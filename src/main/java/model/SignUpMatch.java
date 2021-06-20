@@ -4,14 +4,24 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SignUpMatch {
 
+    private List<ActiveRecruits> activeSignUpMatches = new ArrayList<>();
+    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    public void createSignUpList(String[] message, GuildMessageReceivedEvent event) {
+    public SignUpMatch(@NotNull GuildMessageReceivedEvent event) {
+        event.getMessage().delete().complete();
+    }
+
+    public void createSignUpList3Data(String[] message, GuildMessageReceivedEvent event) {
         String nameCategory = "Brzoza i Ranger testujo";
         List<Category> categories = event.getGuild().getCategories();
         String idClanMember = event.getGuild().getRolesByName("Clan Member", true).get(0).getId();

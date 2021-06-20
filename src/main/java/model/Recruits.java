@@ -1,11 +1,15 @@
 package model;
 
+import embed.EmbedCloseChannel;
+import embed.EmbedOpernChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +23,11 @@ public class Recruits {
 
     private List<ActiveRecruits> activeRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
         String nameStrefaRekruta = "Brzoza i Ranger testujo";
-        Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
         String idRadaKlanu = event.getGuild().getRolesByName("Rada Klanu", true).get(0).getId();
         String idDrill = event.getGuild().getRolesByName("Drill Instructor", true).get(0).getId();
         event.deferEdit().queue();
@@ -196,4 +201,52 @@ public class Recruits {
         }
     }
 
+    public void closeChannel(GuildMessageReceivedEvent event) {
+        event.getMessage().delete().submit();
+        boolean isRecruitChannel = isRecruitChannel(event);
+        if (isRecruitChannel){
+            int indexOfRecrut = getIndexOfRecrut(event);
+            event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
+                event.getGuild().retrieveMember(user).queue(member -> {
+                    event.getChannel().getManager().putPermissionOverride(member,null,permissions1).queue();
+                    new EmbedCloseChannel(event);
+                    logger.info("Kanał zamkniety: {} , userName: {}, userID: {}",event.getChannel().getName(),user.getName(),user.getId());
+                });
+            });
+        }
+
+    }
+
+    private int getIndexOfRecrut(GuildMessageReceivedEvent event) {
+        for (int i = 0; i < activeRecruits.size(); i++) {
+            if (activeRecruits.get(i).getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void reOpenChannel(GuildMessageReceivedEvent event) {
+        event.getMessage().delete().submit();
+        boolean isRecruitChannel = isRecruitChannel(event);
+        if (isRecruitChannel){
+            int indexOfRecrut = getIndexOfRecrut(event);
+            event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
+                event.getGuild().retrieveMember(user).queue(member -> {
+                    event.getChannel().getManager().putPermissionOverride(member,permissions1,null).queue();
+                    new EmbedOpernChannel(event);
+                    logger.info("Kanał otwarty: {} , userName: {}, userID: {}",event.getChannel().getName(),user.getName(),user.getId());
+                });
+            });
+        }
+    }
+
+    private boolean isRecruitChannel(GuildMessageReceivedEvent event) {
+        for (ActiveRecruits ar:activeRecruits){
+            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+                return true;
+            }
+        }
+        return false;
+    }
 }

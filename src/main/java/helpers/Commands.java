@@ -3,6 +3,10 @@ package helpers;
 public class Commands {
 
     private static final String PREFIX = "!";
+
+    public static final String HELPS = PREFIX + "help";
+    public static final String REOPEN = PREFIX + "open";
+    public static final String CLOSE = PREFIX + "close";
     public static final String START_REKRUT = PREFIX + "startRekrut";
     public static final String POZYTYWNY = PREFIX + "p";
     public static final String NEGATYWNY = PREFIX + "n";
