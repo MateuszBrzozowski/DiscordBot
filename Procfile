@@ -1,1 +1,1 @@
-worker: node RangerBot.java
+worker: node src/main/java/ranger/RangerBot.java
