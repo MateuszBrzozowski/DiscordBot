@@ -25,6 +25,7 @@ public class Recruits {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
+    private final String PATH_ACTIVE_RECRUITS = "./src/main/resources/databaseFiles/ActiveRecruits.txt";
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
         String nameStrefaRekruta = "Brzoza i Ranger testujo";
@@ -93,7 +94,7 @@ public class Recruits {
 
     private void startUpList(JDA jda) {
         try {
-            FileReader reader = new FileReader("./src/main/resources/databaseFiles/ActiveRecruits.txt");
+            FileReader reader = new FileReader(PATH_ACTIVE_RECRUITS);
             Scanner scanner = new Scanner(reader);
             while (scanner.hasNextLine()) {
                 String userLine = scanner.nextLine();
@@ -132,7 +133,7 @@ public class Recruits {
             }
         } catch (FileNotFoundException e) {
             logger.info("Nie ma pliku z aktywnymi rekrutami. Tworze plik.");
-            createFile("./src/main/resources/databaseFiles/ActiveRecruits.txt");
+            createFile(PATH_ACTIVE_RECRUITS);
         }
         addAllUsersToFile();
         logger.info("Aktywnych rekrutacji: {}",activeRecruits.size());
@@ -164,7 +165,7 @@ public class Recruits {
 
     private void clearFile() {
         try {
-            FileWriter writer = new FileWriter("./src/main/resources/databaseFiles/ActiveRecruits.txt");
+            FileWriter writer = new FileWriter(PATH_ACTIVE_RECRUITS);
             writer.write("");
             writer.close();
         } catch (IOException e) {
@@ -174,7 +175,7 @@ public class Recruits {
 
     private void addUserToFile(String userID, String userName, String buffCreatedChannelID, boolean append) {
         try {
-            FileWriter writer = new FileWriter("./src/main/resources/databaseFiles/ActiveRecruits.txt", append);
+            FileWriter writer = new FileWriter(PATH_ACTIVE_RECRUITS, append);
             writer.write(userID + ";" + userName + ";" + buffCreatedChannelID + ";\n");
             writer.close();
         } catch (IOException e) {
