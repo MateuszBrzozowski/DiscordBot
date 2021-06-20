@@ -123,8 +123,6 @@ public class Recruits {
                 }
 
                 List<TextChannel> textChannels = jda.getTextChannels();
-                logger.info(String.valueOf(textChannels.size()));
-                logger.info(channelID);
                 for (int i = 0; i < textChannels.size(); i++) {
                     if (channelID.equalsIgnoreCase(textChannels.get(i).getId())) {
                         ActiveRecruits mb = new ActiveRecruits(userID, userName, channelID);
@@ -137,7 +135,7 @@ public class Recruits {
             createFile("./src/main/resources/databaseFiles/ActiveRecruits.txt");
         }
         addAllUsersToFile();
-        logger.info(String.valueOf(activeRecruits.size()));
+        logger.info("Aktywnych rekrutacji: {}",activeRecruits.size());
     }
 
     private void createFile(String s) {

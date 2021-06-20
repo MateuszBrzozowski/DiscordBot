@@ -8,7 +8,6 @@ import java.awt.*;
 public class EmbedRemoveChannel {
 
     public EmbedRemoveChannel(GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Kanał usunięty.");
