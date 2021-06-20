@@ -22,7 +22,7 @@ public class WriteListener extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        String[] message = event.getMessage().getContentRaw().split("\s+");
+        String[] message = event.getMessage().getContentRaw().split(" ");
 
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
             new Recruiter(event);
