@@ -11,6 +11,11 @@
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
+        <configuration>
+            <processTypes>
+                <web>java $JAVA_OPTS -cp target/classes:target/dependency/* Main</web>
+            </processTypes>
+        </configuration>
     </properties>
 
     <dependencies>
@@ -26,6 +31,7 @@
         </dependency>
     </dependencies>
     <repositories>
+
         <repository>
             <id>dv8tion</id>
             <name>m2-dv8tion</name>
@@ -41,5 +47,7 @@
                 <version>3.0.3</version>
             </plugin>
         </plugins>
+
     </build>
+
 </project>
