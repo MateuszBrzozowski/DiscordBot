@@ -239,12 +239,21 @@ public class Recruits {
         }
     }
 
-    private boolean isRecruitChannel(GuildMessageReceivedEvent event) {
+    public boolean isRecruitChannel(GuildMessageReceivedEvent event) {
         for (ActiveRecruits ar:activeRecruits){
             if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
                 return true;
             }
         }
         return false;
+    }
+
+    public String getRecruitIDFromChannelID(GuildMessageReceivedEvent event){
+        for (ActiveRecruits ar:activeRecruits){
+            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+                return ar.getUserID();
+            }
+        }
+        return "-1";
     }
 }

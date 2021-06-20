@@ -13,7 +13,6 @@ public class ButtonClickListener extends ListenerAdapter {
         if (event.getComponentId().equals("newRecrut")) {
             Recruits recrut = RangerBot.getRecruits();
             recrut.newPodanie(event);
-//            recrut.createChannelForNewRecrut(event,userName,userID);
         } else if (event.getComponentId().equals("contact")) {
             //Narazie pomijamy
             //System.out.println("Kontakt");

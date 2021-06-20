@@ -10,7 +10,7 @@ public class EmbedRemoveChannel {
     public EmbedRemoveChannel(GuildMessageReceivedEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
-        builder.setTitle("Kanał usunięty.");
+        builder.setTitle("Kanał usunięty pomyślnie.");
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         event.getChannel().sendMessage(builder.build()).queue();
     }
