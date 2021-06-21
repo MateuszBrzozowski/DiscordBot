@@ -1,1 +1,1 @@
-worker:node src/main/java/ranger/RangerBot.java
+worker: java -jar /out/artifacts/038_DiscordBot_jar/038_DiscordBot.jar

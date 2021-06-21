@@ -26,6 +26,7 @@ public class Recruits {
     private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
     private final String PATH_ACTIVE_RECRUITS = "./src/main/resources/databaseFiles/ActiveRecruits.txt";
+    private final String PATH_ACTIVE_RECRUITS_DIRECTORY = "./src/main/resources/databaseFiles";
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
         String nameStrefaRekruta = "Brzoza i Ranger testujo";
@@ -141,10 +142,14 @@ public class Recruits {
 
     private void createFile(String s) {
         File newFile = new File(s);
-        try {
-            newFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
+        File newDirectory = new File(PATH_ACTIVE_RECRUITS_DIRECTORY);
+        boolean b = newDirectory.mkdirs();
+        if (b){
+            try {
+                newFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
