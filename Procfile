@@ -1,1 +1,1 @@
-worker: java -jar /out/artifacts/038_DiscordBot_jar/038_DiscordBot.jar
+worker: java -jar 038_DiscordBot.jar

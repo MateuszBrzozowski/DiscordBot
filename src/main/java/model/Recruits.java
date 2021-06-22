@@ -25,20 +25,21 @@ public class Recruits {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
+    private final String CATEGORY_ID = "842886351346860112"; //Kategoria  Brzoza i Ranger testujo
     private final String PATH_ACTIVE_RECRUITS = "./src/main/resources/databaseFiles/ActiveRecruits.txt";
     private final String PATH_ACTIVE_RECRUITS_DIRECTORY = "./src/main/resources/databaseFiles";
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
-        String nameStrefaRekruta = "Brzoza i Ranger testujo";
         String idRadaKlanu = event.getGuild().getRolesByName("Rada Klanu", true).get(0).getId();
         String idDrill = event.getGuild().getRolesByName("Drill Instructor", true).get(0).getId();
         event.deferEdit().queue();
         List<Category> categories = event.getGuild().getCategories();
         for (Category cat : categories) {
-            if (cat.getName().equals(nameStrefaRekruta)) {
+            if (cat.getId().equals(CATEGORY_ID)) {
                 event.getGuild().createTextChannel("rekrut-" + userName, cat)
                         .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions1)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions1, null)
+                        .setTopic(userID+";"+userName+";")
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "Drill Instructor" + "> oraz innych członków klanu.\n" +
