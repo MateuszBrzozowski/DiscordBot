@@ -1,7 +1,7 @@
 package ranger;
 
 import events.ButtonClickListener;
-import events.ChannelDelete;
+import events.ChannelUpdate;
 import events.WriteListener;
 import model.Recruits;
 import net.dv8tion.jda.api.JDA;
@@ -23,7 +23,7 @@ public class RangerBot {
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
         jda.addEventListener(new WriteListener());
         jda.addEventListener(new ButtonClickListener());
-        jda.addEventListener(new ChannelDelete());
+        jda.addEventListener(new ChannelUpdate());
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {

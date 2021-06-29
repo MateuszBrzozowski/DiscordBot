@@ -1,12 +1,12 @@
 package model;
 
-public class ActiveRecruits {
+public class Recrut {
 
     private String userName;
     private String userID;
     private String channelID;
 
-    public ActiveRecruits(String userID, String userName, String channelID) {
+    public Recrut(String userID, String userName, String channelID) {
         this.userName = userName;
         this.userID = userID;
         this.channelID = channelID;

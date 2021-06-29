@@ -6,8 +6,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateNameEvent;
+import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
@@ -15,13 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.*;
 
 public class Recruits {
 
-    private List<ActiveRecruits> activeRecruits = new ArrayList<>();
+    private List<Recrut> activeRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
@@ -89,108 +89,55 @@ public class Recruits {
     }
 
     private void addUserToList(String userID, String userName, String buffCreatedChannelID) {
-        ActiveRecruits member = new ActiveRecruits(userID, userName, buffCreatedChannelID);
-        addUserToFile(userID, userName, buffCreatedChannelID, true);
+        Recrut member = new Recrut(userID, userName, buffCreatedChannelID);
         activeRecruits.add(member);
     }
 
     private void startUpList(JDA jda) {
-        try {
-            FileReader reader = new FileReader(PATH_ACTIVE_RECRUITS);
-            Scanner scanner = new Scanner(reader);
-            while (scanner.hasNextLine()) {
-                String userLine = scanner.nextLine();
-                String userName = null;
-                String userID = null;
-                String channelID = null;
-                int indexData = 0;
-                int subStringStartIndex = 0;
-                for (int i = 0; i < userLine.length(); i++) {
-                    if (userLine.charAt(i) == ';') {
-                        if (indexData == 0) {
-                            //id
-                            userID = userLine.substring(subStringStartIndex, i);
-                            subStringStartIndex = i + 1;
-                            indexData++;
-                        } else if (indexData == 1) {
-                            //name
-                            userName = userLine.substring(subStringStartIndex, i);
-                            subStringStartIndex = i + 1;
-                            indexData++;
-                        } else if (indexData == 2) {
-                            //channelID
-                            channelID = userLine.substring(subStringStartIndex, i);
-                            break;
+        List<TextChannel> allTextChannels = jda.getTextChannels();
+        for (int i = 0; i < allTextChannels.size(); i++) {
+            String nameChannel = allTextChannels.get(i).getName();
+            if (nameChannel.length()>=7){
+                if (allTextChannels.get(i).getName().substring(0,7).equalsIgnoreCase("rekrut-")){
+                    try{
+                        if (!allTextChannels.get(i).getTopic().isEmpty()){
+                            String topic = allTextChannels.get(i).getTopic();
+                            String userID = "";
+                            String userName = "";
+                            String channelID = allTextChannels.get(i).getId();
+                            int indexData = 0;
+                            int subStringStartIndex = 0;
+                            for (int j = 0; j < topic.length(); j++) {
+                                if (topic.charAt(j) == ';'){
+                                    if (indexData==0){
+                                        //idusera
+                                        userID = topic.substring(subStringStartIndex,j);
+                                        subStringStartIndex = j +1;
+                                        indexData++;
+                                    }
+                                    else if (indexData==1){
+                                        //userName
+                                        userName = topic.substring(subStringStartIndex,j);
+                                    }
+                                }
+                            }
+                            if (!userID.equalsIgnoreCase("") && !userName.equalsIgnoreCase("")){
+                                Recrut recrut = new Recrut(userID,userName,channelID);
+                                activeRecruits.add(recrut);
+                            }
+
                         }
-                    }
-                }
-
-                List<TextChannel> textChannels = jda.getTextChannels();
-                for (int i = 0; i < textChannels.size(); i++) {
-                    if (channelID.equalsIgnoreCase(textChannels.get(i).getId())) {
-                        ActiveRecruits mb = new ActiveRecruits(userID, userName, channelID);
-                        activeRecruits.add(mb);
+                    }catch (NullPointerException e){
+                        logger.info("Brak danych by pobrać rekruta z kanału. Kanał prawdopodobnie utworzony ręcznie.");
                     }
                 }
             }
-        } catch (FileNotFoundException e) {
-            logger.info("Nie ma pliku z aktywnymi rekrutami. Tworze plik.");
-            createFile(PATH_ACTIVE_RECRUITS);
         }
-        addAllUsersToFile();
-        logger.info("Aktywnych rekrutacji: {}",activeRecruits.size());
-    }
-
-    private void createFile(String s) {
-        File newFile = new File(s);
-        File newDirectory = new File(PATH_ACTIVE_RECRUITS_DIRECTORY);
-        boolean b = newDirectory.mkdirs();
-        if (b){
-            try {
-                newFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void addAllUsersToFile() {
-        if (activeRecruits.size() == 0) {
-            clearFile();
-        } else {
-            for (int i = 0; i < activeRecruits.size(); i++) {
-                if (i == 0) {
-                    addUserToFile(activeRecruits.get(i).getUserID(), activeRecruits.get(i).getUserName(), activeRecruits.get(i).getChannelID(), false);
-                } else {
-                    addUserToFile(activeRecruits.get(i).getUserID(), activeRecruits.get(i).getUserName(), activeRecruits.get(i).getChannelID(), true);
-                }
-            }
-        }
-
-    }
-
-    private void clearFile() {
-        try {
-            FileWriter writer = new FileWriter(PATH_ACTIVE_RECRUITS);
-            writer.write("");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void addUserToFile(String userID, String userName, String buffCreatedChannelID, boolean append) {
-        try {
-            FileWriter writer = new FileWriter(PATH_ACTIVE_RECRUITS, append);
-            writer.write(userID + ";" + userName + ";" + buffCreatedChannelID + ";\n");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        logger.info("Aktywnych rekrutacji: {}", activeRecruits.size());
     }
 
     private boolean checkUser(String userID) {
-        for (ActiveRecruits member : activeRecruits) {
+        for (Recrut member : activeRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
             }
@@ -204,6 +151,7 @@ public class Recruits {
                 activeRecruits.remove(i);
             }
         }
+        logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
     }
 
     public void closeChannel(GuildMessageReceivedEvent event) {
@@ -247,7 +195,25 @@ public class Recruits {
     }
 
     public boolean isRecruitChannel(GuildMessageReceivedEvent event) {
-        for (ActiveRecruits ar:activeRecruits){
+        for (Recrut ar:activeRecruits){
+            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isRecruitChannel(TextChannelUpdateTopicEvent event) {
+        for (Recrut ar:activeRecruits){
+            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isRecruitChannel(TextChannelUpdateNameEvent event) {
+        for (Recrut ar:activeRecruits){
             if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
                 return true;
             }
@@ -256,11 +222,14 @@ public class Recruits {
     }
 
     public String getRecruitIDFromChannelID(GuildMessageReceivedEvent event){
-        for (ActiveRecruits ar:activeRecruits){
+        for (Recrut ar:activeRecruits){
             if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
                 return ar.getUserID();
             }
         }
         return "-1";
     }
+
+
+
 }
