@@ -1,5 +1,6 @@
 package model;
 
+import database.DBConnector;
 import embed.EmbedCloseChannel;
 import embed.EmbedOpernChannel;
 import embed.EmbedRemoveChannel;
@@ -19,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.*;
 
@@ -42,7 +45,7 @@ public class Recruits {
                 event.getGuild().createTextChannel("rekrut-" + userName, cat)
                         .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions1)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions1, null)
-                        .setTopic(userID+";"+userName+";")
+//                        .setTopic(userID+";"+userName+";")
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "Drill Instructor" + "> oraz innych członków klanu.\n" +
@@ -92,51 +95,75 @@ public class Recruits {
         }
     }
 
-    private void addUserToList(String userID, String userName, String buffCreatedChannelID) {
-        Recrut member = new Recrut(userID, userName, buffCreatedChannelID);
+    private void addUserToList(String userID, String userName, String channelID) {
+        Recrut member = new Recrut(userID, userName, channelID);
         activeRecruits.add(member);
+        addUserToDataBase(userID,userName,channelID);
+    }
+
+    private void addUserToDataBase(String userID, String userName, String channelID) {
+        String query = "INSERT INTO `recruts` (`userID`, `userName`, `channelID`) VALUES (\"%s\",\"%s\",\"%s\")";
+        DBConnector connector = new DBConnector();
+        logger.info(String.format(query,userID,userName,channelID));
+        connector.executeQuery(String.format(query,userID,userName,channelID));
     }
 
     private void startUpList(JDA jda) {
+        ResultSet resultSet = getAllRecrutFromDataBase();
+        List<Recrut> recruts = new ArrayList<>();
+        List<Recrut> recrutsToDeleteDataBase = new ArrayList<>();
+        this.activeRecruits.clear();
         List<TextChannel> allTextChannels = jda.getTextChannels();
-        for (int i = 0; i < allTextChannels.size(); i++) {
-            String nameChannel = allTextChannels.get(i).getName();
-            if (nameChannel.length()>=7){
-                if (allTextChannels.get(i).getName().substring(0,7).equalsIgnoreCase("rekrut-")){
-                    try{
-                        if (!allTextChannels.get(i).getTopic().isEmpty()){
-                            String topic = allTextChannels.get(i).getTopic();
-                            String userID = "";
-                            String userName = "";
-                            String channelID = allTextChannels.get(i).getId();
-                            int indexData = 0;
-                            int subStringStartIndex = 0;
-                            for (int j = 0; j < topic.length(); j++) {
-                                if (topic.charAt(j) == ';'){
-                                    if (indexData==0){
-                                        //idusera
-                                        userID = topic.substring(subStringStartIndex,j);
-                                        subStringStartIndex = j +1;
-                                        indexData++;
-                                    }
-                                    else if (indexData==1){
-                                        //userName
-                                        userName = topic.substring(subStringStartIndex,j);
-                                    }
-                                }
-                            }
-                            if (!userID.equalsIgnoreCase("") && !userName.equalsIgnoreCase("")){
-                                Recrut recrut = new Recrut(userID,userName,channelID);
-                                activeRecruits.add(recrut);
+
+        if(resultSet!=null){
+            while (true){
+                try {
+                    if (!resultSet.next()) break;
+                    else {
+                        String userID = resultSet.getString("userID");
+                        String userName = resultSet.getString("userName");
+                        String channelID = resultSet.getString("channelID");
+                        Recrut recrut = new Recrut(userID,userName,channelID);
+                        boolean isActive =false;
+                        for (TextChannel tc: allTextChannels){
+                            if (tc.getId().equalsIgnoreCase(channelID)){
+                                isActive=true;
+                                break;
                             }
                         }
-                    }catch (NullPointerException e){
-                        logger.info("Brak danych by pobrać rekruta z kanału. Kanał prawdopodobnie utworzony ręcznie.");
+                        if (isActive){
+                            activeRecruits.add(recrut);
+                        }else {
+                            recrutsToDeleteDataBase.add(recrut);
+                        }
                     }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
                 }
             }
         }
+
+        for (Recrut rc: recrutsToDeleteDataBase){
+            RemoveRecrutFromDataBase(rc.getChannelID());
+        }
         logger.info("Aktywnych rekrutacji: {}", activeRecruits.size());
+    }
+
+    private ResultSet getAllRecrutFromDataBase() {
+        String query = "SELECT * FROM `recruts`";
+        DBConnector connector = new DBConnector();
+        ResultSet resultSet = null;
+        try {
+            resultSet = connector.executeSelect(query);
+        }catch (Exception e){
+            logger.info("Brak tabeli recruts w bazie danych -> Tworze tabele.");
+            String queryCreate = "CREATE TABLE recruts(" +
+                    "userID VARCHAR(30) PRIMARY KEY," +
+                    "userName VARCHAR(30) NOT NULL," +
+                    "channelID VARCHAR(30) NOT NULL)";
+            connector.executeQuery(queryCreate);
+        }
+        return resultSet;
     }
 
     private boolean checkUser(String userID) {
@@ -152,10 +179,17 @@ public class Recruits {
         for (int i = 0; i < activeRecruits.size(); i++) {
             if (channelID.equalsIgnoreCase(activeRecruits.get(i).getChannelID())) {
                 activeRecruits.remove(i);
+                RemoveRecrutFromDataBase(channelID);
                 logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
             }
         }
 
+    }
+
+    private void RemoveRecrutFromDataBase(String channelID) {
+        String query = "DELETE FROM `recruts` WHERE channelID=\"%s\"";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(String.format(query,channelID));
     }
 
     public void closeChannel(GuildMessageReceivedEvent event) {
@@ -248,6 +282,7 @@ public class Recruits {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
+                            deleteChannelByID(event.getChannel().getId());
                             event.getGuild().getTextChannelById(event.getChannel().getId()).delete().reason("Rekrutacja zakończona").queue();
                             logger.info("Kanał został usunięty.");
                         });
