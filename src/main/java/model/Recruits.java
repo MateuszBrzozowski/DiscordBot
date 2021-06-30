@@ -129,7 +129,6 @@ public class Recruits {
                                 Recrut recrut = new Recrut(userID,userName,channelID);
                                 activeRecruits.add(recrut);
                             }
-
                         }
                     }catch (NullPointerException e){
                         logger.info("Brak danych by pobrać rekruta z kanału. Kanał prawdopodobnie utworzony ręcznie.");
