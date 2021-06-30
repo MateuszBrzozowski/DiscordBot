@@ -32,8 +32,8 @@ public class WriteListener extends ListenerAdapter {
             new EmbedPositive(event);
         } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.ZAPISY)) {
             //!zapisy nazwa data godzina
-            SignUpMatch match = new SignUpMatch(event);
-            match.createSignUpList3Data(message, event);
+            SignUpMatch matches = RangerBot.getMatches();
+            matches.createSignUpList3Data(message, event);
         }else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
             Recruits recruits = RangerBot.getRecruits();
             recruits.closeChannel(event);
@@ -44,7 +44,6 @@ public class WriteListener extends ListenerAdapter {
             new EmbedHelp(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.USUWANIE_KANALU)) {
-            //TODO usuwanie kanału tylko rekrótów
             event.getMessage().delete().submit();
             logger.info("Usuwanie kanału.");
             Recruits recruits = RangerBot.getRecruits();
@@ -72,7 +71,6 @@ public class WriteListener extends ListenerAdapter {
             }else {
                 logger.info("Kanał nie jest kanałem rekrutacyjnym.");
             }
-
         }
     }
 }

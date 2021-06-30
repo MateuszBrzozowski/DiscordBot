@@ -1,10 +1,18 @@
 package model;
 
+import embed.EmbedCantSignToReserve;
+import embed.EmbedCantSignUp;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActiveMatch {
 
+    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String idButtonSignUp;
     private String idButtonSignUpReserve;
     private String idButtonOut;
@@ -35,48 +43,55 @@ public class ActiveMatch {
         return reserveList;
     }
 
-    public void addToMainList(MemberMy member){
+    public void addToMainList(MemberMy member, ButtonClickEvent event){
         if (checkMemberOnMainList(member)){
-            //TODO wiadomosc prywatna - jestes juz na liscie, nie ma? to kontakt.
+            new EmbedCantSignUp(event,member.getUserID());
         }else {
-            if (checkMemberOnReserveList(member)){
-                //TODO usunac z listy reservy
-            }
+            removeFromReserveList(member.getUserID());
             mainList.add(member);
+            logger.info("Dodano do listy głównej.");
         }
     }
 
-    public void addToMainList(String userID,String userName){
+    public void addToMainList(String userID,String userName,ButtonClickEvent event){
         MemberMy memberMy = new MemberMy(userID,userName);
-        addToMainList(memberMy);
+        addToMainList(memberMy,event);
     }
 
-    public void addToReserveList(MemberMy member){
+    public void addToReserveList(MemberMy member, ButtonClickEvent event){
         if (checkMemberOnReserveList(member)){
-            //TODO wiadomosc prywatna - jestes juz na liscie, nie ma? to kontakt.
+            new EmbedCantSignToReserve(event,member.getUserID());
         }else {
-            if (checkMemberOnMainList(member)){
-                //TODO usunac z listy main
-            }
+            removeFromMainList(member.getUserID());
             reserveList.add(member);
+            logger.info("Dodano do listy rezerwowej.");
         }
     }
 
-    public void addToReserveList(String userID,String userName){
+    public void addToReserveList(String userID,String userName, ButtonClickEvent event){
         MemberMy memberMy = new MemberMy(userID,userName);
-        addToReserveList(memberMy);
+        addToReserveList(memberMy,event);
     }
 
     public void removeFromMainList(String userID){
         if (checkMemberOnMainList(userID)){
-            //TODO usuwamy z listy
+            for (int i = 0; i < mainList.size(); i++) {
+                if (mainList.get(i).getUserID().equalsIgnoreCase(userID)){
+                    mainList.remove(i);
+                    logger.info("Usunieto z listy głównej");
+                }
+            }
         }
-
     }
 
     public void removeFromReserveList(String userID){
         if (checkMemberOnReserveList(userID)){
-            //TODO usuwamy z listy rezerwy
+            for (int i = 0; i < reserveList.size(); i++) {
+                if (reserveList.get(i).getUserID().equalsIgnoreCase(userID)){
+                    reserveList.remove(i);
+                    logger.info("Usunieto z listy rezerwowej");
+                }
+            }
         }
     }
 
@@ -117,4 +132,8 @@ public class ActiveMatch {
     }
 
 
+    public void removeFromMatch(String userID) {
+        removeFromMainList(userID);
+        removeFromReserveList(userID);
+    }
 }

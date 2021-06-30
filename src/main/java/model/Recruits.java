@@ -57,6 +57,7 @@ public class Recruits {
                         });
             }
         }
+        logger.info("Nowe podanie złożone. Aktywnych rekrutacji: {}", activeRecruits.size());
     }
 
     public void initialize(JDA jda) {
@@ -149,9 +150,10 @@ public class Recruits {
         for (int i = 0; i < activeRecruits.size(); i++) {
             if (channleID.equalsIgnoreCase(activeRecruits.get(i).getChannelID())) {
                 activeRecruits.remove(i);
+                logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
             }
         }
-        logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
+
     }
 
     public void closeChannel(GuildMessageReceivedEvent event) {
