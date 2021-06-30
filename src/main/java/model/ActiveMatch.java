@@ -136,4 +136,28 @@ public class ActiveMatch {
         removeFromMainList(userID);
         removeFromReserveList(userID);
     }
+
+    public String getStringOfMainList() {
+        if (mainList.size()>0){
+            String result = "";
+            for (int i = 0; i < mainList.size(); i++) {
+                result+=mainList.get(i).getUserName()+"\n";
+            }
+            return result;
+        }else {
+            return "-";
+        }
+    }
+
+    public String getStringOfReserveList() {
+        if (reserveList.size()>0){
+            String result = "";
+            for (int i = 0; i < reserveList.size(); i++) {
+                result+=reserveList.get(i).getUserName()+"\n";
+            }
+            return result;
+        }else {
+            return "-";
+        }
+    }
 }

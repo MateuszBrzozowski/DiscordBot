@@ -35,10 +35,10 @@ public class ButtonClickListener extends ListenerAdapter {
                 matches.updateEmbed(event, indexOfMatch);
             } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getChannel().getId())){
                 matches.signINReserve(event,indexOfMatch);
-                //TODO zzaktualizwoać EMbed
+                matches.updateEmbed(event, indexOfMatch);
             }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getChannel().getId())){
                 matches.signOut(event,indexOfMatch);
-                //TODO zzaktualizwoać EMbed
+                matches.updateEmbed(event, indexOfMatch);
             }
         }
 
