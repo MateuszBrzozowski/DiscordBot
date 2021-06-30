@@ -2,10 +2,13 @@ package model;
 
 import embed.EmbedCloseChannel;
 import embed.EmbedOpernChannel;
+import embed.EmbedRemoveChannel;
+import helpers.IdRole;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateNameEvent;
 import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
@@ -146,9 +149,9 @@ public class Recruits {
         return false;
     }
 
-    public void deleteChannelByID(String channleID) {
+    public void deleteChannelByID(String channelID) {
         for (int i = 0; i < activeRecruits.size(); i++) {
-            if (channleID.equalsIgnoreCase(activeRecruits.get(i).getChannelID())) {
+            if (channelID.equalsIgnoreCase(activeRecruits.get(i).getChannelID())) {
                 activeRecruits.remove(i);
                 logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
             }
@@ -232,6 +235,30 @@ public class Recruits {
         return "-1";
     }
 
-
-
+    public void deleteChannel(GuildMessageReceivedEvent event) {
+        if (isRecruitChannel(event)){
+            logger.info("Kanał jest kanałem rekrutacyjnym.");
+            event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
+                List<Role> roles = member.getRoles();
+                for (Role role : roles) {
+                    if (role.getId().equalsIgnoreCase(IdRole.RADA_KLANU)) {
+                        new EmbedRemoveChannel(event);
+                        Thread thread = new Thread(() -> {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            event.getGuild().getTextChannelById(event.getChannel().getId()).delete().reason("Rekrutacja zakończona").queue();
+                            logger.info("Kanał został usunięty.");
+                        });
+                        thread.start();
+                        break;
+                    }
+                }
+            });
+        }else {
+            logger.info("Kanał nie jest kanałem rekrutacyjnym.");
+        }
+    }
 }

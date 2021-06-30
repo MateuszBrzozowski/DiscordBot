@@ -2,7 +2,6 @@ package model;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SignUpMatch {
@@ -69,7 +67,6 @@ public class SignUpMatch {
             String reserveList =activeSignUpMatches.get(indexOfMatch).getStringOfReserveList();
 
             for (int i = 0; i < fieldsOld.size(); i++) {
-                String nameField = fieldsOld.get(i).getName();
                 if (i==4){
                     MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST+"("+activeSignUpMatches.get(indexOfMatch).getMainList().size()+")",">>> "+mainList,true);
                     fieldsNew.add(fieldNew);
@@ -82,12 +79,19 @@ public class SignUpMatch {
                 }
             }
 
+            int color;
+            if (activeSignUpMatches.get(indexOfMatch).getMainList().size()>=9){
+                color = Color.GREEN.getRGB();
+            }else {
+                color = Color.YELLOW.getRGB();
+            }
+
             MessageEmbed m = new MessageEmbed(mOld.getUrl()
                     ,mOld.getTitle()
                     ,mOld.getDescription()
                     ,mOld.getType()
                     ,mOld.getTimestamp()
-                    ,mOld.getColorRaw()
+                    ,color
                     ,mOld.getThumbnail()
                     ,mOld.getSiteProvider()
                     ,mOld.getAuthor()
@@ -113,13 +117,12 @@ public class SignUpMatch {
         String userName = event.getMember().getNickname();
         String userID = event.getUser().getId();
         activeSignUpMatches.get(indexOfActiveMatch).addToMainList(userID,userName,event);
-
     }
 
-    public void signINReserve(ButtonClickEvent event, int indexOfMatch) {
+    public void signINReserve(ButtonClickEvent event, int indexOfActiveMatch) {
         String userName = event.getMember().getNickname();
         String userID = event.getUser().getId();
-        activeSignUpMatches.get(indexOfMatch).addToReserveList(userID,userName,event);
+        activeSignUpMatches.get(indexOfActiveMatch).addToReserveList(userID,userName,event);
     }
 
     public void signOut(ButtonClickEvent event, int indexOfMatch) {

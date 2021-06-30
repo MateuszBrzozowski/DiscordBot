@@ -1,17 +1,13 @@
 package events;
 
-import model.ActiveMatch;
-import model.SignUpMatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ranger.RangerBot;
 import model.Recruits;
+import model.SignUpMatch;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -20,27 +16,24 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
-        matches = RangerBot.getMatches();
         if (event.getComponentId().equals("newRecrut")) {
             Recruits recrut = RangerBot.getRecruits();
             recrut.newPodanie(event);
         }
 
+        matches = RangerBot.getMatches();
         if (matches.isActiveMatch(event.getChannel().getId())>=0){
-            int indexOfMatch = matches.isActiveMatch(event.getChannel().getId());
             logger.info("Dane meczu prawidlowo odczytane.");
+            int indexOfMatch = matches.isActiveMatch(event.getChannel().getId());
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_"+event.getChannel().getId())){
                 matches.signIn(event,indexOfMatch);
-                matches.updateEmbed(event, indexOfMatch);
             } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getChannel().getId())){
                 matches.signINReserve(event,indexOfMatch);
-                matches.updateEmbed(event, indexOfMatch);
             }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getChannel().getId())){
                 matches.signOut(event,indexOfMatch);
-                matches.updateEmbed(event, indexOfMatch);
             }
+            matches.updateEmbed(event, indexOfMatch);
         }
-
     }
 }
