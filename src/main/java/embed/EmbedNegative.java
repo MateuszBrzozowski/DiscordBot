@@ -1,6 +1,6 @@
 package embed;
 
-import helpers.IdRole;
+import helpers.RoleID;
 import model.Recruits;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -11,7 +11,6 @@ import ranger.RangerBot;
 
 import java.awt.*;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EmbedNegative {
 
@@ -25,7 +24,7 @@ public class EmbedNegative {
                     event.getMessage().delete().submit();
                     List<Role> roles = member.getRoles();
                     for (int i = 0; i < roles.size(); i++) {
-                        if (roles.get(i).getId().equalsIgnoreCase(IdRole.RADA_KLANU)) {
+                        if (roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
                             event.getChannel().sendMessage("<@"+ recruits.getRecruitIDFromChannelID(event) +">").queue();
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.RED);

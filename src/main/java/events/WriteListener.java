@@ -2,6 +2,7 @@ package events;
 
 
 import embed.*;
+import helpers.ChannelID;
 import helpers.Commands;
 import model.Recruits;
 import model.Event;
@@ -22,6 +23,9 @@ public class WriteListener extends ListenerAdapter {
 
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
             new Recruiter(event);
+        }
+        else if (event.getChannel().getId().equalsIgnoreCase(ChannelID.RANGER_BOT_LOGGER)){
+            new EmbedNoWriteOnLoggerChannel(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATYWNY)) {
             new EmbedNegative(event);

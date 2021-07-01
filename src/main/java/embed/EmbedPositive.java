@@ -1,12 +1,10 @@
 package embed;
 
-import helpers.IdRole;
+import helpers.RoleID;
 import model.Recruits;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.internal.entities.UserById;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -26,7 +24,7 @@ public class EmbedPositive {
                     event.getMessage().delete().submit();
                     List<Role> roles = member.getRoles();
                     for (int i = 0; i < roles.size(); i++) {
-                        if (roles.get(i).getId().equalsIgnoreCase(IdRole.RADA_KLANU)) {
+                        if (roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
                             EmbedBuilder builder = new EmbedBuilder();
                             event.getChannel().sendMessage("Gratulacje <@"+ recruits.getRecruitIDFromChannelID(event) +">").queue();
                             builder.setColor(Color.GREEN);

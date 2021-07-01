@@ -2,7 +2,7 @@ package model;
 
 import database.DBConnector;
 import embed.EmbedRemoveChannel;
-import helpers.IdRole;
+import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
@@ -34,6 +34,7 @@ public class Event {
 
     public void initialize(JDA jda) {
         getAllDatabase(jda);
+
     }
 
     private void getAllDatabase(JDA jda) {
@@ -302,7 +303,7 @@ public class Event {
             event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
                 List<Role> roles = member.getRoles();
                 for (Role r: roles){
-                    if (r.getId().equalsIgnoreCase(IdRole.RADA_KLANU)){
+                    if (r.getId().equalsIgnoreCase(RoleID.RADA_KLANU)){
                         new EmbedRemoveChannel(event);
                         Thread thread = new Thread(() -> {
                            try {

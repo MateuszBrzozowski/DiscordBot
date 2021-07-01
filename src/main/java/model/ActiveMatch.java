@@ -1,8 +1,12 @@
 package model;
 
 import database.DBConnector;
-import embed.EmbedCantSignToReserve;
-import embed.EmbedCantSignUp;
+import embed.EmbedCantSignOut;
+import embed.EmbedCantSignInReserve;
+import embed.EmbedCantSignIn;
+import helpers.RangerLogger;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +24,7 @@ public class ActiveMatch {
     private String channelID;
     private List<MemberMy> mainList = new ArrayList<>();
     private List<MemberMy> reserveList = new ArrayList<>();
+    private RangerLogger rangerLogger = new RangerLogger();
 
     public ActiveMatch(String idButtonSignUp,String idButtonSignUpReserve, String idButtonOut, String channelID) {
         this.channelID = channelID;
@@ -55,11 +60,12 @@ public class ActiveMatch {
 
     public void addToMainList(MemberMy member, ButtonClickEvent event){
         if (checkMemberOnMainList(member)){
-            new EmbedCantSignUp(event,member.getUserID());
+            new EmbedCantSignIn(event,member.getUserID());
         }else {
             removeFromReserveList(member.getUserID());
             mainList.add(member);
             AddPlayerDB(member,true);
+            rangerLogger.Info(member.getUserName() + " zapisał się na listę.",event.getChannel().getName());
             logger.info("Dodano do listy głównej.");
         }
     }
@@ -71,11 +77,12 @@ public class ActiveMatch {
 
     public void addToReserveList(MemberMy member, ButtonClickEvent event){
         if (checkMemberOnReserveList(member)){
-            new EmbedCantSignToReserve(event,member.getUserID());
+            new EmbedCantSignInReserve(event,member.getUserID());
         }else {
             removeFromMainList(member.getUserID());
             reserveList.add(member);
             AddPlayerDB(member,false);
+            rangerLogger.Info(member.getUserName() + " zapisał się na listę rezerwową.",event.getChannel().getName());
             logger.info("Dodano do listy rezerwowej.");
         }
     }
@@ -159,8 +166,40 @@ public class ActiveMatch {
 
 
     public void removeFromMatch(String userID) {
+        String userName = SearchAndGetUserName(userID);
         removeFromMainList(userID);
         removeFromReserveList(userID);
+        if (userName!=null){
+            rangerLogger.Info(userName + " wypisał się z listy", getChannelName(channelID));
+        }else {
+            new EmbedCantSignOut(userID);
+        }
+
+    }
+
+    private String getChannelName(String channelID) {
+        JDA jda = RangerBot.getJda();
+        List<TextChannel> textChannels = jda.getTextChannels();
+        for (TextChannel t: textChannels){
+            if (t.getId().equalsIgnoreCase(channelID)){
+                return t.getName();
+            }
+        }
+        return null;
+    }
+
+    private String SearchAndGetUserName(String userID) {
+        for (MemberMy m : mainList){
+            if (m.getUserID().equalsIgnoreCase(userID)){
+                return m.getUserName();
+            }
+        }
+        for (MemberMy m : reserveList){
+            if (m.getUserID().equalsIgnoreCase(userID)){
+                return m.getUserName();
+            }
+        }
+        return null;
     }
 
     public String getStringOfMainList() {

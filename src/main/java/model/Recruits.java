@@ -4,22 +4,20 @@ import database.DBConnector;
 import embed.EmbedCloseChannel;
 import embed.EmbedOpernChannel;
 import embed.EmbedRemoveChannel;
-import helpers.IdRole;
+import helpers.RangerLogger;
+import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateNameEvent;
-import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -34,6 +32,7 @@ public class Recruits {
     private final String CATEGORY_ID = "842886351346860112"; //Kategoria  Brzoza i Ranger testujo
     private final String PATH_ACTIVE_RECRUITS = "./src/main/resources/databaseFiles/ActiveRecruits.txt";
     private final String PATH_ACTIVE_RECRUITS_DIRECTORY = "./src/main/resources/databaseFiles";
+    private final RangerLogger rangerLogger = new RangerLogger();
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
         String idRadaKlanu = event.getGuild().getRolesByName("Rada Klanu", true).get(0).getId();
@@ -144,6 +143,7 @@ public class Recruits {
         for (Recrut rc: recrutsToDeleteDataBase){
             RemoveRecrutFromDataBase(rc.getChannelID());
         }
+//        rangerLogger.Info(String.format("Aktywnych rekrutacji: %d",activeRecruits.size()));
         logger.info("Aktywnych rekrutacji: {}", activeRecruits.size());
     }
 
@@ -254,7 +254,7 @@ public class Recruits {
             event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
                 List<Role> roles = member.getRoles();
                 for (Role role : roles) {
-                    if (role.getId().equalsIgnoreCase(IdRole.RADA_KLANU)) {
+                    if (role.getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
                         new EmbedRemoveChannel(event);
                         Thread thread = new Thread(() -> {
                             try {

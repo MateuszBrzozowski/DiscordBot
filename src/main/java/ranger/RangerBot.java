@@ -3,6 +3,7 @@ package ranger;
 import events.ButtonClickListener;
 import events.ChannelUpdate;
 import events.WriteListener;
+import helpers.RangerLogger;
 import model.Recruits;
 import model.Event;
 import net.dv8tion.jda.api.JDA;
@@ -18,9 +19,11 @@ public class RangerBot {
     private static Recruits recruits;
     private static Event matches;
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
+    private static JDA jda;
+    private static RangerLogger rangerLogger = new RangerLogger();
 
     public static void main(String[] args) throws LoginException {
-        JDA jda = JDABuilder.createDefault("ODU0MTc1NjAwODk3NDI1NDc4.YMgHBQ.nt5FXodl199DFKt2_0WOqG5tN5A").build();
+        jda = JDABuilder.createDefault("ODU0MTc1NjAwODk3NDI1NDc4.YMgHBQ.nt5FXodl199DFKt2_0WOqG5tN5A").build();
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
         jda.addEventListener(new WriteListener());
@@ -32,6 +35,8 @@ public class RangerBot {
             e.printStackTrace();
         }
         initialize(jda);
+
+//        rangerLogger.Info("Ranger-Bot uruchomiony poprawnie.");
         logger.info("Bot uruchomiony.");
     }
 
@@ -48,5 +53,9 @@ public class RangerBot {
 
     public static Event getMatches() {
         return matches;
+    }
+
+    public static JDA getJda() {
+        return jda;
     }
 }

@@ -1,6 +1,6 @@
 package embed;
 
-import helpers.IdRole;
+import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -22,7 +22,7 @@ public class EmbedHelp {
                 logger.info("Uzytkownik {} poprosił o pomoc.", member.getNickname());
                 List<Role> roles = member.getRoles();
                 for (int i = 0; i < roles.size(); i++) {
-                    if(roles.get(i).getId().equalsIgnoreCase(IdRole.RADA_KLANU)){
+                    if(roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)){
                         user.openPrivateChannel().queue(privateChannel -> {
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.YELLOW);
@@ -34,7 +34,7 @@ public class EmbedHelp {
                                     "**!remove** - Usuwa kanał rekrutacji. Możesz usunąć kanał ręcznie bez komendy.\n\n" +
                                     "",false);
                             builder.addField("ZAPISY NA MECZE",">>> **!zapisy <nazwa> <data> <godzina>** - Otwiera nowy kanał, pinguje Clan Member i tworzy listę na mecze \n(przykład: !zapisy CCFN 19.06.2021 19:30)",false);
-                            builder.setFooter("RangerBot created by © Brzozaaa");
+                            builder.setFooter("RangerBot created by Brzozaaa © 2021");
                             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                             privateChannel.sendMessage(builder.build()).queue();
                             logger.info("Wiadomość prywatna z pomocą wysłana.");
