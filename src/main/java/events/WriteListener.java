@@ -58,7 +58,9 @@ public class WriteListener extends ListenerAdapter {
                     match.deleteChannel(event);
                 }
             }
-
+        }
+        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.DICE)){
+            new EmbedDice(event);
         }
     }
 }
