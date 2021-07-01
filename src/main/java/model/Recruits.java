@@ -104,13 +104,11 @@ public class Recruits {
     private void addUserToDataBase(String userID, String userName, String channelID) {
         String query = "INSERT INTO `recruts` (`userID`, `userName`, `channelID`) VALUES (\"%s\",\"%s\",\"%s\")";
         DBConnector connector = new DBConnector();
-        logger.info(String.format(query,userID,userName,channelID));
         connector.executeQuery(String.format(query,userID,userName,channelID));
     }
 
     private void startUpList(JDA jda) {
         ResultSet resultSet = getAllRecrutFromDataBase();
-        List<Recrut> recruts = new ArrayList<>();
         List<Recrut> recrutsToDeleteDataBase = new ArrayList<>();
         this.activeRecruits.clear();
         List<TextChannel> allTextChannels = jda.getTextChannels();
@@ -194,7 +192,7 @@ public class Recruits {
 
     public void closeChannel(GuildMessageReceivedEvent event) {
         event.getMessage().delete().submit();
-        boolean isRecruitChannel = isRecruitChannel(event);
+        boolean isRecruitChannel = isRecruitChannel(event.getChannel().getId());
         if (isRecruitChannel){
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
@@ -219,7 +217,7 @@ public class Recruits {
 
     public void reOpenChannel(GuildMessageReceivedEvent event) {
         event.getMessage().delete().submit();
-        boolean isRecruitChannel = isRecruitChannel(event);
+        boolean isRecruitChannel = isRecruitChannel(event.getChannel().getId());
         if (isRecruitChannel){
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
@@ -232,27 +230,9 @@ public class Recruits {
         }
     }
 
-    public boolean isRecruitChannel(GuildMessageReceivedEvent event) {
+    public boolean isRecruitChannel(String channelID) {
         for (Recrut ar:activeRecruits){
-            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isRecruitChannel(TextChannelUpdateTopicEvent event) {
-        for (Recrut ar:activeRecruits){
-            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isRecruitChannel(TextChannelUpdateNameEvent event) {
-        for (Recrut ar:activeRecruits){
-            if (ar.getChannelID().equalsIgnoreCase(event.getChannel().getId())){
+            if (ar.getChannelID().equalsIgnoreCase(channelID)){
                 return true;
             }
         }
@@ -269,7 +249,7 @@ public class Recruits {
     }
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
-        if (isRecruitChannel(event)){
+        if (isRecruitChannel(event.getChannel().getId())){
             logger.info("Kanał jest kanałem rekrutacyjnym.");
             event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
                 List<Role> roles = member.getRoles();

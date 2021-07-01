@@ -1,5 +1,6 @@
 package model;
 
+import database.DBConnector;
 import embed.EmbedCantSignToReserve;
 import embed.EmbedCantSignUp;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -39,6 +40,15 @@ public class ActiveMatch {
         return mainList;
     }
 
+    public List<MemberMy> getAllPlayersInEvent(){
+        List<MemberMy> all  = getMainList();
+        List<MemberMy> reserve  = getReserveList();
+        for (MemberMy m : reserve){
+            all.add(m);
+        }
+        return all;
+    }
+
     public List<MemberMy> getReserveList() {
         return reserveList;
     }
@@ -49,6 +59,7 @@ public class ActiveMatch {
         }else {
             removeFromReserveList(member.getUserID());
             mainList.add(member);
+            AddPlayerDB(member,true);
             logger.info("Dodano do listy głównej.");
         }
     }
@@ -64,6 +75,7 @@ public class ActiveMatch {
         }else {
             removeFromMainList(member.getUserID());
             reserveList.add(member);
+            AddPlayerDB(member,false);
             logger.info("Dodano do listy rezerwowej.");
         }
     }
@@ -78,6 +90,7 @@ public class ActiveMatch {
             for (int i = 0; i < mainList.size(); i++) {
                 if (mainList.get(i).getUserID().equalsIgnoreCase(userID)){
                     mainList.remove(i);
+                    RemovePlayerDB(userID);
                     logger.info("Usunieto z listy głównej");
                 }
             }
@@ -89,6 +102,7 @@ public class ActiveMatch {
             for (int i = 0; i < reserveList.size(); i++) {
                 if (reserveList.get(i).getUserID().equalsIgnoreCase(userID)){
                     reserveList.remove(i);
+                    RemovePlayerDB(userID);
                     logger.info("Usunieto z listy rezerwowej");
                 }
             }
@@ -102,6 +116,18 @@ public class ActiveMatch {
             }
         }
         return false;
+    }
+
+    private void AddPlayerDB(MemberMy member, boolean b) {
+        String query = "INSERT INTO players (`userID`, `userName`, `mainList`, `event`) VALUES (\"%s\", \"%s\", \"%d\", \"%s\")";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(String.format(query, member.getUserID(),member.getUserName(),b,channelID));
+    }
+
+    private void RemovePlayerDB(String userID) {
+        String query = "DELETE FROM players WHERE userID=\"%s\" AND event=\"%s\"";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(String.format(query,userID,channelID));
     }
 
     private boolean checkMemberOnMainList(MemberMy member) {
@@ -159,5 +185,25 @@ public class ActiveMatch {
         }else {
             return "-";
         }
+    }
+
+    public void addToMainList(MemberMy memberMy) {
+        mainList.add(memberMy);
+    }
+
+    public void addToReserveList(MemberMy memberMy) {
+        reserveList.add(memberMy);
+    }
+
+    public String getIdButtonSignUp() {
+        return idButtonSignUp;
+    }
+
+    public String getIdButtonSignUpReserve() {
+        return idButtonSignUpReserve;
+    }
+
+    public String getIdButtonOut() {
+        return idButtonOut;
     }
 }

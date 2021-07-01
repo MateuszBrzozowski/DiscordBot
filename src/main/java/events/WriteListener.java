@@ -3,18 +3,14 @@ package events;
 
 import embed.*;
 import helpers.Commands;
-import helpers.IdRole;
 import model.Recruits;
-import model.SignUpMatch;
-import net.dv8tion.jda.api.entities.Role;
+import model.Event;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
-
-import java.util.List;
 
 public class WriteListener extends ListenerAdapter {
 
@@ -34,7 +30,7 @@ public class WriteListener extends ListenerAdapter {
             new EmbedPositive(event);
         }
         else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.ZAPISY)) {
-            SignUpMatch matches = RangerBot.getMatches();
+            Event matches = RangerBot.getMatches();
             matches.createSignUpList3Data(message, event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
@@ -52,7 +48,17 @@ public class WriteListener extends ListenerAdapter {
             event.getMessage().delete().submit();
             logger.info("Usuwanie kanału.");
             Recruits recruits = RangerBot.getRecruits();
-            recruits.deleteChannel(event);
+            Event match = RangerBot.getMatches();
+            String channelID = event.getChannel().getId();
+
+            if (recruits.isRecruitChannel(channelID)){
+                recruits.deleteChannel(event);
+            }else{
+                if (match.isActiveMatch(channelID)>=0){
+                    match.deleteChannel(event);
+                }
+            }
+
         }
     }
 }

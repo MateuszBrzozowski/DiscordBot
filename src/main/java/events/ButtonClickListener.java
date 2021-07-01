@@ -1,7 +1,7 @@
 package events;
 
 import model.Recruits;
-import model.SignUpMatch;
+import model.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +12,7 @@ import ranger.RangerBot;
 public class ButtonClickListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private static SignUpMatch matches;
+    private static Event matches;
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {

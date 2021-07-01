@@ -19,7 +19,7 @@ public class EmbedNegative {
 
     public EmbedNegative(GuildMessageReceivedEvent event) {
         Recruits recruits = RangerBot.getRecruits();
-        if (recruits.isRecruitChannel(event)){
+        if (recruits.isRecruitChannel(event.getChannel().getId())){
             event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
                 event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
                     event.getMessage().delete().submit();

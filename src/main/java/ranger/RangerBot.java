@@ -4,7 +4,7 @@ import events.ButtonClickListener;
 import events.ChannelUpdate;
 import events.WriteListener;
 import model.Recruits;
-import model.SignUpMatch;
+import model.Event;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -16,7 +16,7 @@ import javax.security.auth.login.LoginException;
 
 public class RangerBot {
     private static Recruits recruits;
-    private static SignUpMatch matches;
+    private static Event matches;
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
     public static void main(String[] args) throws LoginException {
@@ -38,14 +38,15 @@ public class RangerBot {
     private static void initialize(JDA jda) {
         recruits = new Recruits();
         recruits.initialize(jda);
-        matches = new SignUpMatch();
+        matches = new Event();
+        matches.initialize(jda);
     }
 
     public static Recruits getRecruits() {
         return recruits;
     }
 
-    public static SignUpMatch getMatches() {
+    public static Event getMatches() {
         return matches;
     }
 }
