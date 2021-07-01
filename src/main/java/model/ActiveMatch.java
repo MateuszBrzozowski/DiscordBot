@@ -119,7 +119,7 @@ public class ActiveMatch {
     }
 
     private void AddPlayerDB(MemberMy member, boolean b) {
-        String query = "INSERT INTO players (`userID`, `userName`, `mainList`, `event`) VALUES (\"%s\", \"%s\", \"%d\", \"%s\")";
+        String query = "INSERT INTO players (`userID`, `userName`, `mainList`, `event`) VALUES (\"%s\", \"%s\", %b, \"%s\")";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(query, member.getUserID(),member.getUserName(),b,channelID));
     }

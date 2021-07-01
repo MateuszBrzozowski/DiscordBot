@@ -259,19 +259,24 @@ public class Event {
 
     public void signIn(ButtonClickEvent event, int indexOfActiveMatch) {
         String userName = event.getMember().getNickname();
+        if (userName==null){
+            userName = event.getUser().getName();
+        }
         String userID = event.getUser().getId();
         activeMatches.get(indexOfActiveMatch).addToMainList(userID,userName,event);
     }
 
     public void signINReserve(ButtonClickEvent event, int indexOfActiveMatch) {
         String userName = event.getMember().getNickname();
+        if (userName==null){
+            userName = event.getUser().getName();
+        }
         String userID = event.getUser().getId();
         activeMatches.get(indexOfActiveMatch).addToReserveList(userID,userName,event);
     }
 
     public void signOut(ButtonClickEvent event, int indexOfMatch) {
         String userID = event.getUser().getId();
-        String channelID = event.getChannel().getId();
         activeMatches.get(indexOfMatch).removeFromMatch(userID);
     }
 
