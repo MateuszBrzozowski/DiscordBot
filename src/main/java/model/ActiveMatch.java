@@ -65,7 +65,7 @@ public class ActiveMatch {
             removeFromReserveList(member.getUserID());
             mainList.add(member);
             AddPlayerDB(member,true);
-            rangerLogger.Info(member.getUserName() + " zapisał się na listę.",event.getChannel().getName());
+            rangerLogger.info(member.getUserName() + " zapisał się na listę.",event.getChannel().getName());
             logger.info("Dodano do listy głównej.");
         }
     }
@@ -82,7 +82,7 @@ public class ActiveMatch {
             removeFromMainList(member.getUserID());
             reserveList.add(member);
             AddPlayerDB(member,false);
-            rangerLogger.Info(member.getUserName() + " zapisał się na listę rezerwową.",event.getChannel().getName());
+            rangerLogger.info(member.getUserName() + " zapisał się na listę rezerwową.",event.getChannel().getName());
             logger.info("Dodano do listy rezerwowej.");
         }
     }
@@ -170,7 +170,7 @@ public class ActiveMatch {
         removeFromMainList(userID);
         removeFromReserveList(userID);
         if (userName!=null){
-            rangerLogger.Info(userName + " wypisał się z listy", getChannelName(channelID));
+            rangerLogger.info(userName + " wypisał się z listy", getChannelName(channelID));
         }else {
             new EmbedCantSignOut(userID);
         }

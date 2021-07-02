@@ -2,7 +2,7 @@ package events;
 
 
 import embed.*;
-import helpers.ChannelID;
+import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import model.Recruits;
 import model.Event;
@@ -24,18 +24,22 @@ public class WriteListener extends ListenerAdapter {
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
             new Recruiter(event);
         }
-        else if (event.getChannel().getId().equalsIgnoreCase(ChannelID.RANGER_BOT_LOGGER)){
+        else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)){
             new EmbedNoWriteOnLoggerChannel(event);
         }
-        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATYWNY)) {
+        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
             new EmbedNegative(event);
         }
-        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POZYTYWNY)) {
+        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
             new EmbedPositive(event);
         }
-        else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.ZAPISY)) {
+        else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             Event matches = RangerBot.getMatches();
-            matches.createSignUpList3Data(message, event);
+            matches.createNewEventFrom3Data(message, event);
+        }
+        else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
+            Event matches = RangerBot.getMatches();
+            matches.createNewEventFromSpecificData(message,event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
             Recruits recruits = RangerBot.getRecruits();
@@ -48,7 +52,7 @@ public class WriteListener extends ListenerAdapter {
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
             new EmbedHelp(event);
         }
-        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.USUWANIE_KANALU)) {
+        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
             event.getMessage().delete().submit();
             logger.info("Usuwanie kanału.");
             Recruits recruits = RangerBot.getRecruits();

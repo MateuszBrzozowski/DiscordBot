@@ -27,13 +27,16 @@ public class EmbedHelp {
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.YELLOW);
                             builder.setTitle("Ranger Bot - POMOC");
-                            builder.addField("REKRUCI",">>> **!p** - Wysyła na kanale POZYTYWNY wynik rekrutacji\n" +
-                                    "**!n** - Wysyła na kanale NEGATYWNY wynik rekrutacji\n" +
+                            builder.addField("REKRUCI",">>> **!p** - Pinguje rekruta i wysyła na kanale POZYTYWNY wynik rekrutacji\n" +
+                                    "**!n** - Pinguje rekruta i wysyła na kanale NEGATYWNY wynik rekrutacji\n" +
                                     "**!close** - Zamyka kanał rekrutacji - rekrut nie widzi kanału/nie może pisać.\n" +
                                     "**!open** - Otwiera kanał rekrutacji - rekrut ponownie może widzieć i pisać na kanale.\n" +
                                     "**!remove** - Usuwa kanał rekrutacji. Możesz usunąć kanał ręcznie bez komendy.\n\n" +
                                     "",false);
-                            builder.addField("ZAPISY NA MECZE",">>> **!zapisy <nazwa> <data> <godzina>** - Otwiera nowy kanał, pinguje Clan Member i tworzy listę na mecze \n(przykład: !zapisy CCFN 19.06.2021 19:30)",false);
+                            builder.addField("ZAPISY NA MECZE",">>> **!zapisy <nazwa> <data> <godzina>** - Otwiera nowy kanał, pinguje Clan Member i tworzy listę na mecze. Nazwa jednoczłonowa bez opisu eventu. \n(przykład: !zapisy CCFN 19.06.2021 19:30)\n\n" +
+                                    "**!zapisy -name <nazwa> -date <data> -time <czas> -o <opis>** - Otwiera nowy kanał, pinguje Clan Memer i tworzy listę na mecz. Używamy gdy nazwa eventu składa się więcej niż z jendego wyrazu " +
+                                    "lub chcemy dodać któtki opis eventu zawarty w na liscie\n\n" +
+                                    "**!zapisytu",false);
                             builder.setFooter("RangerBot created by Brzozaaa © 2021");
                             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                             privateChannel.sendMessage(builder.build()).queue();

@@ -9,8 +9,8 @@ public class Commands {
     public static final String REOPEN = PREFIX + "open";
     public static final String CLOSE = PREFIX + "close";
     public static final String START_REKRUT = PREFIX + "startRekrut";
-    public static final String POZYTYWNY = PREFIX + "p";
-    public static final String NEGATYWNY = PREFIX + "n";
-    public static final String ZAPISY = PREFIX + "zapisy";
-    public static final String USUWANIE_KANALU = PREFIX + "remove";
+    public static final String POSITIVE = PREFIX + "p";
+    public static final String NEGATIVE = PREFIX + "n";
+    public static final String NEW_EVENT = PREFIX + "zapisy";
+    public static final String REMOVE_CHANNEL = PREFIX + "remove";
 }

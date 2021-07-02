@@ -4,6 +4,7 @@ import database.DBConnector;
 import embed.EmbedCloseChannel;
 import embed.EmbedOpernChannel;
 import embed.EmbedRemoveChannel;
+import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -29,9 +30,6 @@ public class Recruits {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
-    private final String CATEGORY_ID = "842886351346860112"; //Kategoria  Brzoza i Ranger testujo
-    private final String PATH_ACTIVE_RECRUITS = "./src/main/resources/databaseFiles/ActiveRecruits.txt";
-    private final String PATH_ACTIVE_RECRUITS_DIRECTORY = "./src/main/resources/databaseFiles";
     private final RangerLogger rangerLogger = new RangerLogger();
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
@@ -40,11 +38,10 @@ public class Recruits {
         event.deferEdit().queue();
         List<Category> categories = event.getGuild().getCategories();
         for (Category cat : categories) {
-            if (cat.getId().equals(CATEGORY_ID)) {
+            if (cat.getId().equals(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 event.getGuild().createTextChannel("rekrut-" + userName, cat)
                         .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions1)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions1, null)
-//                        .setTopic(userID+";"+userName+";")
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "Drill Instructor" + "> oraz innych członków klanu.\n" +

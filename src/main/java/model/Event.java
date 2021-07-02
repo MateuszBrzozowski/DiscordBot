@@ -2,6 +2,8 @@ package model;
 
 import database.DBConnector;
 import embed.EmbedRemoveChannel;
+import helpers.CategoryAndChannelID;
+import helpers.RangerLogger;
 import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -19,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +31,10 @@ public class Event {
 
     private List<ActiveMatch> activeMatches = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private final String CATEGORY_ID = "842886351346860112"; //kategoria Brzoza i Ranger testujo
     private final String CLAN_MEMBER_ID = "311978154291888141";
     private static final String NAME_LIST = ":white_check_mark: Lista ";
     private static final String NAME_LIST_RESERVE = ":wc: Rezerwa ";
+    private RangerLogger rangerLogger = new RangerLogger();
 
 
     public void initialize(JDA jda) {
@@ -38,11 +43,11 @@ public class Event {
     }
 
     private void getAllDatabase(JDA jda) {
-        DownladMatchesDB(jda);
-        DownloadPlayersInMatechesDB();
+        downladMatchesDB(jda);
+        downloadPlayersInMatechesDB();
     }
 
-    private void DownladMatchesDB(JDA jda) {
+    private void downladMatchesDB(JDA jda) {
         ResultSet resultSet = getAllMatches();
         List<ActiveMatch> matchesToDeleteDB = new ArrayList<>();
         this.activeMatches.clear();
@@ -77,18 +82,18 @@ public class Event {
             }
         }
         for (ActiveMatch a : matchesToDeleteDB){
-            RemoveMemberFromEventDB(a.getChannelID());
-            RemoveMatchDB(a.getChannelID());
+            removeMemberFromEventDB(a.getChannelID());
+            removeMatchDB(a.getChannelID());
         }
     }
 
-    private void RemoveMatchDB(String channelID) {
+    private void removeMatchDB(String channelID) {
         String query = "DELETE FROM `event` WHERE channelID=\"%s\"";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(query,channelID));
     }
 
-    private void RemoveMemberFromEventDB(String channelID) {
+    private void removeMemberFromEventDB(String channelID) {
         String query = "DELETE FROM `players` WHERE event=\"%s\"";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(query,channelID));
@@ -113,7 +118,7 @@ public class Event {
         return resultSet;
     }
 
-    private void DownloadPlayersInMatechesDB() {
+    private void downloadPlayersInMatechesDB() {
         ResultSet resultSet = getAllPlayers();
         if (resultSet!=null){
             while (true){
@@ -162,40 +167,195 @@ public class Event {
         return resultSet;
     }
 
-    public void createSignUpList3Data(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().complete();
+    public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
+        event.getMessage().delete().submit();
+        createEventChannel(event,message[1],message[2],message[3],null);
+    }
+
+    public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
+        event.getMessage().delete().submit();
+        String userName = event.getMessage().getMember().getNickname();
+        if (userName==null){
+            userName = event.getMessage().getAuthor().getName();
+        }
+//        rangerLogger.info(userName + " - tworzy nowy event.");
+        if (checkMessage(message)){
+            String nameEvent = getEventName(message);
+            String date = getDate(message);
+            String time = getTime(message);
+            String description = getDescription(message);
+            logger.info(nameEvent);
+            logger.info(date);
+            logger.info(time);
+            logger.info(description);
+            if (nameEvent!=null && date!=null && time!=null){
+                createEventChannel(event,nameEvent,date,time,description);
+            }else {
+                logger.info("Nieprawidłowe dane w -name/-date/-time");
+//                rangerLogger.info("Nieprawidłowe dane w -name/-date/-time");
+            }
+        }else {
+            logger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+//            rangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+        }
+    }
+
+    private void createEventChannel(GuildMessageReceivedEvent event, String nameEvent, String date, String time, String description) {
         List<Category> categories = event.getGuild().getCategories();
         for (Category cat : categories) {
-            if (cat.getId().equalsIgnoreCase(CATEGORY_ID)) {
-                event.getGuild().createTextChannel(message[1] + "-" + message[2] + "-" + message[3], cat).queue(textChannel -> {
+            if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
+                event.getGuild().createTextChannel(nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
                     textChannel.sendMessage("<@" + "Clan Member" + "> Zapisy!").queue();
                     EmbedBuilder builder = new EmbedBuilder();
-
                     builder.setColor(Color.YELLOW);
                     builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                    builder.setTitle(message[1]);
-                    builder.addField(":date: Kiedy", message[2], true);
+                    builder.setTitle(nameEvent);
+                    if (description!=null){
+                        builder.setDescription(description);
+                    }
+                    builder.addField(":date: Kiedy", date, true);
                     builder.addBlankField(true);
-                    builder.addField(":clock930: Godzina", message[3], true);
+                    builder.addField(":clock930: Godzina", time, true);
                     builder.addBlankField(false);
                     builder.addField(NAME_LIST+"(0)", ">>> -", true);
                     builder.addBlankField(true);
                     builder.addField(NAME_LIST_RESERVE+"(0)", ">>> -", true);
                     builder.setFooter("Utworzony przez " + event.getMember().getNickname());
                     textChannel.sendMessage(builder.build()).setActionRow(
-                                    Button.primary("in_"+textChannel.getId(), "Zapisz"),
-                                    Button.secondary("reserve_"+textChannel.getId(), "Zapisz na rezerwę"),
-                                    Button.danger("out_"+textChannel.getId(), "Wypisz")).queue();
+                            Button.primary("in_"+textChannel.getId(), "Zapisz"),
+                            Button.secondary("reserve_"+textChannel.getId(), "Zapisz na rezerwę"),
+                            Button.danger("out_"+textChannel.getId(), "Wypisz")).queue();
                     ActiveMatch match = new ActiveMatch("in_"+textChannel.getId(),"reserve_"+textChannel.getId(),"out_"+textChannel.getId(),textChannel.getId());
                     activeMatches.add(match);
-                    AddEventDB(match);
+                    addEventDB(match);
                 });
                 break;
             }
         }
     }
 
-    private void AddEventDB(ActiveMatch match) {
+    public String getDescription(String[] message) {
+        int indexStart = getIndex(message,"-o");
+        if (indexStart>0){
+            int indexEnd = getIndexEnd(message,indexStart);
+            if (indexStart>=indexEnd){
+                return null;
+            }else {
+                String description = "";
+                for (int i = indexStart+1; i <= indexEnd; i++) {
+                    description+=message[i]+" ";
+                }
+                return description;
+            }
+        }
+        return null;
+    }
+
+    public String getEventName(String[] message) {
+        int indexStart = getIndex(message,"-name");
+        int indexEnd = getIndexEnd(message,indexStart);
+        if (indexStart>=indexEnd){
+            return null;
+        }else {
+            String name = "";
+            for (int i = indexStart+1; i <= indexEnd; i++) {
+                name+=message[i]+" ";
+            }
+            return name;
+        }
+    }
+
+
+
+    private String getDate(String[] message) {
+        int indexStart = getIndex(message,"-date");
+        if (!isEnd(message[indexStart+1])){
+            return message[indexStart+1];
+        }
+        return null;
+    }
+
+    public boolean isDateFormat(String s,String pattern) {
+        DateFormat df = new SimpleDateFormat(pattern);
+        df.setLenient(false);
+        try {
+            df.parse(s);
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private String getTime(String[] message) {
+        int indexStart = getIndex(message,"-time");
+        if (!isEnd(message[indexStart+1])){
+            return message[indexStart+1];
+        }
+        return null;
+    }
+
+    private int getIndexEnd(String[] message, int indexStart) {
+        for (int i = indexStart+1; i < message.length; i++) {
+            if (isEnd(message[i])){
+                return i-1;
+            }
+        }
+        return message.length-1;
+    }
+
+    private boolean isEnd(String s) {
+        if (s.equalsIgnoreCase("-name")) return true;
+        else if (s.equalsIgnoreCase("-date")) return true;
+        else if (s.equalsIgnoreCase("-time")) return true;
+        else if (s.equalsIgnoreCase("-o")) return true;
+        else return false;
+    }
+
+    private int getIndex(String[] message, String s) {
+        for (int i = 0; i < message.length; i++) {
+            if (message[i].equalsIgnoreCase(s)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @param message wpisana przez użytkownika
+     *                Wiadomość musi posiadać 3 obowiazkowe parametry
+     *                -name - nazwa eventu
+     *                -data - data eventu
+     *                -czas - kiedy odbywan sie event
+     *                Moze i nie musi zawierac 4 parametru
+     *                -opis - opis eventu
+     * @return true - jeżeli zostały wpisane wszystkie 3 parametry; false - jeżeli parametry zostały nie zostały
+     * wpisane prawidłowo
+     */
+    public boolean checkMessage(String[] message) {
+        boolean name = false;
+        boolean date = false;
+        boolean time = false;
+        for (String s : message){
+            if (s.equalsIgnoreCase("-name")){
+                name=true;
+            }
+            else if (s.equalsIgnoreCase("-date")){
+                date = true;
+            }
+            else if (s.equalsIgnoreCase("-time")){
+                time = true;
+            }
+        }
+        if (name && date && time){
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
+    private void addEventDB(ActiveMatch match) {
         String query = "INSERT INTO `event` (`channelID` ,`signINButtonID`, `signINRButtonID`, `signOUTButtonID`) VALUES (\"%s\",\"%s\",\"%s\",\"%s\")";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(query,match.getChannelID(),match.getIdButtonSignUp(),match.getIdButtonSignUpReserve(),match.getIdButtonOut()));
@@ -324,4 +484,6 @@ public class Event {
             logger.info("Kanał nie jest kanałem eventowym.");
         }
     }
+
+
 }

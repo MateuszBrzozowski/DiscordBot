@@ -10,12 +10,12 @@ public class RangerLogger {
 
     private final static String LOG_CHANNEL_ID = "860096729457098762";
 
-    public void Info(String msg, String channelName){
+    public void info(String msg, String channelName){
         msg = getCurrentDateAndTime() + " [" + channelName + "] - " + msg;
         Send(msg);
     }
 
-    public void Info(String msg){
+    public void info(String msg){
         msg = getCurrentDateAndTime() + " [RANGER-BOT] - " + msg;
         Send(msg);
     }
