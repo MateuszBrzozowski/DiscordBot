@@ -18,6 +18,7 @@ public class ChannelUpdate extends ListenerAdapter {
     private Event match = new Event();
 
 
+
     @Override
     public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
         recruits = RangerBot.getRecruits();
@@ -26,25 +27,10 @@ public class ChannelUpdate extends ListenerAdapter {
         if (recruits.isRecruitChannel(channelID)){
             recruits.deleteChannelByID(channelID);
         }else{
-            if (match.isActiveMatch(channelID)>=0){
+            if (match.isActiveMatchChannelID(channelID)>=0){
                 match.deleteChannelByID(channelID);
             }
         }
     }
 
-    @Override
-    public void onTextChannelUpdateTopic(@NotNull TextChannelUpdateTopicEvent event) {
-//        recruits = RangerBot.getRecruits();
-//        if (recruits.isRecruitChannel(event)){
-//            new EmbedNoChangeThisTopic(event);
-//        }
-    }
-
-    @Override
-    public void onTextChannelUpdateName(@NotNull TextChannelUpdateNameEvent event) {
-//        recruits = RangerBot.getRecruits();
-//        if (recruits.isRecruitChannel(event)){
-//            new EmbedNoChangeThisName(event);
-//        }
-    }
 }

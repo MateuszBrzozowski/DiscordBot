@@ -18,27 +18,27 @@ import java.util.List;
 public class ActiveMatch {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private String idButtonSignUp;
-    private String idButtonSignUpReserve;
-    private String idButtonOut;
     private String channelID;
+    private String messageID; //message with embed List
     private List<MemberMy> mainList = new ArrayList<>();
     private List<MemberMy> reserveList = new ArrayList<>();
     private RangerLogger rangerLogger = new RangerLogger();
 
-    public ActiveMatch(String idButtonSignUp,String idButtonSignUpReserve, String idButtonOut, String channelID) {
+    /**
+     * @param channelID ID kanału na którym jest lista
+     * @param messageID ID wiadomości na której jest embed z Lista.
+     */
+    public ActiveMatch(String channelID, String messageID) {
         this.channelID = channelID;
-        this.idButtonSignUp = idButtonSignUp;
-        this.idButtonSignUpReserve = idButtonSignUpReserve;
-        this.idButtonOut = idButtonOut;
+        this.messageID = messageID;
     }
 
     public String getChannelID() {
         return channelID;
     }
 
-    public void setChannelID(String channelID) {
-        this.channelID = channelID;
+    public String getMessageID() {
+        return messageID;
     }
 
     public List<MemberMy> getMainList() {
@@ -128,13 +128,13 @@ public class ActiveMatch {
     private void AddPlayerDB(MemberMy member, boolean b) {
         String query = "INSERT INTO players (`userID`, `userName`, `mainList`, `event`) VALUES (\"%s\", \"%s\", %b, \"%s\")";
         DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, member.getUserID(),member.getUserName(),b,channelID));
+        connector.executeQuery(String.format(query, member.getUserID(),member.getUserName(),b,messageID));
     }
 
     private void RemovePlayerDB(String userID) {
         String query = "DELETE FROM players WHERE userID=\"%s\" AND event=\"%s\"";
         DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query,userID,channelID));
+        connector.executeQuery(String.format(query,userID,messageID));
     }
 
     private boolean checkMemberOnMainList(MemberMy member) {
@@ -232,17 +232,5 @@ public class ActiveMatch {
 
     public void addToReserveList(MemberMy memberMy) {
         reserveList.add(memberMy);
-    }
-
-    public String getIdButtonSignUp() {
-        return idButtonSignUp;
-    }
-
-    public String getIdButtonSignUpReserve() {
-        return idButtonSignUpReserve;
-    }
-
-    public String getIdButtonOut() {
-        return idButtonOut;
     }
 }

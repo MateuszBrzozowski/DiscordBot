@@ -18,26 +18,16 @@ public class EmbedNegative {
 
     public EmbedNegative(GuildMessageReceivedEvent event) {
         Recruits recruits = RangerBot.getRecruits();
-        if (recruits.isRecruitChannel(event.getChannel().getId())){
-            event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
-                event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
-                    event.getMessage().delete().submit();
-                    List<Role> roles = member.getRoles();
-                    for (int i = 0; i < roles.size(); i++) {
-                        if (roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
-                            event.getChannel().sendMessage("<@"+ recruits.getRecruitIDFromChannelID(event) +">").queue();
-                            EmbedBuilder builder = new EmbedBuilder();
-                            builder.setColor(Color.RED);
-                            builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");
-                            builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
-                            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                            event.getChannel().sendMessage(builder.build()).queue();
-                            logger.info("Uzytkownik {} wysłał negatywny wynik rekrutacji",member.getNickname());
-                            break;
-                        }
-                    }
-                });
-            });
+        if (recruits.isRecruitChannel(event.getChannel().getId())) {
+            event.getChannel().sendMessage("<@" + recruits.getRecruitIDFromChannelID(event) + ">").queue();
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");
+            builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
+            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+            event.getChannel().sendMessage(builder.build()).queue();
+            logger.info("Uzytkownik {} wysłał negatywny wynik rekrutacji", event.getMember().getNickname());
         }
+
     }
 }

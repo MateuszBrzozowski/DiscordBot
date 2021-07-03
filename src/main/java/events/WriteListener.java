@@ -4,14 +4,18 @@ package events;
 import embed.*;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
-import model.Recruits;
+import helpers.RoleID;
 import model.Event;
+import model.Recruits;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+
+import java.util.List;
 
 public class WriteListener extends ListenerAdapter {
 
@@ -20,41 +24,40 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
+        boolean radaKlanu = isRoleRadaKlanu(event);
+        boolean clanMember = isRoleClanMember(event);
+        Event matches = RangerBot.getMatches();
+
+        event.getMessage().delete().submit();
 
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
-            new Recruiter(event);
+            if (radaKlanu) new Recruiter(event);
         }
         else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)){
             new EmbedNoWriteOnLoggerChannel(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
-            new EmbedNegative(event);
+            if (radaKlanu) new EmbedNegative(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
-            new EmbedPositive(event);
+            if (radaKlanu) new EmbedPositive(event);
         }
         else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFrom3Data(message, event);
         }
         else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFrom4Data(message, event);
         }
         else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFrom3DataHere(message, event);
         }
         else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFrom4DataHere(message, event);
         }
         else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFromSpecificData(message,event);
         }
         else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
-            Event matches = RangerBot.getMatches();
             matches.createNewEventFromSpecificData(message,event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
@@ -86,6 +89,31 @@ public class WriteListener extends ListenerAdapter {
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.DICE)){
             new EmbedDice(event);
         }
+    }
+
+
+    private boolean isRoleRadaKlanu(GuildMessageReceivedEvent event) {
+        List<Role> roles = event.getMember().getRoles();
+        for (Role r: roles){
+            if (r.getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
+                logger.info("true");
+                return true;
+            }
+        }
+        logger.info("false");
+        return false;
+    }
+
+    private boolean isRoleClanMember(GuildMessageReceivedEvent event) {
+        List<Role> roles = event.getMember().getRoles();
+        for (Role r: roles){
+            if (r.getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
+                logger.info("true");
+                return true;
+            }
+        }
+        logger.info("false");
+        return false;
     }
 }
 

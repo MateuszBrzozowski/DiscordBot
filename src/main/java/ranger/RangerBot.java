@@ -2,6 +2,7 @@ package ranger;
 
 import events.ButtonClickListener;
 import events.ChannelUpdate;
+import events.MessageUpdate;
 import events.WriteListener;
 import helpers.RangerLogger;
 import model.Recruits;
@@ -29,6 +30,7 @@ public class RangerBot {
         jda.addEventListener(new WriteListener());
         jda.addEventListener(new ButtonClickListener());
         jda.addEventListener(new ChannelUpdate());
+        jda.addEventListener(new MessageUpdate());
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {

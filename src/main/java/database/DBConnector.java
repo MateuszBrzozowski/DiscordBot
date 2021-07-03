@@ -14,9 +14,9 @@ public class DBConnector {
     public static Connection connect() {
         try {
             connection = DriverManager.getConnection(url,user,pass);
-            logger.info("Połączono z bazą danych");
+            logger.info("Połączono z bazą danych.");
         } catch (SQLException throwables) {
-            logger.error("Połączenie z bazą danych nie udane.");
+            logger.error("Połączenie z bazą danych nieudane.");
             throwables.printStackTrace();
         }
         return connection;
@@ -28,7 +28,7 @@ public class DBConnector {
             Statement statement = connection.createStatement();
             return statement.executeQuery(selectQuery);
         } catch (SQLException throwables) {
-            logger.error("Zapytanie do bazy danych zakończone niepowodzeniem");
+            logger.error("Zapytanie do bazy danych zakończone niepowodzeniem: {}",selectQuery);
             throw new RuntimeException(throwables.getMessage());
         }
     }
@@ -40,7 +40,7 @@ public class DBConnector {
             statement.execute(query);
 
         } catch (SQLException throwables) {
-            logger.error("Zapytanie do bazy danych zakończone niepowodzeniem");
+            logger.error("Zapytanie do bazy danych zakończone niepowodzeniem: {}",query);
             throw new RuntimeException(throwables.getMessage());
         }
 

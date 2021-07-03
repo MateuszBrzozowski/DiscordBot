@@ -20,17 +20,16 @@ public class ButtonClickListener extends ListenerAdapter {
             Recruits recrut = RangerBot.getRecruits();
             recrut.newPodanie(event);
         }
-
         matches = RangerBot.getMatches();
-        if (matches.isActiveMatch(event.getChannel().getId())>=0){
+        if (matches.isActiveMatch(event.getMessage().getId())>=0){
             logger.info("Dane meczu prawidlowo odczytane.");
-            int indexOfMatch = matches.isActiveMatch(event.getChannel().getId());
+            int indexOfMatch = matches.isActiveMatch(event.getMessage().getId());
             event.deferEdit().queue();
-            if (event.getComponentId().equalsIgnoreCase("in_"+event.getChannel().getId())){
+            if (event.getComponentId().equalsIgnoreCase("in_"+event.getMessage().getId())){
                 matches.signIn(event,indexOfMatch);
-            } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getChannel().getId())){
+            } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getMessage().getId())){
                 matches.signINReserve(event,indexOfMatch);
-            }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getChannel().getId())){
+            }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getMessage().getId())){
                 matches.signOut(event,indexOfMatch);
             }
             matches.updateEmbed(event, indexOfMatch);
