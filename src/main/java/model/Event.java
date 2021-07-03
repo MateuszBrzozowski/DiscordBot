@@ -167,12 +167,10 @@ public class Event {
     }
 
     public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         createEventChannel(event,message[1],message[2],message[3],null,3);
     }
 
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         if (message[4].equalsIgnoreCase("-ac")){
             createEventChannel(event,message[1],message[2],message[3],null,1);
         }
@@ -185,12 +183,10 @@ public class Event {
     }
 
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,3);
     }
 
     public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         if (message[4].equalsIgnoreCase("-ac")){
             event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
             createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,1);
@@ -206,7 +202,6 @@ public class Event {
     }
 
     public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         String userName = getUserNameFromEvent(event);
 //        rangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)){
@@ -574,32 +569,19 @@ public class Event {
     }
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
-        String channelID = event.getChannel().getId();
-        if (isActiveMatchChannelID(channelID)>=0){
-            logger.info("Na kanale znajdują się listy/zapisy na eventy");
-            event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
-                List<Role> roles = member.getRoles();
-                for (Role r: roles){
-                    if (r.getId().equalsIgnoreCase(RoleID.RADA_KLANU)){
-                        new EmbedRemoveChannel(event);
-                        Thread thread = new Thread(() -> {
-                           try {
-                               Thread.sleep(5000);
-                           } catch (InterruptedException e) {
-                               e.printStackTrace();
-                           }
-                           deleteChannelByID(channelID);
-                           event.getGuild().getTextChannelById(channelID).delete().reason("Event zakończony").queue();
-                           logger.info("Kanał {} usunięty", event.getChannel().getName());
-                        });
-                        thread.start();
-                        break;
-                    }
-                }
-            });
-        }else {
-            logger.info("Kanał nie jest kanałem eventowym.");
-        }
+        logger.info("Na kanale znajdują się listy/zapisy na eventy");
+        new EmbedRemoveChannel(event);
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            deleteChannelByID(event.getChannel().getId());
+            event.getGuild().getTextChannelById(event.getChannel().getId()).delete().reason("Event zakończony").queue();
+            logger.info("Kanał {} usunięty przez {}", event.getChannel().getName(), event.getAuthor().getName());
+        });
+        thread.start();
     }
 
     private String getUserNameFromEvent(GuildMessageReceivedEvent event) {

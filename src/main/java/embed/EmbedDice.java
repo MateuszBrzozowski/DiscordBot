@@ -10,7 +10,6 @@ import java.util.Random;
 public class EmbedDice {
 
     public EmbedDice(@NotNull GuildMessageReceivedEvent event) {
-        event.getMessage().delete().submit();
         String userName = event.getMessage().getMember().getNickname();
         if (userName==null){
             userName = event.getMessage().getAuthor().getName();

@@ -24,65 +24,60 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
-        boolean radaKlanu = isRoleRadaKlanu(event);
+        boolean radKlan = isRoleRadaKlanu(event);
         boolean clanMember = isRoleClanMember(event);
         Event matches = RangerBot.getMatches();
+        Recruits recruits = RangerBot.getRecruits();
 
         event.getMessage().delete().submit();
 
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
-            if (radaKlanu) new Recruiter(event);
+            if (radKlan) new Recruiter(event);
         }
         else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)){
             new EmbedNoWriteOnLoggerChannel(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
-            if (radaKlanu) new EmbedNegative(event);
+            if (radKlan) new EmbedNegative(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
-            if (radaKlanu) new EmbedPositive(event);
+            if (radKlan) new EmbedPositive(event);
         }
         else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            matches.createNewEventFrom3Data(message, event);
+            if (clanMember) matches.createNewEventFrom3Data(message, event);
         }
         else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            matches.createNewEventFrom4Data(message, event);
+            if (clanMember) matches.createNewEventFrom4Data(message, event);
         }
         else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-            matches.createNewEventFrom3DataHere(message, event);
+            if (clanMember) matches.createNewEventFrom3DataHere(message, event);
         }
         else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-            matches.createNewEventFrom4DataHere(message, event);
+            if (clanMember) matches.createNewEventFrom4DataHere(message, event);
         }
         else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
-            matches.createNewEventFromSpecificData(message,event);
+            if (clanMember) matches.createNewEventFromSpecificData(message,event);
         }
         else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
-            matches.createNewEventFromSpecificData(message,event);
+            if (clanMember) matches.createNewEventFromSpecificData(message,event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
-            Recruits recruits = RangerBot.getRecruits();
-            recruits.closeChannel(event);
+            if (radKlan) recruits.closeChannel(event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
-            Recruits recruits = RangerBot.getRecruits();
-            recruits.reOpenChannel(event);
+            if (radKlan) recruits.reOpenChannel(event);
         }
         else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
-            new EmbedHelp(event);
+            if (radKlan) new EmbedHelp(event);
         }
         else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
-            event.getMessage().delete().submit();
-            logger.info("Usuwanie kanału.");
-            Recruits recruits = RangerBot.getRecruits();
-            Event match = RangerBot.getMatches();
-            String channelID = event.getChannel().getId();
-
-            if (recruits.isRecruitChannel(channelID)){
-                recruits.deleteChannel(event);
-            }else{
-                if (match.isActiveMatch(channelID)>=0){
-                    match.deleteChannel(event);
+            if (radKlan) {
+                logger.info("Usuwanie kanału.");
+                String channelID = event.getChannel().getId();
+                if (recruits.isRecruitChannel(channelID)){
+                    recruits.deleteChannel(event);
+                }else if (matches.isActiveMatch(channelID)>=0){
+                    matches.deleteChannel(event);
                 }
             }
         }

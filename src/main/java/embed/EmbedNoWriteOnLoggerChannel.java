@@ -10,7 +10,6 @@ public class EmbedNoWriteOnLoggerChannel {
 
     public EmbedNoWriteOnLoggerChannel(@NotNull GuildMessageReceivedEvent event) {
         if (!event.getAuthor().isBot()){
-            event.getMessage().delete().submit();
             event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
                 user.openPrivateChannel().queue(privateChannel -> {
                     EmbedBuilder builder = new EmbedBuilder();
