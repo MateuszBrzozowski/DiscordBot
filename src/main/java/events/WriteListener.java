@@ -37,7 +37,23 @@ public class WriteListener extends ListenerAdapter {
             Event matches = RangerBot.getMatches();
             matches.createNewEventFrom3Data(message, event);
         }
+        else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+            Event matches = RangerBot.getMatches();
+            matches.createNewEventFrom4Data(message, event);
+        }
+        else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
+            Event matches = RangerBot.getMatches();
+            matches.createNewEventFrom3DataHere(message, event);
+        }
+        else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
+            Event matches = RangerBot.getMatches();
+            matches.createNewEventFrom4DataHere(message, event);
+        }
         else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
+            Event matches = RangerBot.getMatches();
+            matches.createNewEventFromSpecificData(message,event);
+        }
+        else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
             Event matches = RangerBot.getMatches();
             matches.createNewEventFromSpecificData(message,event);
         }

@@ -12,5 +12,6 @@ public class Commands {
     public static final String POSITIVE = PREFIX + "p";
     public static final String NEGATIVE = PREFIX + "n";
     public static final String NEW_EVENT = PREFIX + "zapisy";
+    public static final String NEW_EVENT_HERE = PREFIX + "zapisyhere";
     public static final String REMOVE_CHANNEL = PREFIX + "remove";
 }
