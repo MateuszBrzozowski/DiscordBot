@@ -15,7 +15,7 @@ public class Recruiter extends ListenerAdapter {
         builder.setColor(Color.YELLOW);
         builder.setTitle("PODANIE");
         builder.setDescription("Złóż podanie do klanu klikając przycisk poniżej");
-        builder.addField("Wymagania", "- Wiek min. 16 lat\n" +
+        builder.addField("Wymagania", ">>> - Wiek min. 16 lat\n" +
                 "- Podstawowa umiejętność walki\n" +
                 "- Podstawowa znajomość zasad rozgrywki w Squad\n" +
                 "- Chęć gry zespołowej oraz wykonywania poleceń\n" +

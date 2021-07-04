@@ -155,7 +155,7 @@ public class Event {
         }catch (Exception e){
             logger.info("Brak tabeli players w bazie danych -> Tworze tabele");
             String queryCreate = "CREATE TABLE players(" +
-                    "id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY, " +
+                    "id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY, " +
                     "userID VARCHAR(30)," +
                     "userName VARCHAR(30) NOT NULL," +
                     "mainList BOOLEAN," +
@@ -402,6 +402,7 @@ public class Event {
         else if (s.equalsIgnoreCase("-o")) return true;
         else if (s.equalsIgnoreCase("-ac")) return true;
         else if (s.equalsIgnoreCase("-r")) return true;
+        else if (s.equalsIgnoreCase("-c")) return true;
         else return false;
     }
 
