@@ -127,33 +127,32 @@ public class EventTest {
         //then
         Assert.assertEquals(b,true);
     }
-    @Test
-    public void isDateformat_DateBrokenYear_False(){
-        //given
-        String date = "1.01.";
-        //when
-        Boolean b = event.isDateFormat(date,patternDate);
-        //then
-        Assert.assertEquals(b,false);
-    }
-    @Test
-    public void isDateformat_DateBrokenMonth_False(){
-        //given
-        String date = "1.13.2000";
-        //when
-        Boolean b = event.isDateFormat(date,patternDate);
-        //then
-        Assert.assertEquals(b,false);
-    }
-    @Test
-    public void isDateformat_DateBrokenDay_False(){
-        //given
-        String date = "112.12.2000";
-        //when
-        Boolean b = event.isDateFormat(date,patternDate);
-        //then
-        Assert.assertEquals(b,false);
-    }
+//    public void isDateformat_DateBrokenYear_False(){
+//        //given
+//        String date = "1.01.";
+//        //when
+//        Boolean b = event.isDateFormat(date,patternDate);
+//        //then
+//        Assert.assertEquals(b,false);
+//    }
+//    @Test
+//    public void isDateformat_DateBrokenMonth_False(){
+//        //given
+//        String date = "1.13.2000";
+//        //when
+//        Boolean b = event.isDateFormat(date,patternDate);
+//        //then
+//        Assert.assertEquals(b,false);
+//    }
+//    @Test
+//    public void isDateformat_DateBrokenDay_False(){
+//        //given
+//        String date = "112.12.2000";
+//        //when
+//        Boolean b = event.isDateFormat(date,patternDate);
+//        //then
+//        Assert.assertEquals(b,false);
+//    }
     @Test
     public void getDescription_DescriptionOKMid(){
         //given
@@ -199,5 +198,67 @@ public class EventTest {
         //then
         Assert.assertEquals(descirption,null);
     }
-
+    @Test
+    public void isTimeFormat_TimeOK_True(){
+        //given
+        String time = "19:59";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,true);
+    }
+    @Test
+    public void isTimeFormat_TimeLast_True(){
+        //given
+        String time = "23:59";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,true);
+    }
+    @Test
+    public void isTimeFormat_TimeOKFirst_True(){
+        //given
+        String time = "00:00";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,true);
+    }
+    @Test
+    public void isTimeFormat_TimeLastNoOk_False(){
+        //given
+        String time = "24:05";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,false);
+    }
+    @Test
+    public void isTimeFormat_MinutyZaZakresem_False(){
+        //given
+        String time = "19:60";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,false);
+    }
+    @Test
+    public void isTimeFormat_Format_False(){
+        //given
+        String time = "19k05";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,false);
+    }
+    @Test
+    public void isTimeFormat_FormatDwa_False(){
+        //given
+        String time = "9:05";
+        //when
+        boolean isTime = event.isTimeFormat(time);
+        //then
+        Assert.assertEquals(isTime,false);
+    }
 }

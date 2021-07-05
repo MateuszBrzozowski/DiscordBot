@@ -4,6 +4,7 @@ import database.DBConnector;
 import embed.EmbedCloseChannel;
 import embed.EmbedOpernChannel;
 import embed.EmbedRemoveChannel;
+import embed.EmbedYouHaveRecrutChannel;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
@@ -33,8 +34,6 @@ public class Recruits {
     private final RangerLogger rangerLogger = new RangerLogger();
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
-        String idRadaKlanu = event.getGuild().getRolesByName("Rada Klanu", true).get(0).getId();
-        String idDrill = event.getGuild().getRolesByName("Drill Instructor", true).get(0).getId();
         event.deferEdit().queue();
         List<Category> categories = event.getGuild().getCategories();
         for (Category cat : categories) {
@@ -44,8 +43,8 @@ public class Recruits {
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions1, null)
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "Drill Instructor" + "> oraz innych członków klanu.\n" +
-                                    "<@&" + "Rada Klanu" + "> ").queue();
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
+                                    "<@&" + RoleID.RADA_KLANU + "> ").queue();
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.GREEN);
                             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
@@ -74,20 +73,8 @@ public class Recruits {
             createChannelForNewRecrut(event, userName, userID);
         } else {
             event.deferEdit().queue();
-            event.getJDA().retrieveUserById(userID).queue(user -> {
-                user.openPrivateChannel().queue(privateChannel -> {
-                    EmbedBuilder builder = new EmbedBuilder();
-                    builder.setTitle("NIE MOŻESZ ZŁOŻYĆ WIĘCEJ NIŻ JEDNO PODANIE!");
-                    builder.setColor(Color.red);
-                    builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                    builder.setDescription("Zlożyłeś już podanie do naszego klanu i\n" +
-                            "jesteś w trakcie rekrutacji.\n");
-                    builder.addField("Jeżeli masz pytania w związku z Twoją rekrutacją", "", false);
-                    builder.addField("1. Spradź kanały", "Znajdź kanał przypisany do twojej rekrutacji i napisz do nas.", false);
-                    builder.addField("2.Nie widze kanału.", "Jeżeli nie widzisz kanału przypisanego do twojej rekrutacji skontaktuj się z nami bezpośrednio. Drill Instrutor -> Rada Klanu.", false);
-                    privateChannel.sendMessage(builder.build()).queue();
-                });
-            });
+            new EmbedYouHaveRecrutChannel(event,userID);
+
         }
     }
 

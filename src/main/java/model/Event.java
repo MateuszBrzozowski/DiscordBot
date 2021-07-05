@@ -26,9 +26,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
+import java.util.*;
 import java.util.List;
 
 public class Event {
@@ -42,7 +40,6 @@ public class Event {
 
     public void initialize(JDA jda) {
         getAllDatabase(jda);
-
     }
 
     private void getAllDatabase(JDA jda) {
@@ -203,7 +200,7 @@ public class Event {
 
     public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
         String userName = getUserNameFromEvent(event);
-//        rangerLogger.info(userName + " - tworzy nowy event.");
+        rangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)){
             String nameEvent = getEventName(message);
             String date = getDate(message);
@@ -279,20 +276,20 @@ public class Event {
      */
     private void createList(String userName,TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
         if (whoPing==1){
-            textChannel.sendMessage("<@" + "Clan Member" + "> <@" + "RekrutID" + "> Zapisy!").queue();
+            textChannel.sendMessage("<@" + RoleID.CLAN_MEMBER_ID + "> <@" + RoleID.RECRUT_ID + "> Zapisy!").queue();
         }
         else if(whoPing==2){
-            textChannel.sendMessage("<@" + "RekrutID" + "> Zapisy!").queue();
+            textChannel.sendMessage("<@" + RoleID.RECRUT_ID + "> Zapisy!").queue();
         }
         else if (whoPing==3){
-            textChannel.sendMessage("<@" + "Clan Member" + "> Zapisy!").queue();
+            textChannel.sendMessage("<@" + RoleID.CLAN_MEMBER_ID + "> Zapisy!").queue();
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         builder.setTitle(nameEvent);
         if (description!=null){
-            builder.setDescription(description);
+            builder.setDescription(description+"\n");
         }
         builder.addField(":date: Kiedy", date, true);
         builder.addBlankField(true);
@@ -302,21 +299,26 @@ public class Event {
         builder.addBlankField(true);
         builder.addField(NAME_LIST_RESERVE+"(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + userName);
-        textChannel.sendMessage(builder.build()).setActionRow(
-                Button.primary("in_", "Zapisz"),
-                Button.secondary("reserve_" ,"Niepewny"),
-                Button.danger("out_", "Wypisz"))
-                .queue(message -> {
-                    MessageEmbed mOld = message.getEmbeds().get(0);
-                    String msgID = message.getId();
-                    message.editMessage(mOld).setActionRow(Button.primary("in_"+  msgID, "Zapisz"),
-                            Button.secondary("reserve_"+msgID, "Zapisz na rezerwę"),
-                            Button.danger("out_"+msgID, "Wypisz")).queue();
-                    ActiveMatch match = new ActiveMatch(textChannel.getId(),msgID);
-                    activeMatches.add(match);
-                    addEventDB(match);
-        });
-
+        try {
+            textChannel.sendMessage(builder.build()).setActionRow(
+                    Button.primary("in_", "Zapisz"),
+                    Button.secondary("reserve_" ,"Niepewny"),
+                    Button.danger("out_", "Wypisz"))
+                    .queue(message -> {
+                        MessageEmbed mOld = message.getEmbeds().get(0);
+                        String msgID = message.getId();
+                        message.editMessage(mOld).setActionRow(Button.primary("in_"+  msgID, "Zapisz"),
+                                Button.secondary("reserve_"+msgID, "Niepewny"),
+                                Button.danger("out_"+msgID, "Wypisz")).queue();
+                        ActiveMatch match = new ActiveMatch(textChannel.getId(),msgID);
+                        activeMatches.add(match);
+                        addEventDB(match);
+                    });
+        }catch (IllegalArgumentException e){
+            rangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
+                    "Nazwa eventu - 256\n" +
+                    "Tekst (opis eventu) - 2048");
+        }
     }
 
     public String getDescription(String[] message) {
@@ -353,17 +355,20 @@ public class Event {
     private String getDate(String[] message) {
         int indexStart = getIndex(message,"-date");
         if (!isEnd(message[indexStart+1])){
-            return message[indexStart+1];
+            if (isDateFormat(message[indexStart+1],"dd.MM.yyyy"))
+                return message[indexStart+1];
         }
         return null;
     }
 
     public boolean isDateFormat(String s,String pattern) {
-        DateFormat df = new SimpleDateFormat(pattern);
+        SimpleDateFormat df = new SimpleDateFormat(pattern);
         df.setLenient(false);
         try {
+            Date javaDate = df.parse(s);
             df.parse(s);
         } catch (ParseException e) {
+            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,pattern));
             return false;
         }
         return true;
@@ -371,10 +376,43 @@ public class Event {
 
     private String getTime(String[] message) {
         int indexStart = getIndex(message,"-time");
-        if (!isEnd(message[indexStart+1])){
-            return message[indexStart+1];
+        String time = message[indexStart+1];
+        if (!isEnd(time)){
+            if (time.length()==4){
+                time = "0"+time;
+            }
+            if (isTimeFormat(time)){
+                return time;
+            }
         }
         return null;
+    }
+
+    public boolean isTimeFormat(String s) {
+        if (s.length()==5){
+            if (s.substring(2,3).equalsIgnoreCase(":")){
+                if (isDecimal(s.substring(0,1)) && isDecimal(s.substring(1,2)) && isDecimal(s.substring(3,4)) && isDecimal(s.substring(4,5))){
+                    int hour = Integer.parseInt(s.substring(0,2));
+                    int min = Integer.parseInt(s.substring(3,5));
+                    if (hour>=0 && hour<=23 && min>=0 && min<=59){
+                        return true;
+                    }
+                    else logger.info("Zly format - godzina lub czas wyszły za zakres");
+                }
+                else logger.info("Zly format - to nie jest liczba");
+            }
+            else logger.info("Zly format :");
+        }
+        return false;
+    }
+
+    private boolean isDecimal(String s) {
+        for (int i = 0; i < 10; i++) {
+            if (s.equals(String.valueOf(i))){
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean searchParametrInMessage(String[] message, String s) {
