@@ -53,7 +53,7 @@ public class Recruits {
                             builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                             builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                             textChannel.sendMessage(builder.build()).queue();
-                            textChannel.sendMessage("Wkrótce się z Tobą skontaktujemy.").queue();
+                            textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
                             addUserToList(userID, userName, textChannel.getId());
                         });
             }
