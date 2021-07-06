@@ -14,6 +14,17 @@ public class MemberMy {
         return userName;
     }
 
+    public String getUserNameWithoutRangers() {
+        String result = userName;
+        if (result.matches("(.*)<rRangersPL>(.*)")){
+            result = result.replace("<rRangersPL>","");
+        }
+        else if (result.matches("(.*)<RangersPL>(.*)")){
+            result = result.replace("<RangersPL>","");
+        }
+        return result;
+    }
+
     public void setUserName(String userName) {
         this.userName = userName;
     }

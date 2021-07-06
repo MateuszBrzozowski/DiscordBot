@@ -276,14 +276,14 @@ public class Event {
      */
     private void createList(String userName,TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
         if (whoPing==1){
-            textChannel.sendMessage("<@" + RoleID.CLAN_MEMBER_ID + "> <@" + RoleID.RECRUT_ID + "> Zapisy!").queue();
+            textChannel.sendMessage("<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!").queue();
         }
         else if(whoPing==2){
-            textChannel.sendMessage("<@" + RoleID.RECRUT_ID + "> Zapisy!").queue();
+            textChannel.sendMessage("<@&" + RoleID.RECRUT_ID + "> Zapisy!").queue();
             //TODO dał permisję dla rekrutów
         }
         else if (whoPing==3){
-            textChannel.sendMessage("<@" + RoleID.CLAN_MEMBER_ID + "> Zapisy!").queue();
+            textChannel.sendMessage("<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!").queue();
             //TODO dać permisję dla clan Memberów
         }
         else

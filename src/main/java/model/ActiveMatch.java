@@ -206,7 +206,7 @@ public class ActiveMatch {
         if (mainList.size()>0){
             String result = "";
             for (int i = 0; i < mainList.size(); i++) {
-                result+=mainList.get(i).getUserName()+"\n";
+                result+=mainList.get(i).getUserNameWithoutRangers()+"\n";
             }
             return result;
         }else {
@@ -218,7 +218,7 @@ public class ActiveMatch {
         if (reserveList.size()>0){
             String result = "";
             for (int i = 0; i < reserveList.size(); i++) {
-                result+=reserveList.get(i).getUserName()+"\n";
+                result+=reserveList.get(i).getUserNameWithoutRangers()+"\n";
             }
             return result;
         }else {

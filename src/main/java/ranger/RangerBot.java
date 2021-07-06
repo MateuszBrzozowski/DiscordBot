@@ -24,7 +24,7 @@ public class RangerBot {
     private static RangerLogger rangerLogger = new RangerLogger();
 
     public static void main(String[] args) throws LoginException {
-        jda = JDABuilder.createDefault("ODU0MTc1NjAwODk3NDI1NDc4.YMgHBQ.nt5FXodl199DFKt2_0WOqG5tN5A").build();
+        jda = JDABuilder.createDefault("ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.ovdk1tinyHvCsfvAiLyDfPUyZ6k").build();
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
         jda.addEventListener(new WriteListener());
@@ -37,6 +37,8 @@ public class RangerBot {
             e.printStackTrace();
         }
         initialize(jda);
+
+
 
 //        rangerLogger.Info("Ranger-Bot uruchomiony poprawnie.");
         logger.info("Bot uruchomiony.");

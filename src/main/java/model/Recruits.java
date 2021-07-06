@@ -9,11 +9,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -25,8 +27,8 @@ public class Recruits {
 
     private List<Recrut> activeRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private Collection<Permission> permissions1 = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
-    private Collection<Permission> permissionsTest = EnumSet.of(Permission.MESSAGE_WRITE);
+    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RangerLogger rangerLogger = new RangerLogger();
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
@@ -34,8 +36,9 @@ public class Recruits {
         for (Category cat : categories) {
             if (cat.getId().equals(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 event.getGuild().createTextChannel("rekrut-" + userName, cat)
-                        .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions1)
-                        .addMemberPermissionOverride(Long.parseLong(userID), permissions1, null)
+                        .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions)
+                        .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID),permViewChannel,null)
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
@@ -68,10 +71,7 @@ public class Recruits {
         if (!checkUser(userID)){
             if (!RoleID.isRoleAnotherClanButtonClick(event)){
                 if (!RoleID.isRoleButtonClick(event,RoleID.CLAN_MEMBER_ID)){
-                    if (!RoleID.isRoleButtonClick(event,RoleID.RECRUT_ID)){
-                        createChannelForNewRecrut(event, userName, userID);
-                    }
-                    else new EmbedYouHaveRecrutRole(event);
+                    createChannelForNewRecrut(event, userName, userID);
                 }
                 else new EmbedYouAreClanMember(event);
             }
@@ -162,12 +162,25 @@ public class Recruits {
     public void deleteChannelByID(String channelID) {
         for (int i = 0; i < activeRecruits.size(); i++) {
             if (channelID.equalsIgnoreCase(activeRecruits.get(i).getChannelID())) {
+                removeRoleFromUserID(activeRecruits.get(i).getUserID());
                 activeRecruits.remove(i);
                 RemoveRecrutFromDataBase(channelID);
                 logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
             }
         }
+    }
 
+    public void removeRoleFromUserID(String userID){
+        JDA jda = RangerBot.getJda();
+        jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID).retrieveMemberById(userID).queue(member -> {
+            List<Role> roles = member.getRoles();
+            for (Role r:roles){
+                if (r.getId().equalsIgnoreCase(RoleID.RECRUT_ID)){
+                    member.getGuild().removeRoleFromMember(member,r).queue();
+                    break;
+                }
+            }
+        });
     }
 
     private void RemoveRecrutFromDataBase(String channelID) {
@@ -182,7 +195,7 @@ public class Recruits {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
-                    event.getChannel().getManager().putPermissionOverride(member,null,permissions1).queue();
+                    event.getChannel().getManager().putPermissionOverride(member,null, permissions).queue();
                     new EmbedCloseChannel(event);
                     logger.info("Kanał zamkniety: {} , userName: {}, userID: {}",event.getChannel().getName(),user.getName(),user.getId());
                 });
@@ -206,7 +219,7 @@ public class Recruits {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
-                    event.getChannel().getManager().putPermissionOverride(member,permissions1,null).queue();
+                    event.getChannel().getManager().putPermissionOverride(member, permissions,null).queue();
                     new EmbedOpernChannel(event);
                     logger.info("Kanał otwarty: {} , userName: {}, userID: {}",event.getChannel().getName(),user.getName(),user.getId());
                 });

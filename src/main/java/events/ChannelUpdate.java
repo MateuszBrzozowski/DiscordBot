@@ -17,8 +17,6 @@ public class ChannelUpdate extends ListenerAdapter {
     private Recruits recruits = new Recruits();
     private Event match = new Event();
 
-
-
     @Override
     public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
         recruits = RangerBot.getRecruits();

@@ -1,13 +1,20 @@
 package helpers;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.utils.WidgetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 import java.util.List;
 
 public class RoleID {
 
+    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     public static final String RADA_KLANU ="773233884145647666";
     public static final String CLAN_MEMBER_ID = "311978154291888141";
     public static final String RECRUT_ID = "410808008331886592";
@@ -46,4 +53,5 @@ public class RoleID {
         }
         return false;
     }
+
 }
