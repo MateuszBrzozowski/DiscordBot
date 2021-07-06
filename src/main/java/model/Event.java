@@ -211,6 +211,7 @@ public class Event {
             boolean c = searchParametrInMessage(message,"-c");
             if (nameEvent!=null && date!=null && time!=null){
                 if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
+                    //TODO ogarnąć te permisje w lepszy sposób! PRzyszłościowo pomyśleć i tworozny kanał tylko bez permisji i trzeba mu dać permisje również dla clan member
                     if (ac || r) event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
                     if (ac) createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,1);
                     else if (r) createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,2);
@@ -251,7 +252,6 @@ public class Event {
                             .queue(textChannel -> {
                                 if (whoVisable==1) createList(getUserNameFromEvent(event),textChannel,nameEvent,date,time,description,1);
                                 else if (whoVisable==2) createList(getUserNameFromEvent(event),textChannel,nameEvent,date,time,description,2);
-                                else createList(getUserNameFromEvent(event),textChannel,nameEvent,date,time,description,3);
 
                     });
                 }else {
@@ -280,9 +280,15 @@ public class Event {
         }
         else if(whoPing==2){
             textChannel.sendMessage("<@" + RoleID.RECRUT_ID + "> Zapisy!").queue();
+            //TODO dał permisję dla rekrutów
         }
         else if (whoPing==3){
             textChannel.sendMessage("<@" + RoleID.CLAN_MEMBER_ID + "> Zapisy!").queue();
+            //TODO dać permisję dla clan Memberów
+        }
+        else
+        {
+            //TODO kanał widoczny dla każdego bez pingu
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);

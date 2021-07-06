@@ -1,10 +1,7 @@
 package model;
 
 import database.DBConnector;
-import embed.EmbedCloseChannel;
-import embed.EmbedOpernChannel;
-import embed.EmbedRemoveChannel;
-import embed.EmbedYouHaveRecrutChannel;
+import embed.*;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
@@ -12,7 +9,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -34,7 +30,6 @@ public class Recruits {
     private final RangerLogger rangerLogger = new RangerLogger();
 
     public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
-        event.deferEdit().queue();
         List<Category> categories = event.getGuild().getCategories();
         for (Category cat : categories) {
             if (cat.getId().equals(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
@@ -69,13 +64,20 @@ public class Recruits {
     public void newPodanie(ButtonClickEvent event) {
         String userName = event.getUser().getName();
         String userID = event.getUser().getId();
-        if (!checkUser(userID)) {
-            createChannelForNewRecrut(event, userName, userID);
-        } else {
-            event.deferEdit().queue();
-            new EmbedYouHaveRecrutChannel(event,userID);
-
+        event.deferEdit().queue();
+        if (!checkUser(userID)){
+            if (!RoleID.isRoleAnotherClanButtonClick(event)){
+                if (!RoleID.isRoleButtonClick(event,RoleID.CLAN_MEMBER_ID)){
+                    if (!RoleID.isRoleButtonClick(event,RoleID.RECRUT_ID)){
+                        createChannelForNewRecrut(event, userName, userID);
+                    }
+                    else new EmbedYouHaveRecrutRole(event);
+                }
+                else new EmbedYouAreClanMember(event);
+            }
+            else new EmbedYouAreInClan(event);
         }
+        else new EmbedYouHaveRecrutChannel(event);
     }
 
     private void addUserToList(String userID, String userName, String channelID) {

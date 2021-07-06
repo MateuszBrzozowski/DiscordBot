@@ -7,15 +7,12 @@ import helpers.Commands;
 import helpers.RoleID;
 import model.Event;
 import model.Recruits;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
-
-import java.util.List;
 
 public class WriteListener extends ListenerAdapter {
 
@@ -24,8 +21,8 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
-        boolean radKlan = isRoleRadaKlanu(event);
-        boolean clanMember = isRoleClanMember(event);
+        boolean radKlan = RoleID.isRoleMessageRecived(event,RoleID.RADA_KLANU);
+        boolean clanMember = RoleID.isRoleMessageRecived(event,RoleID.CLAN_MEMBER_ID);
         Event matches = RangerBot.getMatches();
         Recruits recruits = RangerBot.getRecruits();
 
@@ -98,25 +95,6 @@ public class WriteListener extends ListenerAdapter {
         }
     }
 
-    private boolean isRoleRadaKlanu(GuildMessageReceivedEvent event) {
-        List<Role> roles = event.getMember().getRoles();
-        for (Role r: roles){
-            if (r.getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isRoleClanMember(GuildMessageReceivedEvent event) {
-        List<Role> roles = event.getMember().getRoles();
-        for (Role r: roles){
-            if (r.getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
 
 
