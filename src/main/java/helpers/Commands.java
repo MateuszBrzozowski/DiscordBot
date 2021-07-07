@@ -2,8 +2,10 @@ package helpers;
 
 public class Commands {
 
+
     private static final String PREFIX = "!";
 
+    public static final String GENERATOR = PREFIX + "generator";
     public static final String DICE = PREFIX + "kostka";
     public static final String HELPS = PREFIX + "help";
     public static final String REOPEN = PREFIX + "open";

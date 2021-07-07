@@ -33,8 +33,8 @@ public class Event {
 
     private List<ActiveMatch> activeMatches = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private static final String NAME_LIST = ":white_check_mark: Lista ";
-    private static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
+    public static final String NAME_LIST = ":white_check_mark: Lista ";
+    public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private RangerLogger rangerLogger = new RangerLogger();
 
@@ -276,15 +276,13 @@ public class Event {
      */
     private void createList(String userName,TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
         if (whoPing==1){
-            textChannel.sendMessage("<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!").queue();
+            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + "RoleID.RECRUT_ID" + "> Zapisy!").queue();
         }
         else if(whoPing==2){
-            textChannel.sendMessage("<@&" + RoleID.RECRUT_ID + "> Zapisy!").queue();
-            //TODO dał permisję dla rekrutów
+            textChannel.sendMessage("<@&" + "RoleID.RECRUT_ID" + "> Zapisy!").queue();
         }
         else if (whoPing==3){
-            textChannel.sendMessage("<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!").queue();
-            //TODO dać permisję dla clan Memberów
+            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!").queue();
         }
         else
         {
@@ -374,7 +372,7 @@ public class Event {
             Date javaDate = df.parse(s);
             df.parse(s);
         } catch (ParseException e) {
-            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,pattern));
+//            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,pattern));
             return false;
         }
         return true;
@@ -436,7 +434,7 @@ public class Event {
                 return i-1;
             }
         }
-        return message.length-1;
+        return indexStart;
     }
 
     private boolean isEnd(String s) {

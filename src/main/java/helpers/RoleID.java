@@ -1,11 +1,7 @@
 package helpers;
 
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.utils.WidgetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -24,8 +20,7 @@ public class RoleID {
     public static final String PEC_ID = "748800075806932993";
     public static final String RN_ID = "748800245575712910";
 
-    public static boolean isRoleMessageRecived(GuildMessageReceivedEvent event, String rola){
-        List<Role> roles = event.getMember().getRoles();
+    public static boolean isRoleMessageRecived(List<Role> roles, String rola){
         for (Role r: roles){
             if (r.getId().equalsIgnoreCase(rola)) {
                 return true;

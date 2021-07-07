@@ -5,6 +5,7 @@ import events.ChannelUpdate;
 import events.MessageUpdate;
 import events.WriteListener;
 import helpers.RangerLogger;
+import model.EventsGeneratorModel;
 import model.Recruits;
 import model.Event;
 import net.dv8tion.jda.api.JDA;
@@ -19,9 +20,12 @@ import javax.security.auth.login.LoginException;
 public class RangerBot {
     private static Recruits recruits;
     private static Event matches;
+    private static EventsGeneratorModel eventsGeneratorModel;
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private static JDA jda;
     private static RangerLogger rangerLogger = new RangerLogger();
+
+
 
     public static void main(String[] args) throws LoginException {
         jda = JDABuilder.createDefault("ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.ovdk1tinyHvCsfvAiLyDfPUyZ6k").build();
@@ -31,6 +35,7 @@ public class RangerBot {
         jda.addEventListener(new ButtonClickListener());
         jda.addEventListener(new ChannelUpdate());
         jda.addEventListener(new MessageUpdate());
+
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {
@@ -49,6 +54,7 @@ public class RangerBot {
         recruits.initialize(jda);
         matches = new Event();
         matches.initialize(jda);
+        eventsGeneratorModel = new EventsGeneratorModel();
     }
 
     public static Recruits getRecruits() {
@@ -61,5 +67,9 @@ public class RangerBot {
 
     public static JDA getJda() {
         return jda;
+    }
+
+    public static EventsGeneratorModel getEventsGeneratorModel() {
+        return eventsGeneratorModel;
     }
 }
