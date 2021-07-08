@@ -1,6 +1,7 @@
 package model;
 
 import database.DBConnector;
+import embed.EmbedInfoEditEventChannel;
 import embed.EmbedRemoveChannel;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
@@ -9,12 +10,10 @@ import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -167,7 +166,23 @@ public class Event {
         createEventChannel(event,message[1],message[2],message[3],null,3);
     }
 
+    public void createNewEventFrom3Data(String[] message, PrivateMessageReceivedEvent event) {
+        createEventChannel(event,message[1],message[2],message[3],null,3);
+    }
+
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
+        if (message[4].equalsIgnoreCase("-ac")){
+            createEventChannel(event,message[1],message[2],message[3],null,1);
+        }
+        else if (message[4].equalsIgnoreCase("-r")){
+            createEventChannel(event,message[1],message[2],message[3],null,2);
+        }
+        else {
+            createEventChannel(event,message[1],message[2],message[3],null,3);
+        }
+    }
+
+    public void createNewEventFrom4Data(String[] message, PrivateMessageReceivedEvent event) {
         if (message[4].equalsIgnoreCase("-ac")){
             createEventChannel(event,message[1],message[2],message[3],null,1);
         }
@@ -230,6 +245,29 @@ public class Event {
         }
     }
 
+    public void createNewEventFromSpecificData(String[] message, PrivateMessageReceivedEvent event) {
+        String userName = getUserNameFromEvent(event);
+        rangerLogger.info(userName + " - tworzy nowy event.");
+        if (checkMessage(message)){
+            String nameEvent = getEventName(message);
+            String date = getDate(message);
+            String time = getTime(message);
+            String description = getDescription(message);
+            boolean ac = searchParametrInMessage(message,"-ac");
+            boolean r = searchParametrInMessage(message,"-r");
+            boolean c = searchParametrInMessage(message,"-c");
+            if (nameEvent!=null && date!=null && time!=null) {
+                if (ac) createEventChannel(event, nameEvent, date, time, description, 1);
+                else if (r) createEventChannel(event, nameEvent, date, time, description, 2);
+                else createEventChannel(event, nameEvent, date, time, description, 3);
+            }else {
+                rangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
+            }
+        }else {
+            rangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+        }
+    }
+
 
 
     /**
@@ -259,7 +297,62 @@ public class Event {
                         createList(getUserNameFromEvent(event),textChannel,nameEvent,date,time,description,3);
                     });
                 }
+                break;
+            }
+        }
+    }
 
+    /**
+     * @param event otrzymania wiadomości
+     * @param nameEvent który tworzymy
+     * @param date kiedy tworzymy event
+     * @param time o której jest event
+     * @param description eventu
+     * @param whoVisable 1 - rekrut + clanMember; 2 - rekrut
+     */
+    private void createEventChannel(PrivateMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
+        List<Guild> guilds = event.getJDA().getGuilds();
+        logger.info("Ilość Guilds: {} ",guilds.size());
+        for (Guild g : guilds) {
+            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+                String creatorID = event.getMessage().getAuthor().getId();
+                List<Member> members = g.getMembers();
+                for (Member m : members){
+                    if (m.getId().equalsIgnoreCase(creatorID)){
+                        String creatorName = m.getNickname();
+                        if (creatorName==null){
+                            creatorName = event.getMessage().getAuthor().getName();
+                        }
+                        createEventChannel(g,creatorName,nameEvent,date,time,description,whoVisable);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+
+    }
+
+    private void createEventChannel(Guild guild,String creatorName, String nameEvent, String date, String time, String description, int whoVisable) {
+        List<Category> categories = guild.getCategories();
+        for (Category cat : categories) {
+            if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
+                if (whoVisable==1 || whoVisable==2){
+                    guild.createTextChannel(nameEvent + "-" + date + "-" + time, cat)
+                            .addPermissionOverride(guild.getPublicRole(),null,permissions)
+                            .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID),permissions,null)
+                            .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID),permissions,null)
+                            .queue(textChannel -> {
+                                if (whoVisable==1) createList(creatorName,textChannel,nameEvent,date,time,description,1);
+                                else if (whoVisable==2) createList(creatorName,textChannel,nameEvent,date,time,description,2);
+
+                            });
+                }else {
+                    guild.createTextChannel(nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
+                        createList(creatorName,textChannel,nameEvent,date,time,description,3);
+                    });
+                }
                 break;
             }
         }
@@ -294,6 +387,9 @@ public class Event {
         builder.setTitle(nameEvent);
         if (description!=null){
             builder.setDescription(description+"\n");
+        }
+        else if (description.length()>2048){
+            textChannel.sendMessage(description).queue();
         }
         builder.addField(":date: Kiedy", date, true);
         builder.addBlankField(true);
@@ -643,4 +739,44 @@ public class Event {
         return userName;
     }
 
+    private String getUserNameFromEvent(PrivateMessageReceivedEvent event) {
+        return event.getAuthor().getName();
+    }
+
+    public void createNewChannel(GuildMessageReceivedEvent event, String userID) {
+        List<Category> categories = event.getGuild().getCategories();
+        for (Category c : categories){
+            if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)){
+                event.getGuild().createTextChannel("nowy-event",c)
+                        .addPermissionOverride(event.getGuild().getPublicRole(),null,permissions)
+                        .addMemberPermissionOverride(Long.parseLong(userID),permissions,null)
+                        .queue(textChannel -> {
+                            //wyslac info do usera
+                            new EmbedInfoEditEventChannel(event.getGuild());
+                        });
+                break;
+            }
+        }
+    }
+
+    public void createNewChannel(PrivateMessageReceivedEvent event, String userID) {
+        List<Guild> guilds = event.getJDA().getGuilds();
+        for (Guild g : guilds){
+            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+                List<Category> categories = g.getCategories();
+                for (Category c : categories){
+                    if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)){
+                        g.createTextChannel("nowy-event",c)
+                                .addPermissionOverride(g.getPublicRole(),null,permissions)
+                                .addMemberPermissionOverride(Long.parseLong(userID),permissions,null)
+                                .queue(textChannel -> {
+                                    //Wyslac do usera info jak edytowac i stworzyc liste na tym kanale
+                                });
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 }

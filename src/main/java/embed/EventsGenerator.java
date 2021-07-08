@@ -4,10 +4,10 @@ import helpers.RangerLogger;
 import model.Event;
 import model.EventsGeneratorModel;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ public class EventsGenerator {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private RangerLogger rangerLogger = new RangerLogger();
+    private boolean here = false;
     private String userID;
     private String userName;
     private String nameEvent;
@@ -27,7 +28,8 @@ public class EventsGenerator {
     private String description = null;
     private String perm;
     private int stageOfGenerator = 0;
-    GuildMessageReceivedEvent eventMsgRec;
+    GuildMessageReceivedEvent eventMsgRec=null;
+    PrivateMessageReceivedEvent eventPrivateMsgRec=null;
 
 
 
@@ -35,11 +37,19 @@ public class EventsGenerator {
         userID = event.getMessage().getAuthor().getId();
         userName = event.getMessage().getAuthor().getName();
         this.eventMsgRec = event;
-        embedStart(event);
+        embedStart();
     }
 
-    private void embedStart(GuildMessageReceivedEvent event) {
-        event.getJDA().retrieveUserById(userID).queue(user -> {
+    public EventsGenerator(@NotNull PrivateMessageReceivedEvent event) {
+        userID = event.getMessage().getAuthor().getId();
+        userName = event.getMessage().getAuthor().getName();
+        this.eventPrivateMsgRec = event;
+        embedStart();
+    }
+
+    private void embedStart() {
+        JDA jda = RangerBot.getJda();
+        jda.retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setTitle("WITAJ " + userName.toUpperCase() + " W GENERATORZE EVENTÓW!");
@@ -50,7 +60,7 @@ public class EventsGenerator {
                         "Przerwanie generowania - Wpisz tutaj **!cancel**\n" +
                         "Maksymalna liczba znaków w tytule - 256\n" +
                         "Maksymalna liczba znaków w opisie znajdującym się na liście - 2048\n" +
-                        "~~Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newChannel** -(tworzy kanał w " +
+                        "~~Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newEventChannel** -(tworzy kanał w " +
                         "kategorii Mecze/Szkolenia/Eventy, " +
                         "następnie napisz na tym kanale osobiście opis i stwórz listę przy pomocy komendy **!generatorHere**~~ <-Funkcja jeszcze nie działa.");
                 EmbedBuilder getEventName = new EmbedBuilder();
@@ -131,15 +141,15 @@ public class EventsGenerator {
             }
             case 5:
             {
-                if (msg.length()<2048 && msg.length()>0){
+                if (msg.length()<2048){
                     description = msg;
                     stageOfGenerator++;
                     embedWhoPing(event);
                 }
                 else {
-                    embedDescriptionToLong(event);
-                    embedGetDescription(event);
+                    embedDescriptionLong(event);
                 }
+
                 break;
             }
             case 6:
@@ -191,17 +201,7 @@ public class EventsGenerator {
                     embedDoYouWantAnyChange(event,true);
                 }
                 else if (msg.equalsIgnoreCase("end")){
-                    //konczymy generowanie
-                    Event e = RangerBot.getMatches();
-                    String cmd = createCommand();
-                    String[] cmdTable = cmd.split(" ");
-                    e.createNewEventFromSpecificData(cmdTable,eventMsgRec);
-                    embedFinish(event);
-                    EventsGeneratorModel model = RangerBot.getEventsGeneratorModel();
-                    int index = model.userHaveActiveGenerator(event.getAuthor().getId());
-                    if (index>=0){
-                        model.removeGenerator(index);
-                    }
+                    end(event);
                 }
                 else {
                     embedWhoPingNotCorrect(event);
@@ -219,8 +219,8 @@ public class EventsGenerator {
             }
             case 9:
             {
-                if (msg.length()<2048 && msg.length()>0) description = msg;
-                else embedDescriptionToLong(event);
+                description = msg;
+                embedDescriptionLong(event);
                 embedDoYouWantAnyChange(event,false);
                 stageOfGenerator=7;
                 break;
@@ -260,13 +260,27 @@ public class EventsGenerator {
         }
     }
 
+    private void end(PrivateMessageReceivedEvent event) {
+        Event e = RangerBot.getMatches();
+        String cmd = createCommand();
+        String[] cmdTable = cmd.split(" ");
+        if (eventMsgRec==null) e.createNewEventFromSpecificData(cmdTable,eventPrivateMsgRec);
+        else e.createNewEventFromSpecificData(cmdTable,eventMsgRec);
+        embedFinish(event);
+        EventsGeneratorModel model = RangerBot.getEventsGeneratorModel();
+        int index = model.userHaveActiveGenerator(event.getAuthor().getId());
+        if (index>=0){
+            model.removeGenerator(index);
+        }
+    }
+
     private void embedDoYouWantAnyChange(PrivateMessageReceivedEvent event,boolean showList) {
         event.getJDA().retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
                 if (showList) embedListExample(event,privateChannel);
 
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.YELLOW);
+                builder.setColor(Color.GREEN);
                 builder.setTitle("Generwoanie listy zakończone.");
                 builder.addField("Czy chcesz wprowadzić jakieś zmiany?","N - nazwa eventu\n" +
                         "D - data eventu\n" +
@@ -282,6 +296,9 @@ public class EventsGenerator {
     }
 
     private void embedListExample(PrivateMessageReceivedEvent event, PrivateChannel privateChannel) {
+        if (description!=null) {
+            if (description.length()>2040) privateChannel.sendMessage(description).queue();
+        }
         if (perm.equalsIgnoreCase("ac")){
             privateChannel.sendMessage("CLAN_MEMBER RECRUT Zapisy!").queue();
         }
@@ -292,7 +309,7 @@ public class EventsGenerator {
             privateChannel.sendMessage("CLAN_MEMBER Zapisy!").queue();
         }
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
+        builder.setColor(Color.GREEN);
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         builder.setTitle(nameEvent);
         if (description!=null){
@@ -309,7 +326,10 @@ public class EventsGenerator {
     }
 
     private String createCommand() {
-        return "!zapisy -name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
+        String command = "";
+        if (here) command = "!zapisyhere ";
+        else  command = "!zapisy ";
+        return command + "-name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
     }
 
     private void embedFinish(PrivateMessageReceivedEvent event) {
@@ -335,12 +355,13 @@ public class EventsGenerator {
         });
     }
 
-    private void embedDescriptionToLong(PrivateMessageReceivedEvent event) {
+    private void embedDescriptionLong(PrivateMessageReceivedEvent event) {
         event.getJDA().retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Opis za długi!","",false);
+                builder.addField("UWAGA - Długi opis!","Twój opis jest za długi żebym mógł go umieścić " +
+                        "bezpośrednio na liście. Maksymalna liczba znaków - 2048",false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -455,4 +476,9 @@ public class EventsGenerator {
             });
         });
     }
+
+    public void setHere(boolean here) {
+        this.here = here;
+    }
+
 }

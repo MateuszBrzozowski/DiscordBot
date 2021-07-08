@@ -5,6 +5,8 @@ public class Commands {
 
     private static final String PREFIX = "!";
 
+    public static final String GENERATOR_HERE = PREFIX + "generatorHere";
+    public static final String NEW_CHANNEL = PREFIX + "newChannel";
     public static final String GENERATOR = PREFIX + "generator";
     public static final String DICE = PREFIX + "kostka";
     public static final String HELPS = PREFIX + "help";
