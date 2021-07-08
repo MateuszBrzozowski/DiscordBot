@@ -2,9 +2,9 @@ package helpers;
 
 public class Commands {
 
-
     private static final String PREFIX = "!";
 
+    public static final String NAME = PREFIX + "name";
     public static final String GENERATOR_HERE = PREFIX + "generatorHere";
     public static final String NEW_CHANNEL = PREFIX + "newChannel";
     public static final String GENERATOR = PREFIX + "generator";

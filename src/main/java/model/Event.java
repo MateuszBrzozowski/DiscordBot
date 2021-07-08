@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,6 +35,7 @@ public class Event {
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private RangerLogger rangerLogger = new RangerLogger();
+    private HashMap<String,TextChannel> textChannelsUser = new HashMap<>();
 
     public void initialize(JDA jda) {
         getAllDatabase(jda);
@@ -751,8 +751,8 @@ public class Event {
                         .addPermissionOverride(event.getGuild().getPublicRole(),null,permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID),permissions,null)
                         .queue(textChannel -> {
-                            //wyslac info do usera
-                            new EmbedInfoEditEventChannel(event.getGuild());
+                            textChannelsUser.put(userID,textChannel);
+                            new EmbedInfoEditEventChannel(event.getGuild(),userID);
                         });
                 break;
             }
@@ -770,7 +770,8 @@ public class Event {
                                 .addPermissionOverride(g.getPublicRole(),null,permissions)
                                 .addMemberPermissionOverride(Long.parseLong(userID),permissions,null)
                                 .queue(textChannel -> {
-                                    //Wyslac do usera info jak edytowac i stworzyc liste na tym kanale
+                                    textChannelsUser.put(userID,textChannel);
+                                    new EmbedInfoEditEventChannel(g,userID);
                                 });
                         break;
                     }
@@ -778,5 +779,39 @@ public class Event {
                 break;
             }
         }
+    }
+
+    public boolean checkChannelIsInEventCategory(GuildMessageReceivedEvent event) {
+        if (userHaveChannel(event.getMessage().getAuthor().getId(),event.getChannel())){
+            List<Category> categories = event.getGuild().getCategories();
+            for (Category c : categories){
+                if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)){
+                    List<TextChannel> textChannels = c.getTextChannels();
+                    for (TextChannel tc : textChannels){
+                        if (tc.getId().equalsIgnoreCase(event.getChannel().getId())){
+                            return true;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        else {
+            event.getMessage().delete().submit();
+        }
+        return false;
+    }
+
+    private boolean userHaveChannel(String userID, TextChannel channel) {
+        if (!textChannelsUser.isEmpty()){
+            for (int i = 0; i < textChannelsUser.size(); i++) {
+                if (textChannelsUser.containsKey(userID)){
+                    if (textChannelsUser.get(userID).getId().equalsIgnoreCase(channel.getId())){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

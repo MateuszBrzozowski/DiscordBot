@@ -91,8 +91,16 @@ public class WriteListener extends ListenerAdapter {
 
             }
             else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)){
+                event.getMessage().delete().submit();
                 String userID = event.getMessage().getAuthor().getId();
                 matches.createNewChannel(event, userID);
+            }
+            else if (message.length > 1 && message[0].equalsIgnoreCase(Commands.NAME)){
+                if (matches.checkChannelIsInEventCategory(event)){
+                    String name = getNameFromUser(message);
+                    event.getMessage().delete().submit();
+                    event.getChannel().getManager().setName(name).queue();
+                }
             }
             else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
                 event.getMessage().delete().submit();
@@ -148,6 +156,14 @@ public class WriteListener extends ListenerAdapter {
             event.getMessage().delete().submit();
             new EmbedDice(event);
         }
+    }
+
+    private String getNameFromUser(String[] message) {
+        String result = "";
+        for (int i = 1; i < message.length; i++) {
+            result+=message[i]+ " ";
+        }
+        return result;
     }
 
     @Override
