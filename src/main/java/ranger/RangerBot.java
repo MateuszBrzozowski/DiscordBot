@@ -1,17 +1,15 @@
 package ranger;
 
 import events.*;
-import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
-import helpers.RoleID;
-import model.*;
+import model.DiceGames;
+import model.Event;
+import model.EventsGeneratorModel;
+import model.Recruits;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +17,13 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class RangerBot {
+
+    private static final String BOT_TOKEN = "token";
     private static Recruits recruits;
     private static Event matches;
+    private static DiceGames diceGames;
     private static EventsGeneratorModel eventsGeneratorModel;
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private static JDA jda;
@@ -32,11 +32,12 @@ public class RangerBot {
 
 
     public static void main(String[] args) throws LoginException {
+        
         Collection<GatewayIntent> intents = new ArrayList<>();
         intents.add(GatewayIntent.GUILD_MEMBERS);
         intents.add(GatewayIntent.GUILD_MESSAGES);
         intents.add(GatewayIntent.DIRECT_MESSAGES);
-        jda = JDABuilder.create("ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.ovdk1tinyHvCsfvAiLyDfPUyZ6k", intents)
+        jda = JDABuilder.create(BOT_TOKEN, intents)
                 .addEventListeners(new WriteListener())
                 .addEventListeners(new ButtonClickListener())
                 .addEventListeners(new ChannelUpdate())
@@ -61,8 +62,7 @@ public class RangerBot {
         matches = new Event();
         matches.initialize(jda);
         eventsGeneratorModel = new EventsGeneratorModel();
-//        discordServer = new DiscordServer();
-//        discordServer.initialize(jda);
+        diceGames = new DiceGames();
 
     }
 
@@ -80,5 +80,9 @@ public class RangerBot {
 
     public static EventsGeneratorModel getEventsGeneratorModel() {
         return eventsGeneratorModel;
+    }
+
+    public static DiceGames getDiceGames() {
+        return diceGames;
     }
 }

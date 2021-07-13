@@ -18,7 +18,6 @@ public class EmbedYouAreInClan {
                 builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                 builder.setDescription("Masz przypisaną rolę innego klanu na naszym discordzie.");
                 builder.addBlankField(false);
-                builder.addField("FAQ","",false);
                 builder.addField("- Nie należę do żadnego klanu", "Proszę znajdź użytkownika z rolą Rada klanu na naszym discordzie i " +
                         "napisz do nas.", false);
                 privateChannel.sendMessage(builder.build()).queue();

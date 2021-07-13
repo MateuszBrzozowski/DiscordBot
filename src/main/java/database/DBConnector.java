@@ -6,15 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 
 public class DBConnector {
-//    private static String url ="jdbc:mysql://localhost/rangerbot";
-//    private static String database ="heroku_81d940f3eb8f149";
     private static String database ="rangerbot";
-//    private static String serwer ="eu-cdbr-west-01.cleardb.com";
     private static String serwer ="localhost";
     private static String url ="jdbc:mysql://"+serwer+"/"+database;
-//    private static String user ="b5abcf8a4dffdd";
     private static String user ="root";
-//    private static String pass = "3ec5318c";
     private static String pass = "";
     private static RangerLogger rangerLogger = new RangerLogger();
     protected static final Logger logger = LoggerFactory.getLogger(DBConnector.class);

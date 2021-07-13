@@ -5,10 +5,7 @@ import embed.*;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import helpers.RoleID;
-import model.Event;
-import model.EventsGeneratorModel;
-import model.MemberMy;
-import model.Recruits;
+import model.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -95,7 +92,7 @@ public class WriteListener extends ListenerAdapter {
                 String userID = event.getMessage().getAuthor().getId();
                 matches.createNewChannel(event, userID);
             }
-            else if (message.length > 1 && message[0].equalsIgnoreCase(Commands.NAME)){
+            else if (message.length > 1 && message.length <100 && message[0].equalsIgnoreCase(Commands.NAME)){
                 if (matches.checkChannelIsInEventCategory(event)){
                     String name = getNameFromUser(message);
                     event.getMessage().delete().submit();
@@ -136,7 +133,7 @@ public class WriteListener extends ListenerAdapter {
             }
             else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
                 event.getMessage().delete().submit();
-                if (radKlan) new EmbedHelp(event);
+                new EmbedHelp(event.getMessage().getAuthor().getId());
             }
             else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
                 event.getMessage().delete().submit();
@@ -156,6 +153,24 @@ public class WriteListener extends ListenerAdapter {
             event.getMessage().delete().submit();
             new EmbedDice(event);
         }
+        else if (message.length >1 && message[0].equalsIgnoreCase(Commands.DICE)){
+            event.getMessage().delete().submit();
+            DiceGame diceGame = new DiceGame(message, event);
+            DiceGames diceGames = RangerBot.getDiceGames();
+            diceGames.addGame(diceGame);
+        }
+        else {
+            //wpisane cokolwiek przez kogokowliek
+            //sprawdzic czy jest aktywna gra na tym kanale
+            //jak tak to ją dokonczyć z informacją
+            DiceGames diceGames = RangerBot.getDiceGames();
+            if (!event.getAuthor().isBot()){
+                if (diceGames.isActiveGameOnChannelID(event.getChannel().getId())){
+                    event.getMessage().delete().submit();
+                    diceGames.play(event);
+                }
+            }
+        }
     }
 
     private String getNameFromUser(String[] message) {
@@ -173,7 +188,6 @@ public class WriteListener extends ListenerAdapter {
 
         String[] message = event.getMessage().getContentRaw().split(" ");
         Event matches = RangerBot.getMatches();
-        Recruits recruits = RangerBot.getRecruits();
 
         EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
         int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
@@ -192,6 +206,9 @@ public class WriteListener extends ListenerAdapter {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
             }
+        }
+        else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
+            new EmbedHelp(event.getAuthor().getId());
         }
         else if (message.length==4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
             matches.createNewEventFrom3Data(message,event);
@@ -215,7 +232,6 @@ public class WriteListener extends ListenerAdapter {
         }
         else {
             sendMessage(event);
-            logger.info("User nie ma aktywnego generatora");
         }
     }
 

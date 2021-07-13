@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -195,12 +196,15 @@ public class Event {
     }
 
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
+        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
         createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,3);
     }
 
     public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
+
         if (message[4].equalsIgnoreCase("-ac")){
             event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
+            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
             createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,1);
         }
         else if (message[4].equalsIgnoreCase("-r")){
@@ -208,6 +212,7 @@ public class Event {
             createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,2);
         }
         else {
+            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
             createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,3);
         }
 
@@ -226,11 +231,20 @@ public class Event {
             boolean c = searchParametrInMessage(message,"-c");
             if (nameEvent!=null && date!=null && time!=null){
                 if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
-                    //TODO ogarnąć te permisje w lepszy sposób! PRzyszłościowo pomyśleć i tworozny kanał tylko bez permisji i trzeba mu dać permisje również dla clan member
-                    if (ac || r) event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
-                    if (ac) createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,1);
-                    else if (r) createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,2);
-                    else if (c) createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,3);
+                    if (ac || r) {
+                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
+                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
+                    }
+                    if (ac) {
+                        createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,1);
+                    }
+                    else if (r) {
+                        createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,2);
+                    }
+                    else if (c) {
+                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
+                        createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,3);
+                    }
                     else createList(getUserNameFromEvent(event),event.getChannel(),nameEvent,date,time,description,-1);
                 }else {
                     if (ac) createEventChannel(event,nameEvent,date,time,description,1);
@@ -246,8 +260,8 @@ public class Event {
     }
 
     public void createNewEventFromSpecificData(String[] message, PrivateMessageReceivedEvent event) {
-        String userName = getUserNameFromEvent(event);
-        rangerLogger.info(userName + " - tworzy nowy event.");
+        String userName = getUserNameFromID(event.getAuthor().getId());
+        rangerLogger.info(userName + " - stworzył nowy event.");
         if (checkMessage(message)){
             String nameEvent = getEventName(message);
             String date = getDate(message);
@@ -312,7 +326,6 @@ public class Event {
      */
     private void createEventChannel(PrivateMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
         List<Guild> guilds = event.getJDA().getGuilds();
-        logger.info("Ilość Guilds: {} ",guilds.size());
         for (Guild g : guilds) {
             if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
                 String creatorID = event.getMessage().getAuthor().getId();
@@ -387,9 +400,6 @@ public class Event {
         builder.setTitle(nameEvent);
         if (description!=null){
             builder.setDescription(description+"\n");
-        }
-        else if (description.length()>2048){
-            textChannel.sendMessage(description).queue();
         }
         builder.addField(":date: Kiedy", date, true);
         builder.addBlankField(true);
@@ -661,13 +671,13 @@ public class Event {
     }
 
     public void signIn(ButtonClickEvent event, int indexOfActiveMatch) {
-        String userName = getUserNameFromEvent(event);
+        String userName = getUserNameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
         activeMatches.get(indexOfActiveMatch).addToMainList(userID,userName,event);
     }
 
     public void signINReserve(ButtonClickEvent event, int indexOfActiveMatch) {
-        String userName = getUserNameFromEvent(event);
+        String userName = getUserNameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
         activeMatches.get(indexOfActiveMatch).addToReserveList(userID,userName,event);
     }
@@ -739,11 +749,25 @@ public class Event {
         return userName;
     }
 
-    private String getUserNameFromEvent(PrivateMessageReceivedEvent event) {
-        return event.getAuthor().getName();
+
+    private String getUserNameFromID(String userID) {
+        JDA jda = RangerBot.getJda();
+        List<Guild> guilds = jda.getGuilds();
+        for (Guild guild : guilds) {
+            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+                String name = guild.getMemberById(userID).getNickname();
+                if (name == null){
+                    name = guild.getJDA().getUserById(userID).getName();
+                }
+                return name;
+            }
+        }
+        return null;
     }
 
     public void createNewChannel(GuildMessageReceivedEvent event, String userID) {
+        String username = getUserNameFromID(userID);
+        rangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
         List<Category> categories = event.getGuild().getCategories();
         for (Category c : categories){
             if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)){
@@ -763,6 +787,8 @@ public class Event {
         List<Guild> guilds = event.getJDA().getGuilds();
         for (Guild g : guilds){
             if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+                String username = getUserNameFromID(userID);
+                rangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
                 List<Category> categories = g.getCategories();
                 for (Category c : categories){
                     if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)){
