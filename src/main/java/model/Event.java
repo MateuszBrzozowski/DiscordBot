@@ -45,6 +45,7 @@ public class Event {
     private void getAllDatabase(JDA jda) {
         downladMatchesDB(jda);
         downloadPlayersInMatechesDB();
+        rangerLogger.info(String.format("Aktywnych eventów [%d]",activeMatches.size()));
     }
 
     private void downladMatchesDB(JDA jda) {
@@ -134,6 +135,7 @@ public class Event {
                                     m.addToReserveList(memberMy);
                                 }
                             }
+                            rangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]",event,m.getNumberOfSignIn()));
                         }
                     }
                 } catch (SQLException throwables) {

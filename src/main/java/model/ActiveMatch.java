@@ -233,4 +233,8 @@ public class ActiveMatch {
     public void addToReserveList(MemberMy memberMy) {
         reserveList.add(memberMy);
     }
+
+    public int getNumberOfSignIn() {
+        return mainList.size() + reserveList.size();
+    }
 }

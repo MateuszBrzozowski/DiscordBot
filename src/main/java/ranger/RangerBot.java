@@ -20,9 +20,9 @@ import java.util.Collection;
 
 public class RangerBot {
 
-    private static final String BOT_TOKEN = "token";
+    private static final String BOT_TOKEN = "ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.JETYfFYyUAi7pW-yeeMjNOpiPtM";
     private static Recruits recruits;
-    private static Event matches;
+    private static Event events;
     private static DiceGames diceGames;
     private static EventsGeneratorModel eventsGeneratorModel;
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
@@ -46,6 +46,7 @@ public class RangerBot {
                 .build();
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
+
         try {
             jda.awaitReady();
         } catch (InterruptedException e) {
@@ -59,8 +60,8 @@ public class RangerBot {
     private static void initialize(JDA jda) {
         recruits = new Recruits();
         recruits.initialize(jda);
-        matches = new Event();
-        matches.initialize(jda);
+        events = new Event();
+        events.initialize(jda);
         eventsGeneratorModel = new EventsGeneratorModel();
         diceGames = new DiceGames();
 
@@ -71,7 +72,7 @@ public class RangerBot {
     }
 
     public static Event getMatches() {
-        return matches;
+        return events;
     }
 
     public static JDA getJda() {
