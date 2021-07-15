@@ -2,7 +2,7 @@
 Discord bot.
 
 ---
-###v2.0 | 13.07.2021
+2.0 | 13.07.2021
 - Dodany generator kreowania eventów.
 Wypytuje uzytkownika o dane eventu i tworzy go na odpowiednim kanale. Możemy go uruchomić z pozycji serwera pisząc na dowolnym kanale lub pisząc bezpośrednio do bota w prywatnej wiadomości.
 - Usuwanie roli rekruta jezeli nim jest po usunięciu jego kanału rekrutacji.
@@ -13,13 +13,13 @@ Wypytuje uzytkownika o dane eventu i tworzy go na odpowiednim kanale. Możemy go
 - Zmieniona wiadomości.
 - Usprawnione działanie kostki. Możliwość rywalizacji dwóch osób.
 
-###v1.2 | 6.07.2021r
+v1.2 | 6.07.2021r
 - Poprawa wyglądu na liście eventów.
 
-###v1.1 | 6.07.2021r.
+v1.1 | 6.07.2021r.
 - Clan Member/Rekrut/Członek innego klanu nie może złożyć podania na rekrutację.
 - Clan Member widzi kanały nowych rekrutów.
 - Fix pingów przy zapisach na eventy.
 
-###v1.0 - 5.07.2021r.
+v1.0 - 5.07.2021r.
 - Bot obslugujący rekrutację w klanie oraz zapisy na różnego rodzaju eventy.
