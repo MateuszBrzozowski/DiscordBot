@@ -12,11 +12,14 @@ Wypytuje uzytkownika o dane eventu i tworzy go na odpowiednim kanale. Możemy go
 - Nowa pomoc po wpisaniu !help w prywatnej wiadomości do bota lub na dowolnym kanale.
 - Zmieniona wiadomości.
 - Usprawnione działanie kostki. Możliwość rywalizacji dwóch osób.
+
 ###v1.2 | 6.07.2021r
 - Poprawa wyglądu na liście eventów.
+
 ###v1.1 | 6.07.2021r.
 - Clan Member/Rekrut/Członek innego klanu nie może złożyć podania na rekrutację.
 - Clan Member widzi kanały nowych rekrutów.
 - Fix pingów przy zapisach na eventy.
+
 ###v1.0 - 5.07.2021r.
 - Bot obslugujący rekrutację w klanie oraz zapisy na różnego rodzaju eventy.
