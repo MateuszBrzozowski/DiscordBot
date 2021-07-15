@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import helpers.Validation;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -114,7 +115,7 @@ public class EventTest {
         //given
         String date = "31.01.2000";
         //when
-        Boolean b = event.isDateFormat(date,patternDate);
+        Boolean b = Validation.isDateFormat(date);
         //then
         Assert.assertEquals(b,true);
     }
@@ -123,36 +124,10 @@ public class EventTest {
         //given
         String date = "1.01.2000";
         //when
-        Boolean b = event.isDateFormat(date,patternDate);
+        Boolean b = Validation.isDateFormat(date);
         //then
         Assert.assertEquals(b,true);
     }
-//    public void isDateformat_DateBrokenYear_False(){
-//        //given
-//        String date = "1.01.";
-//        //when
-//        Boolean b = event.isDateFormat(date,patternDate);
-//        //then
-//        Assert.assertEquals(b,false);
-//    }
-//    @Test
-//    public void isDateformat_DateBrokenMonth_False(){
-//        //given
-//        String date = "1.13.2000";
-//        //when
-//        Boolean b = event.isDateFormat(date,patternDate);
-//        //then
-//        Assert.assertEquals(b,false);
-//    }
-//    @Test
-//    public void isDateformat_DateBrokenDay_False(){
-//        //given
-//        String date = "112.12.2000";
-//        //when
-//        Boolean b = event.isDateFormat(date,patternDate);
-//        //then
-//        Assert.assertEquals(b,false);
-//    }
     @Test
     public void getDescription_DescriptionOKMid(){
         //given
@@ -203,7 +178,7 @@ public class EventTest {
         //given
         String time = "19:59";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,true);
     }
@@ -212,7 +187,7 @@ public class EventTest {
         //given
         String time = "23:59";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,true);
     }
@@ -221,7 +196,7 @@ public class EventTest {
         //given
         String time = "00:00";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,true);
     }
@@ -230,7 +205,7 @@ public class EventTest {
         //given
         String time = "24:05";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,false);
     }
@@ -239,7 +214,7 @@ public class EventTest {
         //given
         String time = "19:60";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,false);
     }
@@ -248,7 +223,7 @@ public class EventTest {
         //given
         String time = "19k05";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,false);
     }
@@ -257,7 +232,7 @@ public class EventTest {
         //given
         String time = "9:05";
         //when
-        boolean isTime = event.isTimeFormat(time);
+        boolean isTime = Validation.isTimeFormat(time);
         //then
         Assert.assertEquals(isTime,false);
     }

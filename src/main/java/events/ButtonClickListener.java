@@ -12,7 +12,7 @@ import ranger.RangerBot;
 public class ButtonClickListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private static Event matches;
+    private static Event event;
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -20,19 +20,18 @@ public class ButtonClickListener extends ListenerAdapter {
             Recruits recrut = RangerBot.getRecruits();
             recrut.newPodanie(event);
         }
-        matches = RangerBot.getMatches();
-        if (matches.isActiveMatch(event.getMessage().getId())>=0){
-            logger.info("Dane meczu prawidlowo odczytane.");
-            int indexOfMatch = matches.isActiveMatch(event.getMessage().getId());
+        ButtonClickListener.event = RangerBot.getMatches();
+        if (ButtonClickListener.event.isActiveMatch(event.getMessage().getId())>=0){
+            int indexOfMatch = ButtonClickListener.event.isActiveMatch(event.getMessage().getId());
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_"+event.getMessage().getId())){
-                matches.signIn(event,indexOfMatch);
+                ButtonClickListener.event.signIn(event,indexOfMatch);
             } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getMessage().getId())){
-                matches.signINReserve(event,indexOfMatch);
+                ButtonClickListener.event.signINReserve(event,indexOfMatch);
             }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getMessage().getId())){
-                matches.signOut(event,indexOfMatch);
+                ButtonClickListener.event.signOut(event,indexOfMatch);
             }
-            matches.updateEmbed(event, indexOfMatch);
+            ButtonClickListener.event.updateEmbed(event, indexOfMatch);
         }
     }
 }

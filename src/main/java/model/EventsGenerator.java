@@ -1,6 +1,7 @@
-package embed;
+package model;
 
 import helpers.RangerLogger;
+import helpers.Validation;
 import model.Event;
 import model.EventsGeneratorModel;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -95,8 +96,7 @@ public class EventsGenerator {
             }
             case 2:
             {
-                Event e = new Event();
-                boolean isDateFormat =  e.isDateFormat(msg,"dd.MM.yyyy");
+                boolean isDateFormat = Validation.isDateFormat(msg);
                 if (isDateFormat){
                     date = msg;
                     stageOfGenerator++;
@@ -110,8 +110,7 @@ public class EventsGenerator {
             }
             case 3:
             {
-                Event e = new Event();
-                boolean isTimeFormat = e.isTimeFormat(msg);
+                boolean isTimeFormat = Validation.isTimeFormat(msg);
                 if (isTimeFormat){
                     time = msg;
                     stageOfGenerator++;
@@ -227,8 +226,7 @@ public class EventsGenerator {
             }
             case 10:
             {
-                Event e = new Event();
-                boolean isDateFormat = e.isDateFormat(msg,"dd.MM.yyyy");
+                boolean isDateFormat = Validation.isDateFormat(msg);
                 if (isDateFormat) date = msg;
                 embedDoYouWantAnyChange(event,false);
                 stageOfGenerator=7;
@@ -236,8 +234,7 @@ public class EventsGenerator {
             }
             case 11:
             {
-                Event e = new Event();
-                boolean isTimeFormat = e.isTimeFormat(msg);
+                boolean isTimeFormat = Validation.isTimeFormat(msg);
                 if (isTimeFormat) time = msg;
                 embedDoYouWantAnyChange(event,false);
                 stageOfGenerator=7;
