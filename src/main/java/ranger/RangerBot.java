@@ -20,7 +20,7 @@ import java.util.Collection;
 
 public class RangerBot {
 
-    private static final String BOT_TOKEN = "ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.PwC4qAmo5uHVxPRUSy_DNmlEz0s";
+    private static final String BOT_TOKEN = "";
     private static Recruits recruits;
     private static Event events;
     private static DiceGames diceGames;

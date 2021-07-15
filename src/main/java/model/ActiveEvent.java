@@ -15,7 +15,7 @@ import ranger.RangerBot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActiveMatch {
+public class ActiveEvent {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String channelID;
@@ -28,7 +28,7 @@ public class ActiveMatch {
      * @param channelID ID kanału na którym jest lista
      * @param messageID ID wiadomości na której jest embed z Lista.
      */
-    public ActiveMatch(String channelID, String messageID) {
+    public ActiveEvent(String channelID, String messageID) {
         this.channelID = channelID;
         this.messageID = messageID;
     }

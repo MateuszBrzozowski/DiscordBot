@@ -3,6 +3,7 @@ package model;
 import database.DBConnector;
 import embed.EmbedInfoEditEventChannel;
 import embed.EmbedRemoveChannel;
+import embed.EmbedWrongDateOrTime;
 import helpers.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -20,14 +21,12 @@ import ranger.RangerBot;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
 public class Event {
 
-    private List<ActiveMatch> activeMatches = new ArrayList<>();
+    private List<ActiveEvent> activeEvents = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     public static final String NAME_LIST = ":white_check_mark: Lista ";
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
@@ -42,13 +41,13 @@ public class Event {
     private void getAllDatabase(JDA jda) {
         downladMatchesDB(jda);
         downloadPlayersInMatechesDB();
-        rangerLogger.info(String.format("Aktywnych eventów [%d]",activeMatches.size()));
+//        rangerLogger.info(String.format("Aktywnych eventów [%d]", activeEvents.size()));
     }
 
     private void downladMatchesDB(JDA jda) {
         ResultSet resultSet = getAllMatches();
-        List<ActiveMatch> matchesToDeleteDB = new ArrayList<>();
-        this.activeMatches.clear();
+        List<ActiveEvent> matchesToDeleteDB = new ArrayList<>();
+        this.activeEvents.clear();
         List<TextChannel> textChannels = jda.getTextChannels();
 
         if (resultSet!=null){
@@ -58,7 +57,7 @@ public class Event {
                     else {
                         String channelID = resultSet.getString("channelID");
                         String messageID = resultSet.getString("msgID");
-                        ActiveMatch match = new ActiveMatch(channelID,messageID);
+                        ActiveEvent match = new ActiveEvent(channelID,messageID);
                         boolean isActive = false;
                         for (TextChannel tc : textChannels){
                             if (tc.getId().equalsIgnoreCase(channelID)){
@@ -67,7 +66,7 @@ public class Event {
                             }
                         }
                         if (isActive){
-                            activeMatches.add(match);
+                            activeEvents.add(match);
                         }else {
                             matchesToDeleteDB.add(match);
                         }
@@ -77,7 +76,7 @@ public class Event {
                 }
             }
         }
-        for (ActiveMatch a : matchesToDeleteDB){
+        for (ActiveEvent a : matchesToDeleteDB){
             removeMemberFromEventDB(a.getMessageID());
             removeMatchDB(a.getMessageID());
         }
@@ -124,7 +123,7 @@ public class Event {
                         Boolean mainList = resultSet.getBoolean("mainList");
                         String event = resultSet.getString("event");
                         MemberMy memberMy = new MemberMy(userID,userName);
-                        for (ActiveMatch m : activeMatches){
+                        for (ActiveEvent m : activeEvents){
                             if (m.getMessageID().equalsIgnoreCase(event)){
                                 if (mainList){
                                     m.addToMainList(memberMy);
@@ -163,58 +162,73 @@ public class Event {
     }
 
     public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
-        createEventChannel(event,message[1],message[2],message[3],null,3);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])){
+            createEventChannel(event,message[1],message[2],message[3],null,3);
+        }
+        else {
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
+        }
     }
 
     public void createNewEventFrom3Data(String[] message, PrivateMessageReceivedEvent event) {
-        createEventChannel(event,message[1],message[2],message[3],null,3);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            createEventChannel(event, message[1], message[2], message[3], null, 3);
+        }
+        else {
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
+        }
     }
 
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
-        if (message[4].equalsIgnoreCase("-ac")){
-            createEventChannel(event,message[1],message[2],message[3],null,1);
-        }
-        else if (message[4].equalsIgnoreCase("-r")){
-            createEventChannel(event,message[1],message[2],message[3],null,2);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            if (message[4].equalsIgnoreCase("-ac")) {
+                createEventChannel(event, message[1], message[2], message[3], null, 1);
+            } else if (message[4].equalsIgnoreCase("-r")) {
+                createEventChannel(event, message[1], message[2], message[3], null, 2);
+            }
         }
         else {
-            createEventChannel(event,message[1],message[2],message[3],null,3);
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
         }
     }
 
     public void createNewEventFrom4Data(String[] message, PrivateMessageReceivedEvent event) {
-        if (message[4].equalsIgnoreCase("-ac")){
-            createEventChannel(event,message[1],message[2],message[3],null,1);
-        }
-        else if (message[4].equalsIgnoreCase("-r")){
-            createEventChannel(event,message[1],message[2],message[3],null,2);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            if (message[4].equalsIgnoreCase("-ac")) {
+                createEventChannel(event, message[1], message[2], message[3], null, 1);
+            } else if (message[4].equalsIgnoreCase("-r")) {
+                createEventChannel(event, message[1], message[2], message[3], null, 2);
+            }
         }
         else {
-            createEventChannel(event,message[1],message[2],message[3],null,3);
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
         }
     }
 
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
-        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
-        createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,3);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+            createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 3);
+        }
+        else {
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
+        }
     }
 
     public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
-
-        if (message[4].equalsIgnoreCase("-ac")){
-            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
-            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
-            createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,1);
-        }
-        else if (message[4].equalsIgnoreCase("-r")){
-            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID),permissions,null).queue();
-            createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,2);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            if (message[4].equalsIgnoreCase("-ac")) {
+                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 1);
+            } else if (message[4].equalsIgnoreCase("-r")) {
+                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 2);
+            }
         }
         else {
-            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permissions,null).queue();
-            createList(getUserNameFromEvent(event),event.getChannel(),message[1],message[2],message[3],null,3);
+            new EmbedWrongDateOrTime(event.getAuthor().getId());
         }
-
     }
 
     public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
@@ -419,9 +433,9 @@ public class Event {
                         message.editMessage(mOld).setActionRow(Button.primary("in_"+  msgID, "Zapisz"),
                                 Button.secondary("reserve_"+msgID, "Niepewny"),
                                 Button.danger("out_"+msgID, "Wypisz")).queue();
-                        ActiveMatch match = new ActiveMatch(textChannel.getId(),msgID);
-                        activeMatches.add(match);
-                        addEventDB(match);
+                        ActiveEvent event = new ActiveEvent(textChannel.getId(),msgID);
+                        activeEvents.add(event);
+                        addEventDB(event);
                     });
         }catch (IllegalArgumentException e){
             rangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
@@ -558,7 +572,7 @@ public class Event {
 
     }
 
-    private void addEventDB(ActiveMatch match) {
+    private void addEventDB(ActiveEvent match) {
         String query = "INSERT INTO `event` (`channelID`,`msgID`) VALUES (\"%s\",\"%s\")";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(query,match.getChannelID(),match.getMessageID()));
@@ -571,16 +585,16 @@ public class Event {
             MessageEmbed mOld = embeds.get(0);
             List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
             List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-            String mainList = activeMatches.get(indexOfMatch).getStringOfMainList();
-            String reserveList = activeMatches.get(indexOfMatch).getStringOfReserveList();
+            String mainList = activeEvents.get(indexOfMatch).getStringOfMainList();
+            String reserveList = activeEvents.get(indexOfMatch).getStringOfReserveList();
 
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i==4){
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST+"("+ activeMatches.get(indexOfMatch).getMainList().size()+")",">>> "+mainList,true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST+"("+ activeEvents.get(indexOfMatch).getMainList().size()+")",">>> "+mainList,true);
                     fieldsNew.add(fieldNew);
                 }
                 else if (i==6){
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST_RESERVE + "(" + activeMatches.get(indexOfMatch).getReserveList().size() + ")", ">>> "+reserveList, true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST_RESERVE + "(" + activeEvents.get(indexOfMatch).getReserveList().size() + ")", ">>> "+reserveList, true);
                     fieldsNew.add(fieldNew);
                 }else {
                     fieldsNew.add(fieldsOld.get(i));
@@ -588,7 +602,7 @@ public class Event {
             }
 
             int color;
-            if (activeMatches.get(indexOfMatch).getMainList().size()>=9){
+            if (activeEvents.get(indexOfMatch).getMainList().size()>=9){
                 color = Color.GREEN.getRGB();
             }else {
                 color = Color.YELLOW.getRGB();
@@ -613,8 +627,8 @@ public class Event {
     }
 
     public int isActiveMatch(String messageID){
-        for (int i = 0; i < activeMatches.size(); i++) {
-            if (messageID.equalsIgnoreCase(activeMatches.get(i).getMessageID())){
+        for (int i = 0; i < activeEvents.size(); i++) {
+            if (messageID.equalsIgnoreCase(activeEvents.get(i).getMessageID())){
                 return i;
             }
         }
@@ -622,8 +636,8 @@ public class Event {
     }
 
     public int isActiveMatchChannelID(String channelID){
-        for (int i = 0; i < activeMatches.size(); i++) {
-            if (channelID.equalsIgnoreCase(activeMatches.get(i).getChannelID())){
+        for (int i = 0; i < activeEvents.size(); i++) {
+            if (channelID.equalsIgnoreCase(activeEvents.get(i).getChannelID())){
                 return i;
             }
         }
@@ -633,18 +647,18 @@ public class Event {
     public void signIn(ButtonClickEvent event, int indexOfActiveMatch) {
         String userName = getUserNameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
-        activeMatches.get(indexOfActiveMatch).addToMainList(userID,userName,event);
+        activeEvents.get(indexOfActiveMatch).addToMainList(userID,userName,event);
     }
 
     public void signINReserve(ButtonClickEvent event, int indexOfActiveMatch) {
         String userName = getUserNameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
-        activeMatches.get(indexOfActiveMatch).addToReserveList(userID,userName,event);
+        activeEvents.get(indexOfActiveMatch).addToReserveList(userID,userName,event);
     }
 
     public void signOut(ButtonClickEvent event, int indexOfMatch) {
         String userID = event.getUser().getId();
-        activeMatches.get(indexOfMatch).removeFromMatch(userID);
+        activeEvents.get(indexOfMatch).removeFromMatch(userID);
     }
 
     public void deleteChannelByID(String channelID) {
@@ -653,16 +667,16 @@ public class Event {
             if (inexOfMatch==-1){
                 break;
             }
-            RemoveEventDB(activeMatches.get(inexOfMatch).getMessageID());
-            activeMatches.remove(inexOfMatch);
+            RemoveEventDB(activeEvents.get(inexOfMatch).getMessageID());
+            activeEvents.remove(inexOfMatch);
         }
     }
 
     public void RemoveEvent(String messageID){
-        for (int i = 0; i < activeMatches.size(); i++) {
-            if (activeMatches.get(i).getMessageID().equalsIgnoreCase(messageID)){
+        for (int i = 0; i < activeEvents.size(); i++) {
+            if (activeEvents.get(i).getMessageID().equalsIgnoreCase(messageID)){
                 RemoveEventDB(messageID);
-                activeMatches.remove(i);
+                activeEvents.remove(i);
                 break;
             }
         }

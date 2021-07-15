@@ -265,7 +265,7 @@ public class WriteListener extends ListenerAdapter {
         Random random = new Random();
         event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
-                privateChannel.sendMessage(msg[random.nextInt(msg.length)]).queue();
+                privateChannel.sendMessage("Niestety, nie rozumiem Ciebie. Jeżeli potrzebujesz pomocy. Wpisz !help").queue();
             });
         });
     }
