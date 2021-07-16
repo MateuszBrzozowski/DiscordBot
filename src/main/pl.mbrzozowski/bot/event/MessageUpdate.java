@@ -1,6 +1,6 @@
-package events;
+package bot.event;
 
-import model.Event;
+import event.Event;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;

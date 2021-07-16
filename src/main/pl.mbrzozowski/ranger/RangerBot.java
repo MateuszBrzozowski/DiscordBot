@@ -1,10 +1,10 @@
 package ranger;
 
-import events.*;
+import bot.event.*;
+import event.Event;
+import event.EventsGeneratorModel;
 import helpers.RangerLogger;
 import model.DiceGames;
-import model.Event;
-import model.EventsGeneratorModel;
 import model.Recruits;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;

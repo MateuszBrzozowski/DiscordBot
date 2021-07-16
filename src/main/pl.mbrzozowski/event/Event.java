@@ -1,10 +1,11 @@
-package model;
+package event;
 
 import database.DBConnector;
 import embed.EmbedInfoEditEventChannel;
 import embed.EmbedRemoveChannel;
 import embed.EmbedWrongDateOrTime;
 import helpers.*;
+import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;

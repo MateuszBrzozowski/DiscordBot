@@ -1,10 +1,8 @@
-package events;
+package bot.event;
 
 import model.Recruits;
-import model.Event;
+import event.Event;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
-import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateNameEvent;
-import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

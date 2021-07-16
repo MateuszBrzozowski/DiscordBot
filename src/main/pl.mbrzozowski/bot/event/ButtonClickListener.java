@@ -1,7 +1,7 @@
-package events;
+package bot.event;
 
 import model.Recruits;
-import model.Event;
+import event.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;

@@ -1,6 +1,6 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import event.Event;
 import helpers.Validation;
 import org.junit.Assert;
 import org.junit.Test;

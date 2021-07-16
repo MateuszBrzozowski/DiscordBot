@@ -1,9 +1,7 @@
-package model;
+package event;
 
 import helpers.RangerLogger;
 import helpers.Validation;
-import model.Event;
-import model.EventsGeneratorModel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.PrivateChannel;

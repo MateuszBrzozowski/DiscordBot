@@ -1,4 +1,4 @@
-package events;
+package bot.event;
 
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;

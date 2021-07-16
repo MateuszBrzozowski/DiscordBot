@@ -1,7 +1,10 @@
-package events;
+package bot.event;
 
 
 import embed.*;
+import event.Event;
+import event.EventsGenerator;
+import event.EventsGeneratorModel;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import helpers.RoleID;

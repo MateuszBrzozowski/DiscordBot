@@ -1,10 +1,11 @@
-package model;
+package event;
 
 import database.DBConnector;
 import embed.EmbedCantSignOut;
 import embed.EmbedCantSignInReserve;
 import embed.EmbedCantSignIn;
 import helpers.RangerLogger;
+import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
