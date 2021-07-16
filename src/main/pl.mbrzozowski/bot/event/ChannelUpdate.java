@@ -1,6 +1,6 @@
 package bot.event;
 
-import model.Recruits;
+import recrut.Recruits;
 import event.Event;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

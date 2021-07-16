@@ -1,16 +1,13 @@
 package embed;
 
-import helpers.RoleID;
-import model.Recruits;
+import recrut.Recruits;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
 
 import java.awt.*;
-import java.util.List;
 
 public class EmbedNegative {
 

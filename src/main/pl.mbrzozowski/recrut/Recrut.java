@@ -1,4 +1,4 @@
-package model;
+package recrut;
 
 public class Recrut {
 

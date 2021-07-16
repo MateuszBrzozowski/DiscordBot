@@ -1,4 +1,4 @@
-package model;
+package recrut;
 
 import database.DBConnector;
 import embed.*;
