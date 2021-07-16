@@ -30,9 +30,8 @@ public class RangerBot {
     private static RangerLogger rangerLogger = new RangerLogger();
 
 
-
     public static void main(String[] args) throws LoginException {
-        
+
         Collection<GatewayIntent> intents = new ArrayList<>();
         intents.add(GatewayIntent.GUILD_MEMBERS);
         intents.add(GatewayIntent.GUILD_MESSAGES);

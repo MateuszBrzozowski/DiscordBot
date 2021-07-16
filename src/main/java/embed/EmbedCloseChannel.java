@@ -18,7 +18,7 @@ public class EmbedCloseChannel {
         event.getGuild().retrieveMemberById(event.getMessage().getAuthor().getId()).queue(member -> {
             List<Role> roles = member.getRoles();
             for (int i = 0; i < roles.size(); i++) {
-                if (roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)){
+                if (roles.get(i).getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setColor(Color.YELLOW);
                     builder.setTitle("Kanał zamknięty");

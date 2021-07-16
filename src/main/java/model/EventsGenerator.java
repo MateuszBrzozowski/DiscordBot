@@ -29,9 +29,8 @@ public class EventsGenerator {
     private String description = null;
     private String perm;
     private int stageOfGenerator = 0;
-    GuildMessageReceivedEvent eventMsgRec=null;
-    PrivateMessageReceivedEvent eventPrivateMsgRec=null;
-
+    GuildMessageReceivedEvent eventMsgRec = null;
+    PrivateMessageReceivedEvent eventPrivateMsgRec = null;
 
 
     public EventsGenerator(@NotNull GuildMessageReceivedEvent event) {
@@ -66,7 +65,7 @@ public class EventsGenerator {
                         "następnie napisz na tym kanale osobiście opis i stwórz listę przy pomocy komendy **!generatorHere**~~ <-Funkcja jeszcze nie działa.");
                 EmbedBuilder getEventName = new EmbedBuilder();
                 getEventName.setColor(Color.YELLOW);
-                getEventName.addField("Podaj nazwę twojego eventu","Maksymalna liczba znaków - 256",false);
+                getEventName.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
                 privateChannel.sendMessage(builder.build()).queue();
                 privateChannel.sendMessage(getEventName.build()).queue();
                 stageOfGenerator++;
@@ -80,176 +79,149 @@ public class EventsGenerator {
 
     public void saveAnswerAndSetNextStage(PrivateMessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
-        switch (stageOfGenerator){
-            case 1:
-            {
-                if (msg.length()<256 && msg.length()>0){
+        switch (stageOfGenerator) {
+            case 1: {
+                if (msg.length() < 256 && msg.length() > 0) {
                     nameEvent = msg;
                     stageOfGenerator++;
                     embedGetDate(event);
-                }
-                else {
+                } else {
                     embedGetNameCorrect(event);
                     embedGetName(event);
                 }
                 break;
             }
-            case 2:
-            {
+            case 2: {
                 boolean isDateFormat = Validation.isDateFormat(msg);
-                if (isDateFormat){
+                if (isDateFormat) {
                     date = msg;
                     stageOfGenerator++;
                     embedGetTime(event);
-                }
-                else {
+                } else {
                     embedDateNotCorrect(event);
                     embedGetDate(event);
                 }
                 break;
             }
-            case 3:
-            {
+            case 3: {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                if (isTimeFormat){
+                if (isTimeFormat) {
                     time = msg;
                     stageOfGenerator++;
                     embedIsDescription(event);
-                }
-                else {
+                } else {
                     embedTimeNotCorrect(event);
                     embedGetTime(event);
                 }
                 break;
             }
-            case 4:
-            {
-                if (msg.equalsIgnoreCase("T")){
+            case 4: {
+                if (msg.equalsIgnoreCase("T")) {
                     embedGetDescription(event);
                     stageOfGenerator++;
-                }
-                else if (msg.equalsIgnoreCase("N")){
+                } else if (msg.equalsIgnoreCase("N")) {
                     embedWhoPing(event);
-                    stageOfGenerator+=2;
-                }
-                else {
+                    stageOfGenerator += 2;
+                } else {
                     embedIsDescriptionNotCorrect(event);
                     embedIsDescription(event);
                 }
                 break;
             }
-            case 5:
-            {
-                if (msg.length()<2048){
+            case 5: {
+                if (msg.length() < 2048) {
                     description = msg;
                     stageOfGenerator++;
                     embedWhoPing(event);
-                }
-                else {
+                } else {
                     embedDescriptionLong(event);
                 }
 
                 break;
             }
-            case 6:
-            {
-                if (msg.length()<=2){
-                    if (msg.equalsIgnoreCase("c") || msg.equalsIgnoreCase("ac") || msg.equalsIgnoreCase("r")){
+            case 6: {
+                if (msg.length() <= 2) {
+                    if (msg.equalsIgnoreCase("c") || msg.equalsIgnoreCase("ac") || msg.equalsIgnoreCase("r")) {
                         perm = msg;
-                        embedDoYouWantAnyChange(event,true);
+                        embedDoYouWantAnyChange(event, true);
                         stageOfGenerator++;
-                    }
-                    else {
+                    } else {
                         embedWhoPingNotCorrect(event);
                         embedWhoPing(event);
                     }
-                }
-                else {
+                } else {
                     embedWhoPingNotCorrect(event);
                     embedWhoPing(event);
                 }
                 break;
             }
-            case 7:
-            {
-                if (msg.equalsIgnoreCase("n")){
+            case 7: {
+                if (msg.equalsIgnoreCase("n")) {
                     //zmiana nazwy
                     embedGetName(event);
-                    stageOfGenerator=8;
-                }
-                else if (msg.equalsIgnoreCase("d")){
+                    stageOfGenerator = 8;
+                } else if (msg.equalsIgnoreCase("d")) {
                     //zmiana daty
                     embedGetDate(event);
-                    stageOfGenerator=10;
-                }
-                else if (msg.equalsIgnoreCase("t")){
+                    stageOfGenerator = 10;
+                } else if (msg.equalsIgnoreCase("t")) {
                     //zmiana czasu eventu
                     embedGetTime(event);
-                    stageOfGenerator=11;
-                }
-                else if (msg.equalsIgnoreCase("o")){
+                    stageOfGenerator = 11;
+                } else if (msg.equalsIgnoreCase("o")) {
                     //zmiana opisu eventu zawartego na liście.
                     embedGetDescription(event);
-                    stageOfGenerator=9;
-                }
-                else if (msg.equalsIgnoreCase("p")){
+                    stageOfGenerator = 9;
+                } else if (msg.equalsIgnoreCase("p")) {
                     embedWhoPing(event);
-                    stageOfGenerator=12;
-                }
-                else if (msg.equalsIgnoreCase("show")){
-                    embedDoYouWantAnyChange(event,true);
-                }
-                else if (msg.equalsIgnoreCase("end")){
+                    stageOfGenerator = 12;
+                } else if (msg.equalsIgnoreCase("show")) {
+                    embedDoYouWantAnyChange(event, true);
+                } else if (msg.equalsIgnoreCase("end")) {
                     end(event);
-                }
-                else {
+                } else {
                     embedWhoPingNotCorrect(event);
-                    embedDoYouWantAnyChange(event,false);
+                    embedDoYouWantAnyChange(event, false);
                 }
                 break;
             }
-            case 8:
-            {
-                if (msg.length()<256 && msg.length()>0) nameEvent = msg;
+            case 8: {
+                if (msg.length() < 256 && msg.length() > 0) nameEvent = msg;
                 else embedGetNameCorrect(event);
-                embedDoYouWantAnyChange(event,false);
-                stageOfGenerator=7;
+                embedDoYouWantAnyChange(event, false);
+                stageOfGenerator = 7;
                 break;
             }
-            case 9:
-            {
+            case 9: {
                 description = msg;
                 embedDescriptionLong(event);
-                embedDoYouWantAnyChange(event,false);
-                stageOfGenerator=7;
+                embedDoYouWantAnyChange(event, false);
+                stageOfGenerator = 7;
                 break;
             }
-            case 10:
-            {
+            case 10: {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 if (isDateFormat) date = msg;
-                embedDoYouWantAnyChange(event,false);
-                stageOfGenerator=7;
+                embedDoYouWantAnyChange(event, false);
+                stageOfGenerator = 7;
                 break;
             }
-            case 11:
-            {
+            case 11: {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 if (isTimeFormat) time = msg;
-                embedDoYouWantAnyChange(event,false);
-                stageOfGenerator=7;
+                embedDoYouWantAnyChange(event, false);
+                stageOfGenerator = 7;
                 break;
             }
-            case 12:
-            {
+            case 12: {
                 boolean b = msg.equalsIgnoreCase("c");
                 boolean b1 = msg.equalsIgnoreCase("ac");
                 boolean b2 = msg.equalsIgnoreCase("r");
-                if (b || b1 ||b2 ) {
+                if (b || b1 || b2) {
                     perm = msg;
                 }
-                embedDoYouWantAnyChange(event,false);
-                stageOfGenerator=7;
+                embedDoYouWantAnyChange(event, false);
+                stageOfGenerator = 7;
                 break;
             }
             default:
@@ -261,71 +233,69 @@ public class EventsGenerator {
         Event e = RangerBot.getMatches();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
-        if (eventMsgRec==null) e.createNewEventFromSpecificData(cmdTable,eventPrivateMsgRec);
-        else e.createNewEventFromSpecificData(cmdTable,eventMsgRec);
+        if (eventMsgRec == null) e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec);
+        else e.createNewEventFromSpecificData(cmdTable, eventMsgRec);
         embedFinish(event);
         EventsGeneratorModel model = RangerBot.getEventsGeneratorModel();
         int index = model.userHaveActiveGenerator(event.getAuthor().getId());
-        if (index>=0){
+        if (index >= 0) {
             model.removeGenerator(index);
         }
     }
 
-    private void embedDoYouWantAnyChange(PrivateMessageReceivedEvent event,boolean showList) {
+    private void embedDoYouWantAnyChange(PrivateMessageReceivedEvent event, boolean showList) {
         event.getJDA().retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
-                if (showList) embedListExample(event,privateChannel);
+                if (showList) embedListExample(event, privateChannel);
 
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.GREEN);
                 builder.setTitle("Generwoanie listy zakończone.");
-                builder.addField("Czy chcesz wprowadzić jakieś zmiany?","N - nazwa eventu\n" +
+                builder.addField("Czy chcesz wprowadzić jakieś zmiany?", "N - nazwa eventu\n" +
                         "D - data eventu\n" +
                         "T - czas eventu\n" +
                         "O - opis eventu zawarty na liście\n" +
                         "P - Do kogo kierowana jest lista\n\n" +
                         "SHOW - zobacz jak bedzie wygladac lista\n" +
                         "END - kończy generowanie listy.\n" +
-                        "!CANCEL - anuluje generowanie listy",false);
+                        "!CANCEL - anuluje generowanie listy", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
     }
 
     private void embedListExample(PrivateMessageReceivedEvent event, PrivateChannel privateChannel) {
-        if (description!=null) {
-            if (description.length()>2040) privateChannel.sendMessage(description).queue();
+        if (description != null) {
+            if (description.length() > 2040) privateChannel.sendMessage(description).queue();
         }
-        if (perm.equalsIgnoreCase("ac")){
+        if (perm.equalsIgnoreCase("ac")) {
             privateChannel.sendMessage("CLAN_MEMBER RECRUT Zapisy!").queue();
-        }
-        else if(perm.equalsIgnoreCase("r")){
+        } else if (perm.equalsIgnoreCase("r")) {
             privateChannel.sendMessage("RECRUT Zapisy!").queue();
-        }
-        else if (perm.equalsIgnoreCase("c")){
+        } else if (perm.equalsIgnoreCase("c")) {
             privateChannel.sendMessage("CLAN_MEMBER Zapisy!").queue();
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         builder.setTitle(nameEvent);
-        if (description!=null){
-            builder.setDescription(description+"\n");
+        if (description != null) {
+            builder.setDescription(description + "\n");
         }
         builder.addField(":date: Kiedy", date, true);
         builder.addBlankField(true);
         builder.addField(":clock930: Godzina", time, true);
         builder.addBlankField(false);
-        builder.addField(Event.NAME_LIST+"(0)", ">>> -", true);
+        builder.addField(Event.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
-        builder.addField(Event.NAME_LIST_RESERVE+"(0)", ">>> -", true);
+        builder.addField(Event.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         privateChannel.sendMessage(builder.build()).queue();
     }
 
     private String createCommand() {
         String command = "";
         if (here) command = "!zapisyhere ";
-        else  command = "!zapisy ";
+        else command = "!zapisy ";
         return command + "-name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
     }
 
@@ -335,7 +305,7 @@ public class EventsGenerator {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.GREEN);
                 builder.setTitle("GENEROWANIE LISTY ZAKOŃCZONE.");
-                builder.addField("","Sprawdź kanały na discordzie. Twój kanał i lista powinny być teraz widoczne.",false);
+                builder.addField("", "Sprawdź kanały na discordzie. Twój kanał i lista powinny być teraz widoczne.", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -346,7 +316,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Twoja odpowiedź jest niepoprawna","",false);
+                builder.addField("Twoja odpowiedź jest niepoprawna", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -357,8 +327,8 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("UWAGA - Długi opis!","Twój opis jest za długi żebym mógł go umieścić " +
-                        "bezpośrednio na liście. Maksymalna liczba znaków - 2048",false);
+                builder.addField("UWAGA - Długi opis!", "Twój opis jest za długi żebym mógł go umieścić " +
+                        "bezpośrednio na liście. Maksymalna liczba znaków - 2048", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -369,7 +339,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Do kogo kierowane są zapisy.","c - Clan Member\nac - Clan Member + Rekrut\nr - Rekrut",false);
+                builder.addField("Do kogo kierowane są zapisy.", "c - Clan Member\nac - Clan Member + Rekrut\nr - Rekrut", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -380,7 +350,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Podaj opis, który umieszczę na liście.","Maksymalna liczba znaków - 2048",false);
+                builder.addField("Podaj opis, który umieszczę na liście.", "Maksymalna liczba znaków - 2048", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -391,7 +361,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowa odpowiedź","",false);
+                builder.addField("Nieprawidłowa odpowiedź", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -402,7 +372,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Czy chcesz dodać opis na listę twojego eventu?","T - TAK\nN - NIE",false);
+                builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "T - TAK\nN - NIE", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -413,7 +383,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowy format czasu eventu","",false);
+                builder.addField("Nieprawidłowy format czasu eventu", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -424,7 +394,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Podaj czas rozpoczęcia twojego eventu","Format: hh:mm",false);
+                builder.addField("Podaj czas rozpoczęcia twojego eventu", "Format: hh:mm", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -435,7 +405,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowy format daty eventu","",false);
+                builder.addField("Nieprawidłowy format daty eventu", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -446,7 +416,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Podaj datę twojego eventu","Format: dd.MM.yyyy",false);
+                builder.addField("Podaj datę twojego eventu", "Format: dd.MM.yyyy", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -457,9 +427,9 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowa nazwa eventu","",false);
+                builder.addField("Nieprawidłowa nazwa eventu", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
-                });
+            });
         });
     }
 
@@ -468,7 +438,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.YELLOW);
-                builder.addField("Podaj nazwę twojego eventu","Maksymalna liczba znaków - 256",false);
+                builder.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });

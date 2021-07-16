@@ -18,15 +18,15 @@ public class EmbedPositive {
 
     public EmbedPositive(GuildMessageReceivedEvent event) {
         Recruits recruits = RangerBot.getRecruits();
-        if (recruits.isRecruitChannel(event.getChannel().getId())){
+        if (recruits.isRecruitChannel(event.getChannel().getId())) {
             EmbedBuilder builder = new EmbedBuilder();
-            event.getChannel().sendMessage("Gratulacje <@"+ recruits.getRecruitIDFromChannelID(event) +">").queue();
+            event.getChannel().sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(event) + ">").queue();
             builder.setColor(Color.GREEN);
             builder.setTitle("WYNIK REKRUTACJI - POZYTYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
             event.getChannel().sendMessage(builder.build()).queue();
-            logger.info("Uzytkownik {} wysłał pozytywny wynik rekrutacji",event.getMember().getNickname());
+            logger.info("Uzytkownik {} wysłał pozytywny wynik rekrutacji", event.getMember().getNickname());
         }
     }
 }

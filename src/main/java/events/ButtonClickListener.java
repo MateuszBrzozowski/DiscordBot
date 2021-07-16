@@ -21,15 +21,15 @@ public class ButtonClickListener extends ListenerAdapter {
             recrut.newPodanie(event);
         }
         ButtonClickListener.event = RangerBot.getMatches();
-        if (ButtonClickListener.event.isActiveMatch(event.getMessage().getId())>=0){
+        if (ButtonClickListener.event.isActiveMatch(event.getMessage().getId()) >= 0) {
             int indexOfMatch = ButtonClickListener.event.isActiveMatch(event.getMessage().getId());
             event.deferEdit().queue();
-            if (event.getComponentId().equalsIgnoreCase("in_"+event.getMessage().getId())){
-                ButtonClickListener.event.signIn(event,indexOfMatch);
-            } else if (event.getComponentId().equalsIgnoreCase("reserve_"+event.getMessage().getId())){
-                ButtonClickListener.event.signINReserve(event,indexOfMatch);
-            }else if (event.getComponentId().equalsIgnoreCase("out_"+event.getMessage().getId())){
-                ButtonClickListener.event.signOut(event,indexOfMatch);
+            if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
+                ButtonClickListener.event.signIn(event, indexOfMatch);
+            } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
+                ButtonClickListener.event.signINReserve(event, indexOfMatch);
+            } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
+                ButtonClickListener.event.signOut(event, indexOfMatch);
             }
             ButtonClickListener.event.updateEmbed(event, indexOfMatch);
         }

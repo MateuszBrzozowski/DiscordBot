@@ -14,7 +14,7 @@ public class EmbedCantSignInReserve {
                 builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                 builder.setTitle("Jesteś już na liście rezerwowej");
                 builder.setDescription("Jesteś już na rezerwowej liście w meczu na który próbowałeś się zapisać.");
-                builder.addField("","Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
+                builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });

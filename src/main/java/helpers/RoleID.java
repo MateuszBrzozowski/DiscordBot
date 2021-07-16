@@ -11,7 +11,7 @@ import java.util.List;
 public class RoleID {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    public static final String RADA_KLANU ="773233884145647666";
+    public static final String RADA_KLANU = "773233884145647666";
     public static final String CLAN_MEMBER_ID = "311978154291888141";
     public static final String RECRUT_ID = "410808008331886592";
     public static final String DRILL_INSTRUCTOR_ID = "534737692911468554";
@@ -20,8 +20,8 @@ public class RoleID {
     public static final String PEC_ID = "748800075806932993";
     public static final String RN_ID = "748800245575712910";
 
-    public static boolean isRoleMessageRecived(List<Role> roles, String rola){
-        for (Role r: roles){
+    public static boolean isRoleMessageRecived(List<Role> roles, String rola) {
+        for (Role r : roles) {
             if (r.getId().equalsIgnoreCase(rola)) {
                 return true;
             }
@@ -31,7 +31,7 @@ public class RoleID {
 
     public static boolean isRoleButtonClick(ButtonClickEvent event, String rola) {
         List<Role> roles = event.getMember().getRoles();
-        for (Role r: roles){
+        for (Role r : roles) {
             if (r.getId().equalsIgnoreCase(rola)) {
                 return true;
             }
@@ -40,9 +40,9 @@ public class RoleID {
     }
 
     public static boolean isRoleAnotherClanButtonClick(ButtonClickEvent event) {
-        String[] clans = {HSR_ID,PC_ID,PEC_ID,RN_ID};
+        String[] clans = {HSR_ID, PC_ID, PEC_ID, RN_ID};
         for (int i = 0; i < clans.length; i++) {
-            if (isRoleButtonClick(event,clans[i])){
+            if (isRoleButtonClick(event, clans[i])) {
                 return true;
             }
         }

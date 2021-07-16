@@ -22,10 +22,10 @@ public class ChannelUpdate extends ListenerAdapter {
         recruits = RangerBot.getRecruits();
         match = RangerBot.getMatches();
         String channelID = event.getChannel().getId();
-        if (recruits.isRecruitChannel(channelID)){
+        if (recruits.isRecruitChannel(channelID)) {
             recruits.deleteChannelByID(channelID);
-        }else{
-            if (match.isActiveMatchChannelID(channelID)>=0){
+        } else {
+            if (match.isActiveMatchChannelID(channelID) >= 0) {
                 match.deleteChannelByID(channelID);
             }
         }

@@ -18,7 +18,7 @@ public class EmbedYouAreClanMember {
                 builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                 builder.setDescription("Jesteś już w naszym klanie dzbanie!");
                 privateChannel.sendMessage(builder.build()).queue();
-                rangerLogger.info("Użytkonik ["+user.getName()+"] chciał złożyć podanie. Jest już w naszym klanie.");
+                rangerLogger.info("Użytkonik [" + user.getName() + "] chciał złożyć podanie. Jest już w naszym klanie.");
             });
         });
     }

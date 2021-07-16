@@ -11,18 +11,18 @@ import java.util.List;
 public class EventsGeneratorModel {
     private List<EventsGenerator> eventsGenerators = new ArrayList<>();
 
-    public void addEventsGenerator(EventsGenerator eGM){
+    public void addEventsGenerator(EventsGenerator eGM) {
         eventsGenerators.add(eGM);
     }
 
-    public int getSizeEventsGenerator(){
+    public int getSizeEventsGenerator() {
         return eventsGenerators.size();
     }
 
     public int userHaveActiveGenerator(String authorID) {
-        if (!eventsGenerators.isEmpty()){
-            for (int i=0; i<eventsGenerators.size() ; i++) {
-                if (eventsGenerators.get(i).getUserID().equalsIgnoreCase(authorID)){
+        if (!eventsGenerators.isEmpty()) {
+            for (int i = 0; i < eventsGenerators.size(); i++) {
+                if (eventsGenerators.get(i).getUserID().equalsIgnoreCase(authorID)) {
                     return i;
                 }
             }

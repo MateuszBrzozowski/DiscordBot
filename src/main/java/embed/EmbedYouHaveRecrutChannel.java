@@ -23,7 +23,7 @@ public class EmbedYouHaveRecrutChannel {
                 builder.addField("2.Nie widze kanału.", "Jeżeli nie widzisz kanału przypisanego do twojej rekrutacji " +
                         "skontaktuj się z Drill Instrutor. Znajdziesz ich po prawej stronie na liście użytkowników.", false);
                 privateChannel.sendMessage(builder.build()).queue();
-                rangerLogger.info("Użytkonik ["+user.getName()+"] chciał złożyć podanie. Ma otwarty kanał rekrutacji.");
+                rangerLogger.info("Użytkonik [" + user.getName() + "] chciał złożyć podanie. Ma otwarty kanał rekrutacji.");
             });
         });
     }

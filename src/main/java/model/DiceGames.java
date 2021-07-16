@@ -13,7 +13,7 @@ public class DiceGames {
     }
 
     public boolean isActiveGameOnChannelID(String id) {
-        for (DiceGame dg : diceGames){
+        for (DiceGame dg : diceGames) {
             if (dg.getChannelID().equalsIgnoreCase(id)) return true;
         }
         return false;

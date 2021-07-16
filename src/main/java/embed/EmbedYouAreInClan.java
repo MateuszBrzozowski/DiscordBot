@@ -21,7 +21,7 @@ public class EmbedYouAreInClan {
                 builder.addField("- Nie należę do żadnego klanu", "Proszę znajdź użytkownika z rolą Rada klanu na naszym discordzie i " +
                         "napisz do nas.", false);
                 privateChannel.sendMessage(builder.build()).queue();
-                rangerLogger.info("Użytkonik ["+user.getName()+"] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
+                rangerLogger.info("Użytkonik [" + user.getName() + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
             });
         });
     }

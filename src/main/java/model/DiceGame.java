@@ -20,33 +20,32 @@ public class DiceGame {
     }
 
     private void embedInviteToGame(GuildMessageReceivedEvent event) {
-        player1Name= getUserNameFromEvent(event);
+        player1Name = getUserNameFromEvent(event);
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail("https://www.iconsdb.com/icons/download/white/dice-64.png");
         builder.setTitle(player1Name + " zapraszą do gry w kostkę! Aby zagrać wpisz na tym kanale dowolną wiadomość.");
-        if (gameName!=null){
-            builder.addField("Temat gry:", gameName,false);
+        if (gameName != null) {
+            builder.addField("Temat gry:", gameName, false);
         }
         event.getChannel().sendMessage(builder.build()).queue();
     }
 
     private String getUserNameFromEvent(GuildMessageReceivedEvent event) {
         String userName = event.getMessage().getMember().getNickname();
-        if (userName==null){
+        if (userName == null) {
             userName = event.getMessage().getAuthor().getName();
         }
         return userName;
     }
 
     private String getNameFromTable(String[] gameName) {
-        if (gameName[1].equalsIgnoreCase("null")){
+        if (gameName[1].equalsIgnoreCase("null")) {
             return null;
-        }
-        else {
+        } else {
             String name = "";
             for (int i = 1; i < gameName.length; i++) {
-                name+=gameName[i] + " ";
+                name += gameName[i] + " ";
             }
             return name;
         }
@@ -58,15 +57,14 @@ public class DiceGame {
 
     public void play(GuildMessageReceivedEvent event) {
         player2Name = getUserNameFromEvent(event);
-        while (true){
+        while (true) {
             int player1 = losujLiczbę();
             int player2 = losujLiczbę();
-            if (player1>player2){
-                showResult(player1Name,player1,player2Name,player2,event);
+            if (player1 > player2) {
+                showResult(player1Name, player1, player2Name, player2, event);
                 break;
-            }
-            else if (player2>player1){
-                showResult(player2Name,player2,player1Name,player1, event);
+            } else if (player2 > player1) {
+                showResult(player2Name, player2, player1Name, player1, event);
                 break;
             }
         }
@@ -76,15 +74,15 @@ public class DiceGame {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail("https://www.iconsdb.com/icons/download/white/dice-64.png");
-        if (gameName!=null) builder.setTitle(gameName);
-        builder.addField(playerWinName + " wygrał z " + playerLoseName,playerWinName + " : " + winInt +"\n" +
-                playerLoseName + " : " + loseInt,false);
+        if (gameName != null) builder.setTitle(gameName);
+        builder.addField(playerWinName + " wygrał z " + playerLoseName, playerWinName + " : " + winInt + "\n" +
+                playerLoseName + " : " + loseInt, false);
         event.getChannel().sendMessage(builder.build()).queue();
     }
 
     private int losujLiczbę() {
         Random random = new Random();
-        int liczba = random.nextInt(6)+1;
+        int liczba = random.nextInt(6) + 1;
         return liczba;
     }
 }

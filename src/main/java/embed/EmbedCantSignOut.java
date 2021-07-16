@@ -17,7 +17,7 @@ public class EmbedCantSignOut {
                 builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                 builder.setTitle("Nie możesz wypisać się z tego meczu.");
                 builder.setDescription("Nie możesz wypisać się z meczu na który się nie zapisałeś!");
-                builder.addField("","Jeżeli jednak jesteś na liście a nadal otrzymujesz tą wiadomość. Napisz do administracji.", false);
+                builder.addField("", "Jeżeli jednak jesteś na liście a nadal otrzymujesz tą wiadomość. Napisz do administracji.", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });

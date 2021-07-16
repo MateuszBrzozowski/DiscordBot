@@ -29,28 +29,24 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
-        boolean radKlan = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(),RoleID.RADA_KLANU);
-        boolean clanMember = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(),RoleID.CLAN_MEMBER_ID);
+        boolean radKlan = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.RADA_KLANU);
+        boolean clanMember = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.CLAN_MEMBER_ID);
         Event matches = RangerBot.getMatches();
         Recruits recruits = RangerBot.getRecruits();
 
-        if (clanMember){
+        if (clanMember) {
             if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
                 event.getMessage().delete().submit();
                 if (radKlan) new Recruiter(event);
-            }
-            else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)){
+            } else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)) {
                 new EmbedNoWriteOnLoggerChannel(event);
-            }
-            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) new EmbedNegative(event);
-            }
-            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) new EmbedPositive(event);
-            }
-            else if (message.length==1 && message[0].equalsIgnoreCase(Commands.GENERATOR)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR)) {
                 event.getMessage().delete().submit();
                 EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
                 String authorID = event.getAuthor().getId();
@@ -67,8 +63,7 @@ public class WriteListener extends ListenerAdapter {
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 }
 
-            }
-            else if (message.length==1 && message[0].equalsIgnoreCase(Commands.GENERATOR_HERE)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR_HERE)) {
                 event.getMessage().delete().submit();
                 EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
                 String authorID = event.getAuthor().getId();
@@ -86,86 +81,72 @@ public class WriteListener extends ListenerAdapter {
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 }
 
-            }
-            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)){
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
                 event.getMessage().delete().submit();
                 String userID = event.getMessage().getAuthor().getId();
                 matches.createNewChannel(event, userID);
-            }
-            else if (message.length > 1 && message.length <100 && message[0].equalsIgnoreCase(Commands.NAME)){
-                if (matches.checkChannelIsInEventCategory(event)){
+            } else if (message.length > 1 && message.length < 100 && message[0].equalsIgnoreCase(Commands.NAME)) {
+                if (matches.checkChannelIsInEventCategory(event)) {
                     String name = getNameFromUser(message);
                     event.getMessage().delete().submit();
                     event.getChannel().getManager().setName(name).queue();
                 }
-            }
-            else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+            } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
                 event.getMessage().delete().submit();
                 matches.createNewEventFrom3Data(message, event);
-            }
-            else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+            } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
                 event.getMessage().delete().submit();
                 matches.createNewEventFrom4Data(message, event);
-            }
-            else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
+            } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
                 event.getMessage().delete().submit();
                 matches.createNewEventFrom3DataHere(message, event);
-            }
-            else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
+            } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
                 event.getMessage().delete().submit();
                 matches.createNewEventFrom4DataHere(message, event);
-            }
-            else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
+            } else if (message.length >= 7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
                 event.getMessage().delete().submit();
-                matches.createNewEventFromSpecificData(message,event);
-            }
-            else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)){
+                matches.createNewEventFromSpecificData(message, event);
+            } else if (message.length >= 7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
                 event.getMessage().delete().submit();
-                matches.createNewEventFromSpecificData(message,event);
-            }
-            else if (message.length==1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
+                matches.createNewEventFromSpecificData(message, event);
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.closeChannel(event);
-            }
-            else if (message.length==1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.reOpenChannel(event);
-            }
-            else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
                 event.getMessage().delete().submit();
                 new EmbedHelp(event.getMessage().getAuthor().getId());
-            }
-            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
                 event.getMessage().delete().submit();
                 if (radKlan) {
                     logger.info("Usuwanie kanału.");
                     String channelID = event.getChannel().getId();
-                    if (recruits.isRecruitChannel(channelID)){
+                    if (recruits.isRecruitChannel(channelID)) {
                         recruits.deleteChannel(event);
-                    }else if (matches.isActiveMatchChannelID(channelID)>=0){
+                    } else if (matches.isActiveMatchChannelID(channelID) >= 0) {
                         matches.deleteChannel(event);
                     }
                 }
             }
         }
 
-        if (message.length == 1 && message[0].equalsIgnoreCase(Commands.DICE)){
+        if (message.length == 1 && message[0].equalsIgnoreCase(Commands.DICE)) {
             event.getMessage().delete().submit();
             new EmbedDice(event);
-        }
-        else if (message.length >1 && message[0].equalsIgnoreCase(Commands.DICE)){
+        } else if (message.length > 1 && message[0].equalsIgnoreCase(Commands.DICE)) {
             event.getMessage().delete().submit();
             DiceGame diceGame = new DiceGame(message, event);
             DiceGames diceGames = RangerBot.getDiceGames();
             diceGames.addGame(diceGame);
-        }
-        else {
+        } else {
             //wpisane cokolwiek przez kogokowliek
             //sprawdzic czy jest aktywna gra na tym kanale
             //jak tak to ją dokonczyć z informacją
             DiceGames diceGames = RangerBot.getDiceGames();
-            if (!event.getAuthor().isBot()){
-                if (diceGames.isActiveGameOnChannelID(event.getChannel().getId())){
+            if (!event.getAuthor().isBot()) {
+                if (diceGames.isActiveGameOnChannelID(event.getChannel().getId())) {
                     event.getMessage().delete().submit();
                     diceGames.play(event);
                 }
@@ -176,7 +157,7 @@ public class WriteListener extends ListenerAdapter {
     private String getNameFromUser(String[] message) {
         String result = "";
         for (int i = 1; i < message.length; i++) {
-            result+=message[i]+ " ";
+            result += message[i] + " ";
         }
         return result;
     }
@@ -192,13 +173,12 @@ public class WriteListener extends ListenerAdapter {
         EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
         int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
 
-        if (event.getMessage().getContentDisplay().equalsIgnoreCase(Commands.GENERATOR)){
+        if (event.getMessage().getContentDisplay().equalsIgnoreCase(Commands.GENERATOR)) {
             String authorID = event.getAuthor().getId();
-            if (eventsGeneratorModel.userHaveActiveGenerator(authorID)==-1){
+            if (eventsGeneratorModel.userHaveActiveGenerator(authorID) == -1) {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
-            }
-            else {
+            } else {
                 new EmbedYouHaveActiveEventGenerator(event);
                 eventsGeneratorModel.cancelEventGenerator(event);
                 new EmbedICreateNewGenerator(event);
@@ -206,31 +186,24 @@ public class WriteListener extends ListenerAdapter {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
             }
-        }
-        else if (message.length==1 && message[0].equalsIgnoreCase(Commands.HELPS)){
+        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
             new EmbedHelp(event.getAuthor().getId());
-        }
-        else if (message.length==4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
-            matches.createNewEventFrom3Data(message,event);
-        }
-        else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+        } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+            matches.createNewEventFrom3Data(message, event);
+        } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom4Data(message, event);
-        }
-        else if (message.length>=7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)){
+        } else if (message.length >= 7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             event.getMessage().delete().submit();
-            matches.createNewEventFromSpecificData(message,event);
-        }
-        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)){
+            matches.createNewEventFromSpecificData(message, event);
+        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
             String userID = event.getMessage().getAuthor().getId();
-            matches.createNewChannel(event,userID);
-        }
-         else if (indexOfGenerator >= 0) {
+            matches.createNewChannel(event, userID);
+        } else if (indexOfGenerator >= 0) {
             if (event.getMessage().getContentDisplay().equalsIgnoreCase("!cancel")) {
                 eventsGeneratorModel.cancelEventGenerator(event);
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else eventsGeneratorModel.saveAnswerAndNextStage(event, indexOfGenerator);
-        }
-        else {
+        } else {
             sendMessage(event);
         }
     }
@@ -238,13 +211,13 @@ public class WriteListener extends ListenerAdapter {
     private boolean isClanMember(PrivateMessageReceivedEvent event) {
         List<Guild> guilds = event.getJDA().getGuilds();
         for (int i = 0; i < guilds.size(); i++) {
-            if (guilds.get(i).getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+            if (guilds.get(i).getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
                 List<Member> members = guilds.get(i).getMembers();
                 for (int j = 0; j < members.size(); j++) {
-                    if (members.get(j).getId().equalsIgnoreCase(event.getAuthor().getId())){
+                    if (members.get(j).getId().equalsIgnoreCase(event.getAuthor().getId())) {
                         List<Role> roles = members.get(j).getRoles();
                         for (int k = 0; k < roles.size(); k++) {
-                            if (roles.get(k).getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)){
+                            if (roles.get(k).getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
                                 return true;
                             }
                         }
@@ -257,11 +230,11 @@ public class WriteListener extends ListenerAdapter {
 
 
     private void sendMessage(@NotNull PrivateMessageReceivedEvent event) {
-        String[] msg = {"Nie rozumiem","O co Ci chodzi?","Niestety, nie potrafię Cię zrozumieć!","Słucham?","Ale że jak?","Co?",
-        "Ja dopiero rosnę na sile. Na chwilę obecną nie rozumiem Ciebie. Przepraszam","Chcesz bana?","Proszę mnie nie drażnić!",
-        "Proszę mnie nie denerwować! Ja jestem malutki. Nie rozumiem Ciebie!","Dlaczego mi to reboisz? Zostaw mnie w spokoju",
-        "Idź i nie pisz do mnie. BRZOZAAAA!!!! ratuj","Bóg jest odpowiedzią na wszystkie pytania","Stanę przed wejście do burdelu, żeby złapać w nią twoją mamuśkę",
-        "Gdybyś był moim mężem, wsypałabym ci truciznę do herbaty.", "Jak nazywa się człowiek nóż? Janusz!", "Po co dresiiarz idzie do lasu? Poziomki."};
+        String[] msg = {"Nie rozumiem", "O co Ci chodzi?", "Niestety, nie potrafię Cię zrozumieć!", "Słucham?", "Ale że jak?", "Co?",
+                "Ja dopiero rosnę na sile. Na chwilę obecną nie rozumiem Ciebie. Przepraszam", "Chcesz bana?", "Proszę mnie nie drażnić!",
+                "Proszę mnie nie denerwować! Ja jestem malutki. Nie rozumiem Ciebie!", "Dlaczego mi to reboisz? Zostaw mnie w spokoju",
+                "Idź i nie pisz do mnie. BRZOZAAAA!!!! ratuj", "Bóg jest odpowiedzią na wszystkie pytania", "Stanę przed wejście do burdelu, żeby złapać w nią twoją mamuśkę",
+                "Gdybyś był moim mężem, wsypałabym ci truciznę do herbaty.", "Jak nazywa się człowiek nóż? Janusz!", "Po co dresiiarz idzie do lasu? Poziomki."};
         Random random = new Random();
         event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {

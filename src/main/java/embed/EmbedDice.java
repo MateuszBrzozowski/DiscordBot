@@ -26,7 +26,7 @@ public class EmbedDice {
 
     private int losujLiczbę() {
         Random random = new Random();
-        int liczba = random.nextInt(6)+1;
+        int liczba = random.nextInt(6) + 1;
         return liczba;
     }
 }

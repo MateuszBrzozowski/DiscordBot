@@ -80,29 +80,29 @@ public class EmbedHelp {
                             "Nazwa eventu - 256\n" +
                             "Tekst (opis eventu) - 2048\n\n" +
                             "(przykład: !zapisyhere -name Event testowy -date 19.06.2021 -time 19:30 -o opis eventu -ac)\n\n", false);
-                    builder.addField("Nowy kanał",">>> **!newChannel** - Tworzy nowy kanał widoczny tylko dla Ciebie.\n" +
+                    builder.addField("Nowy kanał", ">>> **!newChannel** - Tworzy nowy kanał widoczny tylko dla Ciebie.\n" +
                             "**!name <nazwa>** - wpisz na nowo utworzonym kanale aby zmienić nazwe kanału (najlepiej nazwa eventu)\n\n" +
-                            "Następnie wpisz swój opis i użyj komendy !zapisyhere z odpowiednimi parametrami (patrz. wyżej) lub !generatorhere",false);
+                            "Następnie wpisz swój opis i użyj komendy !zapisyhere z odpowiednimi parametrami (patrz. wyżej) lub !generatorhere", false);
                     EmbedBuilder builderGenerator = new EmbedBuilder();
                     builderGenerator.setTitle("Ranger Bot - POMOC");
                     builderGenerator.setFooter("RangerBot created by Brzozaaa © 2021");
                     builderGenerator.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                     builderGenerator.setColor(Color.YELLOW);
-                    builderGenerator.addField("Genereator",">>> **!generator** - Tworzy kanał i listę w sekcji mecze/szkolenia/eventy\n" +
+                    builderGenerator.addField("Genereator", ">>> **!generator** - Tworzy kanał i listę w sekcji mecze/szkolenia/eventy\n" +
                             "(Polecenie możesz napisać tutaj w prywatnej wiadomości lub na dowolnym kanale.)\n" +
                             "**!generatorHere** - Tworzy listę na kanale w którym polecenie zostalo wpisane. Użyteczne przy tworzeniu w pierwszej kolejności kanału dla eventu, " +
                             "a potem jeżeli chcemy dodać listę. (POMOC - Nowy kanał)\n\n" +
-                            "Po wpisaniu powyższych komend uruchamia się generator eventu. Postępuj zgodnie z instrukcjami.",false);
+                            "Po wpisaniu powyższych komend uruchamia się generator eventu. Postępuj zgodnie z instrukcjami.", false);
 
                     EmbedBuilder builderDice = new EmbedBuilder();
                     builderDice.setTitle("Ranger Bot - POMOC");
                     builderDice.setFooter("RangerBot created by Brzozaaa © 2021");
                     builderDice.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
                     builderDice.setColor(Color.YELLOW);
-                    builderDice.addField("Gry",">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
-                            "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.",false);
+                    builderDice.addField("Gry", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
+                            "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
 
-                    if(isRadKlan(member)) privateChannel.sendMessage(builderRecrut.build()).queue();
+                    if (isRadKlan(member)) privateChannel.sendMessage(builderRecrut.build()).queue();
                     privateChannel.sendMessage(builderGenerator.build()).queue();
                     privateChannel.sendMessage(builder.build()).queue();
                     privateChannel.sendMessage(builderDice.build()).queue();
@@ -114,8 +114,8 @@ public class EmbedHelp {
 
     private boolean isRadKlan(Member member) {
         List<Role> roles = member.getRoles();
-        for (Role role : roles){
-            if (role.getId().equalsIgnoreCase(RoleID.RADA_KLANU)){
+        for (Role role : roles) {
+            if (role.getId().equalsIgnoreCase(RoleID.RADA_KLANU)) {
                 return true;
             }
         }
@@ -124,8 +124,8 @@ public class EmbedHelp {
 
     private Guild getGuild(JDA jda) {
         List<Guild> guilds = jda.getGuilds();
-        for (Guild guild : guilds){
-            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)){
+        for (Guild guild : guilds) {
+            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
                 return guild;
             }
         }

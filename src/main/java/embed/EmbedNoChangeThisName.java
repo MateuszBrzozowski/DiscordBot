@@ -14,7 +14,7 @@ public class EmbedNoChangeThisName {
         builder.setColor(Color.RED);
         builder.setTitle("Wykryto zmianę nazwy kanału");
         builder.setDescription("Nie zmieniaj nazwy tego kanału. Może to zaburzyć prawidłowe funkcjonowanie bota.");
-        builder.addField("Poprzednia nazwa tego kanału",oldTopic,false);
+        builder.addField("Poprzednia nazwa tego kanału", oldTopic, false);
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         event.getChannel().sendMessage(builder.build()).queue();
     }

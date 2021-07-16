@@ -14,7 +14,7 @@ public class EmbedNoChangeThisTopic {
         builder.setColor(Color.RED);
         builder.setTitle("Wykryto zmianę tematu");
         builder.setDescription("Nie zmieniaj tematu tego kanału. Może to zaburzyć prawidłowe funkcjonowanie bota.");
-        builder.addField("Poprzedni temat tego kanału",oldTopic,false);
+        builder.addField("Poprzedni temat tego kanału", oldTopic, false);
         builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
         event.getChannel().sendMessage(builder.build()).queue();
     }
