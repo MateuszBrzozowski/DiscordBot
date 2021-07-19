@@ -20,7 +20,7 @@ public class ActiveEvent {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String channelID;
-    private String messageID; //message with embed List
+    private String messageID; //message with embed List is IDEVENT
     private List<MemberMy> mainList = new ArrayList<>();
     private List<MemberMy> reserveList = new ArrayList<>();
     private RangerLogger rangerLogger = new RangerLogger();
@@ -44,15 +44,6 @@ public class ActiveEvent {
 
     public List<MemberMy> getMainList() {
         return mainList;
-    }
-
-    public List<MemberMy> getAllPlayersInEvent() {
-        List<MemberMy> all = getMainList();
-        List<MemberMy> reserve = getReserveList();
-        for (MemberMy m : reserve) {
-            all.add(m);
-        }
-        return all;
     }
 
     public List<MemberMy> getReserveList() {

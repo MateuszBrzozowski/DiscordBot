@@ -116,7 +116,14 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.closeChannel(event);
-            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
+            } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
+                event.getMessage().delete().submit();
+                String eventID = message[1];
+                if (matches.isActiveMatch(message[1])>=0){
+                    matches.removeEvent(eventID);
+                }
+            }
+            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.reOpenChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {

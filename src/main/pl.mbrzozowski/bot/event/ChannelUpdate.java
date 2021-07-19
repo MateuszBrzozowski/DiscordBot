@@ -13,18 +13,18 @@ public class ChannelUpdate extends ListenerAdapter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Recruits recruits = new Recruits();
-    private Event match = new Event();
+    private Event event = new Event();
 
     @Override
     public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
         recruits = RangerBot.getRecruits();
-        match = RangerBot.getMatches();
+        this.event = RangerBot.getMatches();
         String channelID = event.getChannel().getId();
         if (recruits.isRecruitChannel(channelID)) {
             recruits.deleteChannelByID(channelID);
         } else {
-            if (match.isActiveMatchChannelID(channelID) >= 0) {
-                match.deleteChannelByID(channelID);
+            if (this.event.isActiveMatchChannelID(channelID) >= 0) {
+                this.event.deleteChannelByID(channelID);
             }
         }
     }

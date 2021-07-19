@@ -42,7 +42,15 @@ public class Event {
     private void getAllDatabase(JDA jda) {
         downladMatchesDB(jda);
         downloadPlayersInMatechesDB();
+        loggingInput();
 //        rangerLogger.info(String.format("Aktywnych eventów [%d]", activeEvents.size()));
+    }
+
+    private void loggingInput() {
+        rangerLogger.info(String.format("Ilość aktywnych eventów: [%d]",activeEvents.size()));
+        for (ActiveEvent ae: activeEvents){
+            rangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", ae.getMessageID(), ae.getNumberOfSignIn()));
+        }
     }
 
     private void downladMatchesDB(JDA jda) {
@@ -131,7 +139,6 @@ public class Event {
                                     m.addToReserveList(memberMy);
                                 }
                             }
-                            rangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", event, m.getNumberOfSignIn()));
                         }
                     }
                 } catch (SQLException throwables) {
@@ -608,7 +615,7 @@ public class Event {
                     , mOld.getImage()
                     , fieldsNew);
             message.editMessage(m).queue();
-
+            
         });
     }
 
@@ -658,7 +665,7 @@ public class Event {
         }
     }
 
-    public void RemoveEvent(String messageID) {
+    public void removeEvent(String messageID) {
         for (int i = 0; i < activeEvents.size(); i++) {
             if (activeEvents.get(i).getMessageID().equalsIgnoreCase(messageID)) {
                 RemoveEventDB(messageID);
