@@ -58,9 +58,9 @@ public class EventsGenerator {
                         "Przerwanie generowania - Wpisz tutaj **!cancel**\n" +
                         "Maksymalna liczba znaków w tytule - 256\n" +
                         "Maksymalna liczba znaków w opisie znajdującym się na liście - 2048\n" +
-                        "~~Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newEventChannel** -(tworzy kanał w " +
-                        "kategorii Mecze/Szkolenia/Eventy, " +
-                        "następnie napisz na tym kanale osobiście opis i stwórz listę przy pomocy komendy **!generatorHere**~~ <-Funkcja jeszcze nie działa.");
+                        "Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newChannel** \n" +
+                        "-(tworzy kanał w kategorii Mecze/Szkolenia/Eventy, następnie napisz na tym kanale osobiście opis, \n" +
+                        "zmień nazwę kanału przy pomocy komendy **!name** i stwórz listę przy pomocy komendy **!generatorHere**");
                 EmbedBuilder getEventName = new EmbedBuilder();
                 getEventName.setColor(Color.YELLOW);
                 getEventName.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
@@ -228,7 +228,7 @@ public class EventsGenerator {
     }
 
     private void end(PrivateMessageReceivedEvent event) {
-        Event e = RangerBot.getMatches();
+        Event e = RangerBot.getEvents();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
         if (eventMsgRec == null) e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec);

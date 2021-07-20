@@ -35,7 +35,7 @@ public class WriteListener extends ListenerAdapter {
         String[] message = event.getMessage().getContentRaw().split(" ");
         boolean radKlan = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.RADA_KLANU);
         boolean clanMember = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.CLAN_MEMBER_ID);
-        Event matches = RangerBot.getMatches();
+        Event matches = RangerBot.getEvents();
         Recruits recruits = RangerBot.getRecruits();
 
         if (clanMember) {
@@ -119,11 +119,10 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
                 event.getMessage().delete().submit();
                 String eventID = message[1];
-                if (matches.isActiveMatch(message[1])>=0){
+                if (matches.isActiveMatch(message[1]) >= 0) {
                     matches.removeEvent(eventID);
                 }
-            }
-            else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
+            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.reOpenChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
@@ -152,9 +151,6 @@ public class WriteListener extends ListenerAdapter {
             DiceGames diceGames = RangerBot.getDiceGames();
             diceGames.addGame(diceGame);
         } else {
-            //wpisane cokolwiek przez kogokowliek
-            //sprawdzic czy jest aktywna gra na tym kanale
-            //jak tak to ją dokonczyć z informacją
             DiceGames diceGames = RangerBot.getDiceGames();
             if (!event.getAuthor().isBot()) {
                 if (diceGames.isActiveGameOnChannelID(event.getChannel().getId())) {
@@ -179,7 +175,7 @@ public class WriteListener extends ListenerAdapter {
         if (!isClanMember(event)) return;
 
         String[] message = event.getMessage().getContentRaw().split(" ");
-        Event matches = RangerBot.getMatches();
+        Event matches = RangerBot.getEvents();
 
         EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
         int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());

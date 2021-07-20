@@ -20,7 +20,7 @@ public class ButtonClickListener extends ListenerAdapter {
             Recruits recrut = RangerBot.getRecruits();
             recrut.newPodanie(event);
         }
-        this.event = RangerBot.getMatches();
+        this.event = RangerBot.getEvents();
         if (this.event.isActiveMatch(event.getMessage().getId()) >= 0) {
             int indexOfMatch = this.event.isActiveMatch(event.getMessage().getId());
             event.deferEdit().queue();

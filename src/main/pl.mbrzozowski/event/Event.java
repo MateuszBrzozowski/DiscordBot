@@ -42,13 +42,12 @@ public class Event {
     private void getAllDatabase(JDA jda) {
         downladMatchesDB(jda);
         downloadPlayersInMatechesDB();
-        loggingInput();
-//        rangerLogger.info(String.format("Aktywnych eventów [%d]", activeEvents.size()));
+//        loggingInput();
     }
 
     private void loggingInput() {
-        rangerLogger.info(String.format("Ilość aktywnych eventów: [%d]",activeEvents.size()));
-        for (ActiveEvent ae: activeEvents){
+        rangerLogger.info(String.format("Ilość aktywnych eventów: [%d]", activeEvents.size()));
+        for (ActiveEvent ae : activeEvents) {
             rangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", ae.getMessageID(), ae.getNumberOfSignIn()));
         }
     }
@@ -168,9 +167,13 @@ public class Event {
         return resultSet;
     }
 
+    /**
+     * @param message [1] - nazwa eventu; [2] - data; [3] - czas
+     * @param event   GuildMessageReceivedEvent
+     */
     public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            createEventChannel(event, message[1], message[2], message[3], null, 3);
+            createEventChannel(event.getGuild(), getUserNameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
         } else {
             new EmbedWrongDateOrTime(event.getAuthor().getId());
         }
@@ -185,11 +188,12 @@ public class Event {
     }
 
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
+        String userName = getUserNameFromID(event.getAuthor().getId());
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (message[4].equalsIgnoreCase("-ac")) {
-                createEventChannel(event, message[1], message[2], message[3], null, 1);
+                createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 1);
             } else if (message[4].equalsIgnoreCase("-r")) {
-                createEventChannel(event, message[1], message[2], message[3], null, 2);
+                createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 2);
             }
         } else {
             new EmbedWrongDateOrTime(event.getAuthor().getId());
@@ -233,7 +237,7 @@ public class Event {
     }
 
     public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
-        String userName = getUserNameFromEvent(event);
+        String userName = getUserNameFromID(event.getAuthor().getId());
         rangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)) {
             String nameEvent = getEventName(message);
@@ -259,9 +263,9 @@ public class Event {
                     } else
                         createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, -1);
                 } else {
-                    if (ac) createEventChannel(event, nameEvent, date, time, description, 1);
-                    else if (r) createEventChannel(event, nameEvent, date, time, description, 2);
-                    else createEventChannel(event, nameEvent, date, time, description, 3);
+                    if (ac) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 1);
+                    else if (r) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 2);
+                    else createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 3);
                 }
             } else {
                 rangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
@@ -294,72 +298,15 @@ public class Event {
         }
     }
 
-
     /**
-     * @param event       otrzymania wiadomości
-     * @param nameEvent   który tworzymy
+     * @param guild       Guild
+     * @param creatorName Nazwa uzytkownika który tworzy event
+     * @param nameEvent   nazwa eventu
      * @param date        kiedy tworzymy event
      * @param time        o której jest event
-     * @param description eventu
+     * @param description opis eventu
      * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
      */
-    private void createEventChannel(GuildMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
-        List<Category> categories = event.getGuild().getCategories();
-        for (Category cat : categories) {
-            if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-                if (whoVisable == 1 || whoVisable == 2) {
-                    event.getGuild().createTextChannel(nameEvent + "-" + date + "-" + time, cat)
-                            .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions)
-                            .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
-                            .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
-                            .queue(textChannel -> {
-                                if (whoVisable == 1)
-                                    createList(getUserNameFromEvent(event), textChannel, nameEvent, date, time, description, 1);
-                                else if (whoVisable == 2)
-                                    createList(getUserNameFromEvent(event), textChannel, nameEvent, date, time, description, 2);
-
-                            });
-                } else {
-                    event.getGuild().createTextChannel(nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
-                        createList(getUserNameFromEvent(event), textChannel, nameEvent, date, time, description, 3);
-                    });
-                }
-                break;
-            }
-        }
-    }
-
-    /**
-     * @param event       otrzymania wiadomości
-     * @param nameEvent   który tworzymy
-     * @param date        kiedy tworzymy event
-     * @param time        o której jest event
-     * @param description eventu
-     * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
-     */
-    private void createEventChannel(PrivateMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
-        List<Guild> guilds = event.getJDA().getGuilds();
-        for (Guild g : guilds) {
-            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                String creatorID = event.getMessage().getAuthor().getId();
-                List<Member> members = g.getMembers();
-                for (Member m : members) {
-                    if (m.getId().equalsIgnoreCase(creatorID)) {
-                        String creatorName = m.getNickname();
-                        if (creatorName == null) {
-                            creatorName = event.getMessage().getAuthor().getName();
-                        }
-                        createEventChannel(g, creatorName, nameEvent, date, time, description, whoVisable);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-
-
-    }
-
     private void createEventChannel(Guild guild, String creatorName, String nameEvent, String date, String time, String description, int whoVisable) {
         List<Category> categories = guild.getCategories();
         for (Category cat : categories) {
@@ -382,6 +329,24 @@ public class Event {
                     });
                 }
                 break;
+            }
+        }
+    }
+
+    /**
+     * @param event       otrzymania wiadomości
+     * @param nameEvent   który tworzymy
+     * @param date        kiedy tworzymy event
+     * @param time        o której jest event
+     * @param description eventu
+     * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
+     */
+    private void createEventChannel(PrivateMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
+        List<Guild> guilds = event.getJDA().getGuilds();
+        for (Guild g : guilds) {
+            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
+                String creatorName = getUserNameFromID(event.getAuthor().getId());
+                createEventChannel(g, creatorName, nameEvent, date, time, description, whoVisable);
             }
         }
     }
@@ -615,10 +580,14 @@ public class Event {
                     , mOld.getImage()
                     , fieldsNew);
             message.editMessage(m).queue();
-            
+
         });
     }
 
+    /**
+     * @param messageID ID wiadomości w której jest lista z zapisami na event
+     * @return zwraca index eventu. zwraca; -1 jeżeli eventu nie ma.
+     */
     public int isActiveMatch(String messageID) {
         for (int i = 0; i < activeEvents.size(); i++) {
             if (messageID.equalsIgnoreCase(activeEvents.get(i).getMessageID())) {
@@ -805,5 +774,13 @@ public class Event {
             }
         }
         return false;
+    }
+
+    public List<MemberMy> getMainList(int indexOfEvent) {
+        return activeEvents.get(indexOfEvent).getMainList();
+    }
+
+    public List<MemberMy> getReserveList(int indexOfEvent) {
+        return activeEvents.get(indexOfEvent).getReserveList();
     }
 }

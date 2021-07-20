@@ -11,7 +11,7 @@ public class EmbedRemoveChannel {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Kanał usunięty.");
-        builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
         event.getChannel().sendMessage(builder.build()).queue();
     }
 }

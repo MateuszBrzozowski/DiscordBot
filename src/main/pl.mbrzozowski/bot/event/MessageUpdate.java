@@ -14,7 +14,7 @@ public class MessageUpdate extends ListenerAdapter {
 
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-        Event e = RangerBot.getMatches();
+        Event e = RangerBot.getEvents();
         if (e.isActiveMatch(event.getMessageId()) != -1) {
             e.removeEvent(event.getMessageId());
         }

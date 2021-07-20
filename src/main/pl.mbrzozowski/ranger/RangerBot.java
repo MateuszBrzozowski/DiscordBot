@@ -70,7 +70,7 @@ public class RangerBot {
         return recruits;
     }
 
-    public static Event getMatches() {
+    public static Event getEvents() {
         return events;
     }
 

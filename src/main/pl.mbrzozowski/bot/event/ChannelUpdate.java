@@ -12,13 +12,13 @@ import ranger.RangerBot;
 public class ChannelUpdate extends ListenerAdapter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private Recruits recruits = new Recruits();
-    private Event event = new Event();
+    private Recruits recruits;
+    private Event event;
 
     @Override
     public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
         recruits = RangerBot.getRecruits();
-        this.event = RangerBot.getMatches();
+        this.event = RangerBot.getEvents();
         String channelID = event.getChannel().getId();
         if (recruits.isRecruitChannel(channelID)) {
             recruits.deleteChannelByID(channelID);
