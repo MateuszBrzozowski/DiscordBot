@@ -3,7 +3,9 @@ package event;
 import database.DBConnector;
 import embed.EmbedInfoEditEventChannel;
 import embed.EmbedRemoveChannel;
+import embed.EmbedSettings;
 import embed.EmbedWrongDateOrTime;
+import event.reminder.CreateReminder;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -75,6 +77,8 @@ public class Event {
                         }
                         if (isActive) {
                             activeEvents.add(match);
+                            CreateReminder reminder = new CreateReminder(messageID);
+                            reminder.create();
                         } else {
                             matchesToDeleteDB.add(match);
                         }
@@ -88,34 +92,6 @@ public class Event {
             removeMemberFromEventDB(a.getMessageID());
             removeMatchDB(a.getMessageID());
         }
-    }
-
-    private void removeMatchDB(String messageID) {
-        String query = "DELETE FROM `event` WHERE msgID=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, messageID));
-    }
-
-    private void removeMemberFromEventDB(String messageID) {
-        String query = "DELETE FROM `players` WHERE event=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, messageID));
-    }
-
-    private ResultSet getAllMatches() {
-        String query = "SELECT * FROM `event`";
-        DBConnector connector = new DBConnector();
-        ResultSet resultSet = null;
-        try {
-            resultSet = connector.executeSelect(query);
-        } catch (Exception e) {
-            logger.info("Brak tabeli event w bazie danych -> Tworze tabele");
-            String queryCreate = "CREATE TABLE event(" +
-                    "msgID VARCHAR(30) PRIMARY KEY," +
-                    "channelID VARCHAR(30) NOT NULL)";
-            connector.executeQuery(queryCreate);
-        }
-        return resultSet;
     }
 
     private void downloadPlayersInMatechesDB() {
@@ -145,6 +121,34 @@ public class Event {
                 }
             }
         }
+    }
+
+    private void removeMatchDB(String messageID) {
+        String query = "DELETE FROM `event` WHERE msgID=\"%s\"";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(String.format(query, messageID));
+    }
+
+    private void removeMemberFromEventDB(String messageID) {
+        String query = "DELETE FROM `players` WHERE event=\"%s\"";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(String.format(query, messageID));
+    }
+
+    private ResultSet getAllMatches() {
+        String query = "SELECT * FROM `event`";
+        DBConnector connector = new DBConnector();
+        ResultSet resultSet = null;
+        try {
+            resultSet = connector.executeSelect(query);
+        } catch (Exception e) {
+            logger.info("Brak tabeli event w bazie danych -> Tworze tabele");
+            String queryCreate = "CREATE TABLE event(" +
+                    "msgID VARCHAR(30) PRIMARY KEY," +
+                    "channelID VARCHAR(30) NOT NULL)";
+            connector.executeQuery(queryCreate);
+        }
+        return resultSet;
     }
 
     private ResultSet getAllPlayers() {
@@ -215,7 +219,7 @@ public class Event {
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-            createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 3);
+            createList(getUserNameFromID(event.getAuthor().getId()), event.getChannel(), message[1], message[2], message[3], null, 3);
         } else {
             new EmbedWrongDateOrTime(event.getAuthor().getId());
         }
@@ -352,12 +356,12 @@ public class Event {
     }
 
     /**
-     * @param userName    który towrzy listę zapisów
-     * @param textChannel kanał na którym jest tworzona lista
-     * @param nameEvent   który tworzymy
-     * @param date        kiedy tworzymy event
-     * @param time        o której jest event
-     * @param description opis eventu
+     * @param userName    Nazwa użytkownika, który towrzy listę zapisów
+     * @param textChannel ID kanału na którym jest tworzona lista
+     * @param nameEvent   Nazwa eventu, który tworzymy
+     * @param date        Data kiedy tworzymy event
+     * @param time        Czas o której jest event
+     * @param description Opis eventu
      * @param whoPing     1 - rekrut + clanMember; 2-rekrut; 3- tylko Clan Member
      */
     private void createList(String userName, TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
@@ -370,10 +374,11 @@ public class Event {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
-        builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle(nameEvent);
+        builder.setDescription("");
         if (description != null) {
-            builder.setDescription(description + "\n");
+            builder.setDescription(description);
         }
         builder.addField(":date: Kiedy", date, true);
         builder.addBlankField(true);
@@ -397,6 +402,8 @@ public class Event {
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID);
                         activeEvents.add(event);
                         addEventDB(event);
+                        CreateReminder reminder = new CreateReminder(date,time,message.getId());
+                        reminder.create();
                     });
         } catch (IllegalArgumentException e) {
             rangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
@@ -410,7 +417,7 @@ public class Event {
         if (indexStart > 0) {
             int indexEnd = getIndexEnd(message, indexStart);
             if (indexStart >= indexEnd) {
-                return null;
+                return "";
             } else {
                 String description = "";
                 for (int i = indexStart + 1; i <= indexEnd; i++) {
@@ -419,7 +426,7 @@ public class Event {
                 return description;
             }
         }
-        return null;
+        return "";
     }
 
 
@@ -589,6 +596,7 @@ public class Event {
      * @return zwraca index eventu. zwraca; -1 jeżeli eventu nie ma.
      */
     public int isActiveMatch(String messageID) {
+        logger.info("Aktywnych eventów {}", activeEvents.size());
         for (int i = 0; i < activeEvents.size(); i++) {
             if (messageID.equalsIgnoreCase(activeEvents.get(i).getMessageID())) {
                 return i;

@@ -195,7 +195,11 @@ public class WriteListener extends ListenerAdapter {
             }
         } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
             new EmbedHelp(event.getAuthor().getId());
-        } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+        }
+        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELP_REMINDER)){
+            new EmbedHelpReminder(event.getAuthor().getId());
+        }
+        else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom3Data(message, event);
         } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom4Data(message, event);
