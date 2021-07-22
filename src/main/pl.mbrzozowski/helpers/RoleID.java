@@ -29,6 +29,11 @@ public class RoleID {
         return false;
     }
 
+    /**
+     * @param event Kliknięcie w przycisk
+     * @param rola Rola którą sprawdzamy
+     * @return Zwraca true jeżeli użytkownik posiada rolę przekazaną w parametrze, Zwraca false jeżeli użytkownik nie ma tej roli.
+     */
     public static boolean isRoleButtonClick(ButtonClickEvent event, String rola) {
         List<Role> roles = event.getMember().getRoles();
         for (Role r : roles) {
@@ -39,6 +44,10 @@ public class RoleID {
         return false;
     }
 
+    /**
+     * @param event Kliknięcie w przycisk
+     * @return Zwraca prawdę jeżeli użytkownik ma przypisaną rangę innego klanu, Jeżeli nie ma żadnej rangi zwraca false
+     */
     public static boolean isRoleAnotherClanButtonClick(ButtonClickEvent event) {
         String[] clans = {HSR_ID, PC_ID, PEC_ID, RN_ID};
         for (int i = 0; i < clans.length; i++) {

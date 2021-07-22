@@ -204,7 +204,6 @@ public class WriteListener extends ListenerAdapter {
         } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom4Data(message, event);
         } else if (message.length >= 7 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            event.getMessage().delete().submit();
             matches.createNewEventFromSpecificData(message, event);
         } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
             String userID = event.getMessage().getAuthor().getId();

@@ -57,10 +57,10 @@ public class EventsGenerator {
                         "utworzę listę na Twój mecz/szkolenie/event.\n\n" +
                         "Przerwanie generowania - Wpisz tutaj **!cancel**\n" +
                         "Maksymalna liczba znaków w tytule - 256\n" +
-                        "Maksymalna liczba znaków w opisie znajdującym się na liście - 2048\n" +
+                        "Maksymalna liczba znaków w opisie znajdującym się na liście - 2048\n\n" +
                         "Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newChannel** \n" +
-                        "-(tworzy kanał w kategorii Mecze/Szkolenia/Eventy, następnie napisz na tym kanale osobiście opis, \n" +
-                        "zmień nazwę kanału przy pomocy komendy **!name** i stwórz listę przy pomocy komendy **!generatorHere**");
+                        "-(tworzy kanał w kategorii Mecze/Szkolenia/Eventy), następnie napisz na tym kanale osobiście opis, " +
+                        "zmień nazwę kanału przy pomocy komendy **!name <Twoja_Nazwa>** i stwórz listę przy pomocy komendy **!generatorHere**");
                 EmbedBuilder getEventName = new EmbedBuilder();
                 getEventName.setColor(Color.YELLOW);
                 getEventName.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);

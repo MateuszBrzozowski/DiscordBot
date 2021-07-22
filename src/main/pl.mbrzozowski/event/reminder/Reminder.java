@@ -1,6 +1,5 @@
 package event.reminder;
 
-import embed.EmbedSettings;
 import event.Event;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -46,7 +45,7 @@ public class Reminder extends TimerTask {
     private void sendMessage(String userID) {
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.YELLOW);
+            builder.setColor(Color.ORANGE);
             builder.setThumbnail("https://cdn.icon-icons.com/icons2/1993/PNG/512/clock_hour_minute_second_time_timer_watch_icon_123193.png");
             builder.setTitle("Halo Halo!!!");
             builder.setDescription("Pozostało 15 minut do rozpoczęcia wydarzenia na które się zapisałeś!");

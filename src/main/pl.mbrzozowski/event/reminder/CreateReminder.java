@@ -1,12 +1,17 @@
 package event.reminder;
 
+import event.Event;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 
 public class CreateReminder {
@@ -19,8 +24,9 @@ public class CreateReminder {
 
     public static void main(String[] args) {
 //        CreateReminder reminder = new CreateReminder("20.10.2010","19:00");
-        CreateReminder reminder = new CreateReminder("123456789123456789");
+        CreateReminder reminder = new CreateReminder("861914469482889226");
         reminder.create();
+        reminder.setReminderFromEmbed();
     }
 
     /**
@@ -43,6 +49,18 @@ public class CreateReminder {
 
     public void create() {
         if (!date.isBlank() && !time.isBlank()) {
+            setReminder();
+        } else {
+            if (!eventID.isBlank()) {
+                setReminderFromEmbed();
+            } else {
+                logger.info("Brak danych do stworzenia remindera (brak daty/czasu/lub");
+            }
+        }
+    }
+
+    private void setReminder() {
+        if (!date.isBlank() && !time.isBlank()) {
             Date dateFull = null;
             try {
                 dateFull = dateFormat.parse(date + " " + time);
@@ -50,14 +68,30 @@ public class CreateReminder {
                 e.printStackTrace();
             }
             Timer timer = new Timer();
-            if (dateFull != null) timer.schedule(new Reminder(eventID), dateFull);
-        } else {
-            if (!eventID.isBlank()) {
-                //Pobrac dane z embed date i czas i wywolac jeszcze raz ta funkcje
-//                create();
-            } else {
-                logger.info("Brak danych do stworzenia remindera (brak daty/czasu/lub");
+            if (dateFull != null) {
+                dateFull = new Date(dateFull.getTime() - (15*60*1000)); //ustawia 15 minut przed wydarzenie
+                Date nowDate = new Date();
+                if (nowDate.before(dateFull)){
+                    timer.schedule(new Reminder(eventID), dateFull);
+                }
             }
         }
     }
+
+    /**
+     * Pobiera datę i godzinę z embed z wiadomości (listy) i ustawia reminder dla wydarzenia.
+     */
+    private void setReminderFromEmbed() {
+        JDA jda = RangerBot.getJda();
+        Event event = RangerBot.getEvents();
+        String channelID = event.getChannelID(eventID);
+        jda.getTextChannelById(channelID).retrieveMessageById(eventID).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+            date = fields.get(0).getValue();
+            time = fields.get(2).getValue();
+            setReminder();
+        });
+    }
+
 }

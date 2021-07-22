@@ -11,7 +11,10 @@ import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -24,8 +27,8 @@ import ranger.RangerBot;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class Event {
 
@@ -402,7 +405,7 @@ public class Event {
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID);
                         activeEvents.add(event);
                         addEventDB(event);
-                        CreateReminder reminder = new CreateReminder(date,time,message.getId());
+                        CreateReminder reminder = new CreateReminder(date, time, message.getId());
                         reminder.create();
                     });
         } catch (IllegalArgumentException e) {
@@ -790,5 +793,18 @@ public class Event {
 
     public List<MemberMy> getReserveList(int indexOfEvent) {
         return activeEvents.get(indexOfEvent).getReserveList();
+    }
+
+    /**
+     * @param eventID ID wiadomości w której znajdują się zapisy
+     * @return Zwraca ID kanalu na którym znajduje sie wiadomosc, w innym przypadku zwraca pustego Stringa
+     */
+    public String getChannelID(String eventID) {
+        for (ActiveEvent ae : activeEvents) {
+            if (ae.getMessageID().equalsIgnoreCase(eventID)) {
+                return ae.getChannelID();
+            }
+        }
+        return "";
     }
 }

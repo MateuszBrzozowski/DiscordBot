@@ -1,5 +1,8 @@
 package bot.event;
 
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.components.Button;
 import recrut.Recruits;
 import event.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -9,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
 
+import java.util.List;
+
 public class ButtonClickListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
@@ -16,10 +21,17 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
-        if (event.getComponentId().equals("newRecrut")) {
-            Recruits recrut = RangerBot.getRecruits();
+        Recruits recrut = RangerBot.getRecruits();
+        if (event.getComponentId().equalsIgnoreCase("newRecrut")) {
             recrut.newPodanie(event);
+        } else if (event.getComponentId().equalsIgnoreCase("recrutY")) {
+            event.deferEdit().queue();
+            recrut.confirm(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
+        } else if (event.getComponentId().equalsIgnoreCase("recrutN")) {
+            event.deferEdit().queue();
+            recrut.cancel(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
         }
+
         this.event = RangerBot.getEvents();
         if (this.event.isActiveMatch(event.getMessage().getId()) >= 0) {
             int indexOfMatch = this.event.isActiveMatch(event.getMessage().getId());
@@ -34,4 +46,6 @@ public class ButtonClickListener extends ListenerAdapter {
             this.event.updateEmbed(event, indexOfMatch);
         }
     }
+
+
 }

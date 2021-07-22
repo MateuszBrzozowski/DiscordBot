@@ -8,11 +8,10 @@ import helpers.RoleID;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -26,17 +25,24 @@ import java.util.*;
 public class Recruits {
 
     private List<Recrut> activeRecruits = new ArrayList<>();
+    private List<Recrut> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RangerLogger rangerLogger = new RangerLogger();
 
-    public void createChannelForNewRecrut(ButtonClickEvent event, String userName, String userID) {
-        List<Category> categories = event.getGuild().getCategories();
+    /**
+     * @param userName Nazwa użytkownika
+     * @param userID   ID użytkownika
+     */
+    public void createChannelForNewRecrut(String userName, String userID) {
+        JDA jda = RangerBot.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        List<Category> categories = guild.getCategories();
         for (Category cat : categories) {
             if (cat.getId().equals(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-                event.getGuild().createTextChannel("rekrut-" + userName, cat)
-                        .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions)
+                guild.createTextChannel("rekrut-" + userName, cat)
+                        .addPermissionOverride(guild.getPublicRole(), null, permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                         .queue(textChannel -> {
@@ -51,12 +57,12 @@ public class Recruits {
                             builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                             builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                             textChannel.sendMessage(builder.build()).queue();
-                            textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
+                            textChannel.sendMessage("Po uzupełnieniu formualrza skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
                             addUserToList(userID, userName, textChannel.getId());
                         });
             }
         }
-        logger.info("Nowe podanie złożone. Aktywnych rekrutacji: {}", activeRecruits.size());
+        logger.info("Nowe podanie złożone.");
     }
 
     public void initialize(JDA jda) {
@@ -69,12 +75,96 @@ public class Recruits {
         String userID = event.getUser().getId();
         event.deferEdit().queue();
         if (!checkUser(userID)) {
-            if (!RoleID.isRoleAnotherClanButtonClick(event)) {
-                if (!RoleID.isRoleButtonClick(event, RoleID.CLAN_MEMBER_ID)) {
-                    createChannelForNewRecrut(event, userName, userID);
-                } else new EmbedYouAreClanMember(event);
-            } else new EmbedYouAreInClan(event);
+            if (!checkThinkingUser(userID)) {
+                if (!RoleID.isRoleAnotherClanButtonClick(event)) {
+//                if (!RoleID.isRoleButtonClick(event, RoleID.CLAN_MEMBER_ID)) {
+                    confirmMessage(userID, userName);
+//                } else new EmbedYouAreClanMember(event);
+                } else new EmbedYouAreInClan(event);
+            }
         } else new EmbedYouHaveRecrutChannel(event);
+    }
+
+    private void confirmMessage(String userID, String userName) {
+        rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
+        thinkingRecruits.add(new Recrut(userID, userName));
+        JDA jda = RangerBot.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.YELLOW);
+            builder.setTitle("Potwierdź czy chcesz złożyć podanie?");
+            builder.setDescription("Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Skontaktuję się z Tobą jeden z naszych Drillów aby wprowadzić Cię" +
+                    " w nasze szeregi. Poprosimy również o wypełnienie krótkiego formularza.");
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            privateChannel.sendMessage(builder.build()).setActionRow(Button.success("recrutY", "Potwierdzam"), Button.danger("recrutN", "Rezygnuję")).queue(message -> {
+                Thread timer = new Thread(() -> {
+                    logger.info("Nowy wątek");
+                    try {
+                        Thread.sleep(1000 * 60 * 2); //2 minuty oczekiwania na odpowiedź
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (userIsThinking(userID)>=0){
+                        logger.info("User dalej nie odpowiedział.");
+                        cancel(userID, privateChannel, message.getId());
+                        disableButtons(privateChannel,message.getId());
+                    }
+                    logger.info("kończę oczekiwanie");
+                });
+                timer.start();
+            });
+        });
+    }
+
+    public void confirm(String userID, MessageChannel privateChannel, String messageID) {
+        int index = userIsThinking(userID);
+        if (index >= 0) {
+            createChannelForNewRecrut(thinkingRecruits.get(index).getUserName(), userID);
+            thinkingRecruits.remove(index);
+        } else {
+            sendMessageBotReload(userID);
+        }
+        disableButtons(privateChannel, messageID);
+    }
+
+    public void cancel(String userID, MessageChannel privateChannel, String messageID) {
+        int index = userIsThinking(userID);
+        if (index >= 0) {
+            rangerLogger.info("Użytkownik [" + thinkingRecruits.get(index).getUserName() + "] zrezygnował ze złożenia podania.");
+            thinkingRecruits.remove(index);
+        } else {
+            sendMessageBotReload(userID);
+        }
+        disableButtons(privateChannel, messageID);
+    }
+
+    private void sendMessageBotReload(String userID) {
+        JDA jda = RangerBot.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            privateChannel.sendMessage("UPS! Coś poszło nie tak. Jeżeli chcesz złóż ponownie podanie.").queue();
+        });
+    }
+
+    /**
+     * @param userID ID użytkowanika który składa podanie
+     * @return Zwraca index na liście thinkingRecruits, jeżeli użytkownik dostał wiadomość z prośbą o potwierdzenie
+     * złożenie podania i dalej ma możliwość akceptacji; W innym przypadku zwraca -1
+     */
+    private int userIsThinking(String userID) {
+        for (int i = 0; i < thinkingRecruits.size(); i++) {
+            if (userID.equalsIgnoreCase(thinkingRecruits.get(i).getUserID())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void disableButtons(MessageChannel channel, String messageID) {
+        channel.retrieveMessageById(messageID).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            MessageEmbed messageEmbed = embeds.get(0);
+            message.editMessage(messageEmbed).setActionRow(Button.success("recrutY", "Potwierdzam").asDisabled(), Button.danger("recrutN", "Rezygnuję").asDisabled()).queue();
+        });
     }
 
     private void addUserToList(String userID, String userName, String channelID) {
@@ -149,6 +239,15 @@ public class Recruits {
 
     private boolean checkUser(String userID) {
         for (Recrut member : activeRecruits) {
+            if (member.getUserID().equalsIgnoreCase(userID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkThinkingUser(String userID) {
+        for (Recrut member : thinkingRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
             }
@@ -257,4 +356,6 @@ public class Recruits {
         });
         thread.start();
     }
+
+
 }
