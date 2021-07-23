@@ -5,7 +5,6 @@ import embed.EmbedInfoEditEventChannel;
 import embed.EmbedRemoveChannel;
 import embed.EmbedSettings;
 import embed.EmbedWrongDateOrTime;
-import event.reminder.CreateReminder;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -80,8 +79,8 @@ public class Event {
                         }
                         if (isActive) {
                             activeEvents.add(match);
-                            CreateReminder reminder = new CreateReminder(messageID);
-                            reminder.create();
+//                            CreateReminder reminder = new CreateReminder(messageID);
+//                            reminder.create();
                         } else {
                             matchesToDeleteDB.add(match);
                         }
@@ -369,7 +368,7 @@ public class Event {
      */
     private void createList(String userName, TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
         if (whoPing == 1) {
-            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + "RoleID.RECRUT_ID" + "> Zapisy!").queue();
+            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + " RoleID.RECRUT_ID" + "> Zapisy!").queue();
         } else if (whoPing == 2) {
             textChannel.sendMessage("<@&" + "RoleID.RECRUT_ID" + "> Zapisy!").queue();
         } else if (whoPing == 3) {
@@ -405,8 +404,8 @@ public class Event {
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID);
                         activeEvents.add(event);
                         addEventDB(event);
-                        CreateReminder reminder = new CreateReminder(date, time, message.getId());
-                        reminder.create();
+//                        CreateReminder reminder = new CreateReminder(date, time, message.getId());
+//                        reminder.create();
                     });
         } catch (IllegalArgumentException e) {
             rangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
@@ -596,10 +595,9 @@ public class Event {
 
     /**
      * @param messageID ID wiadomości w której jest lista z zapisami na event
-     * @return zwraca index eventu. zwraca; -1 jeżeli eventu nie ma.
+     * @return zwraca index eventu.; -1 jeżeli eventu nie ma.
      */
-    public int isActiveMatch(String messageID) {
-        logger.info("Aktywnych eventów {}", activeEvents.size());
+    public int getIndexActiveEvent(String messageID) {
         for (int i = 0; i < activeEvents.size(); i++) {
             if (messageID.equalsIgnoreCase(activeEvents.get(i).getMessageID())) {
                 return i;
@@ -646,12 +644,49 @@ public class Event {
     }
 
     public void removeEvent(String messageID) {
-        for (int i = 0; i < activeEvents.size(); i++) {
-            if (activeEvents.get(i).getMessageID().equalsIgnoreCase(messageID)) {
-                RemoveEventDB(messageID);
-                activeEvents.remove(i);
-                break;
-            }
+        int index = getIndexActiveEvent(messageID);
+        if (index >= 0) {
+            RemoveEventDB(messageID);
+            activeEvents.remove(index);
+        }
+    }
+
+    public void disableButtons(String messageID) {
+        int index = getIndexActiveEvent(messageID);
+        logger.info("Index eventu: {}",index);
+        if (index >= 0) {
+            JDA jda = RangerBot.getJda();
+            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            textChannel.retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<Button> buttons = message.getButtons();
+                List<Button> buttonsNew = new ArrayList<>();
+                for (Button b : buttons) {
+                    b = b.asDisabled();
+                    buttonsNew.add(b);
+                }
+                MessageEmbed messageEmbed = embeds.get(0);
+                message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+            });
+        }
+    }
+
+    public void enableButtons(String messageID) {
+        int index = getIndexActiveEvent(messageID);
+        if (index >= 0) {
+            JDA jda = RangerBot.getJda();
+            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            textChannel.retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<Button> buttons = message.getButtons();
+                List<Button> buttonsNew = new ArrayList<>();
+                for (Button b : buttons) {
+                    b = b.asEnabled();
+                    buttonsNew.add(b);
+                }
+                MessageEmbed messageEmbed = embeds.get(0);
+                message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+            });
         }
     }
 

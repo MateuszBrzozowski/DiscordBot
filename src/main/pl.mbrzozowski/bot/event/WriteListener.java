@@ -50,6 +50,9 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) new EmbedPositive(event);
+            } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
+                event.getMessage().delete().submit();
+                if (radKlan) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR)) {
                 event.getMessage().delete().submit();
                 EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
@@ -66,7 +69,6 @@ public class WriteListener extends ListenerAdapter {
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 }
-
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR_HERE)) {
                 event.getMessage().delete().submit();
                 EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
@@ -119,7 +121,7 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
                 event.getMessage().delete().submit();
                 String eventID = message[1];
-                if (matches.isActiveMatch(message[1]) >= 0) {
+                if (matches.getIndexActiveEvent(message[1]) >= 0) {
                     matches.removeEvent(eventID);
                 }
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
@@ -180,6 +182,11 @@ public class WriteListener extends ListenerAdapter {
         EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
         int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
 
+//        if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
+//            Recruits recruits = RangerBot.getRecruits();
+//            recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
+//        }
+
         if (event.getMessage().getContentDisplay().equalsIgnoreCase(Commands.GENERATOR)) {
             String authorID = event.getAuthor().getId();
             if (eventsGeneratorModel.userHaveActiveGenerator(authorID) == -1) {
@@ -195,11 +202,9 @@ public class WriteListener extends ListenerAdapter {
             }
         } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
             new EmbedHelp(event.getAuthor().getId());
-        }
-        else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELP_REMINDER)){
+        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELP_REMINDER)) {
             new EmbedHelpReminder(event.getAuthor().getId());
-        }
-        else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
+        } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom3Data(message, event);
         } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom4Data(message, event);
@@ -213,9 +218,16 @@ public class WriteListener extends ListenerAdapter {
                 eventsGeneratorModel.cancelEventGenerator(event);
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else eventsGeneratorModel.saveAnswerAndNextStage(event, indexOfGenerator);
-        } else {
-            sendMessage(event);
+        } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
+            matches.removeEvent(message[1]);
+        } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
+            matches.disableButtons(message[1]);
+        } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
+            matches.enableButtons(message[1]);
         }
+//        else {
+//            sendMessage(event);
+//        }
     }
 
     private boolean isClanMember(PrivateMessageReceivedEvent event) {

@@ -29,7 +29,7 @@ public class Reminder extends TimerTask {
     @Override
     public void run() {
         //TODO pobrac sobie wszystkich uzytkownikow z bazy danych ktorzy nie chca dostawac powiadomien.
-        int indexOfEvent = event.isActiveMatch(eventID);
+        int indexOfEvent = event.getIndexActiveEvent(eventID);
         if (indexOfEvent>=0){
             List<MemberMy> mainList = event.getMainList(indexOfEvent);
             List<MemberMy> reserveList = event.getReserveList(indexOfEvent);

@@ -22,13 +22,6 @@ public class CreateReminder {
     private String time = "";
     private String eventID = "";
 
-    public static void main(String[] args) {
-//        CreateReminder reminder = new CreateReminder("20.10.2010","19:00");
-        CreateReminder reminder = new CreateReminder("861914469482889226");
-        reminder.create();
-        reminder.setReminderFromEmbed();
-    }
-
     /**
      * @param date    Data wydarzenia
      * @param time    Czas wydarzenia
@@ -48,10 +41,10 @@ public class CreateReminder {
     }
 
     public void create() {
-        if (!date.isBlank() && !time.isBlank()) {
+        if (date != "" && time != "") {
             setReminder();
         } else {
-            if (!eventID.isBlank()) {
+            if (eventID != "") {
                 setReminderFromEmbed();
             } else {
                 logger.info("Brak danych do stworzenia remindera (brak daty/czasu/lub");
@@ -60,7 +53,7 @@ public class CreateReminder {
     }
 
     private void setReminder() {
-        if (!date.isBlank() && !time.isBlank()) {
+        if (date != "" && time != "") {
             Date dateFull = null;
             try {
                 dateFull = dateFormat.parse(date + " " + time);
@@ -69,9 +62,9 @@ public class CreateReminder {
             }
             Timer timer = new Timer();
             if (dateFull != null) {
-                dateFull = new Date(dateFull.getTime() - (15*60*1000)); //ustawia 15 minut przed wydarzenie
+                dateFull = new Date(dateFull.getTime() - (15 * 60 * 1000)); //ustawia 15 minut przed wydarzenie
                 Date nowDate = new Date();
-                if (nowDate.before(dateFull)){
+                if (nowDate.before(dateFull)) {
                     timer.schedule(new Reminder(eventID), dateFull);
                 }
             }

@@ -16,7 +16,7 @@ public class EmbedNegative {
     public EmbedNegative(GuildMessageReceivedEvent event) {
         Recruits recruits = RangerBot.getRecruits();
         if (recruits.isRecruitChannel(event.getChannel().getId())) {
-            event.getChannel().sendMessage("<@" + recruits.getRecruitIDFromChannelID(event) + ">").queue();
+            event.getChannel().sendMessage("<@" + recruits.getRecruitIDFromChannelID(event.getChannel().getId()) + ">").queue();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");

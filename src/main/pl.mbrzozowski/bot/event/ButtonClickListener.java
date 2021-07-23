@@ -1,8 +1,5 @@
 package bot.event;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.components.Button;
 import recrut.Recruits;
 import event.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -11,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
-
-import java.util.List;
 
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -33,8 +28,8 @@ public class ButtonClickListener extends ListenerAdapter {
         }
 
         this.event = RangerBot.getEvents();
-        if (this.event.isActiveMatch(event.getMessage().getId()) >= 0) {
-            int indexOfMatch = this.event.isActiveMatch(event.getMessage().getId());
+        if (this.event.getIndexActiveEvent(event.getMessage().getId()) >= 0) {
+            int indexOfMatch = this.event.getIndexActiveEvent(event.getMessage().getId());
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
                 this.event.signIn(event, indexOfMatch);

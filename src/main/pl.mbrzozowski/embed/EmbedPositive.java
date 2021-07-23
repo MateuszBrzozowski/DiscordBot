@@ -17,7 +17,7 @@ public class EmbedPositive {
         Recruits recruits = RangerBot.getRecruits();
         if (recruits.isRecruitChannel(event.getChannel().getId())) {
             EmbedBuilder builder = new EmbedBuilder();
-            event.getChannel().sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(event) + ">").queue();
+            event.getChannel().sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(event.getChannel().getId()) + ">").queue();
             builder.setColor(Color.GREEN);
             builder.setTitle("WYNIK REKRUTACJI - POZYTYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
