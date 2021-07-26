@@ -99,18 +99,16 @@ public class Recruits {
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             privateChannel.sendMessage(builder.build()).setActionRow(Button.success("recrutY", "Potwierdzam"), Button.danger("recrutN", "Rezygnuję")).queue(message -> {
                 Thread timer = new Thread(() -> {
-                    logger.info("Nowy wątek");
                     try {
                         Thread.sleep(1000 * 60 * 2); //2 minuty oczekiwania na odpowiedź
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (userIsThinking(userID) >= 0) {
-                        logger.info("User dalej nie odpowiedział.");
+                        //TODO wyslac informacje że zakonczone oczekiwanie i ze jak chce zlozyc podanie to niech zrobi jeszcze raz
                         cancel(userID, privateChannel, message.getId());
                         disableButtons(privateChannel, message.getId());
                     }
-                    logger.info("kończę oczekiwanie");
                 });
                 timer.start();
             });
@@ -287,12 +285,14 @@ public class Recruits {
     }
 
     public void closeChannel(GuildMessageReceivedEvent event) {
-        boolean isRecruitChannel = isRecruitChannel(event.getChannel().getId());
+        TextChannel textChannel = event.getChannel();
+        boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
         if (isRecruitChannel) {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
-                    event.getChannel().getManager().putPermissionOverride(member, null, permissions).queue();
+                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),null,permViewChannel);
+                    textChannel.getManager().putPermissionOverride(member, null, permissions).queue();
                     new EmbedCloseChannel(event);
                     logger.info("Kanał zamkniety: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
                 });
@@ -311,11 +311,13 @@ public class Recruits {
     }
 
     public void reOpenChannel(GuildMessageReceivedEvent event) {
-        boolean isRecruitChannel = isRecruitChannel(event.getChannel().getId());
+        TextChannel textChannel = event.getChannel();
+        boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
         if (isRecruitChannel) {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
+                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permViewChannel,null);
                     event.getChannel().getManager().putPermissionOverride(member, permissions, null).queue();
                     new EmbedOpernChannel(event);
                     logger.info("Kanał otwarty: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
