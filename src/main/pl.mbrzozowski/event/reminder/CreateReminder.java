@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
+import recrut.Recruits;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -75,8 +77,8 @@ public class CreateReminder {
      * Pobiera datę i godzinę z embed z wiadomości (listy) i ustawia reminder dla wydarzenia.
      */
     private void setReminderFromEmbed() {
-        JDA jda = RangerBot.getJda();
-        Event event = RangerBot.getEvents();
+        JDA jda = Repository.getJda();
+        Event event = Repository.getEvent();
         String channelID = event.getChannelID(eventID);
         jda.getTextChannelById(channelID).retrieveMessageById(eventID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();

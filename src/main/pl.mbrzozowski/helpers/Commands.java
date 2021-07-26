@@ -1,14 +1,16 @@
 package helpers;
 
 public class Commands {
-
     private static final String PREFIX = "!";
 
+    public static final String STATUS = PREFIX + "status";
+    public static final String DATE = PREFIX + "date";
+    public static final String TIME = PREFIX + "time";
     public static final String DISABLE_BUTTONS = PREFIX + "disable";
     public static final String ENABLE_BUTTONS = PREFIX + "enable";
     public static final String ACCEPT_RECRUT = PREFIX + "accept";
     public static final String HELP_REMINDER = PREFIX + "helpReminder";
-    public static final String CLOSE_EVENT = PREFIX + "closeEvent";
+    public static final String DELETE_EVENT = PREFIX + "deleteEvent";
     public static final String NAME = PREFIX + "name";
     public static final String GENERATOR_HERE = PREFIX + "generatorHere";
     public static final String NEW_CHANNEL = PREFIX + "newChannel";

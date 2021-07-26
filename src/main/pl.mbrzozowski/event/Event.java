@@ -10,10 +10,7 @@ import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -22,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
+import recrut.Recruits;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -378,8 +377,7 @@ public class Event {
         builder.setColor(Color.YELLOW);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle(nameEvent);
-        builder.setDescription("");
-        if (description != null) {
+        if (description != "") {
             builder.setDescription(description);
         }
         builder.addField(":date: Kiedy", date, true);
@@ -414,7 +412,7 @@ public class Event {
         }
     }
 
-    public String getDescription(String[] message) {
+    private String getDescription(String[] message) {
         int indexStart = getIndex(message, "-o");
         if (indexStart > 0) {
             int indexEnd = getIndexEnd(message, indexStart);
@@ -432,7 +430,7 @@ public class Event {
     }
 
 
-    public String getEventName(String[] message) {
+    private String getEventName(String[] message) {
         int indexStart = getIndex(message, "-name");
         int indexEnd = getIndexEnd(message, indexStart);
         if (indexStart >= indexEnd) {
@@ -646,16 +644,91 @@ public class Event {
     public void removeEvent(String messageID) {
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
+            disableButtons(messageID);
             RemoveEventDB(messageID);
             activeEvents.remove(index);
         }
     }
 
+    public void changeTime(String messageID, String time) {
+        if (!Validation.isTimeFormat(time)) return;
+        int index = getIndexActiveEvent(messageID);
+        if (index >= 0) {
+            JDA jda = Repository.getJda();
+            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            textChannel.retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                MessageEmbed mOld = embeds.get(0);
+                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
+                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+                for (int i = 0; i < fieldsOld.size(); i++) {
+                    if (i == 2) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
+                        fieldsNew.add(fieldNew);
+                    } else {
+                        fieldsNew.add(fieldsOld.get(i));
+                    }
+                }
+                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
+                        , mOld.getTitle()
+                        , mOld.getDescription()
+                        , mOld.getType()
+                        , mOld.getTimestamp()
+                        , mOld.getColorRaw()
+                        , mOld.getThumbnail()
+                        , mOld.getSiteProvider()
+                        , mOld.getAuthor()
+                        , mOld.getVideoInfo()
+                        , mOld.getFooter()
+                        , mOld.getImage()
+                        , fieldsNew);
+                message.editMessage(mNew).queue();
+            });
+        }
+    }
+
+
+    public void changeDate(String messageID, String date) {
+        if (!Validation.isDateFormat(date)) return;
+        int index = getIndexActiveEvent(messageID);
+        if (index >= 0) {
+            JDA jda = Repository.getJda();
+            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            textChannel.retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                MessageEmbed mOld = embeds.get(0);
+                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
+                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+                for (int i = 0; i < fieldsOld.size(); i++) {
+                    if (i == 0) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", date, true);
+                        fieldsNew.add(fieldNew);
+                    } else {
+                        fieldsNew.add(fieldsOld.get(i));
+                    }
+                }
+                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
+                        , mOld.getTitle()
+                        , mOld.getDescription()
+                        , mOld.getType()
+                        , mOld.getTimestamp()
+                        , mOld.getColorRaw()
+                        , mOld.getThumbnail()
+                        , mOld.getSiteProvider()
+                        , mOld.getAuthor()
+                        , mOld.getVideoInfo()
+                        , mOld.getFooter()
+                        , mOld.getImage()
+                        , fieldsNew);
+                message.editMessage(mNew).queue();
+            });
+        }
+    }
+
     public void disableButtons(String messageID) {
         int index = getIndexActiveEvent(messageID);
-        logger.info("Index eventu: {}",index);
         if (index >= 0) {
-            JDA jda = RangerBot.getJda();
+            JDA jda = Repository.getJda();
             TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
@@ -674,7 +747,7 @@ public class Event {
     public void enableButtons(String messageID) {
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            JDA jda = RangerBot.getJda();
+            JDA jda = Repository.getJda();
             TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
@@ -723,17 +796,8 @@ public class Event {
         return userName;
     }
 
-    private String getUserNameFromEvent(ButtonClickEvent event) {
-        String userName = event.getMember().getNickname();
-        if (userName == null) {
-            userName = event.getUser().getName();
-        }
-        return userName;
-    }
-
-
     private String getUserNameFromID(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
@@ -841,5 +905,45 @@ public class Event {
             }
         }
         return "";
+    }
+
+    /**
+     * Wyświetla ile jest aktywnych evnetów
+     * oraz wypisuje ID eventu czyli wiadomości w której przechowywana jest lista, ID kanału oraz
+     * dane ile jest zapisanych użytkowników. Również wyświetla wszystkich użytkowników.
+     *
+     * @param privateChannel Kanał użytkownika który chce wyświetlić status aplikacji.
+     */
+    public void sendInfo(PrivateChannel privateChannel) {
+        EmbedBuilder activeEventsBuilder = new EmbedBuilder();
+        activeEventsBuilder.setColor(Color.RED);
+        activeEventsBuilder.setTitle("Eventy");
+        activeEventsBuilder.addField("Aktywnych eventów", String.valueOf(activeEvents.size()), false);
+        privateChannel.sendMessage(activeEventsBuilder.build()).queue();
+        for (ActiveEvent ae : activeEvents) {
+            List<MemberMy> mainList = ae.getMainList();
+            List<MemberMy> reserveList = ae.getReserveList();
+            JDA jda = Repository.getJda();
+            String channelName = jda.getTextChannelById(ae.getChannelID()).getName();
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.WHITE);
+            builder.addField("ID eventu", ae.getMessageID(), false);
+            builder.addField("ID kanału", ae.getChannelID(), false);
+            builder.addField("Nazwa kanału",channelName,false);
+            builder.addField("Ilość zapisanych", String.valueOf(ae.getNumberOfSignIn()), true);
+            builder.addField("Główna lista", String.valueOf(mainList.size()), true);
+            builder.addField("Rezerwowa lista", String.valueOf(reserveList.size()), true);
+            String stringMainList = "";
+            for (MemberMy m : mainList) {
+                stringMainList += m.getUserName() + ", ";
+            }
+            builder.addField("Główna lista", stringMainList, false);
+            String stringReserveList = "";
+            for (MemberMy m : reserveList) {
+                stringReserveList += m.getUserName() + ", ";
+            }
+            builder.addField("Rezerwowa lista", stringReserveList, false);
+            privateChannel.sendMessage(builder.build()).queue();
+        }
     }
 }

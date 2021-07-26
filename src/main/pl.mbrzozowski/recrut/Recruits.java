@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -36,7 +37,7 @@ public class Recruits {
      * @param userID   ID użytkownika
      */
     public void createChannelForNewRecrut(String userName, String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         List<Category> categories = guild.getCategories();
         for (Category cat : categories) {
@@ -88,7 +89,7 @@ public class Recruits {
     private void confirmMessage(String userID, String userName) {
         rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
         thinkingRecruits.add(new Recrut(userID, userName));
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
@@ -139,7 +140,7 @@ public class Recruits {
     }
 
     private void sendMessageBotReload(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             privateChannel.sendMessage("UPS! Coś poszło nie tak. Jeżeli chcesz złóż ponownie podanie.").queue();
         });
@@ -267,7 +268,7 @@ public class Recruits {
     }
 
     public void removeRoleFromUserID(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID).retrieveMemberById(userID).queue(member -> {
             List<Role> roles = member.getRoles();
             for (Role r : roles) {
@@ -358,7 +359,7 @@ public class Recruits {
     }
 
     private String getUserNameFromID(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
@@ -380,32 +381,32 @@ public class Recruits {
      */
     public void acceptRecrut(String nickRecrut, TextChannel channel, User drill) {
         if (isRecruitChannel(channel.getId())) {
-        channel.sendMessage("<@" + "getRecruitIDFromChannelID(channel.getId())" + "> Kilka ważnych informacji na początek!").queue();
-        welcome(channel, nickRecrut);
-        recrutingTimeInfo(channel);
-        breakTimeInfo(channel);
-        clanTagInfo(channel);
-        rankInfo(channel);
-        playingSquad(channel);
-        useTSAndDiscord(channel);
-        whoIsWho(channel);
-        signature(channel, drill);
+            channel.sendMessage("<@" + "getRecruitIDFromChannelID(channel.getId())" + "> Kilka ważnych informacji na początek!").queue();
+            welcome(channel, nickRecrut);
+            recrutingTimeInfo(channel);
+            breakTimeInfo(channel);
+            clanTagInfo(channel);
+            rankInfo(channel);
+            playingSquad(channel);
+            useTSAndDiscord(channel);
+            whoIsWho(channel);
+            signature(channel, drill);
         }
     }
 
     private void useTSAndDiscord(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.addField("TS - audio / Discord - text","Do komunikacji głosowej używamy ts. Wbijaj zawsze gdy grasz. Nawet jeżeli nikogo nie ma, wejdź na kanał. Może ktoś do Ciebie dołączy.\n" +
-                "Discorda używamy natomiast do komunikacji tekstowej.",false);
+        builder.addField("TS - audio / Discord - text", "Do komunikacji głosowej używamy ts. Wbijaj zawsze gdy grasz. Nawet jeżeli nikogo nie ma, wejdź na kanał. Może ktoś do Ciebie dołączy.\n" +
+                "Discorda używamy natomiast do komunikacji tekstowej.", false);
         channel.sendMessage(builder.build()).queue();
     }
 
     private void clanTagInfo(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.addField("Kultura i szacunek do innych!","Grając na serwerze z tagiem klanu, pamiętaj że jesteś jego wizytówką! Jako grupa uważamy się " +
-                "za kulturalnych i dojrzałych – niech taki obraz Rangersów trwa.",false);
+        builder.addField("Kultura i szacunek do innych!", "Grając na serwerze z tagiem klanu, pamiętaj że jesteś jego wizytówką! Jako grupa uważamy się " +
+                "za kulturalnych i dojrzałych – niech taki obraz Rangersów trwa.", false);
         channel.sendMessage(builder.build()).queue();
     }
 
@@ -492,4 +493,22 @@ public class Recruits {
         channel.sendMessage(builder.build()).queue();
     }
 
+    public void sendInfo(PrivateChannel privateChannel) {
+        EmbedBuilder activeRecruitsBuilder = new EmbedBuilder();
+        activeRecruitsBuilder.setColor(Color.RED);
+        activeRecruitsBuilder.setTitle("Rekruci");
+        activeRecruitsBuilder.addField("Aktywnych rekrutacji", String.valueOf(activeRecruits.size()), false);
+        privateChannel.sendMessage(activeRecruitsBuilder.build()).queue();
+        for (Recrut r : activeRecruits) {
+            JDA jda = Repository.getJda();
+            String channelName = jda.getTextChannelById(r.getChannelID()).getName();
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.WHITE);
+            builder.addField("ID użytkownika",r.getUserID(),false);
+            builder.addField("Nazwa użytkownika",r.getUserName(),true);
+            builder.addField("ID kanału",r.getChannelID(),false);
+            builder.addField("Nazwa kanału", channelName,true);
+            privateChannel.sendMessage(builder.build()).queue();
+        }
+    }
 }

@@ -9,6 +9,7 @@ import java.util.Date;
 
 public class Validation {
 
+    private static RangerLogger rangerLogger = new RangerLogger();
     protected static final Logger logger = LoggerFactory.getLogger(Validation.class.getName());
     private static final String datePattern = "dd.MM.yyyy";
 
@@ -19,13 +20,20 @@ public class Validation {
             Date javaDate = df.parse(s);
             df.parse(s);
         } catch (ParseException e) {
-//            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,pattern));
+            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,datePattern));
             return false;
         }
         return true;
     }
 
+    /**
+     * @param s Czas w formacie HH:mm lub H:mm
+     * @return Zwraca true jeżeli czas jes podany w poprawnej formie, w innym przypadku zwraca false.
+     */
     public static boolean isTimeFormat(String s) {
+        if (s.length() == 4) {
+            s = "0" + s;
+        }
         if (s.length() == 5) {
             if (s.substring(2, 3).equalsIgnoreCase(":")) {
                 if (isDecimal(s.substring(0, 1)) && isDecimal(s.substring(1, 2)) && isDecimal(s.substring(3, 4)) && isDecimal(s.substring(4, 5))) {

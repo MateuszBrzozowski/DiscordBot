@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventsGeneratorModel {
+
     private List<EventsGenerator> eventsGenerators = new ArrayList<>();
 
     public void addEventsGenerator(EventsGenerator eGM) {

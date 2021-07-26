@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 import java.util.List;
@@ -19,7 +20,7 @@ public class EmbedHelp {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public EmbedHelp(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         Guild guild = getGuild(jda);
         jda.retrieveUserById(userID).queue(user -> {
             guild.retrieveMemberById(user.getId()).queue(member -> {
@@ -102,10 +103,21 @@ public class EmbedHelp {
                     builderDice.addField("Gry", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
                             "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
 
+                    EmbedBuilder builderDev = new EmbedBuilder();
+                    builderDev.setTitle("Ranger Bot - POMOC - DEV");
+                    builderDev.setColor(Color.RED);
+                    builderDev.addField("Komendy DEV", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
+                            "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n" +
+                            "**!disable [msgID]** -  Wyłącza buttony\n" +
+                            "**!enable [msgID]** - Włącza buttony\n" +
+                            "**!deleteEvent [msgID]** - zamyka event i usuwa event z bazy danych.\n" +
+                            "**!status** - Wyswietla status aplikacji.", false);
                     if (isRadKlan(member)) privateChannel.sendMessage(builderRecrut.build()).queue();
                     privateChannel.sendMessage(builderGenerator.build()).queue();
                     privateChannel.sendMessage(builder.build()).queue();
                     privateChannel.sendMessage(builderDice.build()).queue();
+                    if (userID.equalsIgnoreCase("642402714382237716"))
+                        privateChannel.sendMessage(builderDev.build()).queue();
                     logger.info("Wiadomość prywatna z pomocą wysłana.");
                 });
             });

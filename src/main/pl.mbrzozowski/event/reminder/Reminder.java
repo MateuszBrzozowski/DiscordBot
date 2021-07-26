@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.JDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 import java.util.List;
@@ -16,8 +17,8 @@ public class Reminder extends TimerTask {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String eventID;
-    private JDA jda = RangerBot.getJda();
-    private Event event = RangerBot.getEvents();
+    private JDA jda = Repository.getJda();
+    private Event event = Repository.getEvent();
 
     /**
      * @param eventID - ID eventu, id wiadmości w której jest lista z zapisami.

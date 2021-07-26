@@ -1,5 +1,6 @@
 package embed;
 
+import ranger.Repository;
 import recrut.Recruits;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -14,7 +15,7 @@ public class EmbedNegative {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public EmbedNegative(GuildMessageReceivedEvent event) {
-        Recruits recruits = RangerBot.getRecruits();
+        Recruits recruits = Repository.getRecruits();
         if (recruits.isRecruitChannel(event.getChannel().getId())) {
             event.getChannel().sendMessage("<@" + recruits.getRecruitIDFromChannelID(event.getChannel().getId()) + ">").queue();
             EmbedBuilder builder = new EmbedBuilder();

@@ -3,13 +3,14 @@ package embed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 
 public class EmbedHelpReminder {
 
     public EmbedHelpReminder(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("Ranger Bot - POMOC - REMINDER");

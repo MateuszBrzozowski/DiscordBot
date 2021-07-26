@@ -2,6 +2,7 @@ package helpers;
 
 import net.dv8tion.jda.api.JDA;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,7 +29,7 @@ public class RangerLogger {
     }
 
     private void Send(String msg) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.getTextChannelById(LOG_CHANNEL_ID).sendMessage(msg).queue();
     }
 

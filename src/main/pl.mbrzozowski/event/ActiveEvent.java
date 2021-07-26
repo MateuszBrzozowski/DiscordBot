@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +171,7 @@ public class ActiveEvent {
     }
 
     private String getChannelName(String channelID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         List<TextChannel> textChannels = jda.getTextChannels();
         for (TextChannel t : textChannels) {
             if (t.getId().equalsIgnoreCase(channelID)) {

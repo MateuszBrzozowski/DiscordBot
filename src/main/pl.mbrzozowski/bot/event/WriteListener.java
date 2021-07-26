@@ -9,6 +9,7 @@ import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import helpers.RoleID;
 import model.*;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -19,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 import recrut.Recruits;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class WriteListener extends ListenerAdapter {
 
@@ -35,8 +36,8 @@ public class WriteListener extends ListenerAdapter {
         String[] message = event.getMessage().getContentRaw().split(" ");
         boolean radKlan = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.RADA_KLANU);
         boolean clanMember = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.CLAN_MEMBER_ID);
-        Event matches = RangerBot.getEvents();
-        Recruits recruits = RangerBot.getRecruits();
+        Event matches = Repository.getEvent();
+        Recruits recruits = Repository.getRecruits();
 
         if (clanMember) {
             if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
@@ -55,7 +56,7 @@ public class WriteListener extends ListenerAdapter {
                 if (radKlan) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR)) {
                 event.getMessage().delete().submit();
-                EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
+                EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
                 String authorID = event.getAuthor().getId();
                 int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(authorID);
                 if (indexOfGenerator == -1) {
@@ -71,7 +72,7 @@ public class WriteListener extends ListenerAdapter {
                 }
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR_HERE)) {
                 event.getMessage().delete().submit();
-                EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
+                EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
                 String authorID = event.getAuthor().getId();
                 int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(authorID);
                 if (indexOfGenerator == -1) {
@@ -86,14 +87,13 @@ public class WriteListener extends ListenerAdapter {
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 }
-
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
                 event.getMessage().delete().submit();
                 String userID = event.getMessage().getAuthor().getId();
                 matches.createNewChannel(event, userID);
             } else if (message.length > 1 && message.length < 100 && message[0].equalsIgnoreCase(Commands.NAME)) {
                 if (matches.checkChannelIsInEventCategory(event)) {
-                    String name = getNameFromUser(message);
+                    String name = getNewChannelNameFromMsg(message);
                     event.getMessage().delete().submit();
                     event.getChannel().getManager().setName(name).queue();
                 }
@@ -118,12 +118,6 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.closeChannel(event);
-            } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
-                event.getMessage().delete().submit();
-                String eventID = message[1];
-                if (matches.getIndexActiveEvent(message[1]) >= 0) {
-                    matches.removeEvent(eventID);
-                }
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
                 event.getMessage().delete().submit();
                 if (radKlan) recruits.reOpenChannel(event);
@@ -150,10 +144,10 @@ public class WriteListener extends ListenerAdapter {
         } else if (message.length > 1 && message[0].equalsIgnoreCase(Commands.DICE)) {
             event.getMessage().delete().submit();
             DiceGame diceGame = new DiceGame(message, event);
-            DiceGames diceGames = RangerBot.getDiceGames();
+            DiceGames diceGames = Repository.getDiceGames();
             diceGames.addGame(diceGame);
         } else {
-            DiceGames diceGames = RangerBot.getDiceGames();
+            DiceGames diceGames = Repository.getDiceGames();
             if (!event.getAuthor().isBot()) {
                 if (diceGames.isActiveGameOnChannelID(event.getChannel().getId())) {
                     event.getMessage().delete().submit();
@@ -163,23 +157,15 @@ public class WriteListener extends ListenerAdapter {
         }
     }
 
-    private String getNameFromUser(String[] message) {
-        String result = "";
-        for (int i = 1; i < message.length; i++) {
-            result += message[i] + " ";
-        }
-        return result;
-    }
-
     @Override
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
         if (!isClanMember(event)) return;
 
         String[] message = event.getMessage().getContentRaw().split(" ");
-        Event matches = RangerBot.getEvents();
+        Event matches = Repository.getEvent();
 
-        EventsGeneratorModel eventsGeneratorModel = RangerBot.getEventsGeneratorModel();
+        EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
         int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
 
 //        if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
@@ -218,28 +204,49 @@ public class WriteListener extends ListenerAdapter {
                 eventsGeneratorModel.cancelEventGenerator(event);
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else eventsGeneratorModel.saveAnswerAndNextStage(event, indexOfGenerator);
-        } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.CLOSE_EVENT)) {
+        } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DELETE_EVENT)) {
             matches.removeEvent(message[1]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
             matches.disableButtons(message[1]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
             matches.enableButtons(message[1]);
+        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
+            matches.changeTime(message[1], message[2]);
+        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.DATE)) {
+            matches.changeDate(message[1], message[2]);
+        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.STATUS)) {
+            sendStatus(event.getAuthor().getId());
+        } else {
+            sendMessage(event);
         }
-//        else {
-//            sendMessage(event);
-//        }
     }
 
+    private void sendStatus(String userID) {
+        if (userID.equalsIgnoreCase(RoleID.DEV_ID)) {
+            JDA jda = Repository.getJda();
+            jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+                Event events = Repository.getEvent();
+                Recruits recruits = Repository.getRecruits();
+                events.sendInfo(privateChannel);
+                recruits.sendInfo(privateChannel);
+            });
+        }
+    }
+
+    /**
+     * @param event Wydarzenie wpisania wiadomości na prywatnym kanale
+     * @return Zwraca true jeżeli użytkownik ma rolę CLAN MEMBER, w innym przypadku zwraca false.
+     */
     private boolean isClanMember(PrivateMessageReceivedEvent event) {
         List<Guild> guilds = event.getJDA().getGuilds();
-        for (int i = 0; i < guilds.size(); i++) {
-            if (guilds.get(i).getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                List<Member> members = guilds.get(i).getMembers();
-                for (int j = 0; j < members.size(); j++) {
-                    if (members.get(j).getId().equalsIgnoreCase(event.getAuthor().getId())) {
-                        List<Role> roles = members.get(j).getRoles();
-                        for (int k = 0; k < roles.size(); k++) {
-                            if (roles.get(k).getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
+        for (Guild guild : guilds) {
+            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
+                List<Member> members = guild.getMembers();
+                for (Member member : members) {
+                    if (member.getId().equalsIgnoreCase(event.getAuthor().getId())) {
+                        List<Role> roles = member.getRoles();
+                        for (Role role : roles) {
+                            if (role.getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
                                 return true;
                             }
                         }
@@ -250,17 +257,22 @@ public class WriteListener extends ListenerAdapter {
         return false;
     }
 
+    /**
+     * @param message Wiadomość wpisana przez użytkownika
+     * @return Zwraca nazwę wpisaną przez użytkownika.
+     */
+    private String getNewChannelNameFromMsg(String[] message) {
+        String result = "";
+        for (int i = 1; i < message.length; i++) {
+            result += message[i] + " ";
+        }
+        return result;
+    }
 
     private void sendMessage(@NotNull PrivateMessageReceivedEvent event) {
-        String[] msg = {"Nie rozumiem", "O co Ci chodzi?", "Niestety, nie potrafię Cię zrozumieć!", "Słucham?", "Ale że jak?", "Co?",
-                "Ja dopiero rosnę na sile. Na chwilę obecną nie rozumiem Ciebie. Przepraszam", "Chcesz bana?", "Proszę mnie nie drażnić!",
-                "Proszę mnie nie denerwować! Ja jestem malutki. Nie rozumiem Ciebie!", "Dlaczego mi to reboisz? Zostaw mnie w spokoju",
-                "Idź i nie pisz do mnie. BRZOZAAAA!!!! ratuj", "Bóg jest odpowiedzią na wszystkie pytania", "Stanę przed wejście do burdelu, żeby złapać w nią twoją mamuśkę",
-                "Gdybyś był moim mężem, wsypałabym ci truciznę do herbaty.", "Jak nazywa się człowiek nóż? Janusz!", "Po co dresiiarz idzie do lasu? Poziomki."};
-        Random random = new Random();
         event.getJDA().retrieveUserById(event.getMessage().getAuthor().getId()).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
-                privateChannel.sendMessage("Niestety, nie rozumiem Ciebie. Jeżeli potrzebujesz pomocy. Wpisz !help").queue();
+                privateChannel.sendMessage("Niestety, nie rozumiem Ciebie. Jeżeli potrzebujesz pomocy. Wpisz **!help**").queue();
             });
         });
     }

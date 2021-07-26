@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 
@@ -24,7 +25,7 @@ public class EventsGenerator {
     private String nameEvent;
     private String date;
     private String time;
-    private String description = null;
+    private String description = "";
     private String perm;
     private int stageOfGenerator = 0;
     GuildMessageReceivedEvent eventMsgRec = null;
@@ -46,7 +47,7 @@ public class EventsGenerator {
     }
 
     private void embedStart() {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
@@ -228,13 +229,13 @@ public class EventsGenerator {
     }
 
     private void end(PrivateMessageReceivedEvent event) {
-        Event e = RangerBot.getEvents();
+        Event e = Repository.getEvent();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
         if (eventMsgRec == null) e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec);
         else e.createNewEventFromSpecificData(cmdTable, eventMsgRec);
         embedFinish(event);
-        EventsGeneratorModel model = RangerBot.getEventsGeneratorModel();
+        EventsGeneratorModel model = Repository.getEventsGeneratorModel();
         int index = model.userHaveActiveGenerator(event.getAuthor().getId());
         if (index >= 0) {
             model.removeGenerator(index);

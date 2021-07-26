@@ -3,13 +3,14 @@ package embed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import ranger.RangerBot;
+import ranger.Repository;
 
 import java.awt.*;
 
 public class EmbedCantSignOut {
 
     public EmbedCantSignOut(String userID) {
-        JDA jda = RangerBot.getJda();
+        JDA jda = Repository.getJda();
         jda.retrieveUserById(userID).queue(user -> {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
