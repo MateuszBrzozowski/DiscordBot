@@ -1,9 +1,7 @@
 package event;
 
 import database.DBConnector;
-import embed.EmbedCantSignOut;
-import embed.EmbedCantSignInReserve;
-import embed.EmbedCantSignIn;
+import embed.EmbedInfo;
 import helpers.RangerLogger;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
@@ -24,7 +22,6 @@ public class ActiveEvent {
     private String messageID; //message with embed List is IDEVENT
     private List<MemberMy> mainList = new ArrayList<>();
     private List<MemberMy> reserveList = new ArrayList<>();
-    private RangerLogger rangerLogger = new RangerLogger();
 
     /**
      * @param channelID ID kanału na którym jest lista
@@ -53,12 +50,12 @@ public class ActiveEvent {
 
     public void addToMainList(MemberMy member, ButtonClickEvent event) {
         if (checkMemberOnMainList(member)) {
-            new EmbedCantSignIn(event, member.getUserID());
+            EmbedInfo.cantSignIn(event.getUser().getId());
         } else {
             removeFromReserveList(member.getUserID());
             mainList.add(member);
             AddPlayerDB(member, true);
-            rangerLogger.info(member.getUserName() + " zapisał się na listę.", event.getChannel().getName());
+            RangerLogger.info(member.getUserName() + " zapisał się na listę.", event.getChannel().getName());
             logger.info("Dodano do listy głównej.");
         }
     }
@@ -70,12 +67,12 @@ public class ActiveEvent {
 
     public void addToReserveList(MemberMy member, ButtonClickEvent event) {
         if (checkMemberOnReserveList(member)) {
-            new EmbedCantSignInReserve(event, member.getUserID());
+            EmbedInfo.cantSignInReserve(event.getUser().getId());
         } else {
             removeFromMainList(member.getUserID());
             reserveList.add(member);
             AddPlayerDB(member, false);
-            rangerLogger.info(member.getUserName() + " zapisał się na listę rezerwową.", event.getChannel().getName());
+            RangerLogger.info(member.getUserName() + " zapisał się na listę rezerwową.", event.getChannel().getName());
             logger.info("Dodano do listy rezerwowej.");
         }
     }
@@ -163,9 +160,9 @@ public class ActiveEvent {
         removeFromMainList(userID);
         removeFromReserveList(userID);
         if (userName != null) {
-            rangerLogger.info(userName + " wypisał się z listy", getChannelName(channelID));
+            RangerLogger.info(userName + " wypisał się z listy", getChannelName(channelID));
         } else {
-            new EmbedCantSignOut(userID);
+            EmbedInfo.cantSignOut(userID);
         }
 
     }

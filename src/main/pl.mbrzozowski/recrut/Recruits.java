@@ -1,7 +1,8 @@
 package recrut;
 
 import database.DBConnector;
-import embed.*;
+import embed.EmbedInfo;
+import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
@@ -82,10 +83,10 @@ public class Recruits {
                 if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
                     if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
                         confirmMessage(userID, userName);
-                    } else new EmbedYouAreClanMember(userID);
-                } else new EmbedYouAreInClan(userID);
+                    } else EmbedInfo.userIsInClanMember(userID);
+                } else EmbedInfo.userIsInClan(userID);
             }
-        } else new EmbedYouHaveRecrutChannel(event);
+        } else EmbedInfo.userHaveRecrutChannel(userID);
     }
 
     private void confirmMessage(String userID, String userName) {
@@ -313,7 +314,7 @@ public class Recruits {
                 event.getGuild().retrieveMember(user).queue(member -> {
                     textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
                     textChannel.getManager().putPermissionOverride(member, null, permissions).queue();
-                    new EmbedCloseChannel(event.getAuthor().getId(),event.getChannel());
+                    EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
                     logger.info("Kanał zamkniety: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
                 });
             });
@@ -339,7 +340,7 @@ public class Recruits {
                 event.getGuild().retrieveMember(user).queue(member -> {
                     textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permViewChannel, null);
                     event.getChannel().getManager().putPermissionOverride(member, permissions, null).queue();
-                    new EmbedOpenChannel(event.getAuthor().getId(),event.getChannel());
+                    EmbedInfo.openChannel(event.getAuthor().getId(), event.getChannel());
                     logger.info("Kanał otwarty: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
                 });
             });
@@ -366,7 +367,7 @@ public class Recruits {
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
         logger.info("Kanał jest kanałem rekrutacyjnym.");
-        new EmbedRemoveChannel(event.getChannel());
+        EmbedInfo.removedChannel(event.getChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);

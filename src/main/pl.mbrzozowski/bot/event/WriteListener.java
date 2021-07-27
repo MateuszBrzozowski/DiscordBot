@@ -34,6 +34,7 @@ public class WriteListener extends ListenerAdapter {
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
         boolean admin = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
+        if (!admin) admin = Users.isUserDev(event.getAuthor().getId());
         boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
         Event matches = Repository.getEvent();
         Recruits recruits = Repository.getRecruits();
@@ -43,13 +44,13 @@ public class WriteListener extends ListenerAdapter {
                 event.getMessage().delete().submit();
                 if (admin) new Recruiter(event);
             } else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)) {
-                new EmbedNoWriteOnLoggerChannel(event);
+                EmbedInfo.noWriteOnLoggerChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
                 event.getMessage().delete().submit();
-                if (admin) new EmbedNegative(event);
+                if (admin) EmbedInfo.endNegative(event.getAuthor().getId(),event.getChannel());
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
                 event.getMessage().delete().submit();
-                if (admin) new EmbedPositive(event);
+                if (admin) EmbedInfo.endPositive(event.getAuthor().getId(),event.getChannel());
             } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
                 event.getMessage().delete().submit();
                 if (admin) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
@@ -62,9 +63,9 @@ public class WriteListener extends ListenerAdapter {
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
-                    new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
+                    EmbedInfo.userHaveActiveEventGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.cancelEventGenerator(event);
-                    new EmbedICreateNewGenerator(event.getAuthor().getId());
+                    EmbedInfo.createNewGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -79,9 +80,9 @@ public class WriteListener extends ListenerAdapter {
                     eventsGenerator.setHere(true);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
-                    new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
+                    EmbedInfo.userHaveActiveEventGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.cancelEventGenerator(event);
-                    new EmbedICreateNewGenerator(event.getAuthor().getId());
+                    EmbedInfo.createNewGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -139,7 +140,8 @@ public class WriteListener extends ListenerAdapter {
 
         if (message.length == 1 && message[0].equalsIgnoreCase(Commands.DICE)) {
             event.getMessage().delete().submit();
-            new EmbedDice(event);
+            DiceGame diceGame = new DiceGame();
+            diceGame.playSolo(event);
         } else if (message.length > 1 && message[0].equalsIgnoreCase(Commands.DICE)) {
             event.getMessage().delete().submit();
             DiceGame diceGame = new DiceGame(message, event);
@@ -161,6 +163,7 @@ public class WriteListener extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         boolean radKlan = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
+        if (!radKlan) radKlan = Users.isUserDev(event.getAuthor().getId());
         boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
 
         if (!clanMember) return;
@@ -182,9 +185,9 @@ public class WriteListener extends ListenerAdapter {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
             } else {
-                new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
+                EmbedInfo.userHaveActiveEventGenerator(event.getAuthor().getId());
                 eventsGeneratorModel.cancelEventGenerator(event);
-                new EmbedICreateNewGenerator(event.getAuthor().getId());
+                EmbedInfo.createNewGenerator(event.getAuthor().getId());
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);

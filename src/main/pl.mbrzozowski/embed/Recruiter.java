@@ -2,13 +2,11 @@ package embed;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 
 import java.awt.*;
 
-public class Recruiter extends ListenerAdapter {
-
+public class Recruiter {
 
     public Recruiter(GuildMessageReceivedEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
@@ -20,5 +18,4 @@ public class Recruiter extends ListenerAdapter {
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         event.getChannel().sendMessage(builder.build()).setActionRow(Button.success("newRecrut", "Podanie")).queue();
     }
-
 }

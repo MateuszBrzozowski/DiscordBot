@@ -1,5 +1,7 @@
 package model;
 
+import embed.EmbedSettings;
+import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +20,8 @@ public class DiceGame {
         this.channelID = event.getChannel().getId();
         embedInviteToGame(event);
     }
+
+    public DiceGame() {}
 
     private void embedInviteToGame(GuildMessageReceivedEvent event) {
         player1Name = getUserNameFromEvent(event);
@@ -84,5 +88,17 @@ public class DiceGame {
         Random random = new Random();
         int liczba = random.nextInt(6) + 1;
         return liczba;
+    }
+
+    public void playSolo(@NotNull GuildMessageReceivedEvent event) {
+        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
+        EmbedBuilder builder = new EmbedBuilder();
+        int liczba = losujLiczbę();
+        builder.setColor(Color.WHITE);
+        builder.setTitle("Wylosowana liczba:");
+        builder.addField(String.valueOf(liczba), "",false);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
+        builder.setFooter(userName);
+        event.getChannel().sendMessage(builder.build()).queue();
     }
 }

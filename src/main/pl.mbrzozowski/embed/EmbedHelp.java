@@ -173,7 +173,7 @@ public class EmbedHelp {
         builder.setFooter(footer);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.addField("Tworzymy gdy opis eventu jest zbyt długi by zmieścić go na liście.", ">>> **!newChannel** - Tworzy nowy kanał.\n" +
-                "*(Poleceni możesz wpisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*\n" +
+                "*(Polecenie możesz wpisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*\n" +
                 "**!name <nazwa>** - wpisz na nowo utworzonym kanale aby zmienić nazwe kanału (najlepiej nazwa eventu)\n\n" +
                 "Następnie wpisz swój opis i użyj komendy !generatorhere", false);
         privateChannel.sendMessage(builder.build()).queue();

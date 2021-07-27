@@ -175,7 +175,7 @@ public class Event {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -183,7 +183,7 @@ public class Event {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             createEventChannel(event, message[1], message[2], message[3], null, 3);
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -196,7 +196,7 @@ public class Event {
                 createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 2);
             }
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -208,7 +208,7 @@ public class Event {
                 createEventChannel(event, message[1], message[2], message[3], null, 2);
             }
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -217,7 +217,7 @@ public class Event {
             event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
             createList(Users.getUserNicknameFromID(event.getAuthor().getId()), event.getChannel(), message[1], message[2], message[3], null, 3);
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -232,7 +232,7 @@ public class Event {
                 createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 2);
             }
         } else {
-            new EmbedWrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
     }
 
@@ -769,7 +769,7 @@ public class Event {
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
         logger.info("Na kanale znajdują się listy/zapisy na eventy");
-        new EmbedRemoveChannel(event.getChannel());
+        EmbedInfo.removedChannel(event.getChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);
@@ -833,6 +833,11 @@ public class Event {
         }
     }
 
+    /**
+     * @param event Wydarzenie wpisania wiadomości na kanale.
+     * @return Zwraca true jeżeli użytkownik stworzył wcześniej kanał na którym pisze. Kanał musi znajdować się
+     * w kategori eventy. W innym przypadku zwraca false.
+     */
     public boolean checkChannelIsInEventCategory(GuildMessageReceivedEvent event) {
         if (userHaveChannel(event.getMessage().getAuthor().getId(), event.getChannel())) {
             List<Category> categories = event.getGuild().getCategories();
@@ -849,6 +854,7 @@ public class Event {
             }
         } else {
             event.getMessage().delete().submit();
+            EmbedInfo.cantChangeTitle(event.getAuthor().getId());
         }
         return false;
     }
