@@ -5,6 +5,7 @@ import embed.*;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
+import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -14,14 +15,15 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ranger.RangerBot;
 import ranger.Repository;
 
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.*;
 
 public class Recruits {
 
@@ -77,11 +79,11 @@ public class Recruits {
         event.deferEdit().queue();
         if (!checkUser(userID)) {
             if (!checkThinkingUser(userID)) {
-                if (!RoleID.isRoleAnotherClanButtonClick(event)) {
-                    if (!RoleID.isRoleButtonClick(event, RoleID.CLAN_MEMBER_ID)) {
+                if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
+                    if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
                         confirmMessage(userID, userName);
-                    } else new EmbedYouAreClanMember(event);
-                } else new EmbedYouAreInClan(event);
+                    } else new EmbedYouAreClanMember(userID);
+                } else new EmbedYouAreInClan(userID);
             }
         } else new EmbedYouHaveRecrutChannel(event);
     }
@@ -106,6 +108,7 @@ public class Recruits {
                     }
                     if (userIsThinking(userID) >= 0) {
                         //TODO wyslac informacje że zakonczone oczekiwanie i ze jak chce zlozyc podanie to niech zrobi jeszcze raz
+                        sendCancelInfo(privateChannel);
                         cancel(userID, privateChannel, message.getId());
                         disableButtons(privateChannel, message.getId());
                     }
@@ -113,6 +116,15 @@ public class Recruits {
                 timer.start();
             });
         });
+    }
+
+    private void sendCancelInfo(PrivateChannel privateChannel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.RED);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+        builder.setTitle("Uwaga");
+        builder.setDescription("Brak potwierdzenia. Anuluje podanie.");
+        privateChannel.sendMessage(builder.build()).queue();
     }
 
     public void confirm(String userID, MessageChannel privateChannel, String messageID) {
@@ -236,6 +248,10 @@ public class Recruits {
         return resultSet;
     }
 
+    /**
+     * @param userID ID użytkownika którego sprawdzamy
+     * @return Zwraca true jeśli użytkownik ma otwarty kanał rekrutacji. W innym przypadku zwraca false.
+     */
     private boolean checkUser(String userID) {
         for (Recrut member : activeRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
@@ -245,6 +261,11 @@ public class Recruits {
         return false;
     }
 
+    /**
+     * @param userID ID użytkownika którego sprawdzamy
+     * @return Zwraca true jeśli użytkownik kliknął Złóż podanie i program cozekuje na odpowiedź. W innym przypoadku
+     * zwraca false.
+     */
     private boolean checkThinkingUser(String userID) {
         for (Recrut member : thinkingRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
@@ -291,9 +312,9 @@ public class Recruits {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
-                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),null,permViewChannel);
+                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
                     textChannel.getManager().putPermissionOverride(member, null, permissions).queue();
-                    new EmbedCloseChannel(event);
+                    new EmbedCloseChannel(event.getAuthor().getId(),event.getChannel());
                     logger.info("Kanał zamkniety: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
                 });
             });
@@ -317,9 +338,9 @@ public class Recruits {
             int indexOfRecrut = getIndexOfRecrut(event);
             event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
                 event.getGuild().retrieveMember(user).queue(member -> {
-                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID),permViewChannel,null);
+                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permViewChannel, null);
                     event.getChannel().getManager().putPermissionOverride(member, permissions, null).queue();
-                    new EmbedOpernChannel(event);
+                    new EmbedOpenChannel(event.getAuthor().getId(),event.getChannel());
                     logger.info("Kanał otwarty: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
                 });
             });
@@ -346,7 +367,7 @@ public class Recruits {
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
         logger.info("Kanał jest kanałem rekrutacyjnym.");
-        new EmbedRemoveChannel(event);
+        new EmbedRemoveChannel(event.getChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);
@@ -359,22 +380,6 @@ public class Recruits {
         });
         thread.start();
     }
-
-    private String getUserNameFromID(String userID) {
-        JDA jda = Repository.getJda();
-        List<Guild> guilds = jda.getGuilds();
-        for (Guild guild : guilds) {
-            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                String name = guild.getMemberById(userID).getNickname();
-                if (name == null) {
-                    name = guild.getJDA().getUserById(userID).getName();
-                }
-                return name;
-            }
-        }
-        return null;
-    }
-
 
     /**
      * @param nickRecrut Nick rekruta który może sobie ustawić
@@ -484,7 +489,7 @@ public class Recruits {
     }
 
     private void signature(TextChannel channel, User drill) {
-        String drillName = getUserNameFromID(drill.getId());
+        String drillName = Users.getUserNicknameFromID(drill.getId());
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail("https://cdn.icon-icons.com/icons2/2622/PNG/512/gui_signature_icon_157586.png");
@@ -506,10 +511,10 @@ public class Recruits {
             String channelName = jda.getTextChannelById(r.getChannelID()).getName();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.WHITE);
-            builder.addField("ID użytkownika",r.getUserID(),false);
-            builder.addField("Nazwa użytkownika",r.getUserName(),true);
-            builder.addField("ID kanału",r.getChannelID(),false);
-            builder.addField("Nazwa kanału", channelName,true);
+            builder.addField("ID użytkownika", r.getUserID(), false);
+            builder.addField("Nazwa użytkownika", r.getUserName(), true);
+            builder.addField("ID kanału", r.getChannelID(), false);
+            builder.addField("Nazwa kanału", channelName, true);
             privateChannel.sendMessage(builder.build()).queue();
         }
     }

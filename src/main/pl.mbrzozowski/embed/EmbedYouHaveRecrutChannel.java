@@ -15,7 +15,7 @@ public class EmbedYouHaveRecrutChannel {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setTitle("NIE MOŻESZ ZŁOŻYĆ WIĘCEJ NIŻ JEDNO PODANIE!");
                 builder.setColor(Color.red);
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+                builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
                 builder.setDescription("Zlożyłeś już podanie do naszego klanu i\n" +
                         "jesteś w trakcie rekrutacji.\n");
                 builder.addField("Jeżeli masz pytania w związku z Twoją rekrutacją", "", false);

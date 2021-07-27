@@ -1,18 +1,14 @@
 package embed;
 
-import ranger.Repository;
-import recrut.Recruits;
+import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ranger.RangerBot;
+import ranger.Repository;
+import recrut.Recruits;
 
 import java.awt.*;
 
 public class EmbedNegative {
-
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public EmbedNegative(GuildMessageReceivedEvent event) {
         Recruits recruits = Repository.getRecruits();
@@ -22,10 +18,9 @@ public class EmbedNegative {
             builder.setColor(Color.RED);
             builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
-            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            builder.setFooter("Podpis: " + Users.getUserNicknameFromID(event.getAuthor().getId()));
             event.getChannel().sendMessage(builder.build()).queue();
-            logger.info("Uzytkownik {} wysłał negatywny wynik rekrutacji", event.getMember().getNickname());
         }
-
     }
 }

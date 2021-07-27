@@ -15,7 +15,7 @@ public class EmbedCantSignOut {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.red);
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+                builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
                 builder.setTitle("Nie możesz wypisać się z tego meczu.");
                 builder.setDescription("Nie możesz wypisać się z meczu na który się nie zapisałeś!");
                 builder.addField("", "Jeżeli jednak jesteś na liście a nadal otrzymujesz tą wiadomość. Napisz do administracji.", false);

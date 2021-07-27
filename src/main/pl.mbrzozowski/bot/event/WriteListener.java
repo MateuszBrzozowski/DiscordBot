@@ -8,6 +8,7 @@ import event.EventsGeneratorModel;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import helpers.RoleID;
+import helpers.Users;
 import model.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -34,8 +35,8 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
-        boolean radKlan = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.RADA_KLANU);
-        boolean clanMember = RoleID.isRoleMessageRecived(event.getMessage().getMember().getRoles(), RoleID.CLAN_MEMBER_ID);
+        boolean radKlan = Users.hasUserRole(event.getAuthor().getId(),RoleID.RADA_KLANU);
+        boolean clanMember = Users.hasUserRole(event.getAuthor().getId(),RoleID.CLAN_MEMBER_ID);
         Event matches = Repository.getEvent();
         Recruits recruits = Repository.getRecruits();
 
@@ -63,9 +64,9 @@ public class WriteListener extends ListenerAdapter {
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
-                    new EmbedYouHaveActiveEventGenerator(event);
+                    new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.cancelEventGenerator(event);
-                    new EmbedICreateNewGenerator(event);
+                    new EmbedICreateNewGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -80,9 +81,9 @@ public class WriteListener extends ListenerAdapter {
                     eventsGenerator.setHere(true);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
-                    new EmbedYouHaveActiveEventGenerator(event);
+                    new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.cancelEventGenerator(event);
-                    new EmbedICreateNewGenerator(event);
+                    new EmbedICreateNewGenerator(event.getAuthor().getId());
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(event);
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -179,9 +180,9 @@ public class WriteListener extends ListenerAdapter {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
             } else {
-                new EmbedYouHaveActiveEventGenerator(event);
+                new EmbedYouHaveActiveEventGenerator(event.getAuthor().getId());
                 eventsGeneratorModel.cancelEventGenerator(event);
-                new EmbedICreateNewGenerator(event);
+                new EmbedICreateNewGenerator(event.getAuthor().getId());
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);

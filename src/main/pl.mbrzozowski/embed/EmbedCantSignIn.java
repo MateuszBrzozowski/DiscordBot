@@ -12,7 +12,7 @@ public class EmbedCantSignIn {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.red);
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+                builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
                 builder.setTitle("Jesteś już na liście");
                 builder.setDescription("Jesteś już na głównej liście w meczu na który próbowałeś się zapisać.");
                 builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
