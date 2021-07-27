@@ -2,6 +2,7 @@ package bot.event;
 
 
 import embed.*;
+import embed.EmbedHelp;
 import event.Event;
 import event.EventsGenerator;
 import event.EventsGeneratorModel;
@@ -11,9 +12,6 @@ import helpers.RoleID;
 import helpers.Users;
 import model.*;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -35,26 +33,26 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
-        boolean radKlan = Users.hasUserRole(event.getAuthor().getId(),RoleID.RADA_KLANU);
-        boolean clanMember = Users.hasUserRole(event.getAuthor().getId(),RoleID.CLAN_MEMBER_ID);
+        boolean admin = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
+        boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
         Event matches = Repository.getEvent();
         Recruits recruits = Repository.getRecruits();
 
         if (clanMember) {
             if (message.length == 1 && message[0].equalsIgnoreCase(Commands.START_REKRUT)) {
                 event.getMessage().delete().submit();
-                if (radKlan) new Recruiter(event);
+                if (admin) new Recruiter(event);
             } else if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)) {
                 new EmbedNoWriteOnLoggerChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
                 event.getMessage().delete().submit();
-                if (radKlan) new EmbedNegative(event);
+                if (admin) new EmbedNegative(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
                 event.getMessage().delete().submit();
-                if (radKlan) new EmbedPositive(event);
+                if (admin) new EmbedPositive(event);
             } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
                 event.getMessage().delete().submit();
-                if (radKlan) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
+                if (admin) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.GENERATOR)) {
                 event.getMessage().delete().submit();
                 EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
@@ -118,16 +116,16 @@ public class WriteListener extends ListenerAdapter {
                 matches.createNewEventFromSpecificData(message, event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.CLOSE)) {
                 event.getMessage().delete().submit();
-                if (radKlan) recruits.closeChannel(event);
+                if (admin) recruits.closeChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REOPEN)) {
                 event.getMessage().delete().submit();
-                if (radKlan) recruits.reOpenChannel(event);
-            } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
+                if (admin) recruits.reOpenChannel(event);
+            } else if (message.length >= 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
                 event.getMessage().delete().submit();
-                new EmbedHelp(event.getMessage().getAuthor().getId());
+                EmbedHelp.help(event.getMessage().getAuthor().getId(), message);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
                 event.getMessage().delete().submit();
-                if (radKlan) {
+                if (admin) {
                     logger.info("Usuwanie kanału.");
                     String channelID = event.getChannel().getId();
                     if (recruits.isRecruitChannel(channelID)) {
@@ -161,7 +159,11 @@ public class WriteListener extends ListenerAdapter {
     @Override
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        if (!isClanMember(event)) return;
+
+        boolean radKlan = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
+        boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
+
+        if (!clanMember) return;
 
         String[] message = event.getMessage().getContentRaw().split(" ");
         Event matches = Repository.getEvent();
@@ -187,10 +189,8 @@ public class WriteListener extends ListenerAdapter {
                 EventsGenerator eventsGenerator = new EventsGenerator(event);
                 eventsGeneratorModel.addEventsGenerator(eventsGenerator);
             }
-        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
-            new EmbedHelp(event.getAuthor().getId());
-        } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.HELP_REMINDER)) {
-            new EmbedHelpReminder(event.getAuthor().getId());
+        } else if (message.length >= 1 && message[0].equalsIgnoreCase(Commands.HELPS)) {
+            EmbedHelp.help(event.getMessage().getAuthor().getId(), message);
         } else if (message.length == 4 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
             matches.createNewEventFrom3Data(message, event);
         } else if (message.length == 5 && message[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
@@ -206,11 +206,11 @@ public class WriteListener extends ListenerAdapter {
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else eventsGeneratorModel.saveAnswerAndNextStage(event, indexOfGenerator);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DELETE_EVENT)) {
-            matches.removeEvent(message[1]);
+            if (radKlan) matches.removeEvent(message[1]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
-            matches.disableButtons(message[1]);
+            if (radKlan) matches.disableButtons(message[1]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
-            matches.enableButtons(message[1]);
+            if (radKlan) matches.enableButtons(message[1]);
         } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
             matches.changeTime(message[1], message[2]);
         } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.DATE)) {
@@ -232,30 +232,6 @@ public class WriteListener extends ListenerAdapter {
                 recruits.sendInfo(privateChannel);
             });
         }
-    }
-
-    /**
-     * @param event Wydarzenie wpisania wiadomości na prywatnym kanale
-     * @return Zwraca true jeżeli użytkownik ma rolę CLAN MEMBER, w innym przypadku zwraca false.
-     */
-    private boolean isClanMember(PrivateMessageReceivedEvent event) {
-        List<Guild> guilds = event.getJDA().getGuilds();
-        for (Guild guild : guilds) {
-            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                List<Member> members = guild.getMembers();
-                for (Member member : members) {
-                    if (member.getId().equalsIgnoreCase(event.getAuthor().getId())) {
-                        List<Role> roles = member.getRoles();
-                        for (Role role : roles) {
-                            if (role.getId().equalsIgnoreCase(RoleID.CLAN_MEMBER_ID)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     /**

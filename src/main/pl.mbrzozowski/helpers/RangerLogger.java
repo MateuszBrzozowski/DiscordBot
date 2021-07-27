@@ -1,15 +1,23 @@
 package helpers;
 
 import net.dv8tion.jda.api.JDA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
 import ranger.Repository;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class RangerLogger {
 
     private final static String LOG_CHANNEL_ID = "860096729457098762";
+    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
     /**
      * @param msg         Wiadomość wypisana na kanale do logowania
@@ -34,8 +42,8 @@ public class RangerLogger {
     }
 
     private static String getCurrentDateAndTime() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd-MM-yyyy HH:mm:ss.SSS");
-        Date date = new Date();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE, dd-MM-yyyy HH:mm:ss.SSS");
+        LocalDateTime date = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         return dateFormat.format(date);
     }
 }

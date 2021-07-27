@@ -1,10 +1,7 @@
 package event;
 
 import database.DBConnector;
-import embed.EmbedInfoEditEventChannel;
-import embed.EmbedRemoveChannel;
-import embed.EmbedSettings;
-import embed.EmbedWrongDateOrTime;
+import embed.*;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -591,7 +588,7 @@ public class Event {
 
     /**
      * @param messageID ID wiadomości w której jest lista z zapisami na event
-     * @return zwraca index eventu.; -1 jeżeli eventu nie ma.
+     * @return zwraca index eventu.; Zwraca -1 jeżeli eventu nie ma.
      */
     public int getIndexActiveEvent(String messageID) {
         for (int i = 0; i < activeEvents.size(); i++) {
@@ -805,7 +802,7 @@ public class Event {
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .queue(textChannel -> {
                             textChannelsUser.put(userID, textChannel);
-                            new EmbedInfoEditEventChannel(userID);
+                            EmbedHelp.infoEditEventChannel(userID);
                         });
                 break;
             }
@@ -826,7 +823,7 @@ public class Event {
                                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                                 .queue(textChannel -> {
                                     textChannelsUser.put(userID, textChannel);
-                                    new EmbedInfoEditEventChannel(userID);
+                                    EmbedHelp.infoEditEventChannel(userID);
                                 });
                         break;
                     }

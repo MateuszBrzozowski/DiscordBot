@@ -2,9 +2,7 @@ package ranger;
 
 import bot.event.*;
 import event.Event;
-import event.EventsGeneratorModel;
 import helpers.RangerLogger;
-import model.DiceGames;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -22,7 +20,6 @@ public class RangerBot {
 
     private static final String BOT_TOKEN = "";
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private static RangerLogger rangerLogger = new RangerLogger();
 
 
     public static void main(String[] args) throws LoginException {

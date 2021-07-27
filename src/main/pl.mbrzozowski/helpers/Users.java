@@ -69,4 +69,15 @@ public class Users {
         }
         return false;
     }
+
+    /**
+     * @param userID ID użytkownika którego sprawdzamy czy jest twórcą bota
+     * @return Zwraca true jeżeli użytkownik to twórca bota, W innym przypadku zwraca false.
+     */
+    public static boolean isUserDev(String userID) {
+        if (userID.equalsIgnoreCase(RoleID.DEV_ID)){
+            return true;
+        }
+        return false;
+    }
 }

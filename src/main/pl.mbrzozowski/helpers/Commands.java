@@ -9,7 +9,6 @@ public class Commands {
     public static final String DISABLE_BUTTONS = PREFIX + "disable";
     public static final String ENABLE_BUTTONS = PREFIX + "enable";
     public static final String ACCEPT_RECRUT = PREFIX + "accept";
-    public static final String HELP_REMINDER = PREFIX + "helpReminder";
     public static final String DELETE_EVENT = PREFIX + "deleteEvent";
     public static final String NAME = PREFIX + "name";
     public static final String GENERATOR_HERE = PREFIX + "generatorHere";

@@ -28,8 +28,8 @@ public class ButtonClickListener extends ListenerAdapter {
         }
 
         Event events = Repository.getEvent();
-        if (events.getIndexActiveEvent(event.getMessage().getId()) >= 0) {
-            int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
+        int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
+        if (indexOfMatch >= 0) {
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
                 events.signIn(event, indexOfMatch);

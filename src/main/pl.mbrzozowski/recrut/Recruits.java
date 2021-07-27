@@ -107,7 +107,6 @@ public class Recruits {
                         e.printStackTrace();
                     }
                     if (userIsThinking(userID) >= 0) {
-                        //TODO wyslac informacje że zakonczone oczekiwanie i ze jak chce zlozyc podanie to niech zrobi jeszcze raz
                         sendCancelInfo(privateChannel);
                         cancel(userID, privateChannel, message.getId());
                         disableButtons(privateChannel, message.getId());

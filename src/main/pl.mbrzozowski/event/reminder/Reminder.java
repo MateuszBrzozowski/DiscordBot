@@ -50,7 +50,7 @@ public class Reminder extends TimerTask {
             builder.setThumbnail("https://cdn.icon-icons.com/icons2/1993/PNG/512/clock_hour_minute_second_time_timer_watch_icon_123193.png");
             builder.setTitle("Halo Halo!!!");
             builder.setDescription("Pozostało 15 minut do rozpoczęcia wydarzenia na które się zapisałeś!");
-            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !helpReminder");
+            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
             privateChannel.sendMessage(builder.build()).queue();
         });
     }
