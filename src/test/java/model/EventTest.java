@@ -236,4 +236,24 @@ public class EventTest {
         //then
         Assert.assertEquals(isTime,false);
     }
+    @Test
+    public void eventDateTimeAfterNow_True(){
+        //given
+        String date = "29.07.2021 19:00";
+        //when
+        Event event = new Event();
+//        boolean b = event.eventDateTimeAfterNow(date);
+        //then
+//        Assert.assertEquals(b,true);
+    }
+    @Test
+    public void eventDateTimeAfterNow_False(){
+        //given
+        String date = "27.07.2021 19:00";
+        //when
+        Event event = new Event();
+//        boolean b = event.eventDateTimeAfterNow(date);
+        //then
+//        Assert.assertEquals(b,false);
+    }
 }

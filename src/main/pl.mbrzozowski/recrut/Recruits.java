@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.managers.ChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -51,8 +52,8 @@ public class Recruits {
                         .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                         .queue(textChannel -> {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
-                                    "<@&" + RoleID.RADA_KLANU + "> ").queue();
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
+                                    "<@&" + "RoleID.RADA_KLANU" + "> ").queue();
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.GREEN);
                             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
@@ -309,22 +310,21 @@ public class Recruits {
         TextChannel textChannel = event.getChannel();
         boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
         if (isRecruitChannel) {
-            int indexOfRecrut = getIndexOfRecrut(event);
-            event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
-                event.getGuild().retrieveMember(user).queue(member -> {
-                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
-                    textChannel.getManager().putPermissionOverride(member, null, permissions).queue();
-                    EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
-                    logger.info("Kanał zamkniety: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
-                });
-            });
+            int indexOfRecrut = getIndexOfRecrut(event.getChannel().getId());
+            Member member = event.getGuild().getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
+            ChannelManager manager = textChannel.getManager();
+            manager.putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
+            if (member != null)
+                manager.putPermissionOverride(member, null, permissions);
+            manager.queue();
+            EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
         }
 
     }
 
-    private int getIndexOfRecrut(GuildMessageReceivedEvent event) {
+    private int getIndexOfRecrut(String channelID) {
         for (int i = 0; i < activeRecruits.size(); i++) {
-            if (activeRecruits.get(i).getChannelID().equalsIgnoreCase(event.getChannel().getId())) {
+            if (activeRecruits.get(i).getChannelID().equalsIgnoreCase(channelID)) {
                 return i;
             }
         }
@@ -335,15 +335,14 @@ public class Recruits {
         TextChannel textChannel = event.getChannel();
         boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
         if (isRecruitChannel) {
-            int indexOfRecrut = getIndexOfRecrut(event);
-            event.getJDA().retrieveUserById(activeRecruits.get(indexOfRecrut).getUserID()).queue(user -> {
-                event.getGuild().retrieveMember(user).queue(member -> {
-                    textChannel.getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permViewChannel, null);
-                    event.getChannel().getManager().putPermissionOverride(member, permissions, null).queue();
-                    EmbedInfo.openChannel(event.getAuthor().getId(), event.getChannel());
-                    logger.info("Kanał otwarty: {} , userName: {}, userID: {}", event.getChannel().getName(), user.getName(), user.getId());
-                });
-            });
+            int indexOfRecrut = getIndexOfRecrut(textChannel.getId());
+            Member member = event.getGuild().getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
+            ChannelManager manager = textChannel.getManager();
+            manager.putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permViewChannel, null);
+            if (member != null)
+                manager.putPermissionOverride(member, permissions, null);
+            manager.queue();
+            EmbedInfo.openChannel(event.getAuthor().getId(), event.getChannel());
         }
     }
 

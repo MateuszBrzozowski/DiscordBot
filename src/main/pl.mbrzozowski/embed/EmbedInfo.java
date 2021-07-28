@@ -106,6 +106,23 @@ public class EmbedInfo {
     }
 
     /**
+     * Wysyła informację do użytkownika że podał date i czas z przeszłości.
+     *
+     * @param userID ID użytkownika do którego wysyłana jest informacja
+     */
+    public static void dateTimeIsBeforeNow(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            builder.setTitle("Podałeś nielogiczną datę i czas. Event w przeszłości?");
+            builder.setDescription("Podaj prawidłową datę i czas.");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+    /**
      * Wyświetla informację, że kanał podany w parametrze został zamknięty.
      *
      * @param userID  ID użytkownika który zamyka kanał
@@ -300,6 +317,23 @@ public class EmbedInfo {
                 privateChannel.sendMessage(builder.build()).queue();
             });
         }
+    }
+
+
+    /**
+     * Wysyła do użytkownika o userID informację że event już się wydarzył.
+     *
+     * @param userID ID użytkownika do którego wysyłana jest wiadomość
+     */
+    public static void eventIsBefore(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            builder.setTitle("Event już się wydarzył. Nie możesz się zapisać.");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
     }
 
 

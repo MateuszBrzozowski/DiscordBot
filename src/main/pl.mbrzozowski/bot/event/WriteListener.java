@@ -1,8 +1,9 @@
 package bot.event;
 
 
-import embed.*;
 import embed.EmbedHelp;
+import embed.EmbedInfo;
+import embed.Recruiter;
 import event.Event;
 import event.EventsGenerator;
 import event.EventsGeneratorModel;
@@ -10,7 +11,9 @@ import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import helpers.RoleID;
 import helpers.Users;
-import model.*;
+import model.DiceGame;
+import model.DiceGames;
+import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -47,10 +50,10 @@ public class WriteListener extends ListenerAdapter {
                 EmbedInfo.noWriteOnLoggerChannel(event);
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEGATIVE)) {
                 event.getMessage().delete().submit();
-                if (admin) EmbedInfo.endNegative(event.getAuthor().getId(),event.getChannel());
+                if (admin) EmbedInfo.endNegative(event.getAuthor().getId(), event.getChannel());
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.POSITIVE)) {
                 event.getMessage().delete().submit();
-                if (admin) EmbedInfo.endPositive(event.getAuthor().getId(),event.getChannel());
+                if (admin) EmbedInfo.endPositive(event.getAuthor().getId(), event.getChannel());
             } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
                 event.getMessage().delete().submit();
                 if (admin) recruits.acceptRecrut(message[1], event.getChannel(), event.getAuthor());
@@ -162,8 +165,8 @@ public class WriteListener extends ListenerAdapter {
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        boolean radKlan = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
-        if (!radKlan) radKlan = Users.isUserDev(event.getAuthor().getId());
+        boolean admin = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
+        if (!admin) admin = Users.isUserDev(event.getAuthor().getId());
         boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
 
         if (!clanMember) return;
@@ -209,15 +212,19 @@ public class WriteListener extends ListenerAdapter {
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else eventsGeneratorModel.saveAnswerAndNextStage(event, indexOfGenerator);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DELETE_EVENT)) {
-            if (radKlan) matches.removeEvent(message[1]);
+            if (admin) matches.removeEvent(message[1]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
-            if (radKlan) matches.disableButtons(message[1]);
+            if (admin) matches.disableButtons(message[1]);
+        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
+            if (admin) matches.disableButtons(message[1], message[2]);
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
-            if (radKlan) matches.enableButtons(message[1]);
-        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
-            matches.changeTime(message[1], message[2]);
+            if (admin) matches.enableButtons(message[1]);
+        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
+            if (admin) matches.enableButtons(message[1],message[2]);
+        }else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
+            if (admin) matches.changeTime(message[1], message[2], event.getAuthor().getId());
         } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.DATE)) {
-            matches.changeDate(message[1], message[2]);
+            if (admin) matches.changeDate(message[1], message[2], event.getAuthor().getId());
         } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.STATUS)) {
             sendStatus(event.getAuthor().getId());
         } else {

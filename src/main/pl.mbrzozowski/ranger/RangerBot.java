@@ -34,6 +34,7 @@ public class RangerBot {
                 .addEventListeners(new MessageUpdate())
                 .addEventListeners(new Listener())
                 .build();
+        Repository.setJDA(jda);
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
         try {
@@ -42,7 +43,6 @@ public class RangerBot {
             e.printStackTrace();
         }
         initialize(jda);
-        Repository.setJDA(jda);
 
         logger.info("Bot uruchomiony.");
     }

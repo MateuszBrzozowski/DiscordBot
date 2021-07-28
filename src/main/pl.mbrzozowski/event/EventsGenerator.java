@@ -18,7 +18,6 @@ import java.awt.*;
 public class EventsGenerator {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private RangerLogger rangerLogger = new RangerLogger();
     private boolean here = false;
     private String userID;
     private String userName;
@@ -92,7 +91,8 @@ public class EventsGenerator {
             }
             case 2: {
                 boolean isDateFormat = Validation.isDateFormat(msg);
-                if (isDateFormat) {
+                boolean isDateAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
+                if (isDateFormat && isDateAfterNow) {
                     date = msg;
                     stageOfGenerator++;
                     embedGetTime(event);
@@ -104,7 +104,12 @@ public class EventsGenerator {
             }
             case 3: {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                if (isTimeFormat) {
+                String time = msg;
+                if (time.length() == 4){
+                    time = "0" + time;
+                }
+                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + time);
+                if (isTimeFormat && isTimeAfterNow) {
                     time = msg;
                     stageOfGenerator++;
                     embedIsDescription(event);
@@ -382,7 +387,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowy format czasu eventu", "", false);
+                builder.addField("Nieprawidłowy format czasu eventu lub data i czas jest z przeszłości.", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });
@@ -404,7 +409,7 @@ public class EventsGenerator {
             user.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.setColor(Color.RED);
-                builder.addField("Nieprawidłowy format daty eventu", "", false);
+                builder.addField("Nieprawidłowy format daty eventu lub podałeś czas z przeszłości.", "", false);
                 privateChannel.sendMessage(builder.build()).queue();
             });
         });

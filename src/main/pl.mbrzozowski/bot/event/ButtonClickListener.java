@@ -1,5 +1,6 @@
 package bot.event;
 
+import event.ButtonClick;
 import ranger.Repository;
 import recrut.Recruits;
 import event.Event;
@@ -32,11 +33,11 @@ public class ButtonClickListener extends ListenerAdapter {
         if (indexOfMatch >= 0) {
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
-                events.signIn(event, indexOfMatch);
+                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_IN);
             } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
-                events.signINReserve(event, indexOfMatch);
+                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_IN_RESERVE);
             } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
-                events.signOut(event, indexOfMatch);
+                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_OUT);
             }
             events.updateEmbed(event, indexOfMatch);
         }

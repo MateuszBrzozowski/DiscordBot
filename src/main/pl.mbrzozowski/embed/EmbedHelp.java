@@ -90,7 +90,9 @@ public class EmbedHelp {
         builder.addField("Komendy DEV", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
                 "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n" +
                 "**!disable [msgID]** -  Wyłącza buttony\n" +
+                "**!disable [msgID] [channID]** -  Wyłącza buttony\n" +
                 "**!enable [msgID]** - Włącza buttony\n" +
+                "**!enable [msgID] [channID]** - Włącza buttony\n" +
                 "**!deleteEvent [msgID]** - zamyka event i usuwa event z bazy danych.\n" +
                 "**!status** - Wyswietla status aplikacji.", false);
         privateChannel.sendMessage(builder.build()).queue();

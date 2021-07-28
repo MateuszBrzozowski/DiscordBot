@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 public class Validation {
@@ -20,7 +24,7 @@ public class Validation {
             Date javaDate = df.parse(s);
             df.parse(s);
         } catch (ParseException e) {
-            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"",s,datePattern));
+            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"", s, datePattern));
             return false;
         }
         return true;
@@ -54,6 +58,28 @@ public class Validation {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Sprawdza czy data i czas jest później niż obecna data i czas.
+     *
+     * @param dateTime Data i czas w formacie dd.MM.yyyy HH:mm
+     * @return Zwraca true jeżeli podany czas w parametrze jest później niż obecny. W innym przypadku zwraca false.
+     */
+    public static boolean eventDateTimeAfterNow(String dateTime) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        LocalDateTime evnetDateTime = null;
+        try {
+            evnetDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
+        } catch (DateTimeParseException e) {
+            RangerLogger.info("Nieprawidłowa data i czas [" + dateTime + "]");
+            return false;
+        }
+        if (evnetDateTime.isAfter(dateTimeNow))
+            return true;
+
         return false;
     }
 }

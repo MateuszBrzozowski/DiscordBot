@@ -1,7 +1,9 @@
 package event;
 
 import database.DBConnector;
-import embed.*;
+import embed.EmbedHelp;
+import embed.EmbedInfo;
+import embed.EmbedSettings;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,6 +22,9 @@ import ranger.Repository;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 
@@ -30,12 +35,13 @@ public class Event {
     public static final String NAME_LIST = ":white_check_mark: Lista ";
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
-    private RangerLogger rangerLogger = new RangerLogger();
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
     public void initialize(JDA jda) {
         getAllDatabase(jda);
+        checkAllListOfEvents();
     }
+
 
     private void getAllDatabase(JDA jda) {
         downladMatchesDB(jda);
@@ -44,9 +50,9 @@ public class Event {
     }
 
     private void loggingInput() {
-        rangerLogger.info(String.format("Ilość aktywnych eventów: [%d]", activeEvents.size()));
+        RangerLogger.info(String.format("Ilość aktywnych eventów: [%d]", activeEvents.size()));
         for (ActiveEvent ae : activeEvents) {
-            rangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", ae.getMessageID(), ae.getNumberOfSignIn()));
+            RangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", ae.getMessageID(), ae.getNumberOfSignIn()));
         }
     }
 
@@ -119,6 +125,53 @@ public class Event {
         }
     }
 
+    /**
+     * Sprawdza każdy event i jeżeli data i czas jest przeszły (event się wydarzył) wyłacza buttony.
+     * Jeżeli event wydarzył się więcej niż 2 dni temu to usuwa z bazy danych.
+     */
+    private void checkAllListOfEvents() {
+        JDA jda = Repository.getJda();
+        for (ActiveEvent ae : activeEvents) {
+            TextChannel channel = jda.getTextChannelById(ae.getChannelID());
+            channel.retrieveMessageById(ae.getMessageID()).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+                String stringDate = fields.get(0).getValue() + " " + fields.get(2).getValue();
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+                LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+                LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
+                if (date.isBefore(dateNow)) {
+                    disableButtons(ae.getMessageID());
+                    LocalDateTime dateTwoDaysBefore = LocalDateTime.now(ZoneId.of("Europe/Paris")).minusDays(2);
+                    if (dateTwoDaysBefore.isAfter(date)) {
+                        removeEvent(ae.getMessageID());
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Sprawdza czy event już się wydarzył.
+     *
+     * @param indexOfActiveMatch Index eventu na liście
+     * @return Zwraca true jeśli event się jeszcze nie wydarzył. W innym przypadku zwraca false.
+     */
+    private boolean eventIsAfter(int indexOfActiveMatch) {
+        JDA jda = Repository.getJda();
+        TextChannel channel = jda.getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
+        List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
+        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        LocalDateTime dateEvent = LocalDateTime.parse(dateString, dateFormat);
+        LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+        if (dateEvent.isAfter(dateNow)) {
+            return true;
+        }
+        return false;
+    }
+
     private void removeMatchDB(String messageID) {
         String query = "DELETE FROM `event` WHERE msgID=\"%s\"";
         DBConnector connector = new DBConnector();
@@ -173,7 +226,11 @@ public class Event {
      */
     public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+            }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
@@ -181,7 +238,11 @@ public class Event {
 
     public void createNewEventFrom3Data(String[] message, PrivateMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            createEventChannel(event, message[1], message[2], message[3], null, 3);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                createEventChannel(event, message[1], message[2], message[3], null, 3);
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+            }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
@@ -190,10 +251,14 @@ public class Event {
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (message[4].equalsIgnoreCase("-ac")) {
-                createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 1);
-            } else if (message[4].equalsIgnoreCase("-r")) {
-                createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 2);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                if (message[4].equalsIgnoreCase("-ac")) {
+                    createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 1);
+                } else if (message[4].equalsIgnoreCase("-r")) {
+                    createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 2);
+                }
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
             }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
@@ -202,10 +267,14 @@ public class Event {
 
     public void createNewEventFrom4Data(String[] message, PrivateMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (message[4].equalsIgnoreCase("-ac")) {
-                createEventChannel(event, message[1], message[2], message[3], null, 1);
-            } else if (message[4].equalsIgnoreCase("-r")) {
-                createEventChannel(event, message[1], message[2], message[3], null, 2);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                if (message[4].equalsIgnoreCase("-ac")) {
+                    createEventChannel(event, message[1], message[2], message[3], null, 1);
+                } else if (message[4].equalsIgnoreCase("-r")) {
+                    createEventChannel(event, message[1], message[2], message[3], null, 2);
+                }
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
             }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
@@ -214,8 +283,12 @@ public class Event {
 
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-            createList(Users.getUserNicknameFromID(event.getAuthor().getId()), event.getChannel(), message[1], message[2], message[3], null, 3);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                createList(Users.getUserNicknameFromID(event.getAuthor().getId()), event.getChannel(), message[1], message[2], message[3], null, 3);
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+            }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
         }
@@ -223,13 +296,17 @@ public class Event {
 
     public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (message[4].equalsIgnoreCase("-ac")) {
-                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
-                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 1);
-            } else if (message[4].equalsIgnoreCase("-r")) {
-                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
-                createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 2);
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                if (message[4].equalsIgnoreCase("-ac")) {
+                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                    createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 1);
+                } else if (message[4].equalsIgnoreCase("-r")) {
+                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                    createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 2);
+                }
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
             }
         } else {
             EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
@@ -238,7 +315,7 @@ public class Event {
 
     public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
-        rangerLogger.info(userName + " - tworzy nowy event.");
+        RangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)) {
             String nameEvent = getEventName(message);
             String date = getDate(message);
@@ -248,36 +325,41 @@ public class Event {
             boolean r = searchParametrInMessage(message, "-r");
             boolean c = searchParametrInMessage(message, "-c");
             if (nameEvent != null && date != null && time != null) {
-                if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-                    if (ac || r) {
-                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                if (Validation.eventDateTimeAfterNow(date + " " + time)) {
+                    if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
+                        if (ac || r) {
+                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                        }
+                        if (ac) {
+                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 1);
+                        } else if (r) {
+                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 2);
+                        } else if (c) {
+                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 3);
+                        } else
+                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, -1);
+                    } else {
+                        if (ac) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 1);
+                        else if (r)
+                            createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 2);
+                        else createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 3);
                     }
-                    if (ac) {
-                        createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 1);
-                    } else if (r) {
-                        createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 2);
-                    } else if (c) {
-                        event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                        createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 3);
-                    } else
-                        createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, -1);
                 } else {
-                    if (ac) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 1);
-                    else if (r) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 2);
-                    else createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 3);
+                    EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
                 }
             } else {
-                rangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
+                RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
             }
         } else {
-            rangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
         }
     }
 
     public void createNewEventFromSpecificData(String[] message, PrivateMessageReceivedEvent event) {
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
-        rangerLogger.info(userName + " - stworzył nowy event.");
+        RangerLogger.info(userName + " - stworzył nowy event.");
         if (checkMessage(message)) {
             String nameEvent = getEventName(message);
             String date = getDate(message);
@@ -287,14 +369,18 @@ public class Event {
             boolean r = searchParametrInMessage(message, "-r");
             boolean c = searchParametrInMessage(message, "-c");
             if (nameEvent != null && date != null && time != null) {
-                if (ac) createEventChannel(event, nameEvent, date, time, description, 1);
-                else if (r) createEventChannel(event, nameEvent, date, time, description, 2);
-                else createEventChannel(event, nameEvent, date, time, description, 3);
+                if (Validation.eventDateTimeAfterNow(date + " " + time)) {
+                    if (ac) createEventChannel(event, nameEvent, date, time, description, 1);
+                    else if (r) createEventChannel(event, nameEvent, date, time, description, 2);
+                    else createEventChannel(event, nameEvent, date, time, description, 3);
+                } else {
+                    EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+                }
             } else {
-                rangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
+                RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
             }
         } else {
-            rangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
         }
     }
 
@@ -401,7 +487,7 @@ public class Event {
 //                        reminder.create();
                     });
         } catch (IllegalArgumentException e) {
-            rangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
+            RangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
                     "Nazwa eventu - 256\n" +
                     "Tekst (opis eventu) - 2048");
         }
@@ -608,21 +694,25 @@ public class Event {
         return -1;
     }
 
-    public void signIn(ButtonClickEvent event, int indexOfActiveMatch) {
+    public void buttonClick(ButtonClickEvent event, int indexOfActiveMatch, ButtonClick buttonClick) {
         String userName = Users.getUserNicknameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
-        activeEvents.get(indexOfActiveMatch).addToMainList(userID, userName, event);
-    }
-
-    public void signINReserve(ButtonClickEvent event, int indexOfActiveMatch) {
-        String userName = Users.getUserNicknameFromID(event.getUser().getId());
-        String userID = event.getUser().getId();
-        activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
-    }
-
-    public void signOut(ButtonClickEvent event, int indexOfMatch) {
-        String userID = event.getUser().getId();
-        activeEvents.get(indexOfMatch).removeFromMatch(userID);
+        if (eventIsAfter(indexOfActiveMatch)) {
+            switch (buttonClick) {
+                case SIGN_IN:
+                    activeEvents.get(indexOfActiveMatch).addToMainList(userID, userName, event);
+                    break;
+                case SIGN_IN_RESERVE:
+                    activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
+                    break;
+                case SIGN_OUT:
+                    activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
+                    break;
+            }
+        } else {
+            EmbedInfo.eventIsBefore(userID);
+            disableButtons(event.getMessageId());
+        }
     }
 
     public void deleteChannelByID(String channelID) {
@@ -638,6 +728,7 @@ public class Event {
 
     public void removeEvent(String messageID) {
         int index = getIndexActiveEvent(messageID);
+        RangerLogger.info("Event [" + messageID + "] usunięty z bazy danych.");
         if (index >= 0) {
             disableButtons(messageID);
             RemoveEventDB(messageID);
@@ -645,7 +736,7 @@ public class Event {
         }
     }
 
-    public void changeTime(String messageID, String time) {
+    public void changeTime(String messageID, String time, String userID) {
         if (!Validation.isTimeFormat(time)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
@@ -656,6 +747,11 @@ public class Event {
                 MessageEmbed mOld = embeds.get(0);
                 List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
                 List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+                String dateTime = fieldsOld.get(0).getValue() + " " + time;
+                if (!Validation.eventDateTimeAfterNow(dateTime)) {
+                    EmbedInfo.dateTimeIsBeforeNow(userID);
+                    return;
+                }
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 2) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
@@ -683,7 +779,7 @@ public class Event {
     }
 
 
-    public void changeDate(String messageID, String date) {
+    public void changeDate(String messageID, String date, String userID) {
         if (!Validation.isDateFormat(date)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
@@ -694,6 +790,11 @@ public class Event {
                 MessageEmbed mOld = embeds.get(0);
                 List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
                 List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+                String dateTime = date + " " + fieldsOld.get(2).getValue();
+                if (!Validation.eventDateTimeAfterNow(dateTime)) {
+                    EmbedInfo.dateTimeIsBeforeNow(userID);
+                    return;
+                }
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 0) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", date, true);
@@ -723,39 +824,47 @@ public class Event {
     public void disableButtons(String messageID) {
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            JDA jda = Repository.getJda();
-            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
-            textChannel.retrieveMessageById(messageID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                List<Button> buttons = message.getButtons();
-                List<Button> buttonsNew = new ArrayList<>();
-                for (Button b : buttons) {
-                    b = b.asDisabled();
-                    buttonsNew.add(b);
-                }
-                MessageEmbed messageEmbed = embeds.get(0);
-                message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
-            });
+            disableButtons(messageID, activeEvents.get(index).getChannelID());
         }
+    }
+
+    public void disableButtons(String messageID, String channelID) {
+        JDA jda = Repository.getJda();
+        TextChannel textChannel = jda.getTextChannelById(channelID);
+        textChannel.retrieveMessageById(messageID).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            List<Button> buttons = message.getButtons();
+            List<Button> buttonsNew = new ArrayList<>();
+            for (Button b : buttons) {
+                b = b.asDisabled();
+                buttonsNew.add(b);
+            }
+            MessageEmbed messageEmbed = embeds.get(0);
+            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+        });
     }
 
     public void enableButtons(String messageID) {
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            JDA jda = Repository.getJda();
-            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
-            textChannel.retrieveMessageById(messageID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                List<Button> buttons = message.getButtons();
-                List<Button> buttonsNew = new ArrayList<>();
-                for (Button b : buttons) {
-                    b = b.asEnabled();
-                    buttonsNew.add(b);
-                }
-                MessageEmbed messageEmbed = embeds.get(0);
-                message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
-            });
+            enableButtons(messageID, activeEvents.get(index).getChannelID());
         }
+    }
+
+    public void enableButtons(String messageID, String channelID) {
+        JDA jda = Repository.getJda();
+        TextChannel textChannel = jda.getTextChannelById(channelID);
+        textChannel.retrieveMessageById(messageID).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            List<Button> buttons = message.getButtons();
+            List<Button> buttonsNew = new ArrayList<>();
+            for (Button b : buttons) {
+                b = b.asEnabled();
+                buttonsNew.add(b);
+            }
+            MessageEmbed messageEmbed = embeds.get(0);
+            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+        });
     }
 
     private void RemoveEventDB(String messageID) {
@@ -793,7 +902,7 @@ public class Event {
 
     public void createNewChannel(GuildMessageReceivedEvent event, String userID) {
         String username = Users.getUserNicknameFromID(userID);
-        rangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
+        RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
         List<Category> categories = event.getGuild().getCategories();
         for (Category c : categories) {
             if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
@@ -814,7 +923,7 @@ public class Event {
         for (Guild g : guilds) {
             if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
                 String username = Users.getUserNicknameFromID(userID);
-                rangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
+                RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
                 List<Category> categories = g.getCategories();
                 for (Category c : categories) {
                     if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
@@ -915,7 +1024,7 @@ public class Event {
             builder.setColor(Color.WHITE);
             builder.addField("ID eventu", ae.getMessageID(), false);
             builder.addField("ID kanału", ae.getChannelID(), false);
-            builder.addField("Nazwa kanału",channelName,false);
+            builder.addField("Nazwa kanału", channelName, false);
             builder.addField("Ilość zapisanych", String.valueOf(ae.getNumberOfSignIn()), true);
             builder.addField("Główna lista", String.valueOf(mainList.size()), true);
             builder.addField("Rezerwowa lista", String.valueOf(reserveList.size()), true);
