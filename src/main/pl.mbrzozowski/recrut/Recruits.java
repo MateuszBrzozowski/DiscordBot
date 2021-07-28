@@ -61,8 +61,8 @@ public class Recruits {
                             builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                             builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
-                                    "<@&" + "RoleID.RADA_KLANU" + "> ")
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
+                                    "<@&" + RoleID.RADA_KLANU + "> ")
                                     .embed(builder.build())
                                     .queue();
                             textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();

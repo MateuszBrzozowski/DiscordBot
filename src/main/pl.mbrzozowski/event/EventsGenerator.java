@@ -104,6 +104,7 @@ public class EventsGenerator {
                 break;
             }
             case 3: {
+                msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 String timeBuff = msg;
                 if (timeBuff.length() == 4){
@@ -111,7 +112,7 @@ public class EventsGenerator {
                 }
                 boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + timeBuff);
                 if (isTimeFormat && isTimeAfterNow) {
-                    time = msg;
+                    time = timeBuff;
                     stageOfGenerator++;
                     embedIsDescription(event);
                 } else {
@@ -212,6 +213,7 @@ public class EventsGenerator {
                 break;
             }
             case 11: {
+                msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 if (isTimeFormat) time = msg;
                 embedDoYouWantAnyChange(event, false);

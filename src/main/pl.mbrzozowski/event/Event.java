@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.*;
 
@@ -137,7 +138,7 @@ public class Event {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 List<MessageEmbed.Field> fields = embeds.get(0).getFields();
                 String stringDate = fields.get(0).getValue() + " " + fields.get(2).getValue();
-                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
                 LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
                 LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
                 if (date.isBefore(dateNow)) {
@@ -163,8 +164,13 @@ public class Event {
         List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-        LocalDateTime dateEvent = LocalDateTime.parse(dateString, dateFormat);
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+        LocalDateTime dateEvent;
+        try {
+            dateEvent = LocalDateTime.parse(dateString, dateFormat);
+        }catch (DateTimeParseException e){
+            return false;
+        }
         LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         if (dateEvent.isAfter(dateNow)) {
             return true;
@@ -225,6 +231,7 @@ public class Event {
      * @param event   GuildMessageReceivedEvent
      */
     public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
@@ -237,6 +244,7 @@ public class Event {
     }
 
     public void createNewEventFrom3Data(String[] message, PrivateMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 createEventChannel(event, message[1], message[2], message[3], null, 3);
@@ -249,6 +257,7 @@ public class Event {
     }
 
     public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
@@ -266,6 +275,7 @@ public class Event {
     }
 
     public void createNewEventFrom4Data(String[] message, PrivateMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 if (message[4].equalsIgnoreCase("-ac")) {
@@ -282,6 +292,7 @@ public class Event {
     }
 
     public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
@@ -295,6 +306,7 @@ public class Event {
     }
 
     public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
+        message[3] = Validation.timeCorrect(message[3]);
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 if (message[4].equalsIgnoreCase("-ac")) {
@@ -540,9 +552,7 @@ public class Event {
         int indexStart = getIndex(message, "-time");
         String time = message[indexStart + 1];
         if (!isEnd(time)) {
-            if (time.length() == 4) {
-                time = "0" + time;
-            }
+            time = Validation.timeCorrect(time);
             if (Validation.isTimeFormat(time)) {
                 return time;
             }
@@ -738,24 +748,26 @@ public class Event {
     }
 
     public void changeTime(String messageID, String time, String userID) {
+        time = Validation.timeCorrect(time);
         if (!Validation.isTimeFormat(time)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
             JDA jda = Repository.getJda();
             TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            String finalTime = time;
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 MessageEmbed mOld = embeds.get(0);
                 List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
                 List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String dateTime = fieldsOld.get(0).getValue() + " " + time;
+                String dateTime = fieldsOld.get(0).getValue() + " " + finalTime;
                 if (!Validation.eventDateTimeAfterNow(dateTime)) {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 2) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", finalTime, true);
                         fieldsNew.add(fieldNew);
                     } else {
                         fieldsNew.add(fieldsOld.get(i));

@@ -35,9 +35,7 @@ public class Validation {
      * @return Zwraca true jeżeli czas jes podany w poprawnej formie, w innym przypadku zwraca false.
      */
     public static boolean isTimeFormat(String s) {
-        if (s.length() == 4) {
-            s = "0" + s;
-        }
+//        s = timeCorrect(s);
         if (s.length() == 5) {
             if (s.substring(2, 3).equalsIgnoreCase(":")) {
                 if (isDecimal(s.substring(0, 1)) && isDecimal(s.substring(1, 2)) && isDecimal(s.substring(3, 4)) && isDecimal(s.substring(4, 5))) {
@@ -50,6 +48,13 @@ public class Validation {
             } else logger.info("Zly format :");
         }
         return false;
+    }
+
+    public static String timeCorrect(String timeOld){
+        if (timeOld.length() == 4) {
+            timeOld = "0" + timeOld;
+        }
+        return timeOld;
     }
 
     private static boolean isDecimal(String s) {
@@ -69,7 +74,7 @@ public class Validation {
      */
     public static boolean eventDateTimeAfterNow(String dateTime) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
         LocalDateTime evnetDateTime = null;
         try {
             evnetDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
