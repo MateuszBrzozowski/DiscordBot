@@ -1,5 +1,6 @@
 package event;
 
+import embed.EmbedSettings;
 import helpers.RangerLogger;
 import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -104,11 +105,11 @@ public class EventsGenerator {
             }
             case 3: {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                String time = msg;
-                if (time.length() == 4){
-                    time = "0" + time;
+                String timeBuff = msg;
+                if (timeBuff.length() == 4){
+                    timeBuff = "0" + timeBuff;
                 }
-                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + time);
+                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + timeBuff);
                 if (isTimeFormat && isTimeAfterNow) {
                     time = msg;
                     stageOfGenerator++;
@@ -281,7 +282,7 @@ public class EventsGenerator {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle(nameEvent);
         if (description != null) {
             builder.setDescription(description + "\n");

@@ -447,12 +447,13 @@ public class Event {
      * @param whoPing     1 - rekrut + clanMember; 2-rekrut; 3- tylko Clan Member
      */
     private void createList(String userName, TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
+        String msg = "";
         if (whoPing == 1) {
-            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + " RoleID.RECRUT_ID" + "> Zapisy!").queue();
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + " RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (whoPing == 2) {
-            textChannel.sendMessage("<@&" + "RoleID.RECRUT_ID" + "> Zapisy!").queue();
+            msg = "<@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (whoPing == 3) {
-            textChannel.sendMessage("<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!").queue();
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!";
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -470,7 +471,7 @@ public class Event {
         builder.addField(NAME_LIST_RESERVE + "(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + userName);
         try {
-            textChannel.sendMessage(builder.build()).setActionRow(
+            textChannel.sendMessage(msg).embed(builder.build()).setActionRow(
                     Button.primary("in_", "Zapisz"),
                     Button.secondary("reserve_", "Niepewny"),
                     Button.danger("out_", "Wypisz"))

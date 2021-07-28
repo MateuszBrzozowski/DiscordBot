@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.ChannelManager;
+import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -51,9 +53,6 @@ public class Recruits {
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                         .queue(textChannel -> {
-                            textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
-                                    "<@&" + "RoleID.RADA_KLANU" + "> ").queue();
                             EmbedBuilder builder = new EmbedBuilder();
                             builder.setColor(Color.GREEN);
                             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
@@ -61,7 +60,11 @@ public class Recruits {
                             builder.addField("Formularz rekrutacyjny:", "https://forms.gle/fbTQSdxBVq3zU7FW9", false);
                             builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                             builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
-                            textChannel.sendMessage(builder.build()).queue();
+                            textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
+                                    "<@&" + "RoleID.RADA_KLANU" + "> ")
+                                    .embed(builder.build())
+                                    .queue();
                             textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
                             addUserToList(userID, userName, textChannel.getId());
                         });
