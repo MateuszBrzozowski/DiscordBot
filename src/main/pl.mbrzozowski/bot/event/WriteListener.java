@@ -1,6 +1,9 @@
 package bot.event;
 
 
+import bot.event.writing.Category;
+import bot.event.writing.Message;
+import bot.event.writing.Recrut;
 import embed.EmbedHelp;
 import embed.EmbedInfo;
 import embed.Recruiter;
@@ -13,7 +16,6 @@ import helpers.RoleID;
 import helpers.Users;
 import model.DiceGame;
 import model.DiceGames;
-import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -25,20 +27,26 @@ import ranger.RangerBot;
 import ranger.Repository;
 import recrut.Recruits;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class WriteListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private List<MemberMy> clanMember = new ArrayList<>();
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
+        String contentDisplay = event.getMessage().getContentDisplay();
+
         boolean admin = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
         if (!admin) admin = Users.isUserDev(event.getAuthor().getId());
+
         boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
+
+        Message msg = new Message(message, contentDisplay, admin, clanMember);
+
+        Category cmdRecrut = new Recrut(event);
+
+
+
         Event matches = Repository.getEvent();
         Recruits recruits = Repository.getRecruits();
 
@@ -220,8 +228,8 @@ public class WriteListener extends ListenerAdapter {
         } else if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
             if (admin) matches.enableButtons(message[1]);
         } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
-            if (admin) matches.enableButtons(message[1],message[2]);
-        }else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
+            if (admin) matches.enableButtons(message[1], message[2]);
+        } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.TIME)) {
             if (admin) matches.changeTime(message[1], message[2], event.getAuthor().getId());
         } else if (message.length == 3 && message[0].equalsIgnoreCase(Commands.DATE)) {
             if (admin) matches.changeDate(message[1], message[2], event.getAuthor().getId());
