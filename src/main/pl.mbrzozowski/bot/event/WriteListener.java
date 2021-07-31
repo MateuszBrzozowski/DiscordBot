@@ -1,9 +1,10 @@
 package bot.event;
 
 
-import bot.event.writing.Category;
+import bot.event.writing.Proccess;
+import bot.event.writing.EventsCmd;
 import bot.event.writing.Message;
-import bot.event.writing.Recrut;
+import bot.event.writing.RecrutCmd;
 import embed.EmbedHelp;
 import embed.EmbedInfo;
 import embed.Recruiter;
@@ -31,6 +32,15 @@ public class WriteListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
+    public static void main(String[] args) {
+        Message msg = new Message(new String[]{"!test"}, "!test", RoleID.DEV_ID);
+        Proccess cmdRecrut = new RecrutCmd();
+        Proccess cmdEventss = new EventsCmd();
+
+        cmdRecrut.setNextProccess(cmdEventss);
+        cmdRecrut.proccessMessage(msg);
+    }
+
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] message = event.getMessage().getContentRaw().split(" ");
@@ -41,10 +51,9 @@ public class WriteListener extends ListenerAdapter {
 
         boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
 
-        Message msg = new Message(message, contentDisplay, admin, clanMember);
+        Message msg = new Message(message, contentDisplay, event.getAuthor().getId());
 
-        Category cmdRecrut = new Recrut(event);
-
+//        Category cmdRecrut = new Recrut(event);
 
 
         Event matches = Repository.getEvent();

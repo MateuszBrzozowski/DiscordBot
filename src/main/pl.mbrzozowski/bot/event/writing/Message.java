@@ -1,5 +1,8 @@
 package bot.event.writing;
 
+import helpers.RoleID;
+import helpers.Users;
+
 public class Message {
 
     private String[] words;
@@ -7,11 +10,12 @@ public class Message {
     private boolean admin;
     private boolean clanMember;
 
-    public Message(String[] words, String contentDisplay, boolean admin, boolean clanMember) {
+    public Message(String[] words, String contentDisplay, String userID) {
         this.words = words;
         this.contentDisplay = contentDisplay;
-        this.admin = admin;
-        this.clanMember = clanMember;
+        this.admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
+        if (!this.admin) Users.isUserDev(userID);
+        this.clanMember = Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID);
     }
 
     public String[] getWords() {
