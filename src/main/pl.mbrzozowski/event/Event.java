@@ -901,14 +901,14 @@ public class Event {
         return userName;
     }
 
-    public void createNewChannel(GuildMessageReceivedEvent event, String userID) {
+    public void createNewChannel(Guild guild, String userID) {
         String username = Users.getUserNicknameFromID(userID);
         RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
-        List<Category> categories = event.getGuild().getCategories();
+        List<Category> categories = guild.getCategories();
         for (Category c : categories) {
             if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-                event.getGuild().createTextChannel("nowy-event", c)
-                        .addPermissionOverride(event.getGuild().getPublicRole(), null, permissions)
+                guild.createTextChannel("nowy-event", c)
+                        .addPermissionOverride(guild.getPublicRole(), null, permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .queue(textChannel -> {
                             textChannelsUser.put(userID, textChannel);

@@ -110,7 +110,7 @@ public class WriteListener extends ListenerAdapter {
             } else if (message.length == 1 && message[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
                 event.getMessage().delete().submit();
                 String userID = event.getMessage().getAuthor().getId();
-                matches.createNewChannel(event, userID);
+                matches.createNewChannel(event.getGuild(), userID);
             } else if (message.length > 1 && message.length < 100 && message[0].equalsIgnoreCase(Commands.NAME)) {
                 if (matches.checkChannelIsInEventCategory(event)) {
                     String name = getNewChannelNameFromMsg(message);
