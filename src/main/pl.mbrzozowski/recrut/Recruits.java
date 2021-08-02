@@ -127,7 +127,7 @@ public class Recruits {
         builder.setColor(Color.RED);
         builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
         builder.setTitle("Uwaga");
-        builder.setDescription("Brak potwierdzenia. Anuluje podanie.");
+        builder.setDescription("Brak odpowiedzi. Anuluje podanie.");
         privateChannel.sendMessage(builder.build()).queue();
     }
 
@@ -406,7 +406,7 @@ public class Recruits {
     private void useTSAndDiscord(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.addField("TS - audio / Discord - text", "Do komunikacji głosowej używamy ts. Wbijaj zawsze gdy grasz. Nawet jeżeli nikogo nie ma, wejdź na kanał. Może ktoś do Ciebie dołączy.\n" +
+        builder.addField("TS - audio / Discord - tekst", "Do komunikacji głosowej używamy TS. Wbijaj zawsze gdy grasz. Nawet jeżeli nikogo nie ma, wejdź na kanał. Może ktoś do Ciebie dołączy.\n" +
                 "Discorda używamy natomiast do komunikacji tekstowej.", false);
         channel.sendMessage(builder.build()).queue();
     }
@@ -443,8 +443,8 @@ public class Recruits {
                 "i sobotnich SCFC (Squad Clan Fight Community). Gramy w meczach międzypaństowwych jeżeli takie są organizowane. - Obecnie przerwa wakakcyjna.", false);
         builder.addField("Eventy międzyklanowe", "Bierzemy czynny udział w eventach organizowanych przez polskie jak i zagraniczne klany. " +
                 "Czasami organizujemy sami takie eventy dla polskich graczy z klanów jak i również dla ludzi niezrzeszonych.", false);
-        builder.addField("Eventy klanowe", "Organizujemy zamknięte eventy klanowe dla złapania luzu i dobrej zabawy między innymi AIM Master, RAT Race", false);
-        builder.addField("Szkolenia", "Organizujemy zamknięte nieobowiązkowe szkolenia dla naszych członków i rekrutów. " +
+        builder.addField("Eventy wewnątrzklanowe", "Organizujemy zamknięte eventy klanowe dla złapania luzu i dobrej zabawy takie jak AIM Master, RAT Race", false);
+        builder.addField("Szkolenia wewnątrzklanowe", "Organizujemy zamknięte nieobowiązkowe szkolenia dla naszych członków i rekrutów. " +
                 "Szkolenia z SquadLeadera, Medyka, HAT/LAT, Obsługi i rozpoznawania pojazdów, Podchodzenia i zdobywania punktów i wiele innych.", false);
         builder.addField("RASP", "czyli **Ranger Assessment and Selection Program** - Obowiązkowe szkolenie dla każdego nowego członka składające się z dwóch części." +
                 " Wymagane do awansu na stopnie NCO.", false);
@@ -457,7 +457,7 @@ public class Recruits {
         builder.setColor(Color.GREEN);
         builder.setTitle("Przerwa/Wyjazd/Brak chęci?");
         builder.setDescription("Jeżeli planujesz podczas rekrutacji przerwę w graniu dłuższą niż tydzień z jakiegokolwiek powodu daj nam znać! \n" +
-                "Nie masz ochoty już z nami grać? OK, żaden problem. Tylko nie zostawiaj nas bez wiadomości. Chcemy wiedzieć na czym stoimy.");
+                "Nie masz ochoty już z nami grać? Również nas o tym poinformuj tutaj na kanale.");
         channel.sendMessage(builder.build()).queue();
     }
 

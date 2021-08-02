@@ -1,10 +1,10 @@
 package bot.event.writing;
 
-public class CheckUser extends Proccess {
+public class CheckUserAdmin extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        if (message.isClanMember()) {
+        if (message.isAdmin()) {
             getNextProccess().proccessMessage(message);
         }
     }

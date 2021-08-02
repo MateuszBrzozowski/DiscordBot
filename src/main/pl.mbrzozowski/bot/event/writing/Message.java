@@ -9,6 +9,7 @@ public class Message {
     private String contentDisplay;
     private boolean admin;
     private boolean clanMember;
+    private String userID;
 
     public Message(String[] words, String contentDisplay, String userID) {
         this.words = words;
@@ -16,6 +17,7 @@ public class Message {
         this.admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
         if (!this.admin) Users.isUserDev(userID);
         this.clanMember = Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID);
+        this.userID = userID;
     }
 
     public String[] getWords() {
@@ -32,5 +34,9 @@ public class Message {
 
     public boolean isClanMember() {
         return clanMember;
+    }
+
+    public String getUserID() {
+        return userID;
     }
 }

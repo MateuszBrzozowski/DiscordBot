@@ -1,7 +1,6 @@
 package event;
 
 import embed.EmbedSettings;
-import helpers.RangerLogger;
 import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -106,7 +105,7 @@ public class EventsGenerator {
             case 3: {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 String timeBuff = msg;
-                if (timeBuff.length() == 4){
+                if (timeBuff.length() == 4) {
                     timeBuff = "0" + timeBuff;
                 }
                 boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + timeBuff);
@@ -238,8 +237,9 @@ public class EventsGenerator {
         Event e = Repository.getEvent();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
-        if (eventMsgRec == null) e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec);
-        else e.createNewEventFromSpecificData(cmdTable, eventMsgRec);
+        if (eventMsgRec == null)
+            e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec.getAuthor().getId(), null);
+        else e.createNewEventFromSpecificData(cmdTable, eventMsgRec.getAuthor().getId(), eventMsgRec.getChannel());
         embedFinish(event);
         EventsGeneratorModel model = Repository.getEventsGeneratorModel();
         int index = model.userHaveActiveGenerator(event.getAuthor().getId());

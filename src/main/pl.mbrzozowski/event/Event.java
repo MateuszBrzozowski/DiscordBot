@@ -220,101 +220,104 @@ public class Event {
         return resultSet;
     }
 
-    /**
-     * @param message [1] - nazwa eventu; [2] - data; [3] - czas
-     * @param event   GuildMessageReceivedEvent
-     */
-    public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
+//    /**
+//     * @param message [1] - nazwa eventu; [2] - data; [3] - czas
+//     * @param event   GuildMessageReceivedEvent
+//     */
+//    public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
+//        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+//            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+//                createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
+//            } else {
+//                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+//            }
+//        } else {
+//            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
+//        }
+//    }
+
+    public void createNewEventFrom3Data(String[] message, String userID) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-                createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
+                createEventChannel(userID, message[1], message[2], message[3], null, 3);
             } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+                EmbedInfo.dateTimeIsBeforeNow(userID);
             }
         } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(userID);
         }
     }
 
-    public void createNewEventFrom3Data(String[] message, PrivateMessageReceivedEvent event) {
-        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-                createEventChannel(event, message[1], message[2], message[3], null, 3);
-            } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-            }
-        } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-        }
-    }
+//    public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
+//        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
+//        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+//            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+//                if (message[4].equalsIgnoreCase("-ac")) {
+//                    createEventChannel(userName, message[1], message[2], message[3], null, 1);
+//                } else if (message[4].equalsIgnoreCase("-r")) {
+//                    createEventChannel(userName, message[1], message[2], message[3], null, 2);
+//                }
+//            } else {
+//                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+//            }
+//        } else {
+//            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
+//        }
+//    }
 
-    public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
-        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
-        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-                if (message[4].equalsIgnoreCase("-ac")) {
-                    createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 1);
-                } else if (message[4].equalsIgnoreCase("-r")) {
-                    createEventChannel(event.getGuild(), userName, message[1], message[2], message[3], null, 2);
-                }
-            } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-            }
-        } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-        }
-    }
-
-    public void createNewEventFrom4Data(String[] message, PrivateMessageReceivedEvent event) {
-        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-                if (message[4].equalsIgnoreCase("-ac")) {
-                    createEventChannel(event, message[1], message[2], message[3], null, 1);
-                } else if (message[4].equalsIgnoreCase("-r")) {
-                    createEventChannel(event, message[1], message[2], message[3], null, 2);
-                }
-            } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-            }
-        } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-        }
-    }
-
-    public void createNewEventFrom3DataHere(String[] message, GuildMessageReceivedEvent event) {
-        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-                event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                createList(Users.getUserNicknameFromID(event.getAuthor().getId()), event.getChannel(), message[1], message[2], message[3], null, 3);
-            } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-            }
-        } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-        }
-    }
-
-    public void createNewEventFrom4DataHere(String[] message, GuildMessageReceivedEvent event) {
+    public void createNewEventFrom4Data(String[] message, String userID) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
                 if (message[4].equalsIgnoreCase("-ac")) {
-                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
-                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                    createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 1);
+                    createEventChannel(userID, message[1], message[2], message[3], null, 1);
                 } else if (message[4].equalsIgnoreCase("-r")) {
-                    event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
-                    createList(getUserNameFromEvent(event), event.getChannel(), message[1], message[2], message[3], null, 2);
+                    createEventChannel(userID, message[1], message[2], message[3], null, 2);
                 }
             } else {
-                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+                EmbedInfo.dateTimeIsBeforeNow(userID);
             }
         } else {
-            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
+            EmbedInfo.wrongDateOrTime(userID);
         }
     }
 
-    public void createNewEventFromSpecificData(String[] message, GuildMessageReceivedEvent event) {
-        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
+    public void createNewEventFrom3DataHere(String[] message, String userID, TextChannel channel) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                createList(Users.getUserNicknameFromID(userID), channel, message[1], message[2], message[3], null, 3);
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(userID);
+            }
+        } else {
+            EmbedInfo.wrongDateOrTime(userID);
+        }
+    }
+
+    public void createNewEventFrom4DataHere(String[] message, String userID, TextChannel channel) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
+            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
+                if (message[4].equalsIgnoreCase("-ac")) {
+                    channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                    channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                    createList(Users.getUserNicknameFromID(userID), channel, message[1], message[2], message[3], null, 1);
+                } else if (message[4].equalsIgnoreCase("-r")) {
+                    channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                    createList(Users.getUserNicknameFromID(userID), channel, message[1], message[2], message[3], null, 2);
+                }
+            } else {
+                EmbedInfo.dateTimeIsBeforeNow(userID);
+            }
+        } else {
+            EmbedInfo.wrongDateOrTime(userID);
+        }
+    }
+
+    public void createNewEventFromSpecificData(String[] message, String userID, TextChannel channel) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        String userName = Users.getUserNicknameFromID(userID);
         RangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)) {
             String nameEvent = getEventName(message);
@@ -328,26 +331,25 @@ public class Event {
                 if (Validation.eventDateTimeAfterNow(date + " " + time)) {
                     if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
                         if (ac || r) {
-                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
+                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
                         }
                         if (ac) {
-                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 1);
+                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 1);
                         } else if (r) {
-                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 2);
+                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 2);
                         } else if (c) {
-                            event.getChannel().getManager().putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, 3);
+                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
+                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 3);
                         } else
-                            createList(getUserNameFromEvent(event), event.getChannel(), nameEvent, date, time, description, -1);
+                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, -1);
                     } else {
-                        if (ac) createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 1);
-                        else if (r)
-                            createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 2);
-                        else createEventChannel(event.getGuild(), userName, nameEvent, date, time, description, 3);
+                        if (ac) createEventChannel(userName, nameEvent, date, time, description, 1);
+                        else if (r) createEventChannel(userName, nameEvent, date, time, description, 2);
+                        else createEventChannel(userName, nameEvent, date, time, description, 3);
                     }
                 } else {
-                    EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
+                    EmbedInfo.dateTimeIsBeforeNow(userID);
                 }
             } else {
                 RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
@@ -357,43 +359,45 @@ public class Event {
         }
     }
 
-    public void createNewEventFromSpecificData(String[] message, PrivateMessageReceivedEvent event) {
-        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
-        RangerLogger.info(userName + " - stworzył nowy event.");
-        if (checkMessage(message)) {
-            String nameEvent = getEventName(message);
-            String date = getDate(message);
-            String time = getTime(message);
-            String description = getDescription(message);
-            boolean ac = searchParametrInMessage(message, "-ac");
-            boolean r = searchParametrInMessage(message, "-r");
-            boolean c = searchParametrInMessage(message, "-c");
-            if (nameEvent != null && date != null && time != null) {
-                if (Validation.eventDateTimeAfterNow(date + " " + time)) {
-                    if (ac) createEventChannel(event, nameEvent, date, time, description, 1);
-                    else if (r) createEventChannel(event, nameEvent, date, time, description, 2);
-                    else createEventChannel(event, nameEvent, date, time, description, 3);
-                } else {
-                    EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-                }
-            } else {
-                RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
-            }
-        } else {
-            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
-        }
-    }
+//    public void createNewEventFromSpecificData(String[] message, String userID) {
+//        String userName = Users.getUserNicknameFromID(userID);
+//        RangerLogger.info(userName + " - stworzył nowy event.");
+//        if (checkMessage(message)) {
+//            String nameEvent = getEventName(message);
+//            String date = getDate(message);
+//            String time = getTime(message);
+//            String description = getDescription(message);
+//            boolean ac = searchParametrInMessage(message, "-ac");
+//            boolean r = searchParametrInMessage(message, "-r");
+//            boolean c = searchParametrInMessage(message, "-c");
+//            if (nameEvent != null && date != null && time != null) {
+//                if (Validation.eventDateTimeAfterNow(date + " " + time)) {
+//                    if (ac) createEventChannel(userID, nameEvent, date, time, description, 1);
+//                    else if (r) createEventChannel(userID, nameEvent, date, time, description, 2);
+//                    else createEventChannel(userID, nameEvent, date, time, description, 3);
+//                } else {
+//                    EmbedInfo.dateTimeIsBeforeNow(userID);
+//                }
+//            } else {
+//                RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
+//            }
+//        } else {
+//            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+//        }
+//    }
 
     /**
-     * @param guild       Guild
-     * @param creatorName Nazwa uzytkownika który tworzy event
+     * @param userID      ID uzytkownika
      * @param nameEvent   nazwa eventu
      * @param date        kiedy tworzymy event
      * @param time        o której jest event
      * @param description opis eventu
      * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
      */
-    private void createEventChannel(Guild guild, String creatorName, String nameEvent, String date, String time, String description, int whoVisable) {
+    private void createEventChannel(String userID, String nameEvent, String date, String time, String description, int whoVisable) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        String creatorName = Users.getUserNicknameFromID(userID);
+
         List<Category> categories = guild.getCategories();
         for (Category cat : categories) {
             if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
@@ -420,22 +424,18 @@ public class Event {
     }
 
     /**
-     * @param event       otrzymania wiadomości
+     * @param userID      ID użytkownika
      * @param nameEvent   który tworzymy
      * @param date        kiedy tworzymy event
      * @param time        o której jest event
      * @param description eventu
      * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
      */
-    private void createEventChannel(PrivateMessageReceivedEvent event, String nameEvent, String date, String time, String description, int whoVisable) {
-        List<Guild> guilds = event.getJDA().getGuilds();
-        for (Guild g : guilds) {
-            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                String creatorName = Users.getUserNicknameFromID(event.getAuthor().getId());
-                createEventChannel(g, creatorName, nameEvent, date, time, description, whoVisable);
-            }
-        }
-    }
+//    private void createEventChannel(String userID, String nameEvent, String date, String time, String description, int whoVisable) {
+//        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+//        String userNickname = Users.getUserNicknameFromID(userID);
+//        createEventChannel(guild, userNickname, nameEvent, date, time, description, whoVisable);
+//    }
 
     /**
      * @param userName    Nazwa użytkownika, który towrzy listę zapisów
@@ -919,29 +919,29 @@ public class Event {
         }
     }
 
-    public void createNewChannel(PrivateMessageReceivedEvent event, String userID) {
-        List<Guild> guilds = event.getJDA().getGuilds();
-        for (Guild g : guilds) {
-            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                String username = Users.getUserNicknameFromID(userID);
-                RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
-                List<Category> categories = g.getCategories();
-                for (Category c : categories) {
-                    if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-                        g.createTextChannel("nowy-event", c)
-                                .addPermissionOverride(g.getPublicRole(), null, permissions)
-                                .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-                                .queue(textChannel -> {
-                                    textChannelsUser.put(userID, textChannel);
-                                    EmbedHelp.infoEditEventChannel(userID);
-                                });
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    }
+//    public void createNewChannel(PrivateMessageReceivedEvent event, String userID) {
+//        List<Guild> guilds = event.getJDA().getGuilds();
+//        for (Guild g : guilds) {
+//            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
+//                String username = Users.getUserNicknameFromID(userID);
+//                RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
+//                List<Category> categories = g.getCategories();
+//                for (Category c : categories) {
+//                    if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
+//                        g.createTextChannel("nowy-event", c)
+//                                .addPermissionOverride(g.getPublicRole(), null, permissions)
+//                                .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
+//                                .queue(textChannel -> {
+//                                    textChannelsUser.put(userID, textChannel);
+//                                    EmbedHelp.infoEditEventChannel(userID);
+//                                });
+//                        break;
+//                    }
+//                }
+//                break;
+//            }
+//        }
+//    }
 
     /**
      * @param event Wydarzenie wpisania wiadomości na kanale.

@@ -9,9 +9,9 @@ public class DiceCmd extends Proccess {
 
     private GuildMessageReceivedEvent guildEvent;
 
-//    public DiceCmd(GuildMessageReceivedEvent guildEvent) {
-//        this.guildEvent = guildEvent;
-//    }
+    public DiceCmd(GuildMessageReceivedEvent guildEvent) {
+        this.guildEvent = guildEvent;
+    }
 
     @Override
     public void proccessMessage(Message message) {
