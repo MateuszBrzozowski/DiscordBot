@@ -25,11 +25,11 @@ public class GeneratorCmd extends Proccess {
     public void proccessMessage(Message message) {
         if (message.getWords().length == 1) {
             EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
+            int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(message.getUserID());
             if (message.getWords()[0].equalsIgnoreCase(Commands.GENERATOR)) {
                 if (guildEvent != null) {
                     guildEvent.getMessage().delete().submit();
                     String authorID = guildEvent.getAuthor().getId();
-                    int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(authorID);
                     if (indexOfGenerator == -1) {
                         EventsGenerator eventsGenerator = new EventsGenerator(guildEvent);
                         eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -43,7 +43,6 @@ public class GeneratorCmd extends Proccess {
                     }
                 } else if (privateEvent != null) {
                     String authorID = privateEvent.getAuthor().getId();
-                    int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(authorID);
                     if (eventsGeneratorModel.userHaveActiveGenerator(authorID) == -1) {
                         EventsGenerator eventsGenerator = new EventsGenerator(privateEvent);
                         eventsGeneratorModel.addEventsGenerator(eventsGenerator);
@@ -60,7 +59,6 @@ public class GeneratorCmd extends Proccess {
                 if (guildEvent != null) {
                     guildEvent.getMessage().delete().submit();
                     String authorID = guildEvent.getAuthor().getId();
-                    int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(authorID);
                     if (indexOfGenerator == -1) {
                         EventsGenerator eventsGenerator = new EventsGenerator(guildEvent);
                         eventsGenerator.setHere(true);
@@ -74,15 +72,15 @@ public class GeneratorCmd extends Proccess {
                         eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                     }
                 }
-            } else if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
-                if (privateEvent != null) {
-                    int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(message.getUserID());
-                    if (indexOfGenerator >= 0) {
+            } else if (indexOfGenerator >= 0) {
+                System.out.println("Jest generator");
+                if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
+                    if (privateEvent != null) {
                         eventsGeneratorModel.cancelEventGenerator(privateEvent);
                         eventsGeneratorModel.removeGenerator(indexOfGenerator);
-                    } else {
-                        eventsGeneratorModel.saveAnswerAndNextStage(privateEvent, indexOfGenerator);
                     }
+                } else {
+                    eventsGeneratorModel.saveAnswerAndNextStage(privateEvent, indexOfGenerator);
                 }
             } else {
                 getNextProccess().proccessMessage(message);

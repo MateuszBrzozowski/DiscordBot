@@ -344,9 +344,9 @@ public class Event {
                         } else
                             createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, -1);
                     } else {
-                        if (ac) createEventChannel(userName, nameEvent, date, time, description, 1);
-                        else if (r) createEventChannel(userName, nameEvent, date, time, description, 2);
-                        else createEventChannel(userName, nameEvent, date, time, description, 3);
+                        if (ac) createEventChannel(userID, nameEvent, date, time, description, 1);
+                        else if (r) createEventChannel(userID, nameEvent, date, time, description, 2);
+                        else createEventChannel(userID, nameEvent, date, time, description, 3);
                     }
                 } else {
                     EmbedInfo.dateTimeIsBeforeNow(userID);

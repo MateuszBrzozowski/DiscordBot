@@ -44,7 +44,7 @@ public class WriteListener extends ListenerAdapter {
         GeneratorCmd generatorCmd = new GeneratorCmd(event);
         EventsCmd eventsCmd = new EventsCmd(event);
         ChannelCmd channelCmd = new ChannelCmd(event);
-        CheckUserAdmin checkUserAdmin = new CheckUserAdmin();
+        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
 
@@ -185,17 +185,32 @@ public class WriteListener extends ListenerAdapter {
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
-        boolean admin = Users.hasUserRole(event.getAuthor().getId(), RoleID.RADA_KLANU);
-        if (!admin) admin = Users.isUserDev(event.getAuthor().getId());
-        boolean clanMember = Users.hasUserRole(event.getAuthor().getId(), RoleID.CLAN_MEMBER_ID);
-
-        if (!clanMember) return;
-
         String[] message = event.getMessage().getContentRaw().split(" ");
-        Event matches = Repository.getEvent();
+        String contentDisplay = event.getMessage().getContentDisplay();
 
-        EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
-        int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
+        Message msg = new Message(message, contentDisplay, event.getAuthor().getId());
+
+        CheckUser checkUser = new CheckUser();
+        GeneratorCmd generatorCmd = new GeneratorCmd(event);
+        EventsCmd eventsCmd = new EventsCmd(event);
+        ChannelCmd channelCmd = new ChannelCmd(event);
+        HelpCmd helpCmd = new HelpCmd(event);
+        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
+        DeveloperCmd developerCmd = new DeveloperCmd(event);
+
+        checkUser.setNextProccess(generatorCmd);
+        generatorCmd.setNextProccess(eventsCmd);
+        eventsCmd.setNextProccess(channelCmd);
+        channelCmd.setNextProccess(helpCmd);
+        helpCmd.setNextProccess(checkUserAdmin);
+        checkUserAdmin.setNextProccess(developerCmd);
+
+        checkUser.proccessMessage(msg);
+
+
+
+//        EventsGeneratorModel eventsGeneratorModel = Repository.getEventsGeneratorModel();
+//        int indexOfGenerator = eventsGeneratorModel.userHaveActiveGenerator(event.getAuthor().getId());
 
 //        if (message.length == 2 && message[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
 //            Recruits recruits = RangerBot.getRecruits();
