@@ -3,6 +3,7 @@ package helpers;
 public class Commands {
     private static final String PREFIX = "!";
 
+    public static final String CANCEL = PREFIX + "cancel";
     public static final String STATUS = PREFIX + "status";
     public static final String DATE = PREFIX + "date";
     public static final String TIME = PREFIX + "time";

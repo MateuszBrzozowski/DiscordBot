@@ -1,5 +1,6 @@
 package embed;
 
+import event.Event;
 import helpers.RangerLogger;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -337,4 +338,20 @@ public class EmbedInfo {
     }
 
 
+    /**
+     * Wysyła iformację o statusie aplikacji jeżeli użytkownik do twórca aplikacji.
+     *
+     * @param userID ID użytkownika
+     */
+    public static void sendStatus(String userID) {
+        if (Users.isUserDev(userID)) {
+            JDA jda = Repository.getJda();
+            jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+                Event events = Repository.getEvent();
+                Recruits recruits = Repository.getRecruits();
+                events.sendInfo(privateChannel);
+                recruits.sendInfo(privateChannel);
+            });
+        }
+    }
 }
