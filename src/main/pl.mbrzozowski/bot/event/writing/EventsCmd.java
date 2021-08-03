@@ -20,7 +20,7 @@ public class EventsCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords()[0].equalsIgnoreCase(Commands.NEW_EVENT)) {
-            String userID = getUserID();
+            String userID = message.getUserID();
             if (message.getWords().length == 4) {
                 getEvents().createNewEventFrom3Data(message.getWords(), userID);
             } else if (message.getWords().length == 5) {
@@ -29,7 +29,7 @@ public class EventsCmd extends Proccess {
                 getEvents().createNewEventFromSpecificData(message.getWords(), userID, null);
             }
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-            String userID = getUserID();
+            String userID = message.getUserID();
             if (guildEvent != null){
                 if (message.getWords().length == 4) {
                     getEvents().createNewEventFrom3DataHere(message.getWords(), userID, guildEvent.getChannel());
@@ -41,15 +41,6 @@ public class EventsCmd extends Proccess {
             }
         } else {
             getNextProccess().proccessMessage(message);
-        }
-    }
-
-    private String getUserID() {
-        if (privateEvent != null) {
-            return privateEvent.getAuthor().getId();
-        } else {
-            guildEvent.getMessage().delete().submit();
-            return guildEvent.getAuthor().getId();
         }
     }
 }

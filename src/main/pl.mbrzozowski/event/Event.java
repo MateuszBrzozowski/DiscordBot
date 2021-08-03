@@ -141,9 +141,8 @@ public class Event {
                 LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
                 LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
                 if (date.isBefore(dateNow)) {
-                    disableButtons(ae.getMessageID());
-                    LocalDateTime dateTwoDaysBefore = LocalDateTime.now(ZoneId.of("Europe/Paris")).minusDays(2);
-                    if (dateTwoDaysBefore.isAfter(date)) {
+                    LocalDateTime dateOneDaysBefore = LocalDateTime.now(ZoneId.of("Europe/Paris")).minusDays(1);
+                    if (dateOneDaysBefore.isAfter(date)) {
                         removeEvent(ae.getMessageID());
                     }
                 }

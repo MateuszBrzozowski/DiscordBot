@@ -23,13 +23,10 @@ public class ChannelCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
-            String userID;
+            String userID = message.getUserID();
             Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
             if (guildEvent != null) {
                 guildEvent.getMessage().delete().submit();
-                userID = guildEvent.getAuthor().getId();
-            } else {
-                userID = privateEvent.getAuthor().getId();
             }
             getEvents().createNewChannel(guild, userID);
         } else if (message.getWords().length > 1 && message.getWords().length < 100 && message.getWords()[0].equalsIgnoreCase(Commands.NAME)) {
