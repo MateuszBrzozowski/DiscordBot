@@ -24,10 +24,6 @@ public class MemberMy {
         return result;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getUserID() {
         return userID;
     }

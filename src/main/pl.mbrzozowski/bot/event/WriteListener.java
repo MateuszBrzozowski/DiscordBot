@@ -2,12 +2,6 @@ package bot.event;
 
 
 import bot.event.writing.*;
-import embed.EmbedHelp;
-import event.Event;
-import event.EventsGeneratorModel;
-import helpers.Commands;
-import helpers.RoleID;
-import helpers.Users;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
-import ranger.Repository;
 
 public class WriteListener extends ListenerAdapter {
 

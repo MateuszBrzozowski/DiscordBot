@@ -137,7 +137,7 @@ public class Event {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 List<MessageEmbed.Field> fields = embeds.get(0).getFields();
                 String stringDate = fields.get(0).getValue() + " " + fields.get(2).getValue();
-                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
                 LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
                 LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
                 if (date.isBefore(dateNow)) {
@@ -162,7 +162,7 @@ public class Event {
         List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
         LocalDateTime dateEvent = LocalDateTime.parse(dateString, dateFormat);
         LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         if (dateEvent.isAfter(dateNow)) {

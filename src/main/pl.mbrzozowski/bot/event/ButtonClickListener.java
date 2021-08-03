@@ -18,7 +18,7 @@ public class ButtonClickListener extends ListenerAdapter {
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
         Recruits recrut = Repository.getRecruits();
-        if (event.getComponentId().equalsIgnoreCase("newRecrutTEST")) {
+        if (event.getComponentId().equalsIgnoreCase("newRecrut")) {
             recrut.newPodanie(event);
         } else if (event.getComponentId().equalsIgnoreCase("recrutY")) {
             event.deferEdit().queue();

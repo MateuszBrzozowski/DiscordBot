@@ -56,7 +56,6 @@ public class ActiveEvent {
             mainList.add(member);
             AddPlayerDB(member, true);
             RangerLogger.info(member.getUserName() + " zapisał się na listę.", event.getChannel().getName());
-            logger.info("Dodano do listy głównej.");
         }
     }
 
