@@ -24,10 +24,6 @@ public class DeveloperCmd extends Proccess {
             getEvents().enableButtons(message.getWords()[1]);
         } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
             getEvents().enableButtons(message.getWords()[1], message.getWords()[2]);
-        } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.TIME)) {
-            getEvents().changeTime(message.getWords()[1], message.getWords()[2], privateEvent.getAuthor().getId());
-        } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.DATE)) {
-            getEvents().changeDate(message.getWords()[1], message.getWords()[2], privateEvent.getAuthor().getId());
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATUS)) {
             EmbedInfo.sendStatus(privateEvent.getAuthor().getId());
         } else {

@@ -19,12 +19,13 @@ public class EmbedHelp {
     private static String title = "Ranger Bot - POMOC";
     private static String footer = "RangerBot created by Brzozaaa © 2021";
 
-    private static String rekrut = "recrut";
-    private static String generator = "generator";
-    private static String channel = "channel";
-    private static String reminder = "reminder";
-    private static String game = "game";
-    private static String zapisy = "zapisy";
+    private static final String REKRUT = "recrut";
+    private static final String GENERATOR = "generator";
+    private static final String CHANNEL = "channel";
+    private static final String REMINDER = "reminder";
+    private static final String GAME = "game";
+    private static final String SIGNIN = "zapisy";
+    private static final String EVENT_SETTINGS = "event settings";
 
     private static void mainHelp() {
         EmbedBuilder builder = new EmbedBuilder();
@@ -32,12 +33,13 @@ public class EmbedHelp {
         builder.setColor(Color.YELLOW);
         builder.setTitle(title);
         builder.setFooter(footer);
-        builder.addField("", ">>> **!help " + rekrut + "** - (Rada klanu) - Komendy do rekrutów. \n" +
-                "**!help " + generator + "** - Automatyczny generator eventów.\n" +
-                "**!help " + channel + "** - Tworzenie nowego kanału. Pomocne przy bardziej zaawansowanych zapisach z dłuższym, własnym opisem. \n" +
-                "**!help " + zapisy + " cmd** - Tworzenie zapisów przy pomocy komend (zaawansowane)\n" +
-                "**!help " + reminder + "** - Przypomnienia dla eventów.\n" +
-                "**!help " + game + "** - Gry", false);
+        builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Komendy do rekrutów. \n" +
+                "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
+                "**!help " + CHANNEL + "** - Tworzenie nowego kanału. Pomocne przy bardziej zaawansowanych zapisach z dłuższym, własnym opisem. \n" +
+                "**!help " + SIGNIN + " cmd** - Tworzenie zapisów przy pomocy komend (zaawansowane)\n" +
+                "**!help " + EVENT_SETTINGS + " - Zarządzanie eventami.\n" +
+                "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n" +
+                "**!help " + GAME + "** - Gry", false);
         privateChannel.sendMessage(builder.build()).queue();
     }
 
@@ -54,42 +56,54 @@ public class EmbedHelp {
             if (Users.isUserDev(userID)) helpDevCommand();
             RangerLogger.info("Wyświetlona pomoc główna");
         } else if (message.length == 2) {
-            if (message[1].equalsIgnoreCase(rekrut)) {
+            if (message[1].equalsIgnoreCase(REKRUT)) {
                 if (admin) {
                     helpRecrut();
                     RangerLogger.info("Wyświetlona pomoc rekruci");
                 }
-            } else if (message[1].equalsIgnoreCase(generator)) {
+            } else if (message[1].equalsIgnoreCase(GENERATOR)) {
                 helpGenerator();
                 RangerLogger.info("Wyświetlona pomoc generator");
-            } else if (message[1].equalsIgnoreCase(reminder)) {
+            } else if (message[1].equalsIgnoreCase(REMINDER)) {
                 helpReminder();
                 RangerLogger.info("Wyświetlona pomoc reminder");
-            } else if (message[1].equalsIgnoreCase(game)) {
+            } else if (message[1].equalsIgnoreCase(GAME)) {
                 helpGame();
                 RangerLogger.info("Wyświetlona pomoc game");
-            } else if (message[1].equalsIgnoreCase(zapisy)) {
+            } else if (message[1].equalsIgnoreCase(SIGNIN)) {
                 helpSignInCommand();
                 RangerLogger.info("Wyświetlona pomoc zapisy");
-            } else if (message[1].equalsIgnoreCase(channel)) {
+            } else if (message[1].equalsIgnoreCase(CHANNEL)) {
                 helpNewChannel();
                 RangerLogger.info("Wyświetlona pomoc nowy kanał");
+            } else if (message[1].equalsIgnoreCase(EVENT_SETTINGS)) {
+                helpEventsSettings();
+                RangerLogger.info("Wyświetlona pomoc zarządzania eventami.");
             }
         } else if (message.length == 3) {
-            if (message[1].equalsIgnoreCase(zapisy) && message[2].equalsIgnoreCase("cmd")) {
+            if (message[1].equalsIgnoreCase(SIGNIN) && message[2].equalsIgnoreCase("cmd")) {
                 helpSignInCommand();
                 RangerLogger.info("Wyświetlona pomoc zapisy");
             }
         }
     }
 
+    private static void helpEventsSettings() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle(title + " - Zarządznie eventami");
+        builder.setColor(Color.YELLOW);
+        builder.setDescription("Każda z poniższych komend po poprawnym ich zastosowaniu wysyła do każdego zapisanego wiadomość prywatną z informacją o zmianach w evencie.");
+        builder.addField("Komendy DEV", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
+                "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n", false);
+        builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
+        privateChannel.sendMessage(builder.build()).queue();
+    }
+
     private static void helpDevCommand() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Ranger Bot - POMOC - DEV");
         builder.setColor(Color.RED);
-        builder.addField("Komendy DEV", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
-                "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n" +
-                "**!disable [msgID]** -  Wyłącza buttony\n" +
+        builder.addField("Komendy DEV", "**!disable [msgID]** -  Wyłącza buttony\n" +
                 "**!disable [msgID] [channID]** -  Wyłącza buttony\n" +
                 "**!enable [msgID]** - Włącza buttony\n" +
                 "**!enable [msgID] [channID]** - Włącza buttony\n" +
@@ -107,6 +121,7 @@ public class EmbedHelp {
         builder.setDescription("Dzień oraz godzinę przed każdym eventem rozsyłane są przypomnienia do każdego zapisanego użytkownika. Możesz je dla siebie wyłączyć i włączyć przy pomocy komend.\n\n" +
                 "**!reminder Off** - Wyłącza powiadomienia\n" +
                 "**!reminder On** - Włącza powiadomienia");
+        builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
         privateChannel.sendMessage(builder.build()).queue();
     }
 
@@ -118,6 +133,7 @@ public class EmbedHelp {
         builder.setColor(Color.YELLOW);
         builder.addField("", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
                 "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
+        builder.setFooter("Komendy można wpisać na dowolnym kanale na discordzie Rangers Polska.");
         privateChannel.sendMessage(builder.build()).queue();
     }
 
@@ -212,7 +228,7 @@ public class EmbedHelp {
         privateChannel.sendMessage(builder.build()).queue();
     }
 
-    public static void infoEditEventChannel (String userID) {
+    public static void infoEditEventChannel(String userID) {
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();

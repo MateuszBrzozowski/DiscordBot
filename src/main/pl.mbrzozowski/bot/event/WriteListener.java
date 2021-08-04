@@ -60,6 +60,7 @@ public class WriteListener extends ListenerAdapter {
         ChannelCmd channelCmd = new ChannelCmd(event);
         HelpCmd helpCmd = new HelpCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd();
         DeveloperCmd developerCmd = new DeveloperCmd(event);
 
         checkUser.setNextProccess(generatorCmd);
@@ -68,7 +69,8 @@ public class WriteListener extends ListenerAdapter {
         reminderCmd.setNextProccess(channelCmd);
         channelCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
-        checkUserAdmin.setNextProccess(developerCmd);
+        checkUserAdmin.setNextProccess(eventsSettingsCmd);
+        eventsSettingsCmd.setNextProccess(developerCmd);
 
         checkUser.proccessMessage(msg);
     }

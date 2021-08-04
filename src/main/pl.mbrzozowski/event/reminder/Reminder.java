@@ -3,6 +3,7 @@ package event.reminder;
 import embed.EmbedSettings;
 import event.Event;
 import helpers.CategoryAndChannelID;
+import helpers.RangerLogger;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -35,6 +36,7 @@ public class Reminder extends TimerTask {
         if (indexOfEvent >= 0) {
             List<MemberMy> mainList = event.getMainList(indexOfEvent);
             List<MemberMy> reserveList = event.getReserveList(indexOfEvent);
+            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam powiadomienia z przypomnieniem.",eventID);
             for (int i = 0; i < mainList.size(); i++) {
                 String userID = mainList.get(i).getUserID();
                 if (!reminderOFF.userHasOff(userID)) {
@@ -56,10 +58,10 @@ public class Reminder extends TimerTask {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.ORANGE);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setTitle("**PRZYPOMNIENIE:** 1h do wydarzenia!");
-            builder.setDescription("Przypominam o wydarzeniu na które się zapisałeś.");
-            builder.addField("", link + " - :date: " + event.getDateAndTimeFromEmbed(eventID), false);
-            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
+            builder.setTitle("**PRZYPOMNIENIE:** 60 minut do wydarzenia!");
+            builder.setDescription("Dostajesz to powiadomienie ponieważ znajdujesz się na liście eventu, który wkrótce się rozpocznie.");
+            builder.addField("Szczegóły eventu", link + "\n:date: " + event.getDateAndTimeFromEmbed(eventID), false);
+            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help reminder");
             privateChannel.sendMessage(builder.build()).queue();
         });
     }
