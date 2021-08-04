@@ -175,14 +175,13 @@ public class EmbedInfo {
     public static void endNegative(String userID, TextChannel channel) {
         Recruits recruits = Repository.getRecruits();
         if (recruits.isRecruitChannel(channel.getId())) {
-            channel.sendMessage("<@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").queue();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-            channel.sendMessage(builder.build()).queue();
+            channel.sendMessage("<@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").embed(builder.build()).queue();
         }
     }
 
@@ -196,13 +195,12 @@ public class EmbedInfo {
         Recruits recruits = Repository.getRecruits();
         if (recruits.isRecruitChannel(channel.getId())) {
             EmbedBuilder builder = new EmbedBuilder();
-            channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").queue();
             builder.setColor(Color.GREEN);
             builder.setTitle("WYNIK REKRUTACJI - POZYTYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-            channel.sendMessage(builder.build()).queue();
+            channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").embed(builder.build()).queue();
         }
     }
 
