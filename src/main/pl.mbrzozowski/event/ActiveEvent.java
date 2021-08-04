@@ -5,6 +5,8 @@ import embed.EmbedInfo;
 import helpers.RangerLogger;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import java.util.List;
 public class ActiveEvent {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
+    private String name;
     private String channelID;
     private String messageID; //message with embed List is IDEVENT
     private List<MemberMy> mainList = new ArrayList<>();
@@ -30,6 +33,25 @@ public class ActiveEvent {
     public ActiveEvent(String channelID, String messageID) {
         this.channelID = channelID;
         this.messageID = messageID;
+        setName();
+    }
+
+    public ActiveEvent(String channelID, String messageID, String name) {
+        this.name = name;
+        this.channelID = channelID;
+        this.messageID = messageID;
+    }
+
+    private void setName() {
+        try {
+            JDA jda = Repository.getJda();
+            Message message = jda.getTextChannelById(channelID).retrieveMessageById(messageID).complete();
+            List<MessageEmbed> embeds = message.getEmbeds();
+            name = embeds.get(0).getTitle();
+            logger.info("Pobrałem nazwę {}", name);
+        } catch (NullPointerException e){
+            logger.info("Brak aktywnego eventu. Nie mogę pobrać i ustawić nazwy.Event do usunięcia z bazy danych.");
+        }
     }
 
     public String getChannelID() {
@@ -46,6 +68,10 @@ public class ActiveEvent {
 
     public List<MemberMy> getReserveList() {
         return reserveList;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void addToMainList(MemberMy member, ButtonClickEvent event) {

@@ -5,6 +5,7 @@ import embed.EmbedHelp;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import event.reminder.CreateReminder;
+import event.reminder.Timers;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -79,8 +80,8 @@ public class Event {
                         }
                         if (isActive) {
                             activeEvents.add(match);
-//                            CreateReminder reminder = new CreateReminder(messageID);
-//                            reminder.create();
+                            CreateReminder reminder = new CreateReminder(messageID);
+                            reminder.create();
                         } else {
                             matchesToDeleteDB.add(match);
                         }
@@ -91,8 +92,7 @@ public class Event {
             }
         }
         for (ActiveEvent a : matchesToDeleteDB) {
-            removeMemberFromEventDB(a.getMessageID());
-            removeMatchDB(a.getMessageID());
+            removeEventDB(a.getMessageID());
         }
     }
 
@@ -406,7 +406,7 @@ public class Event {
                         message.editMessage(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
                                 Button.secondary("reserve_" + msgID, "Niepewny"),
                                 Button.danger("out_" + msgID, "Wypisz")).queue();
-                        ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID);
+                        ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID, nameEvent);
                         activeEvents.add(event);
                         addEventDB(event);
 
@@ -648,7 +648,7 @@ public class Event {
             if (inexOfMatch == -1) {
                 break;
             }
-            RemoveEventDB(activeEvents.get(inexOfMatch).getMessageID());
+            removeEventDB(activeEvents.get(inexOfMatch).getMessageID());
             activeEvents.remove(inexOfMatch);
         }
     }
@@ -658,7 +658,7 @@ public class Event {
         RangerLogger.info("Event [" + messageID + "] usunięty z bazy danych.");
         if (index >= 0) {
             disableButtons(messageID);
-            RemoveEventDB(messageID);
+            removeEventDB(messageID);
             activeEvents.remove(index);
         }
     }
@@ -700,7 +700,13 @@ public class Event {
                         , mOld.getFooter()
                         , mOld.getImage()
                         , fieldsNew);
-                message.editMessage(mNew).queue();
+                message.editMessage(mNew).queue(message1 -> {
+                    //Jeżeli skuces - to poprzedni timer trzeba wyłączyć i utworzyć nowy.
+                    Timers timers = Repository.getTimers();
+                    timers.cancel(messageID);
+                    CreateReminder reminder = new CreateReminder(messageID);
+                    reminder.create();
+                });
             });
         }
     }
@@ -743,7 +749,13 @@ public class Event {
                         , mOld.getFooter()
                         , mOld.getImage()
                         , fieldsNew);
-                message.editMessage(mNew).queue();
+                message.editMessage(mNew).queue(message1 -> {
+                    //Jeżeli skuces - to poprzedni timer trzeba wyłączyć i utworzyć nowy.
+                    Timers timers = Repository.getTimers();
+                    timers.cancel(messageID);
+                    CreateReminder reminder = new CreateReminder(messageID);
+                    reminder.create();
+                });
             });
         }
     }
@@ -794,7 +806,7 @@ public class Event {
         });
     }
 
-    private void RemoveEventDB(String messageID) {
+    private void removeEventDB(String messageID) {
         String queryPlayers = "DELETE FROM players WHERE event=\"%s\"";
         DBConnector connector = new DBConnector();
         connector.executeQuery(String.format(queryPlayers, messageID));
@@ -817,14 +829,6 @@ public class Event {
             logger.info("Kanał {} usunięty przez {}", event.getChannel().getName(), event.getAuthor().getName());
         });
         thread.start();
-    }
-
-    private String getUserNameFromEvent(GuildMessageReceivedEvent event) {
-        String userName = event.getMessage().getMember().getNickname();
-        if (userName == null) {
-            userName = event.getMessage().getAuthor().getName();
-        }
-        return userName;
     }
 
     public void createNewChannel(Guild guild, String userID) {
@@ -947,12 +951,7 @@ public class Event {
 
     public String getEventNameFromEmbed(String eventID) {
         int indexActiveEvent = getIndexActiveEvent(eventID);
-        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        JDA jda = Repository.getJda();
-        Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
-        List<MessageEmbed> embeds = message.getEmbeds();
-        String title = embeds.get(0).getTitle();
-        return title;
+        return activeEvents.get(indexActiveEvent).getName();
     }
 
     public String getDateAndTimeFromEmbed(String eventID) {

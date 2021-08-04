@@ -68,6 +68,11 @@ public class CreateReminder {
                 Date nowDate = new Date();
                 if (nowDate.before(dateFull)) {
                     timer.schedule(new Reminder(eventID), dateFull);
+                    logger.info("Ustawiam timer");
+
+                    MyTimer myTimer = new MyTimer(eventID, timer);
+                    Timers timers = Repository.getTimers();
+                    timers.add(myTimer);
                 }
             }
         }
