@@ -36,7 +36,7 @@ public class Reminder extends TimerTask {
         if (indexOfEvent >= 0) {
             List<MemberMy> mainList = event.getMainList(indexOfEvent);
             List<MemberMy> reserveList = event.getReserveList(indexOfEvent);
-            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam powiadomienia z przypomnieniem.",eventID);
+            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam przypomnienia.",eventID);
             for (int i = 0; i < mainList.size(); i++) {
                 String userID = mainList.get(i).getUserID();
                 if (!reminderOFF.userHasOff(userID)) {

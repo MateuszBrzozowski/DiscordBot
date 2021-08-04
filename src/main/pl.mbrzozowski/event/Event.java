@@ -126,8 +126,7 @@ public class Event {
     }
 
     /**
-     * Sprawdza każdy event i jeżeli data i czas jest przeszły (event się wydarzył) wyłacza buttony.
-     * Jeżeli event wydarzył się więcej niż 2 dni temu to usuwa z bazy danych.
+     * Sprawdza każdy event i jeżeli data i czas jest przeszły (event się wydarzył) wyłacza buttony i usuwa z bazy.
      */
     private void checkAllListOfEvents() {
         JDA jda = Repository.getJda();
@@ -141,10 +140,7 @@ public class Event {
                 LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
                 LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
                 if (date.isBefore(dateNow)) {
-                    LocalDateTime dateOneDaysBefore = LocalDateTime.now(ZoneId.of("Europe/Paris")).minusDays(1);
-                    if (dateOneDaysBefore.isAfter(date)) {
-                        removeEvent(ae.getMessageID());
-                    }
+                    removeEvent(ae.getMessageID());
                 }
             });
         }
@@ -657,6 +653,8 @@ public class Event {
         int index = getIndexActiveEvent(messageID);
         RangerLogger.info("Event [" + messageID + "] usunięty z bazy danych.");
         if (index >= 0) {
+            String dateTime = getDateAndTimeFromEmbed(messageID);
+            activeEvents.get(index).sendInfoChanges(EventChanges.REMOVE, dateTime);
             disableButtons(messageID);
             removeEventDB(messageID);
             activeEvents.remove(index);
@@ -687,6 +685,7 @@ public class Event {
                         fieldsNew.add(fieldsOld.get(i));
                     }
                 }
+                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
                 MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
                         , mOld.getTitle()
                         , mOld.getDescription()
@@ -701,11 +700,8 @@ public class Event {
                         , mOld.getImage()
                         , fieldsNew);
                 message.editMessage(mNew).queue(message1 -> {
-                    //Jeżeli skuces - to poprzedni timer trzeba wyłączyć i utworzyć nowy.
-                    Timers timers = Repository.getTimers();
-                    timers.cancel(messageID);
-                    CreateReminder reminder = new CreateReminder(messageID);
-                    reminder.create();
+                    updateTimer(messageID);
+                    activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
                 });
             });
         }
@@ -736,6 +732,7 @@ public class Event {
                         fieldsNew.add(fieldsOld.get(i));
                     }
                 }
+                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
                 MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
                         , mOld.getTitle()
                         , mOld.getDescription()
@@ -750,14 +747,18 @@ public class Event {
                         , mOld.getImage()
                         , fieldsNew);
                 message.editMessage(mNew).queue(message1 -> {
-                    //Jeżeli skuces - to poprzedni timer trzeba wyłączyć i utworzyć nowy.
-                    Timers timers = Repository.getTimers();
-                    timers.cancel(messageID);
-                    CreateReminder reminder = new CreateReminder(messageID);
-                    reminder.create();
+                    updateTimer(messageID);
+                    activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
                 });
             });
         }
+    }
+
+    private void updateTimer(String messageID) {
+        Timers timers = Repository.getTimers();
+        timers.cancel(messageID);
+        CreateReminder reminder = new CreateReminder(messageID);
+        reminder.create();
     }
 
     public void disableButtons(String messageID) {
@@ -961,6 +962,12 @@ public class Event {
         Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
         List<MessageEmbed> embeds = message.getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String date = fields.get(0).getValue();
+        String time = fields.get(2).getValue();
+        return date + "r., " + time;
+    }
+
+    private String getDateAndTimeFromEmbed(List<MessageEmbed.Field> fields) {
         String date = fields.get(0).getValue();
         String time = fields.get(2).getValue();
         return date + "r., " + time;

@@ -3,6 +3,7 @@ package event;
 import database.DBConnector;
 import embed.EmbedInfo;
 import helpers.RangerLogger;
+import helpers.Users;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -49,7 +50,7 @@ public class ActiveEvent {
             List<MessageEmbed> embeds = message.getEmbeds();
             name = embeds.get(0).getTitle();
             logger.info("Pobrałem nazwę {}", name);
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             logger.info("Brak aktywnego eventu. Nie mogę pobrać i ustawić nazwy.Event do usunięcia z bazy danych.");
         }
     }
@@ -251,5 +252,18 @@ public class ActiveEvent {
 
     public int getNumberOfSignIn() {
         return mainList.size() + reserveList.size();
+    }
+
+    public void sendInfoChanges(EventChanges whatChange, String dateTime) {
+        for (int i = 0; i < mainList.size(); i++) {
+            String userID = mainList.get(i).getUserID();
+            logger.info(Users.getUserNicknameFromID(userID));
+            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
+        }
+        for (int i = 0; i < reserveList.size(); i++) {
+            String userID = reserveList.get(i).getUserID();
+            logger.info(Users.getUserNicknameFromID(userID));
+            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
+        }
     }
 }

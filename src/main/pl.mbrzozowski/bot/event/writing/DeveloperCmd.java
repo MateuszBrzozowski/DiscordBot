@@ -14,9 +14,7 @@ public class DeveloperCmd extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.DELETE_EVENT)) {
-            getEvents().removeEvent(message.getWords()[1]);
-        } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
+        if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
             getEvents().disableButtons(message.getWords()[1]);
         } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
             getEvents().disableButtons(message.getWords()[1], message.getWords()[2]);

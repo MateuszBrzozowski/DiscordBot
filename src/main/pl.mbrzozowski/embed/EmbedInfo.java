@@ -1,6 +1,8 @@
 package embed;
 
 import event.Event;
+import event.EventChanges;
+import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -381,6 +383,35 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("Przypomnienia włączone.");
             builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+    /**
+     * Wysyła do użytkownika o ID userID wiadomość o zmianach w evencie.
+     * @param userID  ID użytkownika
+     * @param eventID ID eventu
+     * @param whatChange
+     * @param dateTime
+     */
+    public static void sendInfoChanges(String userID, String eventID, EventChanges whatChange, String dateTime) {
+        String description = "";
+        if (whatChange.equals(EventChanges.CHANGES)){
+            description = "Zmieniona data lub czas wydarzenia na które się zapisałeś.";
+        } else if (whatChange.equals(EventChanges.REMOVE)){
+            description = "Wydarzenie zostaje odwołane.";
+        }
+        JDA jda = Repository.getJda();
+        Event event = Repository.getEvent();
+        String finalDescription = description + " Sprawdź szczegóły!";
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            String link = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            builder.setTitle("**UWAGA:** Zmiany w wydarzeniu.");
+            builder.setDescription(finalDescription);
+            builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
             privateChannel.sendMessage(builder.build()).queue();
         });
     }
