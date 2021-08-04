@@ -1,8 +1,11 @@
 package helpers;
 
 public class Commands {
+
     private static final String PREFIX = "!";
 
+    public static final String REMINDER_OFF = PREFIX + "reminder Off";
+    public static final String REMINDER_ON = PREFIX + "reminder On";
     public static final String CANCEL = PREFIX + "cancel";
     public static final String STATUS = PREFIX + "status";
     public static final String DATE = PREFIX + "date";

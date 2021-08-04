@@ -56,6 +56,7 @@ public class WriteListener extends ListenerAdapter {
         CheckUser checkUser = new CheckUser();
         GeneratorCmd generatorCmd = new GeneratorCmd(event);
         EventsCmd eventsCmd = new EventsCmd(event);
+        ReminderCmd reminderCmd = new ReminderCmd(event);
         ChannelCmd channelCmd = new ChannelCmd(event);
         HelpCmd helpCmd = new HelpCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
@@ -63,7 +64,8 @@ public class WriteListener extends ListenerAdapter {
 
         checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(eventsCmd);
-        eventsCmd.setNextProccess(channelCmd);
+        eventsCmd.setNextProccess(reminderCmd);
+        reminderCmd.setNextProccess(channelCmd);
         channelCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
         checkUserAdmin.setNextProccess(developerCmd);

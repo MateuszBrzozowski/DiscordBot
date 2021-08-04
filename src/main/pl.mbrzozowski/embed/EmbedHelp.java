@@ -104,9 +104,9 @@ public class EmbedHelp {
         builder.setFooter(footer);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setColor(Color.YELLOW);
-        builder.setDescription("15 minut przed każdym eventem rozsyłane są przypomnienia do każdego zapisanego użytkownika. Możesz je dla siebie wyłączyć i włączyć przy pomocy komend.\n\n" +
-                "**!reminderOff** - Wyłącza powiadomienia\n" +
-                "**!reminderOn** - Włącza powiadomienia");
+        builder.setDescription("Dzień oraz godzinę przed każdym eventem rozsyłane są przypomnienia do każdego zapisanego użytkownika. Możesz je dla siebie wyłączyć i włączyć przy pomocy komend.\n\n" +
+                "**!reminder Off** - Wyłącza powiadomienia\n" +
+                "**!reminder On** - Włącza powiadomienia");
         privateChannel.sendMessage(builder.build()).queue();
     }
 

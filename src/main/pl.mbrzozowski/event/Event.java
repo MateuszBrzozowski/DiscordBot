@@ -4,6 +4,7 @@ import database.DBConnector;
 import embed.EmbedHelp;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
+import event.reminder.CreateReminder;
 import helpers.*;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -219,22 +219,6 @@ public class Event {
         return resultSet;
     }
 
-//    /**
-//     * @param message [1] - nazwa eventu; [2] - data; [3] - czas
-//     * @param event   GuildMessageReceivedEvent
-//     */
-//    public void createNewEventFrom3Data(String[] message, GuildMessageReceivedEvent event) {
-//        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-//            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-//                createEventChannel(event.getGuild(), Users.getUserNicknameFromID(event.getAuthor().getId()), message[1], message[2], message[3], null, 3);
-//            } else {
-//                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-//            }
-//        } else {
-//            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-//        }
-//    }
-
     public void createNewEventFrom3Data(String[] message, String userID) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
             if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
@@ -246,23 +230,6 @@ public class Event {
             EmbedInfo.wrongDateOrTime(userID);
         }
     }
-
-//    public void createNewEventFrom4Data(String[] message, GuildMessageReceivedEvent event) {
-//        String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
-//        if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
-//            if (Validation.eventDateTimeAfterNow(message[2] + " " + message[3])) {
-//                if (message[4].equalsIgnoreCase("-ac")) {
-//                    createEventChannel(userName, message[1], message[2], message[3], null, 1);
-//                } else if (message[4].equalsIgnoreCase("-r")) {
-//                    createEventChannel(userName, message[1], message[2], message[3], null, 2);
-//                }
-//            } else {
-//                EmbedInfo.dateTimeIsBeforeNow(event.getAuthor().getId());
-//            }
-//        } else {
-//            EmbedInfo.wrongDateOrTime(event.getAuthor().getId());
-//        }
-//    }
 
     public void createNewEventFrom4Data(String[] message, String userID) {
         if (Validation.isDateFormat(message[2]) && Validation.isTimeFormat(message[3])) {
@@ -358,33 +325,6 @@ public class Event {
         }
     }
 
-//    public void createNewEventFromSpecificData(String[] message, String userID) {
-//        String userName = Users.getUserNicknameFromID(userID);
-//        RangerLogger.info(userName + " - stworzył nowy event.");
-//        if (checkMessage(message)) {
-//            String nameEvent = getEventName(message);
-//            String date = getDate(message);
-//            String time = getTime(message);
-//            String description = getDescription(message);
-//            boolean ac = searchParametrInMessage(message, "-ac");
-//            boolean r = searchParametrInMessage(message, "-r");
-//            boolean c = searchParametrInMessage(message, "-c");
-//            if (nameEvent != null && date != null && time != null) {
-//                if (Validation.eventDateTimeAfterNow(date + " " + time)) {
-//                    if (ac) createEventChannel(userID, nameEvent, date, time, description, 1);
-//                    else if (r) createEventChannel(userID, nameEvent, date, time, description, 2);
-//                    else createEventChannel(userID, nameEvent, date, time, description, 3);
-//                } else {
-//                    EmbedInfo.dateTimeIsBeforeNow(userID);
-//                }
-//            } else {
-//                RangerLogger.info("Nieprawidłowe lub puste dane w obowiązkowych parametrach -name/-date/-time");
-//            }
-//        } else {
-//            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
-//        }
-//    }
-
     /**
      * @param userID      ID uzytkownika
      * @param nameEvent   nazwa eventu
@@ -421,20 +361,6 @@ public class Event {
             }
         }
     }
-
-    /**
-     * @param userID      ID użytkownika
-     * @param nameEvent   który tworzymy
-     * @param date        kiedy tworzymy event
-     * @param time        o której jest event
-     * @param description eventu
-     * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
-     */
-//    private void createEventChannel(String userID, String nameEvent, String date, String time, String description, int whoVisable) {
-//        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-//        String userNickname = Users.getUserNicknameFromID(userID);
-//        createEventChannel(guild, userNickname, nameEvent, date, time, description, whoVisable);
-//    }
 
     /**
      * @param userName    Nazwa użytkownika, który towrzy listę zapisów
@@ -483,8 +409,9 @@ public class Event {
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID);
                         activeEvents.add(event);
                         addEventDB(event);
-//                        CreateReminder reminder = new CreateReminder(date, time, message.getId());
-//                        reminder.create();
+
+                        CreateReminder reminder = new CreateReminder(date, time, message.getId());
+                        reminder.create();
                     });
         } catch (IllegalArgumentException e) {
             RangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
@@ -918,30 +845,6 @@ public class Event {
         }
     }
 
-//    public void createNewChannel(PrivateMessageReceivedEvent event, String userID) {
-//        List<Guild> guilds = event.getJDA().getGuilds();
-//        for (Guild g : guilds) {
-//            if (g.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-//                String username = Users.getUserNicknameFromID(userID);
-//                RangerLogger.info("Użytkownik [" + username + "] stworzył nowy kanał.");
-//                List<Category> categories = g.getCategories();
-//                for (Category c : categories) {
-//                    if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-//                        g.createTextChannel("nowy-event", c)
-//                                .addPermissionOverride(g.getPublicRole(), null, permissions)
-//                                .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-//                                .queue(textChannel -> {
-//                                    textChannelsUser.put(userID, textChannel);
-//                                    EmbedHelp.infoEditEventChannel(userID);
-//                                });
-//                        break;
-//                    }
-//                }
-//                break;
-//            }
-//        }
-//    }
-
     /**
      * @param event Wydarzenie wpisania wiadomości na kanale.
      * @return Zwraca true jeżeli użytkownik stworzył wcześniej kanał na którym pisze. Kanał musi znajdować się
@@ -1040,5 +943,27 @@ public class Event {
             builder.addField("Rezerwowa lista", stringReserveList, false);
             privateChannel.sendMessage(builder.build()).queue();
         }
+    }
+
+    public String getEventNameFromEmbed(String eventID) {
+        int indexActiveEvent = getIndexActiveEvent(eventID);
+        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
+        JDA jda = Repository.getJda();
+        Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        List<MessageEmbed> embeds = message.getEmbeds();
+        String title = embeds.get(0).getTitle();
+        return title;
+    }
+
+    public String getDateAndTimeFromEmbed(String eventID) {
+        int indexActiveEvent = getIndexActiveEvent(eventID);
+        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
+        JDA jda = Repository.getJda();
+        Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        List<MessageEmbed> embeds = message.getEmbeds();
+        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String date = fields.get(0).getValue();
+        String time = fields.get(2).getValue();
+        return date + "r., " + time;
     }
 }

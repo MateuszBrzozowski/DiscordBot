@@ -354,4 +354,36 @@ public class EmbedInfo {
             });
         }
     }
+
+    /**
+     * Wysyła informację że pomyślnie wyłączono przypomnienia dla eventów.
+     *
+     * @param userID ID użytkownika
+     */
+    public static void reminderOff(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.GREEN);
+            builder.setTitle("Przypomnienia wyłączone.");
+            builder.setDescription("Aby włączyć ponownie przypomnienia użyj komendy **!reminder On**");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+    /**
+     * Wysyła informację że pomyślnie włączono przypomnienia dla eventów.
+     *
+     * @param userID ID użytkownika
+     */
+    public static void reminderOn(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.GREEN);
+            builder.setTitle("Przypomnienia włączone.");
+            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
 }

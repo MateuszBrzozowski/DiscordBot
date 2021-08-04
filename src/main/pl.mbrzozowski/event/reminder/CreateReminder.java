@@ -19,7 +19,7 @@ import java.util.Timer;
 public class CreateReminder {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private DateFormat dateFormat = new SimpleDateFormat("d.MM.yyyy HH:mm");
     private String date = "";
     private String time = "";
     private String eventID = "";
@@ -64,7 +64,7 @@ public class CreateReminder {
             }
             Timer timer = new Timer();
             if (dateFull != null) {
-                dateFull = new Date(dateFull.getTime() - (15 * 60 * 1000)); //ustawia 15 minut przed wydarzenie
+                dateFull = new Date(dateFull.getTime() - (1 * 60 * 1000)); //ustawia 15 minut przed wydarzenie
                 Date nowDate = new Date();
                 if (nowDate.before(dateFull)) {
                     timer.schedule(new Reminder(eventID), dateFull);
