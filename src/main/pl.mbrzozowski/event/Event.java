@@ -658,6 +658,8 @@ public class Event {
             disableButtons(messageID);
             removeEventDB(messageID);
             activeEvents.remove(index);
+            Timers timers = Repository.getTimers();
+            timers.cancel(messageID);
         }
     }
 
