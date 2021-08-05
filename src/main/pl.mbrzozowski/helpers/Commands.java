@@ -4,6 +4,7 @@ public class Commands {
 
     private static final String PREFIX = "!";
 
+    public static final String NO_NOTIFI = "-noNotifi";
     public static final String REMINDER_OFF = PREFIX + "reminder Off";
     public static final String REMINDER_ON = PREFIX + "reminder On";
     public static final String CANCEL = PREFIX + "cancel";
@@ -13,7 +14,7 @@ public class Commands {
     public static final String DISABLE_BUTTONS = PREFIX + "disable";
     public static final String ENABLE_BUTTONS = PREFIX + "enable";
     public static final String ACCEPT_RECRUT = PREFIX + "accept";
-    public static final String DELETE_EVENT = PREFIX + "deleteEvent";
+    public static final String CANCEL_EVENT = PREFIX + "cancelEvent";
     public static final String NAME = PREFIX + "name";
     public static final String GENERATOR_HERE = PREFIX + "generatorHere";
     public static final String NEW_CHANNEL = PREFIX + "newChannel";

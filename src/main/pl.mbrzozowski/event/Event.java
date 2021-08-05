@@ -140,7 +140,7 @@ public class Event {
                 LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
                 LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
                 if (date.isBefore(dateNow)) {
-                    removeEvent(ae.getMessageID());
+                    cancelEvent(ae.getMessageID());
                 }
             });
         }
@@ -649,12 +649,24 @@ public class Event {
         }
     }
 
-    public void removeEvent(String messageID) {
+    public void cancelEvnetWithInfoForPlayers(String messageID) {
+        int index = getIndexActiveEvent(messageID);
+        if (index >= 0) {
+            JDA jda = Repository.getJda();
+            jda.getTextChannelById(activeEvents.get(index).getChannelID()).retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+                String dateTime = getDateAndTimeFromEmbed(fields);
+                activeEvents.get(index).sendInfoChanges(EventChanges.REMOVE, dateTime);
+                cancelEvent(messageID);
+            });
+        }
+    }
+
+    public void cancelEvent(String messageID) {
         int index = getIndexActiveEvent(messageID);
         RangerLogger.info("Event [" + messageID + "] usunięty z bazy danych.");
         if (index >= 0) {
-            String dateTime = getDateAndTimeFromEmbed(messageID);
-            activeEvents.get(index).sendInfoChanges(EventChanges.REMOVE, dateTime);
             disableButtons(messageID);
             removeEventDB(messageID);
             activeEvents.remove(index);
@@ -663,7 +675,7 @@ public class Event {
         }
     }
 
-    public void changeTime(String messageID, String time, String userID) {
+    public void changeTime(String messageID, String time, String userID, boolean notifi) {
         if (!Validation.isTimeFormat(time)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
@@ -703,14 +715,16 @@ public class Event {
                         , fieldsNew);
                 message.editMessage(mNew).queue(message1 -> {
                     updateTimer(messageID);
-                    activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
+                    if (notifi) {
+                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
+                    }
                 });
             });
         }
     }
 
 
-    public void changeDate(String messageID, String date, String userID) {
+    public void changeDate(String messageID, String date, String userID, boolean notifi) {
         if (!Validation.isDateFormat(date)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
@@ -750,7 +764,9 @@ public class Event {
                         , fieldsNew);
                 message.editMessage(mNew).queue(message1 -> {
                     updateTimer(messageID);
-                    activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
+                    if (notifi) {
+                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
+                    }
                 });
             });
         }
@@ -967,6 +983,7 @@ public class Event {
         String date = fields.get(0).getValue();
         String time = fields.get(2).getValue();
         return date + "r., " + time;
+
     }
 
     private String getDateAndTimeFromEmbed(List<MessageEmbed.Field> fields) {

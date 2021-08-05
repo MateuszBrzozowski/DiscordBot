@@ -25,7 +25,7 @@ public class EmbedHelp {
     private static final String REMINDER = "reminder";
     private static final String GAME = "game";
     private static final String SIGNIN = "zapisy";
-    private static final String EVENT_SETTINGS = "event settings";
+    private static final String EVENT_SETTINGS = "event";
 
     private static void mainHelp() {
         EmbedBuilder builder = new EmbedBuilder();
@@ -37,7 +37,7 @@ public class EmbedHelp {
                 "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
                 "**!help " + CHANNEL + "** - Tworzenie nowego kanału. Pomocne przy bardziej zaawansowanych zapisach z dłuższym, własnym opisem. \n" +
                 "**!help " + SIGNIN + " cmd** - Tworzenie zapisów przy pomocy komend (zaawansowane)\n" +
-                "**!help " + EVENT_SETTINGS + " - Zarządzanie eventami.\n" +
+                "**!help " + EVENT_SETTINGS + "** - (Rada klanu) - Zarządzanie eventami.\n" +
                 "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n" +
                 "**!help " + GAME + "** - Gry", false);
         privateChannel.sendMessage(builder.build()).queue();
@@ -77,8 +77,10 @@ public class EmbedHelp {
                 helpNewChannel();
                 RangerLogger.info("Wyświetlona pomoc nowy kanał");
             } else if (message[1].equalsIgnoreCase(EVENT_SETTINGS)) {
-                helpEventsSettings();
-                RangerLogger.info("Wyświetlona pomoc zarządzania eventami.");
+                if (admin) {
+                    helpEventsSettings();
+                    RangerLogger.info("Wyświetlona pomoc zarządzania eventami.");
+                }
             }
         } else if (message.length == 3) {
             if (message[1].equalsIgnoreCase(SIGNIN) && message[2].equalsIgnoreCase("cmd")) {
@@ -92,9 +94,14 @@ public class EmbedHelp {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(title + " - Zarządznie eventami");
         builder.setColor(Color.YELLOW);
-        builder.setDescription("Każda z poniższych komend po poprawnym ich zastosowaniu wysyła do każdego zapisanego wiadomość prywatną z informacją o zmianach w evencie.");
-        builder.addField("Komendy DEV", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
-                "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n", false);
+        builder.setDescription("Niektóre z poniższych komend po poprawnym ich zastosowaniu wysyłają do każdego zapisanego wiadomość prywatną z informacją o zmianach w evencie.");
+        builder.addField("", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
+                "**!time [msgID] [HH:mm] -noNotifi** - zmienia godzine w evencie bez powiadomienia uczestników\n" +
+                "**!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie\n" +
+                "**!date [msgID] [dd.MM.yyyy] -noNotifi** - zmienia date w evencie bez powiadomienia uczestników\n" +
+                "**!cancelEvent [msgID]** - Zamyka Event i usuwa z bazy - OSTROŻNIE! Nie będzie możliwości powrotu. Bądź pewny tego ruchu. " +
+                "Wysyła powiadomienia do każdego uczestnika o odwołaniu.\n" +
+                "**!cancelEvent [msgID] -noNotifi** - Jak wyżej bez powiadomienia o odwołaniu.", false);
         builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
         privateChannel.sendMessage(builder.build()).queue();
     }
@@ -107,7 +114,6 @@ public class EmbedHelp {
                 "**!disable [msgID] [channID]** -  Wyłącza buttony\n" +
                 "**!enable [msgID]** - Włącza buttony\n" +
                 "**!enable [msgID] [channID]** - Włącza buttony\n" +
-                "**!deleteEvent [msgID]** - zamyka event i usuwa event z bazy danych.\n" +
                 "**!status** - Wyswietla status aplikacji.", false);
         privateChannel.sendMessage(builder.build()).queue();
     }
