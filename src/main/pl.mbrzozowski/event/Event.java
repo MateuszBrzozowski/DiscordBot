@@ -35,7 +35,7 @@ public class Event {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     public static final String NAME_LIST = ":white_check_mark: Lista ";
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
-    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
     public void initialize(JDA jda) {
@@ -650,6 +650,7 @@ public class Event {
     }
 
     public void cancelEvnetWithInfoForPlayers(String messageID) {
+        logger.info("Odwołujemy event");
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
             JDA jda = Repository.getJda();

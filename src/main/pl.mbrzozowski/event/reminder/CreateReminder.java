@@ -1,6 +1,7 @@
 package event.reminder;
 
 import event.Event;
+import helpers.Validation;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
@@ -12,6 +13,11 @@ import recrut.Recruits;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -20,6 +26,7 @@ public class CreateReminder {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private DateFormat dateFormat = new SimpleDateFormat("d.MM.yyyy HH:mm");
+    private static final String datePattern = "dd.MM.yyyy";
     private String date = "";
     private String time = "";
     private String eventID = "";
@@ -56,18 +63,23 @@ public class CreateReminder {
 
     private void setReminder() {
         if (date != "" && time != "") {
-            Date dateFull = null;
+            time  = Validation.timeCorrect(time);
+            LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+            String dateTime = date + " " + time;
+            LocalDateTime eventDateTime = null;
             try {
-                dateFull = dateFormat.parse(date + " " + time);
-            } catch (ParseException e) {
+                eventDateTime = LocalDateTime.parse(dateTime,dateTimeFormatter);
+            } catch (DateTimeParseException e) {
                 e.printStackTrace();
             }
             Timer timer = new Timer();
-            if (dateFull != null) {
-                dateFull = new Date(dateFull.getTime() - (1 * 60 * 1000)); //ustawia 15 minut przed wydarzenie
-                Date nowDate = new Date();
-                if (nowDate.before(dateFull)) {
-                    timer.schedule(new Reminder(eventID), dateFull);
+            if (eventDateTime != null) {
+                eventDateTime = eventDateTime.minusMinutes(10);
+                eventDateTime.atZone(ZoneId.of("Europe/Paris"));
+                Date eventDateTimeReminder = Date.from(eventDateTime.atZone(ZoneId.of("Europe/Paris")).toInstant());
+                if (dateTimeNow.isBefore(eventDateTime)) {
+                    timer.schedule(new Reminder(eventID), eventDateTimeReminder);
                     logger.info("Ustawiam timer");
 
                     MyTimer myTimer = new MyTimer(eventID, timer);

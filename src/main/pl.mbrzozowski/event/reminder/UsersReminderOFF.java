@@ -23,7 +23,6 @@ public class UsersReminderOFF {
                     if (!allUsers.next()) break;
                     else {
                         String userID = allUsers.getString("userID");
-                        logger.info("USER ID: " + userID);
                         usersOff.add(userID);
                     }
                 } catch (SQLException throwables) {

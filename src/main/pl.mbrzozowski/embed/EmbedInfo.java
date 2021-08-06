@@ -19,7 +19,7 @@ import java.awt.*;
 
 public class EmbedInfo {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
     private static String footer = "RangerBot created by Brzozaaa © 2021";
 
     /**
@@ -401,11 +401,11 @@ public class EmbedInfo {
         } else if (whatChange.equals(EventChanges.REMOVE)){
             description = "Wydarzenie zostaje odwołane.";
         }
-        JDA jda = Repository.getJda();
         Event event = Repository.getEvent();
+        String link = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
+        JDA jda = Repository.getJda();
         String finalDescription = description + " Sprawdź szczegóły!";
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            String link = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
@@ -413,6 +413,7 @@ public class EmbedInfo {
             builder.setDescription(finalDescription);
             builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
             privateChannel.sendMessage(builder.build()).queue();
+            logger.info("USER: {} -  wysłałem powiadomienie",userID);
         });
     }
 }

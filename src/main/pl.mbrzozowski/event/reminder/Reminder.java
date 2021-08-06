@@ -19,8 +19,7 @@ public class Reminder extends TimerTask {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String eventID;
-    private JDA jda = Repository.getJda();
-    private Event event = Repository.getEvent();
+
 
     /**
      * @param eventID - ID eventu, id wiadmości w której jest lista z zapisami.
@@ -31,36 +30,39 @@ public class Reminder extends TimerTask {
 
     @Override
     public void run() {
+        Event event = Repository.getEvent();
         int indexOfEvent = event.getIndexActiveEvent(eventID);
-        UsersReminderOFF reminderOFF = new UsersReminderOFF();
         if (indexOfEvent >= 0) {
+            UsersReminderOFF reminderOFF = new UsersReminderOFF();
             List<MemberMy> mainList = event.getMainList(indexOfEvent);
             List<MemberMy> reserveList = event.getReserveList(indexOfEvent);
-            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam przypomnienia.",eventID);
+            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam przypomnienia.", eventID);
+            String linkToEvent = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
+            String dateTimeEvent = event.getDateAndTimeFromEmbed(eventID);
             for (int i = 0; i < mainList.size(); i++) {
                 String userID = mainList.get(i).getUserID();
                 if (!reminderOFF.userHasOff(userID)) {
-                    sendMessage(userID);
+                    sendMessage(userID, linkToEvent, dateTimeEvent);
                 }
             }
             for (int i = 0; i < reserveList.size(); i++) {
                 String userID = reserveList.get(i).getUserID();
                 if (!reminderOFF.userHasOff(userID)) {
-                    sendMessage(userID);
+                    sendMessage(userID, linkToEvent, dateTimeEvent);
                 }
             }
         }
     }
 
-    private void sendMessage(String userID) {
+    private void sendMessage(String userID, String linkToEvent, String dateTimeEvent) {
+        JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            String link = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.ORANGE);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setTitle("**PRZYPOMNIENIE:** 60 minut do wydarzenia!");
-            builder.setDescription("Dostajesz to powiadomienie ponieważ znajdujesz się na liście eventu, który wkrótce się rozpocznie.");
-            builder.addField("Szczegóły eventu", link + "\n:date: " + event.getDateAndTimeFromEmbed(eventID), false);
+            builder.setDescription("Wkrótce rozpocznie się wydarzenie na które się zapisałeś.");
+            builder.addField("Szczegóły eventu", linkToEvent + "\n:date: " + dateTimeEvent, false);
             builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help reminder");
             privateChannel.sendMessage(builder.build()).queue();
         });
