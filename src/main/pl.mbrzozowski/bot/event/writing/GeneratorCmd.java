@@ -34,7 +34,7 @@ public class GeneratorCmd extends Proccess {
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
                     EmbedInfo.userHaveActiveEventGenerator(authorID);
-                    eventsGeneratorModel.cancelEventGenerator(guildEvent);
+                    EmbedInfo.cancelEventGenerator(message.getUserID());
                     EmbedInfo.createNewGenerator(authorID);
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(guildEvent);
@@ -47,7 +47,7 @@ public class GeneratorCmd extends Proccess {
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
                     EmbedInfo.userHaveActiveEventGenerator(authorID);
-                    eventsGeneratorModel.cancelEventGenerator(privateEvent);
+                    EmbedInfo.cancelEventGenerator(message.getUserID());
                     EmbedInfo.createNewGenerator(authorID);
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(privateEvent);
@@ -64,7 +64,7 @@ public class GeneratorCmd extends Proccess {
                     eventsGeneratorModel.addEventsGenerator(eventsGenerator);
                 } else {
                     EmbedInfo.userHaveActiveEventGenerator(authorID);
-                    eventsGeneratorModel.cancelEventGenerator(guildEvent);
+                    EmbedInfo.cancelEventGenerator(message.getUserID());
                     EmbedInfo.createNewGenerator(authorID);
                     eventsGeneratorModel.removeGenerator(indexOfGenerator);
                     EventsGenerator eventsGenerator = new EventsGenerator(guildEvent);
@@ -73,7 +73,7 @@ public class GeneratorCmd extends Proccess {
             }
         } else if (indexOfGenerator >= 0 && privateEvent != null) {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
-                eventsGeneratorModel.cancelEventGenerator(privateEvent);
+                EmbedInfo.cancelEventGenerator(message.getUserID());
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
             } else {
                 eventsGeneratorModel.saveAnswerAndNextStage(privateEvent, indexOfGenerator);

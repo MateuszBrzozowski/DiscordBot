@@ -1,10 +1,7 @@
 package event;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +11,6 @@ public class EventsGeneratorModel {
 
     public void addEventsGenerator(EventsGenerator eGM) {
         eventsGenerators.add(eGM);
-    }
-
-    public int getSizeEventsGenerator() {
-        return eventsGenerators.size();
     }
 
     public int userHaveActiveGenerator(String authorID) {
@@ -38,31 +31,5 @@ public class EventsGeneratorModel {
 
     public void removeGenerator(int indexOfGenerator) {
         eventsGenerators.remove(indexOfGenerator);
-    }
-
-    public void cancelEventGenerator(PrivateMessageReceivedEvent event) {
-        String userID = event.getMessage().getAuthor().getId();
-        event.getJDA().retrieveUserById(userID).queue(user -> {
-            user.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.GREEN);
-                builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                privateChannel.sendMessage(builder.build()).queue();
-            });
-        });
-    }
-
-    public void cancelEventGenerator(GuildMessageReceivedEvent event) {
-        String userID = event.getMessage().getAuthor().getId();
-        event.getJDA().retrieveUserById(userID).queue(user -> {
-            user.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.GREEN);
-                builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                privateChannel.sendMessage(builder.build()).queue();
-            });
-        });
     }
 }

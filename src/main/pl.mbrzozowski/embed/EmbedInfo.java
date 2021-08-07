@@ -389,16 +389,17 @@ public class EmbedInfo {
 
     /**
      * Wysyła do użytkownika o ID userID wiadomość o zmianach w evencie.
-     * @param userID  ID użytkownika
-     * @param eventID ID eventu
+     *
+     * @param userID     ID użytkownika
+     * @param eventID    ID eventu
      * @param whatChange
      * @param dateTime
      */
     public static void sendInfoChanges(String userID, String eventID, EventChanges whatChange, String dateTime) {
         String description = "";
-        if (whatChange.equals(EventChanges.CHANGES)){
+        if (whatChange.equals(EventChanges.CHANGES)) {
             description = "Zmieniona data lub czas wydarzenia na które się zapisałeś.";
-        } else if (whatChange.equals(EventChanges.REMOVE)){
+        } else if (whatChange.equals(EventChanges.REMOVE)) {
             description = "Wydarzenie zostaje odwołane.";
         }
         Event event = Repository.getEvent();
@@ -413,7 +414,23 @@ public class EmbedInfo {
             builder.setDescription(finalDescription);
             builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
             privateChannel.sendMessage(builder.build()).queue();
-            logger.info("USER: {} -  wysłałem powiadomienie",userID);
+            logger.info("USER: {} -  wysłałem powiadomienie", userID);
+        });
+    }
+
+    /**
+     * Wysyła informację że generowanie listy zostało przerwane.
+     *
+     * @param userID ID użytkownika do którego wysyłana jest informacja
+     */
+    public static void cancelEventGenerator(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.GREEN);
+            builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
+            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+            privateChannel.sendMessage(builder.build()).queue();
         });
     }
 }
