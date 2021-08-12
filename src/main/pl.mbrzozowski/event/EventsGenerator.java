@@ -102,13 +102,9 @@ public class EventsGenerator {
             case SET_TIME: {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                String timeBuff = msg;
-                if (timeBuff.length() == 4) {
-                    timeBuff = "0" + timeBuff;
-                }
-                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + timeBuff);
+                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + msg);
                 if (isTimeFormat && isTimeAfterNow) {
-                    time = timeBuff;
+                    time = msg;
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
                 } else {
@@ -201,7 +197,8 @@ public class EventsGenerator {
             }
             case CHANGE_DATE: {
                 boolean isDateFormat = Validation.isDateFormat(msg);
-                if (isDateFormat) date = msg;
+                boolean timeAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
+                if (isDateFormat && timeAfterNow) date = msg;
                 else embedDateNotCorrect();
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
@@ -210,7 +207,8 @@ public class EventsGenerator {
             case CHANGE_TIME: {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                if (isTimeFormat) time = msg;
+                boolean timeAfterNow = Validation.eventDateTimeAfterNow(date + " " + msg);
+                if (isTimeFormat && timeAfterNow) time = msg;
                 else embedTimeNotCorrect();
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
@@ -230,6 +228,8 @@ public class EventsGenerator {
                 break;
             }
             default:
+                embedError();
+                removeThisGenerator();
                 logger.info("Default");
         }
     }
@@ -238,10 +238,14 @@ public class EventsGenerator {
         Event e = Repository.getEvent();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
-        if (eventMsgRec == null)
-            e.createNewEventFromSpecificData(cmdTable, eventPrivateMsgRec.getAuthor().getId(), null);
-        else e.createNewEventFromSpecificData(cmdTable, eventMsgRec.getAuthor().getId(), eventMsgRec.getChannel());
+        if (eventMsgRec != null)
+            e.createNewEventFromSpecificData(cmdTable, userID, eventMsgRec.getChannel());
+        else e.createNewEventFromSpecificData(cmdTable, userID, null);
         embedFinish();
+        removeThisGenerator();
+    }
+
+    private void removeThisGenerator() {
         EventsGeneratorModel model = Repository.getEventsGeneratorModel();
         int index = model.userHaveActiveGenerator(userID);
         if (index >= 0) {
@@ -306,6 +310,16 @@ public class EventsGenerator {
             builder.setColor(Color.GREEN);
             builder.setTitle("GENEROWANIE LISTY ZAKOŃCZONE.");
             builder.addField("", "Sprawdź kanały na discordzie. Twój kanał i lista powinny być teraz widoczne.", false);
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+    private void embedError() {
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setTitle("BŁĄD");
+            builder.addField("", "Generowanie Listy przerwane.", false);
             privateChannel.sendMessage(builder.build()).queue();
         });
     }
