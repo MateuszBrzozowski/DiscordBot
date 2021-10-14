@@ -37,6 +37,8 @@ public class Event {
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
+    private final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
+    private final String RED_CIRCLE = "\uD83D\uDD34┋";
 
     public void initialize(JDA jda) {
         getAllDatabase(jda);
@@ -337,7 +339,7 @@ public class Event {
         for (Category cat : categories) {
             if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
                 if (whoVisable == 1 || whoVisable == 2) {
-                    guild.createTextChannel(nameEvent + "-" + date + "-" + time, cat)
+                    guild.createTextChannel(GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat)
                             .addPermissionOverride(guild.getPublicRole(), null, permissions)
                             .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
                             .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
@@ -349,7 +351,7 @@ public class Event {
 
                             });
                 } else {
-                    guild.createTextChannel(nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
+                    guild.createTextChannel(GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
                         createList(creatorName, textChannel, nameEvent, date, time, description, 3);
                     });
                 }
@@ -670,10 +672,23 @@ public class Event {
         if (index >= 0) {
             disableButtons(messageID);
             removeEventDB(messageID);
+            changeTitleRedCircle(activeEvents.get(index).getChannelID());
             activeEvents.remove(index);
             Timers timers = Repository.getTimers();
             timers.cancel(messageID);
         }
+    }
+
+    public void changeTitleRedCircle(String channelID) {
+        logger.info("Zmiana zielonego na czerwone kolko");
+        JDA jda = Repository.getJda();
+        String buffor = jda.getTextChannelById(channelID).getName();
+        logger.info(buffor);
+        buffor = buffor.replace(GREEN_CIRCLE,RED_CIRCLE);
+        jda.getTextChannelById(channelID).getManager()
+                .setName(buffor)
+                .queue();
+        logger.info("Zmienione circle");
     }
 
     public void changeTime(String messageID, String time, String userID, boolean notifi) {
@@ -857,7 +872,7 @@ public class Event {
         List<Category> categories = guild.getCategories();
         for (Category c : categories) {
             if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-                guild.createTextChannel("nowy-event", c)
+                guild.createTextChannel(GREEN_CIRCLE + "nowy-event", c)
                         .addPermissionOverride(guild.getPublicRole(), null, permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .queue(textChannel -> {

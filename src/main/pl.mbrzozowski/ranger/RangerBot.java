@@ -18,9 +18,8 @@ import java.util.Collection;
 
 public class RangerBot {
 
-    private static final String BOT_TOKEN = "ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.CyT1MNrgbXlnUb8Cpn86k73OKoI";
+    private static final String BOT_TOKEN = "";
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-
 
     public static void main(String[] args) throws LoginException {
 
