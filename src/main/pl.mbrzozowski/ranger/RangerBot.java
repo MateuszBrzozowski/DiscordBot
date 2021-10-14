@@ -2,6 +2,7 @@ package ranger;
 
 import bot.event.*;
 import event.Event;
+import helpers.RangerLogger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -17,7 +18,7 @@ import java.util.Collection;
 
 public class RangerBot {
 
-    private static final String BOT_TOKEN = "";
+    private static final String BOT_TOKEN = "ODYxOTA1OTg1ODE5Mzc3NjY0.YOQmgA.CyT1MNrgbXlnUb8Cpn86k73OKoI";
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
 

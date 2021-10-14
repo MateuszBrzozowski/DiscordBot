@@ -433,4 +433,25 @@ public class EmbedInfo {
             privateChannel.sendMessage(builder.build()).queue();
         });
     }
+
+    public static void sendHelloMessagePrivate(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.YELLOW);
+            builder.setTitle("Witamy na Discordzie klanu Rangers Polska");
+            builder.setDescription("Bla bla bla bla bla\nBla bla bla bla bla\nBla bla bla bla bla\n");
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_FLAG_PL);
+            builder.setImage(EmbedSettings.THUMBNAIL);
+            privateChannel.sendMessage(builder.build()).queue();
+
+            EmbedBuilder builderEng = new EmbedBuilder();
+            builderEng.setColor(Color.YELLOW);
+            builderEng.setTitle("Witamy na Discordzie klanu Rangers Polska");
+            builderEng.setDescription("Bla bla bla bla bla\nBla bla bla bla bla\nBla bla bla bla bla\n");
+            builderEng.setThumbnail(EmbedSettings.THUMBNAIL_FLAG_ENG);
+            builderEng.setImage(EmbedSettings.THUMBNAIL);
+            privateChannel.sendMessage(builderEng.build()).queue();
+        });
+    }
 }

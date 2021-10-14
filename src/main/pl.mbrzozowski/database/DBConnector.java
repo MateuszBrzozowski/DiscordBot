@@ -9,7 +9,7 @@ import java.sql.*;
 public class DBConnector {
     private static String database = "rangerbot";
     private static String serwer = "localhost";
-    private static String url = "jdbc:mysql://" + serwer + "/" + database;
+    private static String url = "jdbc:mysql://" + serwer + "/" + database + "?useUnicode=true&characterEncoding=UTF-8";
     private static String user = "root";
     private static String pass = "";
     private static RangerLogger rangerLogger = new RangerLogger();

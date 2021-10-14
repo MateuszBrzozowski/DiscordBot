@@ -75,7 +75,7 @@ public class CreateReminder {
             }
             Timer timer = new Timer();
             if (eventDateTime != null) {
-                eventDateTime = eventDateTime.minusMinutes(10);
+                eventDateTime = eventDateTime.minusHours(1);
                 eventDateTime.atZone(ZoneId.of("Europe/Paris"));
                 Date eventDateTimeReminder = Date.from(eventDateTime.atZone(ZoneId.of("Europe/Paris")).toInstant());
                 if (dateTimeNow.isBefore(eventDateTime)) {

@@ -33,7 +33,7 @@ public class RecrutCmd extends Proccess {
             guildEvent.getMessage().delete().submit();
             getRecruits().closeChannel(guildEvent);
         } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
-            guildEvent.getMessage().delete().submit();
+//            guildEvent.getMessage().delete().submit();
             getRecruits().acceptRecrut(message.getWords()[1], guildEvent.getChannel(), guildEvent.getAuthor());
         }
     }

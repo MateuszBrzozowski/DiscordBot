@@ -15,8 +15,6 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.ChannelManager;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -389,24 +387,32 @@ public class Recruits {
      * @param drill      Drill który przyjął na rekrutację
      */
     public void acceptRecrut(String nickRecrut, TextChannel channel, User drill) {
-        if (isRecruitChannel(channel.getId())) {
-            channel.sendMessage("<@" + "getRecruitIDFromChannelID(channel.getId())" + "> Kilka ważnych informacji na początek!").queue();
-            welcome(channel, nickRecrut);
-            recrutingTimeInfo(channel);
-            breakTimeInfo(channel);
-            clanTagInfo(channel);
-            rankInfo(channel);
-            playingSquad(channel);
-            useTSAndDiscord(channel);
-            whoIsWho(channel);
-            signature(channel, drill);
-        }
+        JDA jda = Repository.getJda();
+        channel = jda.getTextChannelById("842886880932528168");
+        nickRecrut+="<rRangersPL>";
+
+//        if (isRecruitChannel(channel.getId())) {
+        //"getRecruitIDFromChannelID(channel.getId())"
+        channel.sendMessage("<@" + "NazwaRekruta" + "> Kilka ważnych informacji na początek!").queue();
+
+        welcome(channel, nickRecrut);
+        recrutingTimeInfo(channel);
+        breakTimeInfo(channel);
+        clanTagInfo(channel);
+        rankInfo(channel);
+        playingSquad(channel);
+        useTSAndDiscord(channel);
+        signature(channel, drill);
+//        }
+
+        //        whoIsWho(channel);
     }
 
     private void useTSAndDiscord(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.addField("TS - audio / Discord - tekst", "Do komunikacji głosowej używamy TS. Wbijaj zawsze gdy grasz. Nawet jeżeli nikogo nie ma, wejdź na kanał. Może ktoś do Ciebie dołączy.\n" +
+        builder.addField("TS - audio / Discord - tekst", "Do komunikacji głosowej używamy TS. Informację o adresie w pierwszej wiadomości. Wejdź zawsze gdy grasz. " +
+                "Nawet jeżeli nikogo nie ma, przejdź na odpowiedni kanał. Może ktoś do Ciebie dołączy. Zachęcamy do wchodzenia również gdy grasz w inne gry. Mamy do tego przeznaczone odpowiednie pokoje.\n" +
                 "Discorda używamy natomiast do komunikacji tekstowej.", false);
         channel.sendMessage(builder.build()).queue();
     }
@@ -439,16 +445,16 @@ public class Recruits {
         builder.addField("Codzienne granie", "Głównie wieczorami schodzimy się około godziny 19-20.", false);
         builder.addField("Zorganizowane granie", "Od czasu do czasu organizujemy zorganizowane granie w większej ekipie. " +
                 "Informujemy was odpowiednio wcześniej. Schodzimy się o wybranej godzinie, wybieramy serwer i gramy!", false);
-        builder.addField("Mecze międzyklanowe", "Głównie bierzemy udział w niedzielnych CCFN (Community Clan Fight Night) " +
-                "i sobotnich SCFC (Squad Clan Fight Community). Gramy w meczach międzypaństowwych jeżeli takie są organizowane. - Obecnie przerwa wakakcyjna.", false);
+        builder.addField("Mecze międzyklanowe", "Głównie gramy w niedzielnych CCFN (Community Clan Fight Night) " +
+                "i sobotnich SCFC (Squad Clan Fight Community). - przerwa wakacyjna.", false);
         builder.addField("Eventy międzyklanowe", "Bierzemy czynny udział w eventach organizowanych przez polskie jak i zagraniczne klany. " +
-                "Czasami organizujemy sami takie eventy dla polskich graczy z klanów jak i również dla ludzi niezrzeszonych.", false);
+                "Czasami sami organizujemy eventy dla polskich graczy z klanów jak i również dla ludzi niezrzeszonych.", false);
         builder.addField("Eventy wewnątrzklanowe", "Organizujemy zamknięte eventy klanowe dla złapania luzu i dobrej zabawy takie jak AIM Master, RAT Race", false);
         builder.addField("Szkolenia wewnątrzklanowe", "Organizujemy zamknięte nieobowiązkowe szkolenia dla naszych członków i rekrutów. " +
                 "Szkolenia z SquadLeadera, Medyka, HAT/LAT, Obsługi i rozpoznawania pojazdów, Podchodzenia i zdobywania punktów i wiele innych.", false);
         builder.addField("RASP", "czyli **Ranger Assessment and Selection Program** - Obowiązkowe szkolenie dla każdego nowego członka składające się z dwóch części." +
                 " Wymagane do awansu na stopnie NCO.", false);
-        builder.setFooter("Udział w oficjalnych meczach dostępny po przejściu pozytywnie rekrtuacji.");
+        builder.setFooter("*Udział w oficjalnych meczach dostępny po przejściu pozytywnie rekrtuacji.");
         channel.sendMessage(builder.build()).queue();
     }
 
@@ -456,8 +462,8 @@ public class Recruits {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setTitle("Przerwa/Wyjazd/Brak chęci?");
-        builder.setDescription("Jeżeli planujesz podczas rekrutacji przerwę w graniu dłuższą niż tydzień z jakiegokolwiek powodu daj nam znać! \n" +
-                "Nie masz ochoty już z nami grać? Również nas o tym poinformuj tutaj na kanale.");
+        builder.setDescription("Jeżeli planujesz podczas rekrutacji przerwę w graniu dłuższą niż tydzień z jakiegokolwiek powodu daj nam znać tutaj na kanale! Wystarczy informacja kiedy wracasz. \n" +
+                "Nie masz ochoty już grać? Prosimy poinformuj nas również o tym. Lubimy jasne sytuacje.");
         channel.sendMessage(builder.build()).queue();
     }
 
@@ -486,7 +492,7 @@ public class Recruits {
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle("Witaj na rekrutacji do klanu RANGERS POLSKA");
         builder.setDescription("Dziękujemy za złożenie podania i wypełnienie formularza.");
-        builder.addField("Możesz ustawić sobie nick: " + nickRecrut, "", false);
+        builder.addField("Ustaw sobie nick na Steam oraz na naszym discordzie:", "**" + nickRecrut + "**", false);
         channel.sendMessage(builder.build()).queue();
     }
 
@@ -496,9 +502,10 @@ public class Recruits {
         builder.setColor(Color.WHITE);
         builder.setThumbnail("https://cdn.icon-icons.com/icons2/2622/PNG/512/gui_signature_icon_157586.png");
         builder.addField("Przyjął na rekrutację", drillName, false);
-        builder.addField("", "Cześć! W trakcie Twojej rekrutacji jestem twoim pierwszym kontaktem w razie jakichkolwiek problemów, pytań itd." +
-                " Możesz napisać do mnie bezpośrednio na priv lub tutaj na kanale.\n" +
-                "Mam nadzieję, że przeczytałeś powyższe informacje. Jeżeli masz do nich lub ogólnie jakieś pytania. Proszę zadaj mi je tutaj lub łap mnie na TS. Powodzenia i do usłyszenia!", false);
+        builder.addField("", "Cześć! W trakcie Twojej rekrutacji jestem twoim pierwszym kontaktem. W przypadku jakichkolwiek problemów, pytań itd." +
+                " napisz proszę tutaj na kanale.\n" +
+                "W celu dokończenia formalności daj mi znać kiedy możesz wejść na TS. \n" +
+                "Powodzenia i do usłyszenia!", false);
         channel.sendMessage(builder.build()).queue();
     }
 
