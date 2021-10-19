@@ -62,6 +62,7 @@ public class WriteListener extends ListenerAdapter {
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd();
         DeveloperCmd developerCmd = new DeveloperCmd(event);
+        InvalidCmd invalidCmd = new InvalidCmd();
 
         checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(eventsCmd);
@@ -71,6 +72,7 @@ public class WriteListener extends ListenerAdapter {
         helpCmd.setNextProccess(checkUserAdmin);
         checkUserAdmin.setNextProccess(eventsSettingsCmd);
         eventsSettingsCmd.setNextProccess(developerCmd);
+        developerCmd.setNextProccess(invalidCmd);
 
         checkUser.proccessMessage(msg);
     }

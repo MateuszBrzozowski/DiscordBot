@@ -25,8 +25,7 @@ public class DeveloperCmd extends Proccess {
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATUS)) {
             EmbedInfo.sendStatus(privateEvent.getAuthor().getId());
         } else {
-            InvalidCmd invalidCmd = new InvalidCmd();
-            invalidCmd.proccessMessage(message);
+            getNextProccess().proccessMessage(message);
         }
     }
 }
