@@ -2,7 +2,6 @@ package helpers;
 
 public class Commands {
 
-
     private static final String PREFIX = "!";
 
     public static final String NO_NOTIFI = "-noNotifi";
@@ -30,6 +29,7 @@ public class Commands {
     public static final String NEW_EVENT = PREFIX + "zapisy";
     public static final String NEW_EVENT_HERE = PREFIX + "zapisyhere";
     public static final String REMOVE_CHANNEL = PREFIX + "remove";
+    public static final String EVENTS_SETTINGS = PREFIX + "events";
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";
 }

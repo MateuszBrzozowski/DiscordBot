@@ -2,6 +2,7 @@ package ranger;
 
 import event.Event;
 import event.EventsGeneratorModel;
+import event.EventsSettingsModel;
 import event.reminder.Timers;
 import model.DiceGames;
 import net.dv8tion.jda.api.JDA;
@@ -13,6 +14,7 @@ public class Repository {
     private static Recruits recruits = new Recruits();
     private static DiceGames diceGames = new DiceGames();
     private static EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
+    private static EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
     private static Timers timers = new Timers();
     private static JDA jda;
 
@@ -30,6 +32,10 @@ public class Repository {
 
     public static EventsGeneratorModel getEventsGeneratorModel() {
         return eventsGeneratorModel;
+    }
+
+    public static EventsSettingsModel getEventsSettingsModel() {
+        return eventsSettingsModel;
     }
 
     public static JDA getJda() {

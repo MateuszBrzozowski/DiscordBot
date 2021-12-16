@@ -62,7 +62,7 @@ public class WriteListener extends ListenerAdapter {
         ChannelCmd channelCmd = new ChannelCmd(event);
         HelpCmd helpCmd = new HelpCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd();
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event);
         DeveloperCmd developerCmd = new DeveloperCmd(event);
         InvalidCmd invalidCmd = new InvalidCmd();
 
