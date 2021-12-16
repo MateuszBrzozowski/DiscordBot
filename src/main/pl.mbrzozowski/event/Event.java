@@ -597,6 +597,15 @@ public class Event {
         });
     }
 
+    public String getActiveEventsIndexAndName() {
+        String result = "";
+        for (int i = 0; i < activeEvents.size(); i++) {
+            result += i + 1 + " : " + activeEvents.get(i).getName() + "\n";
+        }
+        return result;
+    }
+
+
     /**
      * @param messageID ID wiadomości w której jest lista z zapisami na event
      * @return zwraca index eventu.; Zwraca -1 jeżeli eventu nie ma.
@@ -679,16 +688,18 @@ public class Event {
         }
     }
 
+    /**
+     * Zmienia nazwę kanału. Kołko zielone zamienia się w czerwone.
+     *
+     * @param channelID ID kanału którego jest zmieniana nazwa
+     */
     public void changeTitleRedCircle(String channelID) {
-        logger.info("Zmiana zielonego na czerwone kolko");
         JDA jda = Repository.getJda();
         String buffor = jda.getTextChannelById(channelID).getName();
-        logger.info(buffor);
-        buffor = buffor.replace(GREEN_CIRCLE,RED_CIRCLE);
+        buffor = buffor.replace(GREEN_CIRCLE, RED_CIRCLE);
         jda.getTextChannelById(channelID).getManager()
                 .setName(buffor)
                 .queue();
-        logger.info("Zmienione circle");
     }
 
     public void changeTime(String messageID, String time, String userID, boolean notifi) {
