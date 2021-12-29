@@ -1018,4 +1018,8 @@ public class Event {
         String time = fields.get(2).getValue();
         return date + "r., " + time;
     }
+
+    public int getActiveEventsListSize() {
+        return activeEvents.size();
+    }
 }
