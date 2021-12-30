@@ -18,6 +18,7 @@ public class Roles extends Proccess {
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private GuildMessageReceivedEvent event;
     private String userID;
+    private JDA jda = Repository.getJda();
 
     public Roles(GuildMessageReceivedEvent event) {
         this.event = event;
@@ -26,20 +27,27 @@ public class Roles extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        JDA jda = Repository.getJda();
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.TARKOV)) {
             boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.TARKOV);
             Role roleById = jda.getRoleById(RoleID.TARKOV);
             if (!hasRole) {
                 guild.addRoleToMember(userID, roleById).queue();
-                logger.info("dodano role tarkov");
+                sendConfirmation(roleById, true);
             } else {
                 guild.removeRoleFromMember(userID, roleById).queue();
-                logger.info("usunieto role tarkov");
+                sendConfirmation(roleById, false);
             }
         } else {
             getNextProccess().proccessMessage(message);
+        }
+    }
+
+    private void sendConfirmation(Role roleById, boolean addRole) {
+        if (addRole) {
+            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Przypisano rolę *" + roleById.getName() + "*").queue();
+        } else {
+            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Usunięto rolę *" + roleById.getName() + "*").queue();
         }
     }
 }
