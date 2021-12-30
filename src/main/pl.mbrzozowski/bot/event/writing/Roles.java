@@ -1,9 +1,6 @@
 package bot.event.writing;
 
-import helpers.CategoryAndChannelID;
-import helpers.Commands;
-import helpers.RoleID;
-import helpers.Users;
+import helpers.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -29,18 +26,27 @@ public class Roles extends Proccess {
     public void proccessMessage(Message message) {
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.TARKOV)) {
-            boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.TARKOV);
-            Role roleById = jda.getRoleById(RoleID.TARKOV);
-            if (!hasRole) {
-                guild.addRoleToMember(userID, roleById).queue();
-                sendConfirmation(roleById, true);
+            Role roleTarkov = jda.getRoleById(RoleID.TARKOV);
+            if (message.isClanMember()) {
+                boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.TARKOV);
+                if (!hasRole) {
+                    guild.addRoleToMember(userID, roleTarkov).queue();
+                    sendConfirmation(roleTarkov, true);
+                } else {
+                    guild.removeRoleFromMember(userID, roleTarkov).queue();
+                    sendConfirmation(roleTarkov, false);
+                }
             } else {
-                guild.removeRoleFromMember(userID, roleById).queue();
-                sendConfirmation(roleById, false);
+                sendMessageNoClanMember(roleTarkov);
             }
         } else {
             getNextProccess().proccessMessage(message);
         }
+    }
+
+    private void sendMessageNoClanMember(Role role) {
+        event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Rola niedostępna.").queue();
+        RangerLogger.info(role.getName() + " niedostępna dla " + Users.getUserNicknameFromID(userID) + " --- brak roli *Clan Member*");
     }
 
     private void sendConfirmation(Role roleById, boolean addRole) {

@@ -34,9 +34,9 @@ public class WriteListener extends ListenerAdapter {
         Roles roles = new Roles(event);
 
         diceCmd.setNextProccess(logChannel);
-        logChannel.setNextProccess(checkUser);
-        checkUser.setNextProccess(roles);
-        roles.setNextProccess(generatorCmd);
+        logChannel.setNextProccess(roles);
+        roles.setNextProccess(checkUser);
+        checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(eventsCmd);
         eventsCmd.setNextProccess(channelCmd);
         channelCmd.setNextProccess(helpCmd);
