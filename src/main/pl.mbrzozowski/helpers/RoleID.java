@@ -16,5 +16,6 @@ public class RoleID {
     public static final String PC_ID = "748799503624306688";
     public static final String PEC_ID = "748800075806932993";
     public static final String RN_ID = "748800245575712910";
+    public static final String TARKOV = "925864474034974780";
 
 }

@@ -31,10 +31,12 @@ public class WriteListener extends ListenerAdapter {
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
+        Roles roles = new Roles(event);
 
         diceCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
-        checkUser.setNextProccess(generatorCmd);
+        checkUser.setNextProccess(roles);
+        roles.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(eventsCmd);
         eventsCmd.setNextProccess(channelCmd);
         channelCmd.setNextProccess(helpCmd);
