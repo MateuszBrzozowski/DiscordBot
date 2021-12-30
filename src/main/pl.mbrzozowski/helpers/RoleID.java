@@ -6,6 +6,7 @@ import ranger.RangerBot;
 
 public class RoleID {
 
+
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     public static final String DEV_ID = "642402714382237716";
     public static final String RADA_KLANU = "773233884145647666";
@@ -17,5 +18,6 @@ public class RoleID {
     public static final String PEC_ID = "748800075806932993";
     public static final String RN_ID = "748800245575712910";
     public static final String TARKOV = "925864474034974780";
+    public static final String VIRTUAL_REALITY = "884377874575007764";
 
 }

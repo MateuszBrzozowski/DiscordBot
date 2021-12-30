@@ -39,6 +39,16 @@ public class Roles extends Proccess {
             } else {
                 sendMessageNoClanMember(roleTarkov);
             }
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.VIRTUAL_REALITY)) {
+            Role roleVR = jda.getRoleById(RoleID.VIRTUAL_REALITY);
+            boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.VIRTUAL_REALITY);
+            if (!hasRole) {
+                guild.addRoleToMember(userID, roleVR).queue();
+                sendConfirmation(roleVR, true);
+            } else {
+                guild.removeRoleFromMember(userID, roleVR).queue();
+                sendConfirmation(roleVR, false);
+            }
         } else {
             getNextProccess().proccessMessage(message);
         }
@@ -49,11 +59,15 @@ public class Roles extends Proccess {
         RangerLogger.info(role.getName() + " niedostępna dla " + Users.getUserNicknameFromID(userID) + " --- brak roli *Clan Member*");
     }
 
-    private void sendConfirmation(Role roleById, boolean addRole) {
+    /**
+     * @param role    Rola z serwera
+     * @param addRole true - jesli rola jest dodawana, false - jeśli rola jest usuwana
+     */
+    private void sendConfirmation(Role role, boolean addRole) {
         if (addRole) {
-            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Przypisano rolę *" + roleById.getName() + "*").queue();
+            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Przypisano rolę *" + role.getName() + "*").queue();
         } else {
-            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Usunięto rolę *" + roleById.getName() + "*").queue();
+            event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Usunięto rolę *" + role.getName() + "*").queue();
         }
     }
 }
