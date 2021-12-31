@@ -1,6 +1,7 @@
 package event;
 
 import embed.EmbedSettings;
+import helpers.RangerLogger;
 import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -11,18 +12,26 @@ import ranger.RangerBot;
 import ranger.Repository;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventsSettings {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
+    private boolean possiblyEditing = true;
     private JDA jda = Repository.getJda();
     private Event event = Repository.getEvent();
     private final String userName;
     private final String userID;
-    private String eventID;
+    private List<String> indexsWithAllEventsID = new ArrayList<>();
+    private int chossedIndexOFEvent;
     private String date;
+    private String newDate;
     private String time;
-    private int indexOFEvent;
+    private String newTime;
+    private boolean ifEndingEvent = false;
+    private boolean sendNotifi = false;
+
     private final PrivateMessageReceivedEvent privateMsgEvent;
     private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
 
@@ -42,8 +51,8 @@ public class EventsSettings {
             builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
                     "Wybierz event który chcesz edytować.\n\n" +
                     event.getActiveEventsIndexAndName());
-            //TODO pobrać evnetID (przmeyslec jak przechowywac dane dwoch uzytkownikow na raz edytuje np)
             privateChannel.sendMessage(builder.build()).queue();
+            indexsWithAllEventsID = event.getAllEventID();
         });
     }
 
@@ -55,19 +64,26 @@ public class EventsSettings {
         String msg = privateMsgEvent.getMessage().getContentDisplay();
         switch (stageOfSettings) {
             case CHOOSE_EVENT: {
-                int activeEventsListSize = event.getActiveEventsListSize();
                 int msgInteger = 0;
                 try {
                     msgInteger = Integer.parseInt(msg);
                 } catch (NumberFormatException ex) {
                     logger.error(ex.getMessage());
                 }
-
-                if (msgInteger > 0 && msgInteger <= activeEventsListSize) {
-                    indexOFEvent = msgInteger - 1;
-                    //TODO pobrać date i time do zmiennej w klasie
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    embedWhatToDo();
+                if (msgInteger > 0 && msgInteger <= indexsWithAllEventsID.size()) {
+                    chossedIndexOFEvent = msgInteger - 1;
+                    if (event.checkEventIDOnIndex(chossedIndexOFEvent, indexsWithAllEventsID.get(chossedIndexOFEvent))) {
+                        String eventIDLocal = indexsWithAllEventsID.get(chossedIndexOFEvent);
+                        date = event.getDateFromEmbed(eventIDLocal);
+                        time = event.getTimeFromEmbed(eventIDLocal);
+                        stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                        embedWhatToDo();
+                    } else {
+                        possiblyEditing = false;
+                        RangerLogger.info("Zmiany w eventach. Dalsze edytowanie niemożliwe. " +
+                                "Prawdopodobnie dwóch użytkowników w tym samym czasie edytuje eventy.");
+                        embedEditingNotPossible();
+                    }
                 } else {
                     embedWrongEventID();
                 }
@@ -90,12 +106,11 @@ public class EventsSettings {
                         stageOfSettings = EventSettingsStatus.SET_DATE;
                         break;
                     case 3:
-                        embedWhatMsgSend();
-                        stageOfSettings = EventSettingsStatus.SEND_MSG;
-                        break;
-                    case 4:
                         embedCancelEvent();
                         stageOfSettings = EventSettingsStatus.CANCEL_EVENT;
+                        break;
+                    case 0:
+
                         break;
                     default:
                         embedWrongWhatToDo();
@@ -109,33 +124,200 @@ public class EventsSettings {
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + msg);
                 if (isTimeFormat && isTimeAfterNow) {
-
+                    stageOfSettings = EventSettingsStatus.FINISH;
+                    newTime = msg;
+                    embedDoYouWantAnyChange();
                 } else {
                     embedTimeNotCorrect();
+                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    embedWhatToDo();
                 }
                 break;
+            }
+            case SET_DATE: {
+                boolean isDateFormat = Validation.isDateFormat(msg);
+                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(msg + " " + time);
+                if (isDateFormat && isTimeAfterNow) {
+                    stageOfSettings = EventSettingsStatus.FINISH;
+                    newDate = msg;
+                    embedDoYouWantAnyChange();
+                } else {
+                    embedDateNotCorrect();
+                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    embedWhatToDo();
+                }
+                break;
+            }
+            case CANCEL_EVENT: {
+                if (msg.equalsIgnoreCase("T")) {
+                    ifEndingEvent = true;
+                    stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
+                    embedSendNotifi();
+                } else if (msg.equalsIgnoreCase("N")) {
+                    ifEndingEvent = false;
+                    embedDoYouWantAnyChange();
+                    stageOfSettings = EventSettingsStatus.FINISH;
+                } else {
+                    embedAnswerNotCorrect();
+                    embedCancelEvent();
+                }
+                break;
+            }
+            case SEND_NOTIFI: {
+                if (msg.equalsIgnoreCase("T")) {
+                    sendNotifi = true;
+                    endingEditor();
+                } else if (msg.equalsIgnoreCase("N")) {
+                    sendNotifi = false;
+                    endingEditor();
+                } else {
+                    embedAnswerNotCorrect();
+                    embedSendNotifi();
+                }
+                break;
+            }
+            case FINISH: {
+                if (msg.equalsIgnoreCase("T")) {
+                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    embedWhatToDo();
+                } else if (msg.equalsIgnoreCase("N")) {
+                    if (checkChanges()) {
+                        stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
+                        embedSendNotifi();
+                    } else {
+                        embedNoChanges();
+                        removeThisEditor();
+                    }
+                } else {
+                    embedAnswerNotCorrect();
+                    embedDoYouWantAnyChange();
+                }
+                break;
+            }
+            default: {
+                embedError();
+                removeThisEditor();
             }
         }
     }
 
+    private void embedError() {
+        String t = "Błąd edytora.";
+        String d = "Zamykam edytor.";
+        embedPatternOneField(Color.RED, t, d);
+    }
+
+    private void endingEditor() {
+        String eventID = indexsWithAllEventsID.get(chossedIndexOFEvent);
+        if (event.checkEventIDOnIndex(chossedIndexOFEvent, indexsWithAllEventsID.get(chossedIndexOFEvent))) {
+            if (ifEndingEvent) {
+                if (sendNotifi) {
+                    event.cancelEvnetWithInfoForPlayers(eventID);
+                } else {
+                    event.cancelEvent(eventID);
+                }
+            } else {
+                event.changeDate(eventID, newDate, userID, false);
+                if (sendNotifi) {
+                    event.changeTime(eventID, newTime, userID, true);
+                } else {
+                    event.changeTime(eventID, newTime, userID, false);
+                }
+            }
+        } else {
+            possiblyEditing = false;
+            removeThisEditor();
+            embedNoPossibleEditig();
+            RangerLogger.info("Zmiany w eventach. Dalsze edytowanie niemożliwe. " +
+                    "Prawdopodobnie dwóch użytkowników w tym samym czasie edytuje eventy.");
+            embedEditingNotPossible();
+        }
+    }
+
+    private void embedNoPossibleEditig() {
+        String t = "Zmiany niemożliwe do wprowadzenia.";
+        String d = "Zamykam edytor eventów";
+        embedPatternOneField(Color.RED, t, d);
+    }
+
+    private void removeThisEditor() {
+        EventsSettingsModel model = Repository.getEventsSettingsModel();
+        int index = model.userHaveActiveSettingsPanel(userID);
+        if (index >= 0) {
+            model.removeSettingsPanel(index);
+        }
+    }
+
+    private void embedNoChanges() {
+        String t = "Nie wprowadzono żadnych zmian.";
+        String d = "Zamykam edytor eventów.";
+        embedPatternOneField(Color.RED, t, d);
+    }
 
     /**
-     * @param color       Kolor Embed - RED - Bład, YELLOW - Następny krok lub informacja
-     * @param title       Tytuł pola w embed.
-     * @param description Opis pola w embed
+     * Sprawdza czy zostały wprowadzone zmiany w evencie.
+     *
+     * @return true - jeżeli zostały wprowadzone zmiany w czasie lub dacie lub event ma być anulowany. false - brak zmian
      */
-    private void embedPatternOneField(Color color, String title, String description) {
+    private boolean checkChanges() {
+        if (changedTime() || changedDate() || ifEndingEvent) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean changedDate() {
+        if (date.equalsIgnoreCase(newDate)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean changedTime() {
+        if (time.equalsIgnoreCase(newTime)) {
+            return false;
+        }
+        return true;
+    }
+
+    private void embedDoYouWantAnyChange() {
+        String title = "Czy chcesz wprowadzić jakieś zmiany do eventu?";
+        String description = "T - Tak\nN - Nie";
+        embedPatternOneField(Color.GREEN, title, description);
+    }
+
+    private void embedAnswerNotCorrect() {
+        String title = "Odpowiedź niepoprawna.";
+        embedPatternOneField(Color.RED, title, "");
+    }
+
+
+    private void embedEditingNotPossible() {
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(color);
-            builder.addField(title, description, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            builder.setTitle("Dalsze edytowanie niemożliwe. Spróbuj ponownie za chwilę uruchomić edytor.");
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            privateChannel.sendMessage(builder.build());
         });
+
+    }
+
+
+    private void embedSendNotifi() {
+        String title = "Czy wysłać powiadomienia do wszystkich zapisanych?";
+        String description = "T - Tak\nN - Nie";
+        embedPatternOneField(Color.GREEN, title, description);
     }
 
     private void embedTimeNotCorrect() {
         String title = "Nieprawidłowy wprowadzony czas.";
         String description = "Format: hh:mm";
+        embedPatternOneField(Color.RED, title, description);
+    }
+
+    private void embedDateNotCorrect() {
+        String title = "Nieprawidłowa wprowadzona data.";
+        String description = "Format: dd.mm.yyyy";
         embedPatternOneField(Color.RED, title, description);
     }
 
@@ -148,14 +330,14 @@ public class EventsSettings {
     private void embedCancelEvent() {
         String title = "Czy jestś pewien że chcesz zakończyć event?";
         String description = "!!!UWAGA!!! - Zamyka event i usuwa z bazy danych. Nie będzie możliwości odwrotu tego polecenia. " +
-                "Nie będzie można aktywować zamkniętego eventu i zapisów na niego. Bądź pewny tego ruchu.";
+                "Nie będzie można aktywować zamkniętego eventu i zapisów na niego. Bądź pewny tego ruchu.\n\n" +
+                "T - Tak\nN - Nie";
         embedPatternOneField(Color.RED, title, description);
     }
 
     private void embedWhatMsgSend() {
         String title = "Podaj wiadomośći jaką chcesz wysłać do wszystkich zapisanych użytkowników.";
-        String description = "";
-        embedPatternOneField(Color.YELLOW, title, description);
+        embedPatternOneField(Color.YELLOW, title, "");
     }
 
     private void embedGetDate() {
@@ -177,12 +359,30 @@ public class EventsSettings {
 
     private void embedWhatToDo() {
         String title = "Co chcesz zrobić?";
-        String description = "1. Zmień godzinę\n" +
-                "2. Zmień datę\n" +
-                "3. Wyślij wiadomość do zapisanych.\n" +
-                "4. Anuluj event";
+        String description = "1 - Zmień godzinę\n" +
+                "2 - Zmień datę\n" +
+                "3 - Anuluj event\n" +
+                "0 - Zakończ edytowanie.";
         embedPatternOneField(Color.YELLOW, title, description);
     }
 
 
+    /**
+     * @param color       Kolor Embed - RED - Bład, YELLOW - Następny krok lub informacja
+     * @param title       Tytuł pola w embed.
+     * @param description Opis pola w embed
+     */
+    private void embedPatternOneField(Color color, String title, String description) {
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(color);
+            builder.addField(title, description, false);
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+
+    public boolean isPossiblyEditing() {
+        return possiblyEditing;
+    }
 }

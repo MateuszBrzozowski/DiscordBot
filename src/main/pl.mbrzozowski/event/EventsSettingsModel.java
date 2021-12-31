@@ -24,11 +24,19 @@ public class EventsSettingsModel {
         return -1;
     }
 
-    public void saveAnswerAndNextStage(int index, PrivateMessageReceivedEvent event){
+    public void saveAnswerAndNextStage(int index, PrivateMessageReceivedEvent event) {
         eventsSettings.get(index).saveAnswerAndSetNextStage(event);
     }
 
     public void removeSettingsPanel(int index) {
         eventsSettings.remove(index);
+    }
+
+    public boolean isPossibleEditing(int index) {
+        if (eventsSettings.get(index).isPossiblyEditing()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
