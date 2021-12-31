@@ -434,6 +434,17 @@ public class EmbedInfo {
         });
     }
 
+    public static void cancelEventEditing(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.GREEN);
+            builder.setTitle("Edytor zamknięty");
+            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
     public static void sendHelloMessagePrivate(String userID) {
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {

@@ -1,5 +1,6 @@
 package bot.event.writing;
 
+import embed.EmbedInfo;
 import event.EventsSettings;
 import event.EventsSettingsModel;
 import helpers.Commands;
@@ -26,7 +27,12 @@ public class EventsSettingsCmd extends Proccess {
             EventsSettings eventsSettings = new EventsSettings(privateEvent);
             eventsSettingsModel.addEventsSettings(eventsSettings);
         } else if (indexOfSettings >= 0) {
-            eventsSettingsModel.saveAnswerAndNextStage(indexOfSettings,privateEvent);
+            if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL) || !eventsSettingsModel.isPossibleEditing(indexOfSettings)) {
+                EmbedInfo.cancelEventEditing(privateEvent.getAuthor().getId());
+                eventsSettingsModel.removeSettingsPanel(indexOfSettings);
+            } else {
+                eventsSettingsModel.saveAnswerAndNextStage(indexOfSettings, privateEvent);
+            }
         } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.TIME)) {
             getEvents().changeTime(message.getWords()[1], message.getWords()[2], message.getUserID(), true);
         } else if (message.getWords().length == 4 && message.getWords()[0].equalsIgnoreCase(Commands.TIME) && message.getWords()[3].equalsIgnoreCase(Commands.NO_NOTIFI)) {

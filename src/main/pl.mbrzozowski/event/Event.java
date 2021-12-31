@@ -1019,7 +1019,41 @@ public class Event {
         return date + "r., " + time;
     }
 
-    public int getActiveEventsListSize() {
-        return activeEvents.size();
+    public List getAllEventID() {
+        List<String> listOfEventsID = new ArrayList<>();
+        for (ActiveEvent activeEvent : activeEvents) {
+            listOfEventsID.add(activeEvent.getMessageID());
+        }
+        return listOfEventsID;
+    }
+
+    public boolean checkEventIDOnIndex(int chossedIndexOFEvent, String eventID) {
+        if (activeEvents.get(chossedIndexOFEvent).getMessageID().equalsIgnoreCase(eventID)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public String getDateFromEmbed(String eventID) {
+        int indexActiveEvent = getIndexActiveEvent(eventID);
+        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
+        JDA jda = Repository.getJda();
+        Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        List<MessageEmbed> embeds = message.getEmbeds();
+        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String value = fields.get(0).getValue();
+        return value;
+    }
+
+    public String getTimeFromEmbed(String eventID) {
+        int indexActiveEvent = getIndexActiveEvent(eventID);
+        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
+        JDA jda = Repository.getJda();
+        Message message = jda.getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        List<MessageEmbed> embeds = message.getEmbeds();
+        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String value = fields.get(2).getValue();
+        return value;
     }
 }
