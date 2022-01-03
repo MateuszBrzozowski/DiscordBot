@@ -372,11 +372,11 @@ public class Event {
     private void createList(String userName, TextChannel textChannel, String nameEvent, String date, String time, String description, int whoPing) {
         String msg = "";
         if (whoPing == 1) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (whoPing == 2) {
-            msg = "<@&" + RoleID.RECRUT_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (whoPing == 3) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!";
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -404,6 +404,7 @@ public class Event {
                         message.editMessage(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
                                 Button.secondary("reserve_" + msgID, "Niepewny"),
                                 Button.danger("out_" + msgID, "Wypisz")).queue();
+                        message.pin().queue();
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID, nameEvent);
                         activeEvents.add(event);
                         addEventDB(event);
