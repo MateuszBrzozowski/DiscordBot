@@ -799,6 +799,59 @@ public class Event {
         }
     }
 
+
+    public void changeDateAndTime(String eventID, String newDate, String newTime, String userID, boolean notifi) {
+        if (!Validation.isDateFormat(newDate)) return;
+        if (!Validation.isTimeFormat(newTime)) return;
+        int index = getIndexActiveEvent(eventID);
+        if (index >= 0) {
+            JDA jda = Repository.getJda();
+            TextChannel textChannel = jda.getTextChannelById(activeEvents.get(index).getChannelID());
+            textChannel.retrieveMessageById(eventID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                MessageEmbed mOld = embeds.get(0);
+                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
+                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+                String dataTime = newDate + " " + newTime;
+                if (!Validation.eventDateTimeAfterNow(dataTime)) {
+                    EmbedInfo.dateTimeIsBeforeNow(userID);
+                    return;
+                }
+                for (int i = 0; i < fieldsOld.size(); i++) {
+                    if (i == 0) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
+                        fieldsNew.add(fieldNew);
+                    } else if (i == 2) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
+                        fieldsNew.add(fieldNew);
+                    } else {
+                        fieldsNew.add(fieldsOld.get(i));
+                    }
+                }
+                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
+                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
+                        , mOld.getTitle()
+                        , mOld.getDescription()
+                        , mOld.getType()
+                        , mOld.getTimestamp()
+                        , mOld.getColorRaw()
+                        , mOld.getThumbnail()
+                        , mOld.getSiteProvider()
+                        , mOld.getAuthor()
+                        , mOld.getVideoInfo()
+                        , mOld.getFooter()
+                        , mOld.getImage()
+                        , fieldsNew);
+                message.editMessage(mNew).queue(message1 -> {
+                    updateTimer(eventID);
+                    if (notifi){
+                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES,newDateTime);
+                    }
+                });
+            });
+        }
+    }
+
     private void updateTimer(String messageID) {
         Timers timers = Repository.getTimers();
         timers.cancel(messageID);
