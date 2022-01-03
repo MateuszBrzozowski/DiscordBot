@@ -408,7 +408,7 @@ public class Event {
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID, nameEvent);
                         activeEvents.add(event);
                         addEventDB(event);
-
+                        message.pin().queue();
                         CreateReminder reminder = new CreateReminder(date, time, message.getId());
                         reminder.create();
                     });
