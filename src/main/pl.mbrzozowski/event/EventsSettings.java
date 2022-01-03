@@ -76,6 +76,8 @@ public class EventsSettings {
                         String eventIDLocal = indexsWithAllEventsID.get(chossedIndexOFEvent);
                         date = event.getDateFromEmbed(eventIDLocal);
                         time = event.getTimeFromEmbed(eventIDLocal);
+                        newTime = time;
+                        newDate = date;
                         stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                         embedWhatToDo();
                     } else {
@@ -90,7 +92,7 @@ public class EventsSettings {
                 break;
             }
             case WHAT_TO_DO: {
-                int msgInteger = 0;
+                int msgInteger = 99;
                 try {
                     msgInteger = Integer.parseInt(msg);
                 } catch (NumberFormatException e) {
@@ -110,7 +112,13 @@ public class EventsSettings {
                         stageOfSettings = EventSettingsStatus.CANCEL_EVENT;
                         break;
                     case 0:
-
+                        if (checkChanges()) {
+                            stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
+                            embedSendNotifi();
+                        } else {
+                            embedNoChanges();
+                            removeThisEditor();
+                        }
                         break;
                     default:
                         embedWrongWhatToDo();
@@ -217,13 +225,15 @@ public class EventsSettings {
                     event.cancelEvent(eventID);
                 }
             } else {
-                event.changeDate(eventID, newDate, userID, false);
-                if (sendNotifi) {
-                    event.changeTime(eventID, newTime, userID, true);
-                } else {
-                    event.changeTime(eventID, newTime, userID, false);
+                if (changedDate() && changedTime()) {
+                    event.changeDateAndTime(eventID, newDate, newTime, userID, sendNotifi);
+                } else if (changedDate()) {
+                    event.changeDate(eventID, newDate, userID, sendNotifi);
+                } else if (changedTime()) {
+                    event.changeTime(eventID, newTime, userID, sendNotifi);
                 }
             }
+            embedCloseEditor();
         } else {
             possiblyEditing = false;
             removeThisEditor();
@@ -252,6 +262,11 @@ public class EventsSettings {
         String t = "Nie wprowadzono żadnych zmian.";
         String d = "Zamykam edytor eventów.";
         embedPatternOneField(Color.RED, t, d);
+    }
+
+    private void embedCloseEditor() {
+        String d = "Zamykam edytor eventów.";
+        embedPatternOneField(Color.RED, "", d);
     }
 
     /**
