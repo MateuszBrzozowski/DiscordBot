@@ -4,6 +4,7 @@ import embed.EmbedSettings;
 import event.Event;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
+import helpers.Users;
 import model.MemberMy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -41,13 +42,13 @@ public class Reminder extends TimerTask {
             String dateTimeEvent = event.getDateAndTimeFromEmbed(eventID);
             for (int i = 0; i < mainList.size(); i++) {
                 String userID = mainList.get(i).getUserID();
-                if (!reminderOFF.userHasOff(userID)) {
+                if (!reminderOFF.userHasOff(userID) && (Users.isClanMember(userID) || Users.isRecrut(userID))) {
                     sendMessage(userID, linkToEvent, dateTimeEvent);
                 }
             }
             for (int i = 0; i < reserveList.size(); i++) {
                 String userID = reserveList.get(i).getUserID();
-                if (!reminderOFF.userHasOff(userID)) {
+                if (!reminderOFF.userHasOff(userID) && (Users.isClanMember(userID) || Users.isRecrut(userID))) {
                     sendMessage(userID, linkToEvent, dateTimeEvent);
                 }
             }
