@@ -3,7 +3,6 @@ package event;
 import database.DBConnector;
 import embed.EmbedInfo;
 import helpers.RangerLogger;
-import helpers.Users;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -258,15 +257,11 @@ public class ActiveEvent {
         RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam informację.", messageID);
         for (int i = 0; i < mainList.size(); i++) {
             String userID = mainList.get(i).getUserID();
-            if (Users.isClanMember(userID) || Users.isRecrut(userID)) {
-                EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
-            }
+            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
         }
         for (int i = 0; i < reserveList.size(); i++) {
             String userID = reserveList.get(i).getUserID();
-            if (Users.isClanMember(userID) || Users.isRecrut(userID)) {
-                EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
-            }
+            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
         }
     }
 }

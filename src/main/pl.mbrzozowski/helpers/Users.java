@@ -58,18 +58,6 @@ public class Users {
         return false;
     }
 
-    public static boolean isClanMember(String userID) {
-        String clanMemberId = RoleID.CLAN_MEMBER_ID;
-        if (hasUserRole(userID, clanMemberId)) return true;
-        return false;
-    }
-
-    public static boolean isRecrut(String userID) {
-        String recrutId = RoleID.RECRUT_ID;
-        if (hasUserRole(userID, recrutId)) return true;
-        return false;
-    }
-
     /**
      * @param userID ID użytkownika którego sprawdzamy
      * @return Zwraca true jeżeli użytkownik ma rolę innego klanu. W innym przypadku zwraca false.
@@ -87,7 +75,7 @@ public class Users {
      * @return Zwraca true jeżeli użytkownik to twórca bota, W innym przypadku zwraca false.
      */
     public static boolean isUserDev(String userID) {
-        if (userID.equalsIgnoreCase(RoleID.DEV_ID)) {
+        if (userID.equalsIgnoreCase(RoleID.DEV_ID)){
             return true;
         }
         return false;
