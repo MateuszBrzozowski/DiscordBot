@@ -713,11 +713,13 @@ public class Event {
                 MessageEmbed mOld = embeds.get(0);
                 List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
                 List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String dateTime = fieldsOld.get(0).getValue() + " " + time;
+                String date = fieldsOld.get(0).getValue();
+                String dateTime = date + " " + time;
                 if (!Validation.eventDateTimeAfterNow(dateTime)) {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
+                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 2) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
@@ -762,11 +764,13 @@ public class Event {
                 MessageEmbed mOld = embeds.get(0);
                 List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
                 List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String dateTime = date + " " + fieldsOld.get(2).getValue();
+                String time = fieldsOld.get(2).getValue();
+                String dateTime = date + " " + time;
                 if (!Validation.eventDateTimeAfterNow(dateTime)) {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
+                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 0) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", date, true);
@@ -817,6 +821,7 @@ public class Event {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
+                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + dataTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 0) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
@@ -844,8 +849,8 @@ public class Event {
                         , fieldsNew);
                 message.editMessage(mNew).queue(message1 -> {
                     updateTimer(eventID);
-                    if (notifi){
-                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES,newDateTime);
+                    if (notifi) {
+                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
                     }
                 });
             });
