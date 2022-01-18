@@ -350,7 +350,7 @@ public class EmbedInfo {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-            builder.setTitle("Nie możesz wypisać się 3h przed eventem!");
+            builder.setTitle("Nie możesz wypisać się z eventu tuż przed jego rozpoczęciem!");
             builder.setDescription("Jeżeli nie możesz pojawić się z ważnych przyczyn przekaż informację na kanale eventu dlaczego Cię nie będzie");
             String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID +

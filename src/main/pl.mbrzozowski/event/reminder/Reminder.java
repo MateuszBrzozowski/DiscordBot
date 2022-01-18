@@ -19,13 +19,19 @@ public class Reminder extends TimerTask {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String eventID;
+    private TypeOfReminder typeOfReminder;
+    private final String TITLE_ONE_HOUR = "**PRZYPOMNIENIE:** 60 minut do wydarzenia!";
+    private final String TITLE_ONE_DAY = "**PRZYPOMNIENIE:** 1 dzień do wydarzenia!";
+    private final String DESCRIPTION_ONE_HOUR = "Wkrótce rozpocznie się wydarzenie na które się zapisałeś.";
+    private final String DESCRIPTION_ONE_DAY = "Jutro wydarzenie na które się zapisałeś.";
 
 
     /**
      * @param eventID - ID eventu, id wiadmości w której jest lista z zapisami.
      */
-    public Reminder(String eventID) {
+    public Reminder(String eventID, TypeOfReminder type) {
         this.eventID = eventID;
+        this.typeOfReminder = type;
     }
 
     @Override
@@ -60,11 +66,33 @@ public class Reminder extends TimerTask {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.ORANGE);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setTitle("**PRZYPOMNIENIE:** 60 minut do wydarzenia!");
-            builder.setDescription("Wkrótce rozpocznie się wydarzenie na które się zapisałeś.");
+            builder.setTitle(chooseTitle());
+            builder.setDescription(chooseDescription());
             builder.addField("Szczegóły eventu", linkToEvent + "\n:date: " + dateTimeEvent, false);
             builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help reminder");
             privateChannel.sendMessage(builder.build()).queue();
         });
+    }
+
+    private String chooseTitle(){
+        switch (typeOfReminder){
+            case ONE_HOUR:
+                return TITLE_ONE_HOUR;
+            case ONE_DAY:
+                return TITLE_ONE_DAY;
+            default:
+                return "Błąd remindera";
+        }
+    }
+
+    private String chooseDescription(){
+        switch (typeOfReminder){
+            case ONE_HOUR:
+                return DESCRIPTION_ONE_HOUR;
+            case ONE_DAY:
+                return DESCRIPTION_ONE_DAY;
+            default:
+                return "Błąd remindera";
+        }
     }
 }

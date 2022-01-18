@@ -77,16 +77,16 @@ public class CreateReminder {
                 LocalDateTime oneDayBefore = eventDateTime.minusDays(1);
                 oneDayBefore.atZone(ZoneId.of("Europe/Paris"));
 
-                setReminderWithExactTime(timerOneHour, oneHourBefore, dateTimeNow);
-                setReminderWithExactTime(timerOneDay, oneDayBefore, dateTimeNow);
+                setReminderWithExactTime(timerOneHour, oneHourBefore, dateTimeNow, TypeOfReminder.ONE_HOUR);
+                setReminderWithExactTime(timerOneDay, oneDayBefore, dateTimeNow, TypeOfReminder.ONE_DAY);
             }
         }
     }
 
-    private void setReminderWithExactTime(Timer timer, LocalDateTime timerTme, LocalDateTime dateTimeNow) {
+    private void setReminderWithExactTime(Timer timer, LocalDateTime timerTme, LocalDateTime dateTimeNow, TypeOfReminder type) {
         Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
         if (dateTimeNow.isBefore(timerTme)) {
-            timer.schedule(new Reminder(eventID), eventDateTime);
+            timer.schedule(new Reminder(eventID, type), eventDateTime);
             logger.info("Ustawiam timer");
 
             MyTimer myTimer = new MyTimer(eventID, timer);
