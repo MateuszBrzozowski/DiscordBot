@@ -169,6 +169,29 @@ public class Event {
         return false;
     }
 
+    /**
+     * Sprawdza czy pozostały trzy godziny do eventu
+     *
+     * @param indexOfActiveMatch index eventu
+     * @return Zwraca true jeżeli pozostały trzy godziny lub mniej do eventu, w innym przypadku zwraca false
+     */
+    private boolean threeHoursToEvent(int indexOfActiveMatch) {
+        JDA jda = Repository.getJda();
+        TextChannel channel = jda.getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
+        List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
+        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+        String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+        LocalDateTime eventDateTime = LocalDateTime.parse(dateString, dateFormat);
+        eventDateTime = eventDateTime.minusHours(3);
+        eventDateTime.atZone(ZoneId.of("Europe/Paris"));
+        LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+        if (dateNow.isAfter(eventDateTime)) {
+            return true;
+        }
+        return false;
+    }
+
     private void removeMatchDB(String messageID) {
         String query = "DELETE FROM `event` WHERE msgID=\"%s\"";
         DBConnector connector = new DBConnector();
@@ -640,10 +663,19 @@ public class Event {
                     activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
                     break;
                 case SIGN_OUT:
-                    activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
+                    if (!threeHoursToEvent(indexOfActiveMatch)) {
+                        activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
+                    } else {
+                        EmbedInfo.youCantSingOut(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
+                        RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
+                                + activeEvents.get(indexOfActiveMatch).getName() + "] - Cas do eventu 3h lub mniej.");
+                    }
+
                     break;
             }
         } else {
+            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
+                    + activeEvents.get(indexOfActiveMatch).getName() + "] - Event się już rozpoczął.");
             EmbedInfo.eventIsBefore(userID);
             disableButtons(event.getMessageId());
         }
