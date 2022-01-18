@@ -34,7 +34,7 @@ public class Event {
     private List<ActiveEvent> activeEvents = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     public static final String NAME_LIST = ":white_check_mark: Lista ";
-    public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Niepewny/Rezerwa ";
+    public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
     private final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
@@ -396,13 +396,13 @@ public class Event {
         try {
             textChannel.sendMessage(msg).embed(builder.build()).setActionRow(
                     Button.primary("in_", "Zapisz"),
-                    Button.secondary("reserve_", "Niepewny"),
+                    Button.secondary("reserve_", "Rezerwa"),
                     Button.danger("out_", "Wypisz"))
                     .queue(message -> {
                         MessageEmbed mOld = message.getEmbeds().get(0);
                         String msgID = message.getId();
                         message.editMessage(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
-                                Button.secondary("reserve_" + msgID, "Niepewny"),
+                                Button.secondary("reserve_" + msgID, "Rezerwa"),
                                 Button.danger("out_" + msgID, "Wypisz")).queue();
                         message.pin().queue();
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID, nameEvent);
@@ -864,6 +864,11 @@ public class Event {
         reminder.create();
     }
 
+    /**
+     * Wyłącza przyciski w zapisach
+     *
+     * @param messageID ID wiadomości eventu
+     */
     public void disableButtons(String messageID) {
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
@@ -871,6 +876,10 @@ public class Event {
         }
     }
 
+    /**
+     * @param messageID ID wiadomości eventu
+     * @param channelID ID kanału na którym znajduję sie event
+     */
     public void disableButtons(String messageID, String channelID) {
         JDA jda = Repository.getJda();
         TextChannel textChannel = jda.getTextChannelById(channelID);
