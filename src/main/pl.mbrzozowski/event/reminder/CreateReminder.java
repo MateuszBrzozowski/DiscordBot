@@ -6,14 +6,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ranger.RangerBot;
 import ranger.Repository;
-import recrut.Recruits;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -63,30 +59,39 @@ public class CreateReminder {
 
     private void setReminder() {
         if (date != "" && time != "") {
-            time  = Validation.timeCorrect(time);
+            time = Validation.timeCorrect(time);
             LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             String dateTime = date + " " + time;
             LocalDateTime eventDateTime = null;
             try {
-                eventDateTime = LocalDateTime.parse(dateTime,dateTimeFormatter);
+                eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
             } catch (DateTimeParseException e) {
                 e.printStackTrace();
             }
-            Timer timer = new Timer();
+            Timer timerOneHour = new Timer();
+            Timer timerOneDay = new Timer();
             if (eventDateTime != null) {
-                eventDateTime = eventDateTime.minusHours(1);
-                eventDateTime.atZone(ZoneId.of("Europe/Paris"));
-                Date eventDateTimeReminder = Date.from(eventDateTime.atZone(ZoneId.of("Europe/Paris")).toInstant());
-                if (dateTimeNow.isBefore(eventDateTime)) {
-                    timer.schedule(new Reminder(eventID), eventDateTimeReminder);
-                    logger.info("Ustawiam timer");
+                LocalDateTime oneHourBefore = eventDateTime.minusHours(1);
+                oneHourBefore.atZone(ZoneId.of("Europe/Paris"));
+                LocalDateTime oneDayBefore = eventDateTime.minusDays(1);
+                oneDayBefore.atZone(ZoneId.of("Europe/Paris"));
 
-                    MyTimer myTimer = new MyTimer(eventID, timer);
-                    Timers timers = Repository.getTimers();
-                    timers.add(myTimer);
-                }
+                setReminderWithExactTime(timerOneHour, oneHourBefore, dateTimeNow);
+                setReminderWithExactTime(timerOneDay, oneDayBefore, dateTimeNow);
             }
+        }
+    }
+
+    private void setReminderWithExactTime(Timer timer, LocalDateTime timerTme, LocalDateTime dateTimeNow) {
+        Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
+        if (dateTimeNow.isBefore(timerTme)) {
+            timer.schedule(new Reminder(eventID), eventDateTime);
+            logger.info("Ustawiam timer");
+
+            MyTimer myTimer = new MyTimer(eventID, timer);
+            Timers timers = Repository.getTimers();
+            timers.add(myTimer);
         }
     }
 
