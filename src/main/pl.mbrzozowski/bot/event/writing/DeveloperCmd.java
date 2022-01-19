@@ -24,6 +24,12 @@ public class DeveloperCmd extends Proccess {
             getEvents().enableButtons(message.getWords()[1], message.getWords()[2]);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATUS)) {
             EmbedInfo.sendStatus(privateEvent.getAuthor().getId());
+        } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.MSG)) {
+            getBotWriter().setChannelID(message.getWords()[1]);
+        } else if (getBotWriter().isActive()) {
+            getBotWriter().sendMsg(privateEvent.getMessage().getContentDisplay());
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.MSG_CANCEL)) {
+            getBotWriter().setActive(false);
         } else {
             getNextProccess().proccessMessage(message);
         }
