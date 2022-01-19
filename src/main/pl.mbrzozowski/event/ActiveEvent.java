@@ -170,7 +170,7 @@ public class ActiveEvent {
         return false;
     }
 
-    private boolean checkMemberOnMainList(String userID) {
+    public boolean checkMemberOnMainList(String userID) {
         for (int i = 0; i < mainList.size(); i++) {
             if (mainList.get(i).getUserID().equalsIgnoreCase(userID)) {
                 return true;

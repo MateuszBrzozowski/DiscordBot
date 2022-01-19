@@ -353,9 +353,32 @@ public class EmbedInfo {
             builder.setTitle("Nie możesz wypisać się z eventu tuż przed jego rozpoczęciem!");
             builder.setDescription("Jeżeli nie możesz pojawić się z ważnych przyczyn przekaż informację na kanale eventu dlaczego Cię nie będzie");
             String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
-                    CategoryAndChannelID.RANGERSPL_GUILD_ID +
+                    CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
-            builder.addField("Event", linkToEventChannel, false);
+            builder.addField("Link do eventu", linkToEventChannel, false);
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
+
+    /**
+     * Wysyła do użytkownika o userID powiadomienie że nie może wypisać się 3h przed eventem z głównej listy na rezerwową
+     *
+     * @param userID  ID użytkownika do którego wysyna jest wiadomość
+     * @param eventID ID eventu z którego próbuje wypisać się uzytkownik
+     */
+    public static void youCantSignReserve(String userID, String eventID) {
+        JDA jda = Repository.getJda();
+        Event event = Repository.getEvent();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            builder.setTitle("Nie możesz wypisać się z głownej listy na rezerwową tuż przed rozpoczęciem eventu!");
+            builder.setDescription("Jeżeli istnieje ryzyko, że się spóźnisz i chcesz wpisać się na rezerwę tuż przed powiadom nas na kanale eventu");
+            String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
+                    CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
+                    event.getChannelID(eventID) + ")";
+            builder.addField("Link do eventu", linkToEventChannel, false);
             privateChannel.sendMessage(builder.build()).queue();
         });
     }

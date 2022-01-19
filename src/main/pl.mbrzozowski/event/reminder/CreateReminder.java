@@ -60,7 +60,6 @@ public class CreateReminder {
     private void setReminder() {
         if (date != "" && time != "") {
             time = Validation.timeCorrect(time);
-            LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             String dateTime = date + " " + time;
             LocalDateTime eventDateTime = null;
@@ -77,13 +76,14 @@ public class CreateReminder {
                 LocalDateTime oneDayBefore = eventDateTime.minusDays(1);
                 oneDayBefore.atZone(ZoneId.of("Europe/Paris"));
 
-                setReminderWithExactTime(timerOneHour, oneHourBefore, dateTimeNow, TypeOfReminder.ONE_HOUR);
-                setReminderWithExactTime(timerOneDay, oneDayBefore, dateTimeNow, TypeOfReminder.ONE_DAY);
+                setReminderWithExactTime(timerOneHour, oneHourBefore, TypeOfReminder.ONE_HOUR);
+                setReminderWithExactTime(timerOneDay, oneDayBefore, TypeOfReminder.ONE_DAY);
             }
         }
     }
 
-    private void setReminderWithExactTime(Timer timer, LocalDateTime timerTme, LocalDateTime dateTimeNow, TypeOfReminder type) {
+    private void setReminderWithExactTime(Timer timer, LocalDateTime timerTme, TypeOfReminder type) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
         if (dateTimeNow.isBefore(timerTme)) {
             timer.schedule(new Reminder(eventID, type), eventDateTime);

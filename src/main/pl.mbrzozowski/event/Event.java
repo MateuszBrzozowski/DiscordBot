@@ -660,7 +660,13 @@ public class Event {
                     activeEvents.get(indexOfActiveMatch).addToMainList(userID, userName, event);
                     break;
                 case SIGN_IN_RESERVE:
-                    activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
+                    if (!threeHoursToEvent(indexOfActiveMatch) && !userOnMainList(indexOfActiveMatch, userID)) {
+                        activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
+                    } else {
+                        EmbedInfo.youCantSignReserve(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
+                        RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głownej listy na rezerwową ["
+                                + activeEvents.get(indexOfActiveMatch).getName() + "] - Czas do eventu 3h lub mniej.");
+                    }
                     break;
                 case SIGN_OUT:
                     if (!threeHoursToEvent(indexOfActiveMatch)) {
@@ -668,7 +674,7 @@ public class Event {
                     } else {
                         EmbedInfo.youCantSingOut(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
                         RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
-                                + activeEvents.get(indexOfActiveMatch).getName() + "] - Cas do eventu 3h lub mniej.");
+                                + activeEvents.get(indexOfActiveMatch).getName() + "] - Czas do eventu 3h lub mniej.");
                     }
 
                     break;
@@ -679,6 +685,10 @@ public class Event {
             EmbedInfo.eventIsBefore(userID);
             disableButtons(event.getMessageId());
         }
+    }
+
+    private boolean userOnMainList(int index, String userID) {
+        return activeEvents.get(index).checkMemberOnMainList(userID);
     }
 
     public void deleteChannelByID(String channelID) {
