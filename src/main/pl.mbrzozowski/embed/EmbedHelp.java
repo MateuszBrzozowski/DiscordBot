@@ -114,7 +114,9 @@ public class EmbedHelp {
                 "**!disable [msgID] [channID]** -  Wyłącza buttony\n" +
                 "**!enable [msgID]** - Włącza buttony\n" +
                 "**!enable [msgID] [channID]** - Włącza buttony\n" +
-                "**!status** - Wyswietla status aplikacji.", false);
+                "**!status** - Wyswietla status aplikacji.\n" +
+                "**!msg [channelID]** - Wysyła wiadomość na kanale o ID [channelID] jako bot\n" +
+                "**!msgCancel - Anuluje wysyłanie wiadomości jako bot.**", false);
         privateChannel.sendMessage(builder.build()).queue();
     }
 
