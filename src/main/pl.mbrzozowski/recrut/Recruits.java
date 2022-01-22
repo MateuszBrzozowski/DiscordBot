@@ -381,134 +381,6 @@ public class Recruits {
         thread.start();
     }
 
-    /**
-     * @param nickRecrut Nick rekruta który może sobie ustawić
-     * @param channel    Kanał rekruta
-     * @param drill      Drill który przyjął na rekrutację
-     */
-    public void acceptRecrut(String nickRecrut, TextChannel channel, User drill) {
-        JDA jda = Repository.getJda();
-        channel = jda.getTextChannelById("842886880932528168");
-        nickRecrut+="<rRangersPL>";
-
-//        if (isRecruitChannel(channel.getId())) {
-        //"getRecruitIDFromChannelID(channel.getId())"
-        channel.sendMessage("<@" + "NazwaRekruta" + "> Kilka ważnych informacji na początek!").queue();
-
-        welcome(channel, nickRecrut);
-        recrutingTimeInfo(channel);
-        breakTimeInfo(channel);
-        clanTagInfo(channel);
-        rankInfo(channel);
-        playingSquad(channel);
-        useTSAndDiscord(channel);
-        signature(channel, drill);
-//        }
-
-        //        whoIsWho(channel);
-    }
-
-    private void useTSAndDiscord(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.addField("TS - audio / Discord - tekst", "Do komunikacji głosowej używamy TS. Informację o adresie w pierwszej wiadomości. Wejdź zawsze gdy grasz. " +
-                "Nawet jeżeli nikogo nie ma, przejdź na odpowiedni kanał. Może ktoś do Ciebie dołączy. Zachęcamy do wchodzenia również gdy grasz w inne gry. Mamy do tego przeznaczone odpowiednie pokoje.\n" +
-                "Discorda używamy natomiast do komunikacji tekstowej.", false);
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void clanTagInfo(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.addField("Kultura i szacunek do innych!", "Grając na serwerze z tagiem klanu, pamiętaj że jesteś jego wizytówką! Jako grupa uważamy się " +
-                "za kulturalnych i dojrzałych – niech taki obraz Rangersów trwa.", false);
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void rankInfo(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Rangi w klanie");
-        builder.setDescription("Rangi są uproszczonym układem znanym z US Army. Ranga jest wyznaczana na zasadzie algorytmu, " +
-                "biorącego pod uwagę trzy aspekty, które są następnie ważone:\n" +
-                "- staż w klanie\n" +
-                "- czas gry w SQ\n" +
-                "- liczba rund rozegranych w oficjalnych meczach\n" +
-                "Aktualizacja co miesiąc");
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void playingSquad(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Granie w squada");
-        builder.addField("Codzienne granie", "Głównie wieczorami schodzimy się około godziny 19-20.", false);
-        builder.addField("Zorganizowane granie", "Od czasu do czasu organizujemy zorganizowane granie w większej ekipie. " +
-                "Informujemy was odpowiednio wcześniej. Schodzimy się o wybranej godzinie, wybieramy serwer i gramy!", false);
-        builder.addField("Mecze międzyklanowe", "Głównie gramy w niedzielnych CCFN (Community Clan Fight Night) " +
-                "i sobotnich SCFC (Squad Clan Fight Community). - przerwa wakacyjna.", false);
-        builder.addField("Eventy międzyklanowe", "Bierzemy czynny udział w eventach organizowanych przez polskie jak i zagraniczne klany. " +
-                "Czasami sami organizujemy eventy dla polskich graczy z klanów jak i również dla ludzi niezrzeszonych.", false);
-        builder.addField("Eventy wewnątrzklanowe", "Organizujemy zamknięte eventy klanowe dla złapania luzu i dobrej zabawy takie jak AIM Master, RAT Race", false);
-        builder.addField("Szkolenia wewnątrzklanowe", "Organizujemy zamknięte nieobowiązkowe szkolenia dla naszych członków i rekrutów. " +
-                "Szkolenia z SquadLeadera, Medyka, HAT/LAT, Obsługi i rozpoznawania pojazdów, Podchodzenia i zdobywania punktów i wiele innych.", false);
-        builder.addField("RASP", "czyli **Ranger Assessment and Selection Program** - Obowiązkowe szkolenie dla każdego nowego członka składające się z dwóch części." +
-                " Wymagane do awansu na stopnie NCO.", false);
-        builder.setFooter("*Udział w oficjalnych meczach dostępny po przejściu pozytywnie rekrtuacji.");
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void breakTimeInfo(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Przerwa/Wyjazd/Brak chęci?");
-        builder.setDescription("Jeżeli planujesz podczas rekrutacji przerwę w graniu dłuższą niż tydzień z jakiegokolwiek powodu daj nam znać tutaj na kanale! Wystarczy informacja kiedy wracasz. \n" +
-                "Nie masz ochoty już grać? Prosimy poinformuj nas również o tym. Lubimy jasne sytuacje.");
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void recrutingTimeInfo(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Ile trwa rekrutacja?");
-        builder.setDescription("Rekrutacja trwa zwykle około 1-1,5 misiąca. Nie mamy zakresu godzin jaki musisz przegrać jednak jako rekrut warto być aktywnym. Daj się poznać!");
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void whoIsWho(TextChannel channel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setTitle("Kto jest kim?");
-        builder.addField("Clan Leader", "Bruder", false);
-        builder.addField("Vice Clan Leader", "Lodyga, Brzozaaa", false);
-        builder.addField("Drill Intructor", "Jurand, Kapibałe", false);
-        builder.addField("Serwer Administrator", "LuQeRo", false);
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void welcome(TextChannel channel, String nickRecrut) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setTitle("Witaj na rekrutacji do klanu RANGERS POLSKA");
-        builder.setDescription("Dziękujemy za złożenie podania i wypełnienie formularza.");
-        builder.addField("Ustaw sobie nick na Steam oraz na naszym discordzie:", "**" + nickRecrut + "**", false);
-        channel.sendMessage(builder.build()).queue();
-    }
-
-    private void signature(TextChannel channel, User drill) {
-        String drillName = Users.getUserNicknameFromID(drill.getId());
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.WHITE);
-        builder.setThumbnail("https://cdn.icon-icons.com/icons2/2622/PNG/512/gui_signature_icon_157586.png");
-        builder.addField("Przyjął na rekrutację", drillName, false);
-        builder.addField("", "Cześć! W trakcie Twojej rekrutacji jestem twoim pierwszym kontaktem. W przypadku jakichkolwiek problemów, pytań itd." +
-                " napisz proszę tutaj na kanale.\n" +
-                "W celu dokończenia formalności daj mi znać kiedy możesz wejść na TS. \n" +
-                "Powodzenia i do usłyszenia!", false);
-        channel.sendMessage(builder.build()).queue();
-    }
-
     public void sendInfo(PrivateChannel privateChannel) {
         EmbedBuilder activeRecruitsBuilder = new EmbedBuilder();
         activeRecruitsBuilder.setColor(Color.RED);
@@ -525,6 +397,32 @@ public class Recruits {
             builder.addField("ID kanału", r.getChannelID(), false);
             builder.addField("Nazwa kanału", channelName, true);
             privateChannel.sendMessage(builder.build()).queue();
+        }
+    }
+
+    public void positiveResult(TextChannel channel) {
+        if (isRecruitChannel(channel.getId())) {
+            //przypisanie roli ClanMember
+            JDA jda = Repository.getJda();
+            Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            Role roleClanMember = jda.getRoleById(RoleID.CLAN_MEMBER_ID);
+            Role roleRecruit = jda.getRoleById(RoleID.RECRUT_ID);
+            String recruitID = getRecruitIDFromChannelID(channel.getId());
+            guild.addRoleToMember(recruitID, roleClanMember).queue();
+            guild.removeRoleFromMember(recruitID,roleRecruit).queue();
+            //Wysłanie informacji o przyjęciu nowego członka.
+            TextChannel channelMemberOnly = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_MEMBER_ONLY);
+            channelMemberOnly.sendMessage("Witamy nowego członka klanu <@" + recruitID + ">.").queue();
+        }
+    }
+
+    public void negativeResult(TextChannel channel) {
+        if (isRecruitChannel(channel.getId())) {
+            JDA jda = Repository.getJda();
+            Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            Role roleRecrut = jda.getRoleById(RoleID.RECRUT_ID);
+            String recruitID = getRecruitIDFromChannelID(channel.getId());
+            guild.removeRoleFromMember(recruitID, roleRecrut).queue();
         }
     }
 }

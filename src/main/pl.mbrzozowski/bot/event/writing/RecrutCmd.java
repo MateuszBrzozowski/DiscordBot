@@ -23,18 +23,17 @@ public class RecrutCmd extends Proccess {
         } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
             guildEvent.getMessage().delete().submit();
             EmbedInfo.endNegative(guildEvent.getAuthor().getId(), guildEvent.getChannel());
+            getRecruits().negativeResult(guildEvent.getChannel());
         } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
             guildEvent.getMessage().delete().submit();
             EmbedInfo.endPositive(guildEvent.getAuthor().getId(), guildEvent.getChannel());
+            getRecruits().positiveResult(guildEvent.getChannel());
         } else if (cmd.equalsIgnoreCase(Commands.REOPEN)) {
             guildEvent.getMessage().delete().submit();
             getRecruits().reOpenChannel(guildEvent);
         } else if (cmd.equalsIgnoreCase(Commands.CLOSE)) {
             guildEvent.getMessage().delete().submit();
             getRecruits().closeChannel(guildEvent);
-        } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.ACCEPT_RECRUT)) {
-//            guildEvent.getMessage().delete().submit();
-            getRecruits().acceptRecrut(message.getWords()[1], guildEvent.getChannel(), guildEvent.getAuthor());
         }
     }
 

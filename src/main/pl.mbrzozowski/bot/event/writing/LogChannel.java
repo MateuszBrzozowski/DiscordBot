@@ -14,7 +14,7 @@ public class LogChannel extends Proccess{
 
     @Override
     public void proccessMessage(Message message) {
-        if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.RANGER_BOT_LOGGER)){
+        if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_RANGER_BOT_LOGGER)){
             EmbedInfo.noWriteOnLoggerChannel(guildEvent);
         } else {
             getNextProccess().proccessMessage(message);
