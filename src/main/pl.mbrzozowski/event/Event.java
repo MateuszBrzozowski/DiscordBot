@@ -662,7 +662,7 @@ public class Event {
                 case SIGN_IN_RESERVE:
                     if (!userOnMainList(indexOfActiveMatch, userID)) {
                         activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
-                    } else if (!threeHoursToEvent(indexOfActiveMatch) && userOnMainList(indexOfActiveMatch, userID)) {
+                    } else if (!threeHoursToEvent(indexOfActiveMatch)) {
                         activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
                     } else {
                         EmbedInfo.youCantSignReserve(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
@@ -678,11 +678,10 @@ public class Event {
                         RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
                                 + activeEvents.get(indexOfActiveMatch).getName() + "] - Czas do eventu 3h lub mniej.");
                     }
-
                     break;
             }
         } else {
-            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
+            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk ["
                     + activeEvents.get(indexOfActiveMatch).getName() + "] - Event się już rozpoczął.");
             EmbedInfo.eventIsBefore(userID);
             disableButtons(event.getMessageId());

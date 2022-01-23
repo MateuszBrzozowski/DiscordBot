@@ -374,7 +374,7 @@ public class EmbedInfo {
             builder.setColor(Color.RED);
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
             builder.setTitle("Nie możesz wypisać się z głownej listy na rezerwową tuż przed rozpoczęciem eventu!");
-            builder.setDescription("Jeżeli istnieje ryzyko, że się spóźnisz i chcesz wpisać się na rezerwę tuż przed powiadom nas na kanale eventu");
+            builder.setDescription("Jeżeli istnieje ryzyko, że się spóźnisz powiadom nas na kanale eventu");
             String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
