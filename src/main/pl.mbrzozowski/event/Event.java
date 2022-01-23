@@ -660,7 +660,7 @@ public class Event {
                     activeEvents.get(indexOfActiveMatch).addToMainList(userID, userName, event);
                     break;
                 case SIGN_IN_RESERVE:
-                    if (!threeHoursToEvent(indexOfActiveMatch) && !userOnMainList(indexOfActiveMatch, userID)) {
+                    if (!threeHoursToEvent(indexOfActiveMatch) && userOnMainList(indexOfActiveMatch, userID)) {
                         activeEvents.get(indexOfActiveMatch).addToReserveList(userID, userName, event);
                     } else {
                         EmbedInfo.youCantSignReserve(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
