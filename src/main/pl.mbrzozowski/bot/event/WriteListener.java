@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import questionnaire.Questionnaire;
 import ranger.RangerBot;
 
 public class WriteListener extends ListenerAdapter {
@@ -28,6 +29,7 @@ public class WriteListener extends ListenerAdapter {
         GeneratorCmd generatorCmd = new GeneratorCmd(event);
         EventsCmd eventsCmd = new EventsCmd(event);
         ChannelCmd channelCmd = new ChannelCmd(event);
+        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
@@ -39,7 +41,8 @@ public class WriteListener extends ListenerAdapter {
         checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(eventsCmd);
         eventsCmd.setNextProccess(channelCmd);
-        channelCmd.setNextProccess(helpCmd);
+        channelCmd.setNextProccess(questionnaire);
+        questionnaire.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
         checkUserAdmin.setNextProccess(recrutCmd);
 

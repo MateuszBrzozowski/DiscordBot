@@ -33,6 +33,8 @@ public class Commands {
     public static final String EVENTS_SETTINGS = PREFIX + "events";
     public static final String MSG = PREFIX + "msg";
     public static final String MSG_CANCEL = PREFIX + "msgCancel";
+    public static final String QUESTIONNAIRE = PREFIX + "ankieta";
+    public static final String QUESTIONNAIRE_PUBLIC = PREFIX + "ankietaJawna";
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";
