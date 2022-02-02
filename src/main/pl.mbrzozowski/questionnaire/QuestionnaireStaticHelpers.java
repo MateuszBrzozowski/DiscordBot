@@ -1,6 +1,6 @@
 package questionnaire;
 
-public class QuestionnaireStaticHelpers {
+class QuestionnaireStaticHelpers {
 
     public static final String EMOJI_A = "\uD83C\uDDE6";
     public static final String EMOJI_B = "\uD83C\uDDE7";

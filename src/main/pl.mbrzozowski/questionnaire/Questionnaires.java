@@ -11,6 +11,14 @@ public class Questionnaires {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private List<Questionnaire> questionnaires = new ArrayList<>();
 
+    /**
+     * Tworzy ankiętę na podstawię polecenia wpisanego na kanale
+     *
+     * @param contentDisplay polecenie tworzenia ankiety - MIN_ODP 0, MAX_ODP 9
+     *                       - (przykład. !ankieta PYTANIE | ODP 1 | ODP 2 | ODP 3 / !ankieta PYTANIE)
+     * @param userID         ID użytkownika który tworzy ankiete
+     * @param channelID      ID kanału na którym tworzona jest ankieta
+     */
     public static void buildQuestionaire(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
 
@@ -29,11 +37,16 @@ public class Questionnaires {
         builder.build();
     }
 
-    public void addQuestionnaire(QuestionnaireBuilder questionnaireBuilder) {
+    void addQuestionnaire(QuestionnaireBuilder questionnaireBuilder) {
         Questionnaire questionnaire = new Questionnaire(questionnaireBuilder);
         questionnaires.add(questionnaire);
     }
 
+    /**
+     * @param emoji     Emoji które zostało kliknięte przez użytkownika
+     * @param messageId ID wiadomości dla której została dodana reakcja
+     * @param userID    ID użytkownika który dał reakcję
+     */
     public void saveAnswer(String emoji, String messageId, String userID) {
         questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
 

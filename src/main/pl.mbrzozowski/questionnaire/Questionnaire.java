@@ -15,7 +15,7 @@ public class Questionnaire {
     private String question;
     private List<Answer> answers = new ArrayList<>();
 
-    public Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
+    Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
         this.messageID = questionnaireBuilder.getMessageID();
         this.authorID = questionnaireBuilder.getAuthorID();
         this.channelID = questionnaireBuilder.getChannelID();
@@ -30,7 +30,7 @@ public class Questionnaire {
         }
     }
 
-    public void addAnswer(String emoji, String userID) {
+    void addAnswer(String emoji, String userID) {
         if (!wasUserAnswered(userID)) {
             for (Answer a : answers) {
                 if (a.getAnswerID().equalsIgnoreCase(emoji)) {
@@ -56,15 +56,15 @@ public class Questionnaire {
         builder.updateEmbed();
     }
 
-    public String getMessageID() {
+    String getMessageID() {
         return messageID;
     }
 
-    public String getChannelID() {
+    String getChannelID() {
         return channelID;
     }
 
-    public List<Answer> getAnswers() {
+    List<Answer> getAnswers() {
         return answers;
     }
 }

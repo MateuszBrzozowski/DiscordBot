@@ -9,42 +9,32 @@ public class Answer {
     private String answerID;
     private HashSet<String> usersID = new HashSet<>();
 
-    /**
-     * @param answer    Tekst odpowiedzi
-     * @param messageID ID Ankiety
-     */
-    public Answer(String answer, String answerID, String messageID) {
-        this.messageID = messageID;
+    Answer(String answer, String answerID) {
         this.answer = answer;
         this.answerID = answerID;
     }
 
-    public Answer(String answer, String answerID) {
-        this.answer = answer;
-        this.answerID = answerID;
-    }
-
-    public String getAnswerID() {
+    String getAnswerID() {
         return answerID;
     }
 
-    public String getAnswer() {
+    String getAnswer() {
         return answer;
     }
 
-    public void addUser(String userID) {
+    void addUser(String userID) {
         this.usersID.add(userID);
     }
 
-    public void setMessageID(String messageID) {
+    void setMessageID(String messageID) {
         this.messageID = messageID;
     }
 
-    public int getCountAnswers() {
+    int getCountAnswers() {
         return usersID.size();
     }
 
-    public boolean wasUserAnswered(String userID) {
+    boolean wasUserAnswered(String userID) {
         for (String id : usersID) {
             if (id.equalsIgnoreCase(userID)) {
                 return true;

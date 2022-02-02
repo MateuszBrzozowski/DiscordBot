@@ -26,34 +26,32 @@ public class QuestionnaireBuilder {
     private String question = null;
     private String messageID = null;
     private List<Answer> answers = new ArrayList<>();
-//    private List<String> answers = new ArrayList<>();
-//    private List<String> answersID = new ArrayList<>();
 
     public QuestionnaireBuilder() {
     }
 
-    public QuestionnaireBuilder(Questionnaire questionnaire) {
+    QuestionnaireBuilder(Questionnaire questionnaire) {
         this.channelID = questionnaire.getChannelID();
         this.messageID = questionnaire.getMessageID();
         this.answers = questionnaire.getAnswers();
     }
 
 
-    public QuestionnaireBuilder setQuestion(String question) {
+    QuestionnaireBuilder setQuestion(String question) {
         this.question = question;
         return this;
     }
 
-    public void setMessageID(String messageID) {
+    private void setMessageID(String messageID) {
         this.messageID = messageID;
     }
 
-    public QuestionnaireBuilder setChannelID(String channelID) {
+    QuestionnaireBuilder setChannelID(String channelID) {
         this.channelID = channelID;
         return this;
     }
 
-    public QuestionnaireBuilder addAnswer(String answer) {
+    QuestionnaireBuilder addAnswer(String answer) {
         if (answers.size() < 9) {
             Answer a = new Answer(answer, getEmoji(answers.size() + 1));
             answers.add(a);
@@ -61,33 +59,33 @@ public class QuestionnaireBuilder {
         return this;
     }
 
-    public QuestionnaireBuilder setAuthorID(String userID) {
+    QuestionnaireBuilder setAuthorID(String userID) {
         this.authorID = userID;
         return this;
     }
 
 
-    public String getAuthorID() {
+    String getAuthorID() {
         return authorID;
     }
 
-    public String getChannelID() {
+    String getChannelID() {
         return channelID;
     }
 
-    public String getQuestion() {
+    String getQuestion() {
         return question;
     }
 
-    public List<Answer> getAnswers() {
+    List<Answer> getAnswers() {
         return answers;
     }
 
-    public String getMessageID() {
+    String getMessageID() {
         return messageID;
     }
 
-    public void build() {
+    void build() {
         if (channelID != null && question != null) {
             if (answers.isEmpty()) {
                 Answer answerYes = new Answer("TAK", QuestionnaireStaticHelpers.EMOJI_YES);
@@ -242,7 +240,7 @@ public class QuestionnaireBuilder {
         }
     }
 
-    public void updateEmbed() {
+    void updateEmbed() {
         JDA jda = Repository.getJda();
         jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
             MessageEmbed mOld = message.getEmbeds().get(0);
