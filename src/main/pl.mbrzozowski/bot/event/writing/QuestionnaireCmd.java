@@ -15,9 +15,8 @@ public class QuestionnaireCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE)) {
-            new Questionnaire(message.getContentDisplay(), message.getUserID(),event.getChannel().getId(), false);
-        } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC)) {
-            new Questionnaire(message.getContentDisplay(), message.getUserID(), event.getChannel().getId(), true);
+            new Questionnaire(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
+            event.getMessage().delete().submit();
         } else {
             getNextProccess().proccessMessage(message);
         }

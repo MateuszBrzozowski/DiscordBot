@@ -4,6 +4,7 @@ import helpers.RoleID;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -18,11 +19,14 @@ import java.util.List;
 public class QuestionnaireBuilder {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private boolean isPublic = false;
     private String authorID = RoleID.DEV_ID;
     private String channelID = null;
     private String question = null;
     private List<String> answers = new ArrayList<>();
+    private String EMOJI_A = ":regional_indicator_a:";
+    private String EMOJI_B = ":regional_indicator_b:";
+    private String EMOJI_C = ":regional_indicator_c:";
+    private String EMOJI_D = ":regional_indicator_d:";
 
     public QuestionnaireBuilder setQuestion(String question) {
         this.question = question;
@@ -46,11 +50,6 @@ public class QuestionnaireBuilder {
         return this;
     }
 
-    public QuestionnaireBuilder isPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-        return this;
-    }
-
     public void build() {
         //sprawdzic czy sa odpowiedzi, jezeli nie to robimy prosta ankiete TAK/NIE
         //sprawdzic odpowiedzi czy ktoras jest dluzsza niz 80 znakow, jezeli tak to odpowiedzi na embed, jezeli nie to na buttonach.
@@ -62,49 +61,85 @@ public class QuestionnaireBuilder {
             builder.setTitle("Ankieta");
             builder.setColor(Color.YELLOW);
             builder.addField("Pytanie", question, false);
+            builder.addBlankField(false);
             builder.setFooter("Utworzono przez " + Users.getUserNicknameFromID(authorID));
-            if (!answers.isEmpty()) {
-                if (isPublic) {
-                    builder.addField("Odpowiedzi", getEmptyPublicAnswersToEmbed(), false);
-                } else {
-                    builder.addField("Odpowiedzi", getEmptyAnswersToEmbed(), false);
-                    builder.addField("", "Odpowiedziało (0)", false);
-                }
 
-            } else {
-                if (isPublic) {
-                    builder.addField("Odpowiedzi", "(0) TAK\n(0) NIE", false);
-                }
-                builder.addField("", "Odpowiedziało (0)", false);
-                textChannel.sendMessage(builder.build()).queue(message -> {
-                    MessageEmbed mOld = message.getEmbeds().get(0);
-                    String msgID = message.getId();
-                    message.editMessage(mOld).setActionRow(
-                            Button.primary("A_" + msgID, "TAK"),
-                            Button.primary("B_" + msgID, "NIE"),
-                            Button.danger("end_" + msgID, "Zakończ")).queue();
-                });
-                //prosta ankieta - jest pytanie i odpowiedzi TAK NIE
-            }
+            builder.addField("Odpowiedzi", getAnswers(), false);
+            builder.addField("", "Odpowiedziało - 0", false);
 
-
+            textChannel.sendMessage(builder.build()).queue(message -> {
+                MessageEmbed mOld = message.getEmbeds().get(0);
+                String msgID = message.getId();
+                addButtons(message, mOld, msgID);
+            });
         }
     }
 
-    private String getEmptyAnswersToEmbed() {
-        String result = "";
-        for (int i = 0; i < 5; i++) {
-            result += answers.get(i) + "\n";
+    private void addButtons(Message message, MessageEmbed mOld, String msgID) {
+        switch (answers.size()) {
+            case 2:
+                message.editMessage(mOld).setActionRow(
+                        Button.primary("A_" + msgID, "A"),
+                        Button.primary("B_" + msgID, "B"),
+                        Button.danger("end_" + msgID, "Zakończ")
+                ).queue();
+                break;
+            case 3:
+                message.editMessage(mOld).setActionRow(
+                        Button.primary("A_" + msgID, "A"),
+                        Button.primary("B_" + msgID, "B"),
+                        Button.primary("C_" + msgID, "C"),
+                        Button.danger("end_" + msgID, "Zakończ")
+                ).queue();
+                break;
+            case 4:
+                message.editMessage(mOld).setActionRow(
+                        Button.primary("A_" + msgID, "A"),
+                        Button.primary("B_" + msgID, "B"),
+                        Button.primary("C_" + msgID, "C"),
+                        Button.primary("D_" + msgID, "D"),
+                        Button.danger("end_" + msgID, "Zakończ")
+                ).queue();
+                break;
+            default:
+                message.editMessage(mOld).setActionRow(
+                        Button.primary("A_" + msgID, "TAK"),
+                        Button.primary("B_" + msgID, "NIE"),
+                        Button.danger("end_" + msgID, "Zakończ")
+                ).queue();
         }
-        return result;
+    }
+
+    private String getAnswers() {
+        if (answers.size() < 2) {
+            return "0 | TAK\n0 | NIE";
+        } else {
+            return getEmptyPublicAnswersToEmbed();
+        }
     }
 
     private String getEmptyPublicAnswersToEmbed() {
         String result = "";
-        for (int i = 0; i < 5; i++) {
-            result += "(0) " + answers.get(i) + "\n";
+        for (int i = 0; i < answers.size(); i++) {
+            result += getEmoji(i + 1);
+            result += " - 0 | " + answers.get(i) + "\n";
         }
         return result;
+    }
+
+    private String getEmoji(int i) {
+        switch (i) {
+            case 1:
+                return EMOJI_A;
+            case 2:
+                return EMOJI_B;
+            case 3:
+                return EMOJI_C;
+            case 4:
+                return EMOJI_D;
+            default:
+                return "";
+        }
     }
 
 }

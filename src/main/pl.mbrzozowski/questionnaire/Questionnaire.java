@@ -7,28 +7,24 @@ public class Questionnaire {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    public Questionnaire(String contentDisplay, String userID, String channelID, boolean isPublic) {
+    public Questionnaire(String contentDisplay, String userID, String channelID) {
 
-        if (isPublic) {
-            contentDisplay = contentDisplay.substring(14); //Commands.QUESTIONNAIRE_PUBLIC.length() !ankietaJawna =  14
-        } else {
-            contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
-        }
+        contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
+
         String[] questionAndAnswer = contentDisplay.split("\\|");
 
+        logger.info(String.valueOf(questionAndAnswer.length));
 
         QuestionnaireBuilder builder = new QuestionnaireBuilder();
         builder.setAuthorID(userID)
-                .isPublic(isPublic)
                 .setQuestion(questionAndAnswer[0])
                 .setChannelID(channelID);
 
         if (questionAndAnswer.length >= 3) {
-            for (int i = 1; i < 5; i++) {
+            for (int i = 1; i < questionAndAnswer.length; i++) {
                 builder.addAnswer(questionAndAnswer[i]);
             }
         }
-        logger.info(String.valueOf(questionAndAnswer.length));
         builder.build();
     }
 }
