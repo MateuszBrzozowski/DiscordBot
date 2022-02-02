@@ -63,6 +63,11 @@ public class Questionnaire {
         builder.updateEmbed();
     }
 
+    void endedEmbed(){
+        QuestionnaireBuilder builder = new QuestionnaireBuilder(this);
+        builder.ended();
+    }
+
     String getMessageID() {
         return messageID;
     }
@@ -73,5 +78,9 @@ public class Questionnaire {
 
     List<Answer> getAnswers() {
         return answers;
+    }
+
+    String getAuthorID() {
+        return authorID;
     }
 }

@@ -25,6 +25,7 @@ public class QuestionnaireBuilder {
     private String channelID = null;
     private String question = null;
     private String messageID = null;
+    private boolean isEnding = false;
     private List<Answer> answers = new ArrayList<>();
 
     public QuestionnaireBuilder() {
@@ -208,11 +209,36 @@ public class QuestionnaireBuilder {
         String result = "";
         for (int i = 0; i < answers.size(); i++) {
             if (!answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
-                result += getEmoji(i + 1);
+                if (!isEnding) {
+                    result += getEmoji(i + 1);
+                }
             }
-            result += " " + answers.get(i).getAnswer() + " **- " + answers.get(i).getCountAnswers() + " Głosów**\n";
+            result += " " + answers.get(i).getAnswer() + " **- " + answers.get(i).getCountAnswers() + " Głosów ";
+            if (isEnding){
+                result += "("+getPercent(answers.get(i)) + "%)";
+            }
+            result+="**\n";
         }
         return result;
+    }
+
+    private String getPercent(Answer answer) {
+        float countAnswersFloat = answer.getCountAnswers();
+        float countAllAnswersFloat = getAllCountAnserws();
+        return String.valueOf(Math.round(countAnswersFloat/countAllAnswersFloat*100));
+    }
+
+    private String getAnsweredFieldEnd() {
+        if (answers.size() > 2) {
+            sortAnswers();
+        }
+        return getAnswersField();
+    }
+
+
+    void sortAnswers() {
+        Sorter sorter = new Sorter();
+        answers = sorter.sortQuestionnaireAnswersList(answers);
     }
 
     private String getEmoji(int i) {
@@ -275,4 +301,39 @@ public class QuestionnaireBuilder {
             message.editMessage(m).queue();
         });
     }
+
+    void ended() {
+        isEnding = true;
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
+            MessageEmbed mOld = message.getEmbeds().get(0);
+            List<MessageEmbed.Field> fieldsOld = mOld.getFields();
+            List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+
+            for (int i = 0; i < fieldsOld.size(); i++) {
+                if (i == 1) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("Odpowiedzi", getAnsweredFieldEnd(), false);
+                    fieldsNew.add(fieldNew);
+                } else {
+                    fieldsNew.add(fieldsOld.get(i));
+                }
+            }
+
+            MessageEmbed m = new MessageEmbed(mOld.getUrl()
+                    , mOld.getTitle()
+                    , mOld.getDescription()
+                    , mOld.getType()
+                    , mOld.getTimestamp()
+                    , mOld.getColorRaw()
+                    , mOld.getThumbnail()
+                    , mOld.getSiteProvider()
+                    , mOld.getAuthor()
+                    , mOld.getVideoInfo()
+                    , mOld.getFooter()
+                    , mOld.getImage()
+                    , fieldsNew);
+            message.editMessage(m).queue();
+        });
+    }
+
 }

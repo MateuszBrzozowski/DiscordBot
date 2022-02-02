@@ -1,15 +1,16 @@
 package bot.event;
 
 import event.ButtonClick;
-import ranger.Repository;
-import recrut.Recruits;
 import event.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import questionnaire.Questionnaires;
 import ranger.RangerBot;
+import ranger.Repository;
+import recrut.Recruits;
 
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -33,13 +34,19 @@ public class ButtonClickListener extends ListenerAdapter {
         if (indexOfMatch >= 0) {
             event.deferEdit().queue();
             if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
-                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_IN);
+                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_IN);
             } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
-                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_IN_RESERVE);
+                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_IN_RESERVE);
             } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
-                events.buttonClick(event,indexOfMatch, ButtonClick.SIGN_OUT);
+                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_OUT);
             }
             events.updateEmbed(event, indexOfMatch);
+        }
+
+        Questionnaires questionnaires = Repository.getQuestionnaires();
+        if (event.getComponentId().equalsIgnoreCase("end_" + event.getMessage().getId())) {
+            event.deferEdit().queue();
+            questionnaires.end(event.getMessage().getId(),event.getChannel().getId(),event.getUser().getId());
         }
     }
 

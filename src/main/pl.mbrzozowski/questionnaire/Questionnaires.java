@@ -1,7 +1,12 @@
 package questionnaire;
 
+import helpers.RoleID;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ranger.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +58,6 @@ public class Questionnaires {
     }
 
     private int getIndex(String messageId) {
-        logger.info("szukam indexu");
         for (int i = 0; i < questionnaires.size(); i++) {
             if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
                 logger.info(String.valueOf(i));
@@ -61,5 +65,33 @@ public class Questionnaires {
             }
         }
         return -1;
+    }
+
+    public void end(String messageID, String channelID, String userID) {
+        if (isAuthor(messageID, userID)) {
+            removeReactionsAndButtons(messageID, channelID);
+            questionnaires.get(getIndex(messageID)).endedEmbed();
+            questionnaires.remove(getIndex(messageID));
+        }
+    }
+
+    private void removeReactionsAndButtons(String messageID, String channelID) {
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
+            Button b = Button.primary("null", "Ankieta zakończona.");
+            b = b.asDisabled();
+            MessageEmbed messageEmbed = message.getEmbeds().get(0);
+            message.editMessage(messageEmbed).setActionRow(b).queue();
+            message.clearReactions().queue();
+        });
+    }
+
+    private boolean isAuthor(String messageID, String userID) {
+        if (questionnaires.get(getIndex(messageID)).getAuthorID().equalsIgnoreCase(userID)) {
+            return true;
+        } else if (RoleID.DEV_ID.equalsIgnoreCase(userID)) {
+            return true;
+        }
+        return false;
     }
 }

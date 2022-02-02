@@ -2,7 +2,6 @@ package bot.event;
 
 import event.Event;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -36,12 +35,14 @@ public class MessageUpdate extends ListenerAdapter {
                     MessageEmbed messageEmbed = message.getEmbeds().get(0);
                     String title = messageEmbed.getTitle();
                     if (title.equalsIgnoreCase(QUESTIONNAIRE)) {
-                        MessageReaction.ReactionEmote reactionEmote = event.getReaction().getReactionEmote();
+                        String emoji = event.getReaction().getReactionEmote().getEmoji();
                         Questionnaires questionnaires = Repository.getQuestionnaires();
-                        questionnaires.saveAnswer(reactionEmote.getEmoji(), event.getMessageId(), event.getUser().getId());
+                        questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
                         event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
                     }
                 } catch (IndexOutOfBoundsException e) {
+                } catch (IllegalStateException e) {
+                    event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
                 }
             });
         }
