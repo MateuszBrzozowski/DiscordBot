@@ -42,4 +42,8 @@ public class Answer {
         }
         return false;
     }
+
+    void removeUserAnswer(String userID) {
+        usersID.remove(userID);
+    }
 }

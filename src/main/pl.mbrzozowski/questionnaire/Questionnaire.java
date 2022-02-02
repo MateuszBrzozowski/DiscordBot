@@ -31,14 +31,21 @@ public class Questionnaire {
     }
 
     void addAnswer(String emoji, String userID) {
-        if (!wasUserAnswered(userID)) {
-            for (Answer a : answers) {
-                if (a.getAnswerID().equalsIgnoreCase(emoji)) {
-                    a.addUser(userID);
-                    logger.info("user dodany do " + a.getAnswer());
-                }
+        if (wasUserAnswered(userID)) {
+            removeUserAnswer(userID);
+        }
+        for (Answer a : answers) {
+            if (a.getAnswerID().equalsIgnoreCase(emoji)) {
+                a.addUser(userID);
             }
-            updateEmbed();
+        }
+        updateEmbed();
+
+    }
+
+    private void removeUserAnswer(String userID) {
+        for (Answer a : answers){
+            a.removeUserAnswer(userID);
         }
     }
 
