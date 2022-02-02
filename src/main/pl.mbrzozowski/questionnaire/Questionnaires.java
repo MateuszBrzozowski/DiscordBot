@@ -35,6 +35,18 @@ public class Questionnaires {
     }
 
     public void saveAnswer(String emoji, String messageId, String userID) {
+        questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
 
+    }
+
+    private int getIndex(String messageId) {
+        logger.info("szukam indexu");
+        for (int i = 0; i < questionnaires.size(); i++) {
+            if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
+                logger.info(String.valueOf(i));
+                return i;
+            }
+        }
+        return -1;
     }
 }

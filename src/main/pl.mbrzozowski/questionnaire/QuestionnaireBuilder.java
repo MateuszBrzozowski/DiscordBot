@@ -25,11 +25,27 @@ public class QuestionnaireBuilder {
     private String channelID = null;
     private String question = null;
     private String messageID = null;
-    private List<String> answers = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
+//    private List<String> answers = new ArrayList<>();
+//    private List<String> answersID = new ArrayList<>();
+
+    public QuestionnaireBuilder() {
+    }
+
+    public QuestionnaireBuilder(Questionnaire questionnaire) {
+        this.channelID = questionnaire.getChannelID();
+        this.messageID = questionnaire.getMessageID();
+        this.answers = questionnaire.getAnswers();
+    }
+
 
     public QuestionnaireBuilder setQuestion(String question) {
         this.question = question;
         return this;
+    }
+
+    public void setMessageID(String messageID) {
+        this.messageID = messageID;
     }
 
     public QuestionnaireBuilder setChannelID(String channelID) {
@@ -39,7 +55,8 @@ public class QuestionnaireBuilder {
 
     public QuestionnaireBuilder addAnswer(String answer) {
         if (answers.size() < 9) {
-            answers.add(answer);
+            Answer a = new Answer(answer, getEmoji(answers.size() + 1));
+            answers.add(a);
         }
         return this;
     }
@@ -49,11 +66,37 @@ public class QuestionnaireBuilder {
         return this;
     }
 
+
+    public String getAuthorID() {
+        return authorID;
+    }
+
+    public String getChannelID() {
+        return channelID;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public String getMessageID() {
+        return messageID;
+    }
+
     public void build() {
         if (channelID != null && question != null) {
+            if (answers.isEmpty()) {
+                Answer answerYes = new Answer("TAK", QuestionnaireStaticHelpers.EMOJI_YES);
+                Answer answerNo = new Answer("NIE", QuestionnaireStaticHelpers.EMOJI_NO);
+                this.answers.add(answerYes);
+                this.answers.add(answerNo);
+            }
             buildGraphicsInterfaceAndQuestionnaire();
         }
-
     }
 
     private void buildGraphicsInterfaceAndQuestionnaire() {
@@ -67,7 +110,8 @@ public class QuestionnaireBuilder {
         builder.addField("Pytanie", question, false);
         builder.setFooter("Utworzono przez " + Users.getUserNicknameFromID(authorID));
         builder.addField("Odpowiedzi", getAnswersField(), false);
-        builder.addField("", "Odpowiedziało - 0", false);
+        int allCountAnserws = getAllCountAnserws();
+        builder.addField("", "Odpowiedziało - " + allCountAnserws, false);
 
         textChannel.sendMessage(builder.build()).queue(message -> {
             MessageEmbed mOld = message.getEmbeds().get(0);
@@ -75,17 +119,30 @@ public class QuestionnaireBuilder {
             message.editMessage(mOld).setActionRow(
                     Button.danger("end_" + msgID, "Zakończ")
             ).queue();
-            addReactions(message, mOld, msgID);
+            addReactions(message);
             setMessageID(msgID);
             Repository.getQuestionnaires().addQuestionnaire(this);
         });
     }
 
-    private void addReactions(Message message, MessageEmbed mOld, String msgID) {
+    private int getAllCountAnserws() {
+        int allCountAnserws = 0;
+        for (Answer a : answers) {
+            allCountAnserws += a.getCountAnswers();
+        }
+        return allCountAnserws;
+    }
+
+    private void addReactions(Message message) {
         switch (answers.size()) {
             case 2:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                if (answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
+                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_YES).queue();
+                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_NO).queue();
+                } else {
+                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                }
                 break;
             case 3:
                 message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
@@ -150,18 +207,12 @@ public class QuestionnaireBuilder {
     }
 
     private String getAnswersField() {
-        if (answers.size() < 2) {
-            return "TAK **- 0 Głosów**\nNIE **- 0 Głosów**";
-        } else {
-            return getEmptyPublicAnswersToEmbed();
-        }
-    }
-
-    private String getEmptyPublicAnswersToEmbed() {
         String result = "";
         for (int i = 0; i < answers.size(); i++) {
-            result += getEmoji(i + 1);
-            result += " " + answers.get(i) + " **- 0 Głosów**\n";
+            if (!answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
+                result += getEmoji(i + 1);
+            }
+            result += " " + answers.get(i).getAnswer() + " **- " + answers.get(i).getCountAnswers() + " Głosów**\n";
         }
         return result;
     }
@@ -191,27 +242,39 @@ public class QuestionnaireBuilder {
         }
     }
 
-    public String getAuthorID() {
-        return authorID;
-    }
+    public void updateEmbed() {
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
+            MessageEmbed mOld = message.getEmbeds().get(0);
+            List<MessageEmbed.Field> fieldsOld = mOld.getFields();
+            List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
 
-    public String getChannelID() {
-        return channelID;
-    }
+            for (int i = 0; i < fieldsOld.size(); i++) {
+                if (i == 1) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("Odpowiedzi", getAnswersField(), false);
+                    fieldsNew.add(fieldNew);
+                } else if (i == 2) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("", "Odpowiedziało - " + getAllCountAnserws(), false);
+                    fieldsNew.add(fieldNew);
+                } else {
+                    fieldsNew.add(fieldsOld.get(i));
+                }
+            }
 
-    public String getQuestion() {
-        return question;
-    }
-
-    public List<String> getAnswers() {
-        return answers;
-    }
-
-    public String getMessageID() {
-        return messageID;
-    }
-
-    public void setMessageID(String messageID) {
-        this.messageID = messageID;
+            MessageEmbed m = new MessageEmbed(mOld.getUrl()
+                    , mOld.getTitle()
+                    , mOld.getDescription()
+                    , mOld.getType()
+                    , mOld.getTimestamp()
+                    , mOld.getColorRaw()
+                    , mOld.getThumbnail()
+                    , mOld.getSiteProvider()
+                    , mOld.getAuthor()
+                    , mOld.getVideoInfo()
+                    , mOld.getFooter()
+                    , mOld.getImage()
+                    , fieldsNew);
+            message.editMessage(m).queue();
+        });
     }
 }

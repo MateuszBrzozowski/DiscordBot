@@ -1,6 +1,5 @@
 package questionnaire;
 
-import helpers.RoleID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +10,9 @@ public class Questionnaire {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String messageID;
-    private String authorID = RoleID.DEV_ID;
-    private String channelID = null;
-    private String question = null;
+    private String authorID;
+    private String channelID;
+    private String question;
     private List<Answer> answers = new ArrayList<>();
 
     public Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
@@ -22,21 +21,50 @@ public class Questionnaire {
         this.channelID = questionnaireBuilder.getChannelID();
         this.question = questionnaireBuilder.getQuestion();
         createAnsewrs(questionnaireBuilder.getAnswers());
-        logger.info(messageID);
-        logger.info(channelID);
-        logger.info(String.valueOf(answers.size()));
     }
 
-    private void createAnsewrs(List<String> answers) {
-        for (String s : answers) {
-            Answer answer = new Answer(s, messageID);
-            this.answers.add(answer);
+    private void createAnsewrs(List<Answer> answers) {
+        this.answers = answers;
+        for (int i = 0; i < answers.size(); i++) {
+            this.answers.get(i).setMessageID(messageID);
         }
     }
 
-    public Questionnaire addAnswer(String answerText) {
-        Answer answer = new Answer(answerText, messageID);
-        this.answers.add(answer);
-        return this;
+    public void addAnswer(String emoji, String userID) {
+        if (!wasUserAnswered(userID)) {
+            for (Answer a : answers) {
+                if (a.getAnswerID().equalsIgnoreCase(emoji)) {
+                    a.addUser(userID);
+                    logger.info("user dodany do " + a.getAnswer());
+                }
+            }
+            updateEmbed();
+        }
+    }
+
+    private boolean wasUserAnswered(String userID) {
+        for (Answer a : answers) {
+            if (a.wasUserAnswered(userID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void updateEmbed() {
+        QuestionnaireBuilder builder = new QuestionnaireBuilder(this);
+        builder.updateEmbed();
+    }
+
+    public String getMessageID() {
+        return messageID;
+    }
+
+    public String getChannelID() {
+        return channelID;
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
     }
 }

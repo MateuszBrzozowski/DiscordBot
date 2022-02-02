@@ -11,6 +11,6 @@ public class QuestionnaireStaticHelpers {
     public static final String EMOJI_G = "\uD83C\uDDEC";
     public static final String EMOJI_H = "\uD83C\uDDED";
     public static final String EMOJI_I = "\uD83C\uDDEE";
-    public static final String EMOJI_YES = "U+2705";
-    public static final String EMOJI_NO = "U+274C";
+    public static final String EMOJI_YES = "\u2705";
+    public static final String EMOJI_NO = "\u274C";
 }

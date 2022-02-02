@@ -3,6 +3,7 @@ package bot.event;
 import event.Event;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -13,6 +14,8 @@ import questionnaire.Questionnaires;
 import ranger.Repository;
 
 public class MessageUpdate extends ListenerAdapter {
+
+    private final String QUESTIONNAIRE = "Ankieta";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
@@ -27,22 +30,21 @@ public class MessageUpdate extends ListenerAdapter {
 
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-        //TODO tylko jeśli uzytkownik a nie bot dodaje reakcje
-//        event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
-//            try {
-//                MessageEmbed messageEmbed = message.getEmbeds().get(0);
-//                String title = messageEmbed.getTitle();
-//                if (title.equalsIgnoreCase("Ankieta")) {
-//                    MessageReaction.ReactionEmote reactionEmote = event.getReaction().getReactionEmote();
-//
-//                    logger.info(String.valueOf(reactionEmote.getEmoji().equalsIgnoreCase("\uD83C\uDDE8")));
-//
-//                    logger.info("to jest ankieta");
-//                    Questionnaires questionnaires = Repository.getQuestionnaires();
-//                    questionnaires.saveAnswer(reactionEmote.getEmoji(),event.getMessageId(),event.getUser().getId());
-//                }
-//            } catch (IndexOutOfBoundsException e) {
-//            }
-//        });
+        if (!event.getUser().isBot()) {
+            event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
+                try {
+                    MessageEmbed messageEmbed = message.getEmbeds().get(0);
+                    String title = messageEmbed.getTitle();
+                    if (title.equalsIgnoreCase(QUESTIONNAIRE)) {
+                        MessageReaction.ReactionEmote reactionEmote = event.getReaction().getReactionEmote();
+                        Questionnaires questionnaires = Repository.getQuestionnaires();
+                        questionnaires.saveAnswer(reactionEmote.getEmoji(), event.getMessageId(), event.getUser().getId());
+                        event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                }
+            });
+        }
+
     }
 }
