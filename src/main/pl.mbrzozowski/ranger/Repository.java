@@ -7,6 +7,7 @@ import event.reminder.Timers;
 import model.BotWriter;
 import model.DiceGames;
 import net.dv8tion.jda.api.JDA;
+import questionnaire.Questionnaires;
 import recrut.Recruits;
 
 public class Repository {
@@ -17,6 +18,7 @@ public class Repository {
     private static EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
     private static EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
     private static Timers timers = new Timers();
+    private static Questionnaires questionnaires = new Questionnaires();
     private static BotWriter botWriter = new BotWriter();
     private static JDA jda;
 
@@ -54,5 +56,9 @@ public class Repository {
 
     public static BotWriter getBotWriter() {
         return botWriter;
+    }
+
+    public static Questionnaires getQuestionnaires(){
+        return questionnaires;
     }
 }

@@ -26,6 +26,7 @@ public class RangerBot {
         intents.add(GatewayIntent.GUILD_MEMBERS);
         intents.add(GatewayIntent.GUILD_MESSAGES);
         intents.add(GatewayIntent.DIRECT_MESSAGES);
+        intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
         JDA jda = JDABuilder.create(BOT_TOKEN, intents)
                 .addEventListeners(new WriteListener())
                 .addEventListeners(new ButtonClickListener())

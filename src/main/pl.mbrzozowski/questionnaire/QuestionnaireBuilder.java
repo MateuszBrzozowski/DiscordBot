@@ -19,22 +19,13 @@ import java.util.List;
 
 public class QuestionnaireBuilder {
 
+
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String authorID = RoleID.DEV_ID;
     private String channelID = null;
     private String question = null;
+    private String messageID = null;
     private List<String> answers = new ArrayList<>();
-    private String EMOJI_A = "\uD83C\uDDE6";
-    private String EMOJI_B = "\uD83C\uDDE7";
-    private String EMOJI_C = "\uD83C\uDDE8";
-    private String EMOJI_D = "\uD83C\uDDE9";
-    private String EMOJI_E = "\uD83C\uDDEA";
-    private String EMOJI_F = "\uD83C\uDDEB";
-    private String EMOJI_G = "\uD83C\uDDEC";
-    private String EMOJI_H = "\uD83C\uDDED";
-    private String EMOJI_I = "\uD83C\uDDEE";
-    private String EMOJI_YES = "U+2705";
-    private String EMOJI_NO = "U+274C";
 
     public QuestionnaireBuilder setQuestion(String question) {
         this.question = question;
@@ -59,104 +50,106 @@ public class QuestionnaireBuilder {
     }
 
     public void build() {
-        //sprawdzic czy sa odpowiedzi, jezeli nie to robimy prosta ankiete TAK/NIE
-        //sprawdzic odpowiedzi czy ktoras jest dluzsza niz 80 znakow, jezeli tak to odpowiedzi na embed, jezeli nie to na buttonach.
-        //glosowanie nie jest jawne. chyba ze jest ustawione na jawne
         if (channelID != null && question != null) {
-            JDA jda = Repository.getJda();
-            TextChannel textChannel = jda.getTextChannelById(channelID);
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("Ankieta");
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            Color questionaire = new Color(59, 136, 195);
-            builder.setColor(questionaire);
-            builder.addField("Pytanie", question, false);
-            builder.setFooter("Utworzono przez " + Users.getUserNicknameFromID(authorID));
-
-            builder.addField("Odpowiedzi", getAnswers(), false);
-            builder.addField("", "Odpowiedziało - 0", false);
-
-            textChannel.sendMessage(builder.build()).queue(message -> {
-                MessageEmbed mOld = message.getEmbeds().get(0);
-                String msgID = message.getId();
-                message.editMessage(mOld).setActionRow(
-                        Button.danger("end_" + msgID, "Zakończ")
-                ).queue();
-                addReactions(message, mOld, msgID);
-            });
+            buildGraphicsInterfaceAndQuestionnaire();
         }
 
+    }
+
+    private void buildGraphicsInterfaceAndQuestionnaire() {
+        JDA jda = Repository.getJda();
+        TextChannel textChannel = jda.getTextChannelById(channelID);
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Ankieta");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        Color questionaire = new Color(59, 136, 195);
+        builder.setColor(questionaire);
+        builder.addField("Pytanie", question, false);
+        builder.setFooter("Utworzono przez " + Users.getUserNicknameFromID(authorID));
+        builder.addField("Odpowiedzi", getAnswersField(), false);
+        builder.addField("", "Odpowiedziało - 0", false);
+
+        textChannel.sendMessage(builder.build()).queue(message -> {
+            MessageEmbed mOld = message.getEmbeds().get(0);
+            String msgID = message.getId();
+            message.editMessage(mOld).setActionRow(
+                    Button.danger("end_" + msgID, "Zakończ")
+            ).queue();
+            addReactions(message, mOld, msgID);
+            setMessageID(msgID);
+            Repository.getQuestionnaires().addQuestionnaire(this);
+        });
     }
 
     private void addReactions(Message message, MessageEmbed mOld, String msgID) {
         switch (answers.size()) {
             case 2:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
                 break;
             case 3:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
                 break;
             case 4:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
                 break;
             case 5:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
-                message.addReaction(EMOJI_E).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
                 break;
             case 6:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
-                message.addReaction(EMOJI_E).queue();
-                message.addReaction(EMOJI_F).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
                 break;
             case 7:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
-                message.addReaction(EMOJI_E).queue();
-                message.addReaction(EMOJI_F).queue();
-                message.addReaction(EMOJI_G).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
                 break;
             case 8:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
-                message.addReaction(EMOJI_E).queue();
-                message.addReaction(EMOJI_F).queue();
-                message.addReaction(EMOJI_G).queue();
-                message.addReaction(EMOJI_H).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_H).queue();
                 break;
             case 9:
-                message.addReaction(EMOJI_A).queue();
-                message.addReaction(EMOJI_B).queue();
-                message.addReaction(EMOJI_C).queue();
-                message.addReaction(EMOJI_D).queue();
-                message.addReaction(EMOJI_E).queue();
-                message.addReaction(EMOJI_F).queue();
-                message.addReaction(EMOJI_G).queue();
-                message.addReaction(EMOJI_H).queue();
-                message.addReaction(EMOJI_I).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_H).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_I).queue();
                 break;
             default:
-                message.addReaction(EMOJI_YES).queue();
-                message.addReaction(EMOJI_NO).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_YES).queue();
+                message.addReaction(QuestionnaireStaticHelpers.EMOJI_NO).queue();
         }
     }
 
-    private String getAnswers() {
+    private String getAnswersField() {
         if (answers.size() < 2) {
             return "TAK **- 0 Głosów**\nNIE **- 0 Głosów**";
         } else {
@@ -176,26 +169,49 @@ public class QuestionnaireBuilder {
     private String getEmoji(int i) {
         switch (i) {
             case 1:
-                return EMOJI_A;
+                return QuestionnaireStaticHelpers.EMOJI_A;
             case 2:
-                return EMOJI_B;
+                return QuestionnaireStaticHelpers.EMOJI_B;
             case 3:
-                return EMOJI_C;
+                return QuestionnaireStaticHelpers.EMOJI_C;
             case 4:
-                return EMOJI_D;
+                return QuestionnaireStaticHelpers.EMOJI_D;
             case 5:
-                return EMOJI_E;
+                return QuestionnaireStaticHelpers.EMOJI_E;
             case 6:
-                return EMOJI_F;
+                return QuestionnaireStaticHelpers.EMOJI_F;
             case 7:
-                return EMOJI_G;
+                return QuestionnaireStaticHelpers.EMOJI_G;
             case 8:
-                return EMOJI_H;
+                return QuestionnaireStaticHelpers.EMOJI_H;
             case 9:
-                return EMOJI_I;
+                return QuestionnaireStaticHelpers.EMOJI_I;
             default:
                 return "";
         }
     }
 
+    public String getAuthorID() {
+        return authorID;
+    }
+
+    public String getChannelID() {
+        return channelID;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public List<String> getAnswers() {
+        return answers;
+    }
+
+    public String getMessageID() {
+        return messageID;
+    }
+
+    public void setMessageID(String messageID) {
+        this.messageID = messageID;
+    }
 }
