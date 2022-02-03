@@ -17,6 +17,12 @@ public class QuestionnaireCmd extends Proccess {
         if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE)) {
             Questionnaires.buildQuestionaire(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
             event.getMessage().delete().submit();
+        } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_MULTIPLE)) {
+            Questionnaires.buildQuestionaireMultiple(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
+            event.getMessage().delete().submit();
+        } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC)) {
+            Questionnaires.buildQuestionairePublic(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
+            event.getMessage().delete().submit();
         } else {
             getNextProccess().proccessMessage(message);
         }

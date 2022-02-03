@@ -4,6 +4,7 @@ import helpers.RoleID;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -15,6 +16,7 @@ public class Questionnaires {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private List<Questionnaire> questionnaires = new ArrayList<>();
+    private static int questionAndAnswerCount;
 
     /**
      * Tworzy ankiętę na podstawię polecenia wpisanego na kanale
@@ -27,8 +29,36 @@ public class Questionnaires {
     public static void buildQuestionaire(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
 
-        String[] questionAndAnswer = contentDisplay.split("\\|");
+        QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
+        builder.build();
+    }
 
+    public static void buildQuestionaireMultiple(String contentDisplay, String userID, String channelID) {
+        contentDisplay = contentDisplay.substring(10); //Commands.QUESTIONNAIRE.length() !ankietaW =  10
+        QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
+        if (questionAndAnswerCount >= 3) {
+            builder.asMultiple();
+        }
+        builder.build();
+    }
+
+    public static void buildQuestionairePublic(String contentDisplay, String userID, String channelID) {
+        contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
+
+        QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
+        builder.asPublic();
+        builder.build();
+    }
+
+    void addQuestionnaire(QuestionnaireBuilder questionnaireBuilder) {
+        Questionnaire questionnaire = new Questionnaire(questionnaireBuilder);
+        questionnaires.add(questionnaire);
+    }
+
+    @NotNull
+    private static QuestionnaireBuilder getBuilder(String contentDisplay, String userID, String channelID) {
+        String[] questionAndAnswer = contentDisplay.split("\\|");
+        questionAndAnswerCount = questionAndAnswer.length;
         QuestionnaireBuilder builder = new QuestionnaireBuilder();
         builder.setAuthorID(userID)
                 .setQuestion(questionAndAnswer[0])
@@ -39,12 +69,7 @@ public class Questionnaires {
                 builder.addAnswer(questionAndAnswer[i]);
             }
         }
-        builder.build();
-    }
-
-    void addQuestionnaire(QuestionnaireBuilder questionnaireBuilder) {
-        Questionnaire questionnaire = new Questionnaire(questionnaireBuilder);
-        questionnaires.add(questionnaire);
+        return builder;
     }
 
     /**
@@ -54,13 +79,11 @@ public class Questionnaires {
      */
     public void saveAnswer(String emoji, String messageId, String userID) {
         questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
-
     }
 
     private int getIndex(String messageId) {
         for (int i = 0; i < questionnaires.size(); i++) {
             if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
-                logger.info(String.valueOf(i));
                 return i;
             }
         }

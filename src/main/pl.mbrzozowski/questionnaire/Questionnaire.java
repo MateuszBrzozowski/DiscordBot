@@ -13,6 +13,7 @@ public class Questionnaire {
     private String authorID;
     private String channelID;
     private String question;
+    private boolean isMultiple;
     private List<Answer> answers = new ArrayList<>();
 
     Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
@@ -20,6 +21,7 @@ public class Questionnaire {
         this.authorID = questionnaireBuilder.getAuthorID();
         this.channelID = questionnaireBuilder.getChannelID();
         this.question = questionnaireBuilder.getQuestion();
+        this.isMultiple = questionnaireBuilder.isMultiple();
         createAnsewrs(questionnaireBuilder.getAnswers());
     }
 
@@ -31,8 +33,10 @@ public class Questionnaire {
     }
 
     void addAnswer(String emoji, String userID) {
-        if (wasUserAnswered(userID)) {
-            removeUserAnswer(userID);
+        if (!isMultiple) {
+            if (wasUserAnswered(userID)) {
+                removeUserAnswer(userID);
+            }
         }
         for (Answer a : answers) {
             if (a.getAnswerID().equalsIgnoreCase(emoji)) {
@@ -40,11 +44,10 @@ public class Questionnaire {
             }
         }
         updateEmbed();
-
     }
 
     private void removeUserAnswer(String userID) {
-        for (Answer a : answers){
+        for (Answer a : answers) {
             a.removeUserAnswer(userID);
         }
     }
@@ -63,7 +66,7 @@ public class Questionnaire {
         builder.updateEmbed();
     }
 
-    void endedEmbed(){
+    void endedEmbed() {
         QuestionnaireBuilder builder = new QuestionnaireBuilder(this);
         builder.ended();
     }

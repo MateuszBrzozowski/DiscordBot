@@ -19,6 +19,14 @@ import java.util.List;
 
 public class QuestionnaireBuilder {
 
+    private final String COUNT_ANSWERS = "Razem głosów - ";
+    private final String YES = "TAK";
+    private final String NO = "NIE";
+    private final String QUESTIONNAIRE = "Ankieta";
+    private final String QUESTION = "Pytanie";
+    private final String CREATED_BY = "Utworzono przez ";
+    private final String ANSWERS = "Odpowiedzi";
+    private final String END = "Zakończ";
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private String authorID = RoleID.DEV_ID;
@@ -27,6 +35,8 @@ public class QuestionnaireBuilder {
     private String messageID = null;
     private boolean isEnding = false;
     private List<Answer> answers = new ArrayList<>();
+    private boolean isMultiple = false;
+    private boolean isPublic = false;
 
     public QuestionnaireBuilder() {
     }
@@ -65,6 +75,16 @@ public class QuestionnaireBuilder {
         return this;
     }
 
+    QuestionnaireBuilder asMultiple() {
+        this.isMultiple = true;
+        return this;
+    }
+
+    QuestionnaireBuilder asPublic() {
+        this.isPublic = true;
+        return this;
+    }
+
 
     String getAuthorID() {
         return authorID;
@@ -86,11 +106,19 @@ public class QuestionnaireBuilder {
         return messageID;
     }
 
+    boolean isMultiple() {
+        return isMultiple;
+    }
+
+    boolean isPublic() {
+        return isPublic;
+    }
+
     void build() {
         if (channelID != null && question != null) {
             if (answers.isEmpty()) {
-                Answer answerYes = new Answer("TAK", QuestionnaireStaticHelpers.EMOJI_YES);
-                Answer answerNo = new Answer("NIE", QuestionnaireStaticHelpers.EMOJI_NO);
+                Answer answerYes = new Answer(YES, QuestionnaireStaticHelpers.EMOJI_YES);
+                Answer answerNo = new Answer(NO, QuestionnaireStaticHelpers.EMOJI_NO);
                 this.answers.add(answerYes);
                 this.answers.add(answerNo);
             }
@@ -102,21 +130,21 @@ public class QuestionnaireBuilder {
         JDA jda = Repository.getJda();
         TextChannel textChannel = jda.getTextChannelById(channelID);
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Ankieta");
+        builder.setTitle(QUESTIONNAIRE);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        Color questionaire = new Color(59, 136, 195);
-        builder.setColor(questionaire);
-        builder.addField("Pytanie", question, false);
-        builder.setFooter("Utworzono przez " + Users.getUserNicknameFromID(authorID));
-        builder.addField("Odpowiedzi", getAnswersField(), false);
+        Color questionaireColor = new Color(59, 136, 195);
+        builder.setColor(questionaireColor);
+        builder.addField(QUESTION, question, false);
+        builder.setFooter(CREATED_BY + Users.getUserNicknameFromID(authorID));
+        builder.addField(ANSWERS, getAnswersField(), false);
         int allCountAnserws = getAllCountAnserws();
-        builder.addField("", "Odpowiedziało - " + allCountAnserws, false);
+        builder.addField("", COUNT_ANSWERS + allCountAnserws, false);
 
         textChannel.sendMessage(builder.build()).queue(message -> {
             MessageEmbed mOld = message.getEmbeds().get(0);
             String msgID = message.getId();
             message.editMessage(mOld).setActionRow(
-                    Button.danger("end_" + msgID, "Zakończ")
+                    Button.danger("end_" + msgID, END)
             ).queue();
             addReactions(message);
             setMessageID(msgID);
@@ -214,10 +242,10 @@ public class QuestionnaireBuilder {
                 }
             }
             result += " " + answers.get(i).getAnswer() + " **- " + answers.get(i).getCountAnswers() + " Głosów ";
-            if (isEnding){
-                result += "("+getPercent(answers.get(i)) + "%)";
+            if (isEnding) {
+                result += "(" + getPercent(answers.get(i)) + "%)";
             }
-            result+="**\n";
+            result += "**\n";
         }
         return result;
     }
@@ -225,7 +253,7 @@ public class QuestionnaireBuilder {
     private String getPercent(Answer answer) {
         float countAnswersFloat = answer.getCountAnswers();
         float countAllAnswersFloat = getAllCountAnserws();
-        return String.valueOf(Math.round(countAnswersFloat/countAllAnswersFloat*100));
+        return String.valueOf(Math.round(countAnswersFloat / countAllAnswersFloat * 100));
     }
 
     private String getAnsweredFieldEnd() {
@@ -275,10 +303,10 @@ public class QuestionnaireBuilder {
 
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i == 1) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("Odpowiedzi", getAnswersField(), false);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(ANSWERS, getAnswersField(), false);
                     fieldsNew.add(fieldNew);
                 } else if (i == 2) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("", "Odpowiedziało - " + getAllCountAnserws(), false);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("", COUNT_ANSWERS + getAllCountAnserws(), false);
                     fieldsNew.add(fieldNew);
                 } else {
                     fieldsNew.add(fieldsOld.get(i));
@@ -312,7 +340,7 @@ public class QuestionnaireBuilder {
 
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i == 1) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field("Odpowiedzi", getAnsweredFieldEnd(), false);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(ANSWERS, getAnsweredFieldEnd(), false);
                     fieldsNew.add(fieldNew);
                 } else {
                     fieldsNew.add(fieldsOld.get(i));
