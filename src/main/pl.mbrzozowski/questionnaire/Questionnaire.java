@@ -95,6 +95,10 @@ public class Questionnaire {
         return isPublic;
     }
 
+    boolean isMultiple() {
+        return isMultiple;
+    }
+
     /**
      * Usuwa w wiadomości message wszystkie reakcje usera oprócz emoji przekazanej w parametrze
      *
@@ -113,4 +117,6 @@ public class Questionnaire {
             }
         }
     }
+
+
 }

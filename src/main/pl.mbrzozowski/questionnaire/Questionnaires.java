@@ -31,7 +31,6 @@ public class Questionnaires {
      */
     public static void buildQuestionaire(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE.length());
-
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
         builder.build();
     }
@@ -47,9 +46,18 @@ public class Questionnaires {
 
     public static void buildQuestionairePublic(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_PUBLIC.length());
-
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
         builder.asPublic();
+        builder.build();
+    }
+
+    public static void buildQuestionairePublicMultiple(String contentDisplay, String userID, String channelID) {
+        contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_PUBLIC_MULTIPLE.length());
+        QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
+        builder.asPublic();
+        if (questionAndAnswerCount >= 3) {
+            builder.asMultiple();
+        }
         builder.build();
     }
 
@@ -94,10 +102,11 @@ public class Questionnaires {
     }
 
     public boolean isPublic(String messageId) {
-        if (questionnaires.get(getIndex(messageId)).isPublic()) {
-            return true;
-        }
-        return false;
+        return questionnaires.get(getIndex(messageId)).isPublic();
+    }
+
+    public boolean isMultiple(String messageId) {
+        return questionnaires.get(getIndex(messageId)).isMultiple();
     }
 
     public void end(String messageID, String channelID, String userID) {

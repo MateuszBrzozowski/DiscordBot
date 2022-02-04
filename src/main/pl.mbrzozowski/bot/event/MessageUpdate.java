@@ -40,7 +40,9 @@ public class MessageUpdate extends ListenerAdapter {
                         if (!questionnaires.isPublic(event.getMessageId())) {
                             event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
                         } else {
-                            questionnaires.removeReaction(message, emoji, event.getUser());
+                            if (!questionnaires.isMultiple(event.getMessageId())) {
+                                questionnaires.removeReaction(message, emoji, event.getUser());
+                            }
                         }
                         questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
                     }
