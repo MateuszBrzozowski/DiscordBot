@@ -1,7 +1,6 @@
 package questionnaire;
 
 import embed.EmbedSettings;
-import helpers.RoleID;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -9,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -17,7 +17,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuestionnaireBuilder {
+class QuestionnaireBuilder extends Questionnaire {
 
     private final String COUNT_ANSWERS = "Razem głosów - ";
     private final String YES = "TAK";
@@ -29,16 +29,9 @@ public class QuestionnaireBuilder {
     private final String END = "Zakończ";
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private String authorID = RoleID.DEV_ID;
-    private String channelID = null;
-    private String question = null;
-    private String messageID = null;
     private boolean isEnding = false;
-    private List<Answer> answers = new ArrayList<>();
-    private boolean isMultiple = false;
-    private boolean isPublic = false;
 
-    public QuestionnaireBuilder() {
+    QuestionnaireBuilder() {
     }
 
     QuestionnaireBuilder(Questionnaire questionnaire) {
@@ -64,7 +57,7 @@ public class QuestionnaireBuilder {
 
     QuestionnaireBuilder addAnswer(String answer) {
         if (answers.size() < 9) {
-            Answer a = new Answer(answer, getEmoji(answers.size() + 1));
+            Answer a = new Answer(answer, getEmoji(answers.size()));
             answers.add(a);
         }
         return this;
@@ -85,61 +78,21 @@ public class QuestionnaireBuilder {
         return this;
     }
 
-
-    String getAuthorID() {
-        return authorID;
-    }
-
-    String getChannelID() {
-        return channelID;
-    }
-
-    String getQuestion() {
-        return question;
-    }
-
-    List<Answer> getAnswers() {
-        return answers;
-    }
-
-    String getMessageID() {
-        return messageID;
-    }
-
-    boolean isMultiple() {
-        return isMultiple;
-    }
-
-    boolean isPublic() {
-        return isPublic;
-    }
-
     void build() {
         if (channelID != null && question != null) {
-            if (answers.isEmpty()) {
-                Answer answerYes = new Answer(YES, QuestionnaireStaticHelpers.EMOJI_YES);
-                Answer answerNo = new Answer(NO, QuestionnaireStaticHelpers.EMOJI_NO);
-                this.answers.add(answerYes);
-                this.answers.add(answerNo);
-            }
-            buildGraphicsInterfaceAndQuestionnaire();
+            addAnswerYesAndNo();
+            sendInterfaceToTextChannel(getEmbedBuilder());
         }
     }
 
-    private void buildGraphicsInterfaceAndQuestionnaire() {
+    /**
+     * Wysyła Embed na kanał tekstowy, ustawia ID wiadomości którą jest ankieta i dodaje do repozytorium Ankiete
+     *
+     * @param builder Embed - wygląd ankiety
+     */
+    private void sendInterfaceToTextChannel(EmbedBuilder builder) {
         JDA jda = Repository.getJda();
         TextChannel textChannel = jda.getTextChannelById(channelID);
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(QUESTIONNAIRE);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        Color questionaireColor = new Color(59, 136, 195);
-        builder.setColor(questionaireColor);
-        builder.addField(QUESTION, question, false);
-        builder.setFooter(CREATED_BY + Users.getUserNicknameFromID(authorID));
-        builder.addField(ANSWERS, getAnswersField(), false);
-        int allCountAnserws = getAllCountAnserws();
-        builder.addField("", COUNT_ANSWERS + allCountAnserws, false);
-
         textChannel.sendMessage(builder.build()).queue(message -> {
             MessageEmbed mOld = message.getEmbeds().get(0);
             String msgID = message.getId();
@@ -150,6 +103,38 @@ public class QuestionnaireBuilder {
             setMessageID(msgID);
             Repository.getQuestionnaires().addQuestionnaire(this);
         });
+    }
+
+    /**
+     * Dodaje odpowiedzi TAK/NIE jeżeli żadne odpowiedzi nie zostały ustawione
+     */
+    private void addAnswerYesAndNo() {
+        if (answers.isEmpty()) {
+            Answer answerYes = new Answer(YES, QuestionnaireStaticHelpers.EMOJI_YES);
+            Answer answerNo = new Answer(NO, QuestionnaireStaticHelpers.EMOJI_NO);
+            this.answers.add(answerYes);
+            this.answers.add(answerNo);
+        }
+    }
+
+    /**
+     * Ustawia wygląd ankiety
+     *
+     * @return zwraca embedbuilder z ustawionymi parametrami
+     */
+    @NotNull
+    private EmbedBuilder getEmbedBuilder() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle(QUESTIONNAIRE);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        Color questionnaireColor = new Color(59, 136, 195);
+        builder.setColor(questionnaireColor);
+        builder.addField(QUESTION, question, false);
+        builder.setFooter(CREATED_BY + Users.getUserNicknameFromID(authorID));
+        builder.addField(ANSWERS, getAnswersField(), false);
+        int allCountAnswers = getAllCountAnserws();
+        builder.addField("", COUNT_ANSWERS + allCountAnswers, false);
+        return builder;
     }
 
     private int getAllCountAnserws() {
@@ -167,65 +152,29 @@ public class QuestionnaireBuilder {
                     message.addReaction(QuestionnaireStaticHelpers.EMOJI_YES).queue();
                     message.addReaction(QuestionnaireStaticHelpers.EMOJI_NO).queue();
                 } else {
-                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                    message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
+                    addReactionExactCount(message, 2);
                 }
                 break;
             case 3:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
+                addReactionExactCount(message, 3);
                 break;
             case 4:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
+                addReactionExactCount(message, 4);
                 break;
             case 5:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
+                addReactionExactCount(message, 5);
                 break;
             case 6:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
+                addReactionExactCount(message, 6);
                 break;
             case 7:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
+                addReactionExactCount(message, 7);
                 break;
             case 8:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_H).queue();
+                addReactionExactCount(message, 8);
                 break;
             case 9:
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_A).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_B).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_C).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_D).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_E).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_F).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_G).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_H).queue();
-                message.addReaction(QuestionnaireStaticHelpers.EMOJI_I).queue();
+                addReactionExactCount(message, 9);
                 break;
             default:
                 message.addReaction(QuestionnaireStaticHelpers.EMOJI_YES).queue();
@@ -233,12 +182,40 @@ public class QuestionnaireBuilder {
         }
     }
 
+    /**
+     * Dodaje konkretną liczbę reakcji do wiadomości
+     *
+     * @param message wiadomośc do której mają zostać dodane reakcje
+     * @param count   liczba ile reakcji ma zostać dodanych
+     */
+    private void addReactionExactCount(Message message, int count) {
+        List<String> emojis = getEmojisList();
+        for (int i = 0; i < count; i++) {
+            message.addReaction(emojis.get(i)).queue();
+        }
+    }
+
+    @NotNull
+    private List<String> getEmojisList() {
+        List<String> emojis = new ArrayList<>();
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_A);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_B);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_C);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_D);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_E);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_F);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_G);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_H);
+        emojis.add(QuestionnaireStaticHelpers.EMOJI_I);
+        return emojis;
+    }
+
     private String getAnswersField() {
         String result = "";
         for (int i = 0; i < answers.size(); i++) {
             if (!answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
                 if (!isEnding) {
-                    result += getEmoji(i + 1);
+                    result += getEmoji(i);
                 }
             }
             result += " " + answers.get(i).getAnswer() + " **- " + answers.get(i).getCountAnswers() + " Głosów ";
@@ -264,34 +241,14 @@ public class QuestionnaireBuilder {
     }
 
 
-    void sortAnswers() {
+    private void sortAnswers() {
         Sorter sorter = new Sorter();
         answers = sorter.sortQuestionnaireAnswersList(answers);
     }
 
     private String getEmoji(int i) {
-        switch (i) {
-            case 1:
-                return QuestionnaireStaticHelpers.EMOJI_A;
-            case 2:
-                return QuestionnaireStaticHelpers.EMOJI_B;
-            case 3:
-                return QuestionnaireStaticHelpers.EMOJI_C;
-            case 4:
-                return QuestionnaireStaticHelpers.EMOJI_D;
-            case 5:
-                return QuestionnaireStaticHelpers.EMOJI_E;
-            case 6:
-                return QuestionnaireStaticHelpers.EMOJI_F;
-            case 7:
-                return QuestionnaireStaticHelpers.EMOJI_G;
-            case 8:
-                return QuestionnaireStaticHelpers.EMOJI_H;
-            case 9:
-                return QuestionnaireStaticHelpers.EMOJI_I;
-            default:
-                return "";
-        }
+        List<String> emojis = getEmojisList();
+        return emojis.get(i);
     }
 
     void updateEmbed() {

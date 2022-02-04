@@ -25,7 +25,6 @@ public class Questionnaires {
      * Tworzy ankiętę na podstawię polecenia wpisanego na kanale
      *
      * @param contentDisplay polecenie tworzenia ankiety - MIN_ODP 0, MAX_ODP 9
-     *                       - (przykład. !ankieta PYTANIE | ODP 1 | ODP 2 | ODP 3 / !ankieta PYTANIE)
      * @param userID         ID użytkownika który tworzy ankiete
      * @param channelID      ID kanału na którym tworzona jest ankieta
      */
@@ -35,6 +34,13 @@ public class Questionnaires {
         builder.build();
     }
 
+    /**
+     * Tworzy ankiętę wielokrotnego wyboru na podstawię polecenia wpisanego na kanale
+     *
+     * @param contentDisplay polecenie tworzenia ankiety - MIN_ODP 0, MAX_ODP 9
+     * @param userID         ID użytkownika który tworzy ankiete
+     * @param channelID      ID kanału na którym tworzona jest ankieta
+     */
     public static void buildQuestionaireMultiple(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_MULTIPLE.length());
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
@@ -44,6 +50,13 @@ public class Questionnaires {
         builder.build();
     }
 
+    /**
+     * Tworzy ankiętę publiczną na podstawię polecenia wpisanego na kanale
+     *
+     * @param contentDisplay polecenie tworzenia ankiety - MIN_ODP 0, MAX_ODP 9
+     * @param userID         ID użytkownika który tworzy ankiete
+     * @param channelID      ID kanału na którym tworzona jest ankieta
+     */
     public static void buildQuestionairePublic(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_PUBLIC.length());
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
@@ -51,6 +64,13 @@ public class Questionnaires {
         builder.build();
     }
 
+    /**
+     * Tworzy ankiętę publiczną wielokrotnego wyboru na podstawię polecenia wpisanego na kanale
+     *
+     * @param contentDisplay polecenie tworzenia ankiety - MIN_ODP 0, MAX_ODP 9
+     * @param userID         ID użytkownika który tworzy ankiete
+     * @param channelID      ID kanału na którym tworzona jest ankieta
+     */
     public static void buildQuestionairePublicMultiple(String contentDisplay, String userID, String channelID) {
         contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_PUBLIC_MULTIPLE.length());
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
@@ -61,11 +81,24 @@ public class Questionnaires {
         builder.build();
     }
 
+    /**
+     * Dodaje Ankiete do listy
+     *
+     * @param questionnaireBuilder builder ankiety
+     */
     void addQuestionnaire(QuestionnaireBuilder questionnaireBuilder) {
         Questionnaire questionnaire = new Questionnaire(questionnaireBuilder);
         questionnaires.add(questionnaire);
     }
 
+    /**
+     * Tworzy builder ankiety na podstawie przekazanego polcenia
+     *
+     * @param contentDisplay polecenie tworzenia ankiety
+     * @param userID         ID użytkownika który tworzy ankiete
+     * @param channelID      kanał na którym tworzona jest ankieta
+     * @return
+     */
     @NotNull
     private static QuestionnaireBuilder getBuilder(String contentDisplay, String userID, String channelID) {
         String[] questionAndAnswer = contentDisplay.split("\\|");
@@ -92,6 +125,12 @@ public class Questionnaires {
         questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
     }
 
+    /**
+     * Zwraca index z listy ankiety przekazanej w parametrze
+     *
+     * @param messageId ID wiadomości w której jest ankieta
+     * @return
+     */
     private int getIndex(String messageId) {
         for (int i = 0; i < questionnaires.size(); i++) {
             if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
@@ -101,14 +140,30 @@ public class Questionnaires {
         return -1;
     }
 
+    /**
+     * @param messageId ID wiadomości w której jest ankieta
+     * @return true - jeśli ankieta jest publiczna, w innym przypadku false
+     */
     public boolean isPublic(String messageId) {
         return questionnaires.get(getIndex(messageId)).isPublic();
     }
 
+    /**
+     * @param messageId ID wiadomości w której jest ankieta
+     * @return true - jeśli ankieta jest wielokrotnego wyboru, w innym przypadku false
+     */
     public boolean isMultiple(String messageId) {
         return questionnaires.get(getIndex(messageId)).isMultiple();
     }
 
+    /**
+     * Kończy ankietę. Usuwa przyciski i reakcje w wiadomości/ankiecie jeżeli uzytkownik o ID przekazanym w parametrze
+     * jest autorem ankiety.
+     *
+     * @param messageID ID wiadomości w której jest ankieta
+     * @param channelID ID kanału na którym znajduje się ankieta
+     * @param userID    ID użytkowwnika który próbuje zakończyć ankietę
+     */
     public void end(String messageID, String channelID, String userID) {
         if (isAuthor(messageID, userID)) {
             removeReactionsAndButtons(messageID, channelID);
@@ -117,6 +172,12 @@ public class Questionnaires {
         }
     }
 
+    /**
+     * Usuwa reakcje i przycisk na ankiecie
+     *
+     * @param messageID ID wiadomości w której jest ankieta
+     * @param channelID ID kanału na którym jest ankieta
+     */
     private void removeReactionsAndButtons(String messageID, String channelID) {
         JDA jda = Repository.getJda();
         jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
@@ -128,13 +189,15 @@ public class Questionnaires {
         });
     }
 
+    /**
+     * @param messageID ID wiadomości w której jest ankieta
+     * @param userID    ID użytkownika którego sprawdzamy
+     * @return true - jeśli użytkownik to autor ankiety, w innym przypadku false
+     */
     private boolean isAuthor(String messageID, String userID) {
         if (questionnaires.get(getIndex(messageID)).getAuthorID().equalsIgnoreCase(userID)) {
             return true;
-        } else if (RoleID.DEV_ID.equalsIgnoreCase(userID)) {
-            return true;
-        }
-        return false;
+        } else return RoleID.DEV_ID.equalsIgnoreCase(userID);
     }
 
     /**

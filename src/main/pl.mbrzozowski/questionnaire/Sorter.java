@@ -18,7 +18,6 @@ public class Sorter {
             whereInsert = i;
             for (int j = i - 1; j >= 0; j--) {
                 if (answers.get(i).getCountAnswers() > answersSorted.get(j).getCountAnswers()) {
-                    logger.info(String.valueOf(j));
                     whereInsert = j;
                 }
             }

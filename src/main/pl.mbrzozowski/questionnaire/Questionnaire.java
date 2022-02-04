@@ -8,16 +8,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Questionnaire {
+class Questionnaire {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private String messageID;
-    private String authorID;
-    private String channelID;
-    private String question;
-    private boolean isMultiple;
-    private boolean isPublic;
-    private List<Answer> answers = new ArrayList<>();
+    protected String messageID;
+    protected String authorID;
+    protected String channelID = null;
+    protected String question = null;
+    protected boolean isMultiple = false;
+    protected boolean isPublic = false;
+    protected List<Answer> answers = new ArrayList<>();
+
+    protected Questionnaire(){
+    }
 
     Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
         this.messageID = questionnaireBuilder.getMessageID();
@@ -26,14 +29,7 @@ public class Questionnaire {
         this.question = questionnaireBuilder.getQuestion();
         this.isMultiple = questionnaireBuilder.isMultiple();
         this.isPublic = questionnaireBuilder.isPublic();
-        createAnsewrs(questionnaireBuilder.getAnswers());
-    }
-
-    private void createAnsewrs(List<Answer> answers) {
-        this.answers = answers;
-        for (int i = 0; i < answers.size(); i++) {
-            this.answers.get(i).setMessageID(messageID);
-        }
+        this.answers = questionnaireBuilder.getAnswers();
     }
 
     void addAnswer(String emoji, String userID) {
@@ -97,6 +93,10 @@ public class Questionnaire {
 
     boolean isMultiple() {
         return isMultiple;
+    }
+
+    String getQuestion() {
+        return question;
     }
 
     /**
