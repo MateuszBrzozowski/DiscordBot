@@ -1,8 +1,11 @@
 package questionnaire;
 
+import helpers.Commands;
 import helpers.RoleID;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,14 +30,14 @@ public class Questionnaires {
      * @param channelID      ID kanału na którym tworzona jest ankieta
      */
     public static void buildQuestionaire(String contentDisplay, String userID, String channelID) {
-        contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
+        contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE.length());
 
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
         builder.build();
     }
 
     public static void buildQuestionaireMultiple(String contentDisplay, String userID, String channelID) {
-        contentDisplay = contentDisplay.substring(10); //Commands.QUESTIONNAIRE.length() !ankietaW =  10
+        contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_MULTIPLE.length());
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
         if (questionAndAnswerCount >= 3) {
             builder.asMultiple();
@@ -43,7 +46,7 @@ public class Questionnaires {
     }
 
     public static void buildQuestionairePublic(String contentDisplay, String userID, String channelID) {
-        contentDisplay = contentDisplay.substring(9); //Commands.QUESTIONNAIRE.length() !ankieta =  9
+        contentDisplay = contentDisplay.substring(Commands.QUESTIONNAIRE_PUBLIC.length());
 
         QuestionnaireBuilder builder = getBuilder(contentDisplay, userID, channelID);
         builder.asPublic();
@@ -90,6 +93,13 @@ public class Questionnaires {
         return -1;
     }
 
+    public boolean isPublic(String messageId) {
+        if (questionnaires.get(getIndex(messageId)).isPublic()) {
+            return true;
+        }
+        return false;
+    }
+
     public void end(String messageID, String channelID, String userID) {
         if (isAuthor(messageID, userID)) {
             removeReactionsAndButtons(messageID, channelID);
@@ -116,5 +126,17 @@ public class Questionnaires {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Usuwa w wiadomości message wszystkie reakcje usera oprócz emoji przekazanej w parametrze
+     *
+     * @param message wiadomośc w której usuwane są reakcje
+     * @param emoji   emoji które ma nie zostać usuniete
+     * @param user    którego reakcje są usuwane
+     */
+    public void removeReaction(Message message, String emoji, User user) {
+        Questionnaire questionnaire = questionnaires.get(getIndex(message.getId()));
+        questionnaire.remoweReaction(message, emoji, user);
     }
 }

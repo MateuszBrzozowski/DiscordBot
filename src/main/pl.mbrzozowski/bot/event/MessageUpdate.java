@@ -37,8 +37,12 @@ public class MessageUpdate extends ListenerAdapter {
                     if (title.equalsIgnoreCase(QUESTIONNAIRE)) {
                         String emoji = event.getReaction().getReactionEmote().getEmoji();
                         Questionnaires questionnaires = Repository.getQuestionnaires();
+                        if (!questionnaires.isPublic(event.getMessageId())) {
+                            event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
+                        } else {
+                            questionnaires.removeReaction(message, emoji, event.getUser());
+                        }
                         questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
-                        event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
                     }
                 } catch (IndexOutOfBoundsException e) {
                 } catch (IllegalStateException e) {

@@ -1,5 +1,7 @@
 package questionnaire;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ public class Questionnaire {
     private String channelID;
     private String question;
     private boolean isMultiple;
+    private boolean isPublic;
     private List<Answer> answers = new ArrayList<>();
 
     Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
@@ -22,6 +25,7 @@ public class Questionnaire {
         this.channelID = questionnaireBuilder.getChannelID();
         this.question = questionnaireBuilder.getQuestion();
         this.isMultiple = questionnaireBuilder.isMultiple();
+        this.isPublic = questionnaireBuilder.isPublic();
         createAnsewrs(questionnaireBuilder.getAnswers());
     }
 
@@ -85,5 +89,28 @@ public class Questionnaire {
 
     String getAuthorID() {
         return authorID;
+    }
+
+    boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Usuwa w wiadomości message wszystkie reakcje usera oprócz emoji przekazanej w parametrze
+     *
+     * @param message wiadomośc w której usuwane są reakcje
+     * @param emoji   emoji które ma nie zostać usuniete
+     * @param user    którego reakcje są usuwane
+     */
+    void remoweReaction(Message message, String emoji, User user) {
+        for (Answer a : answers) {
+            if (a.wasUserAnswered(user.getId())) {
+                logger.info("User odpowiedział " + a.getAnswer());
+                if (!emoji.equalsIgnoreCase(a.getAnswerID())) {
+                    a.removeUserAnswer(user.getId());
+                    message.removeReaction(a.getAnswerID(), user).queue();
+                }
+            }
+        }
     }
 }
