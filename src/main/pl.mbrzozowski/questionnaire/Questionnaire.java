@@ -19,7 +19,7 @@ class Questionnaire {
     protected boolean isPublic = false;
     protected List<Answer> answers = new ArrayList<>();
 
-    protected Questionnaire(){
+    protected Questionnaire() {
     }
 
     Questionnaire(QuestionnaireBuilder questionnaireBuilder) {
@@ -109,7 +109,6 @@ class Questionnaire {
     void remoweReaction(Message message, String emoji, User user) {
         for (Answer a : answers) {
             if (a.wasUserAnswered(user.getId())) {
-                logger.info("User odpowiedział " + a.getAnswer());
                 if (!emoji.equalsIgnoreCase(a.getAnswerID())) {
                     a.removeUserAnswer(user.getId());
                     message.removeReaction(a.getAnswerID(), user).queue();

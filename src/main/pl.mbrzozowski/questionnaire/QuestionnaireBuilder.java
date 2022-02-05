@@ -1,5 +1,6 @@
 package questionnaire;
 
+import database.DBConnector;
 import embed.EmbedSettings;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -46,8 +47,9 @@ class QuestionnaireBuilder extends Questionnaire {
         return this;
     }
 
-    private void setMessageID(String messageID) {
+    QuestionnaireBuilder setMessageID(String messageID) {
         this.messageID = messageID;
+        return this;
     }
 
     QuestionnaireBuilder setChannelID(String channelID) {
@@ -60,6 +62,11 @@ class QuestionnaireBuilder extends Questionnaire {
             Answer a = new Answer(answer, getEmoji(answers.size()));
             answers.add(a);
         }
+        return this;
+    }
+
+    QuestionnaireBuilder addAnswer(Answer answer){
+        answers.add(answer);
         return this;
     }
 
@@ -100,7 +107,7 @@ class QuestionnaireBuilder extends Questionnaire {
                     Button.danger("end_" + msgID, END)
             ).queue();
             addReactions(message);
-            setMessageID(msgID);
+            this.setMessageID(msgID);
             Repository.getQuestionnaires().addQuestionnaire(this);
         });
     }

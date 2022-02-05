@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import questionnaire.Questionnaires;
 import recrut.Recruits;
 
 import javax.security.auth.login.LoginException;
@@ -52,5 +53,7 @@ public class RangerBot {
         recruits.initialize(jda);
         Event events = Repository.getEvent();
         events.initialize(jda);
+        Questionnaires questionnaires = Repository.getQuestionnaires();
+        questionnaires.initialize();
     }
 }

@@ -16,8 +16,11 @@ public class DBConnector {
     protected static final Logger logger = LoggerFactory.getLogger(DBConnector.class);
     private static Connection connection = null;
 
-    public static Connection connect() {
+    public DBConnector() {
+        connection = connect();
+    }
 
+    public static Connection connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, pass);
@@ -34,7 +37,7 @@ public class DBConnector {
     }
 
     public ResultSet executeSelect(String selectQuery) {
-        connection = connect();
+//        connection = connect();
         try {
             Statement statement = connection.createStatement();
             return statement.executeQuery(selectQuery);
@@ -45,7 +48,7 @@ public class DBConnector {
     }
 
     public void executeQuery(String query) {
-        connection = connect();
+//        connection = connect();
         try {
             Statement statement = connection.createStatement();
             statement.execute(query);

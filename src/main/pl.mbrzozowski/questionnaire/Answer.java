@@ -8,6 +8,10 @@ class Answer {
     private String answerID;
     private HashSet<String> usersID = new HashSet<>();
 
+    /**
+     * @param answer   tekst odpowiedzi z ankiety
+     * @param answerID emoji
+     */
     Answer(String answer, String answerID) {
         this.answer = answer;
         this.answerID = answerID;

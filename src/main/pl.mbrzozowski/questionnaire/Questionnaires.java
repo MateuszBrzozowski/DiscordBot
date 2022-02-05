@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,5 +212,77 @@ public class Questionnaires {
     public void removeReaction(Message message, String emoji, User user) {
         Questionnaire questionnaire = questionnaires.get(getIndex(message.getId()));
         questionnaire.remoweReaction(message, emoji, user);
+    }
+
+    public void initialize() {
+        QuestionnaireDatabase qdb = new QuestionnaireDatabase();
+        ResultSet allQuestionnaire = qdb.getAllQuestionnaire();
+        QuestionnaireBuilder builder = new QuestionnaireBuilder();
+        pullAllQuestionnairesFromDataBase(allQuestionnaire, builder, qdb);
+        addQuestionnaire(builder);
+    }
+
+    private void pullAllAnswersFromDataBase(ResultSet resultSet, QuestionnaireBuilder builder, QuestionnaireDatabase qdb) {
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    }
+                    String answerText = resultSet.getString("answer");
+                    String answerID = resultSet.getString("answerID");
+                    Answer answer = new Answer(answerText, answerID);
+                    addAllUsersAnswersFromDatabase(qdb.getAllUserAnswer(), answer);
+                    builder.addAnswer(answer);
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void addAllUsersAnswersFromDatabase(ResultSet resultSet, Answer answer) {
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    }
+                    String userID = resultSet.getString("userID");
+                    answer.addUser(userID);
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void pullAllQuestionnairesFromDataBase(ResultSet resultSet, QuestionnaireBuilder builder, QuestionnaireDatabase qdb) {
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    }
+                    String messageID = resultSet.getString("msgID");
+                    String channelID = resultSet.getString("channelID");
+                    String authorID = resultSet.getString("authorID");
+                    boolean isMultiple = resultSet.getBoolean("isMultiple");
+                    boolean isPublic = resultSet.getBoolean("isPublic");
+                    builder.setMessageID(messageID)
+                            .setAuthorID(authorID)
+                            .setChannelID(channelID);
+                    if (isMultiple) {
+                        builder.asMultiple();
+                    }
+                    if (isPublic) {
+                        builder.asPublic();
+                    }
+                    pullAllAnswersFromDataBase(qdb.getAllAnswers(), builder, qdb);
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        }
     }
 }
