@@ -1,7 +1,6 @@
 package bot.event;
 
 import event.Event;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -13,8 +12,6 @@ import questionnaire.Questionnaires;
 import ranger.Repository;
 
 public class MessageUpdate extends ListenerAdapter {
-
-    private final String QUESTIONNAIRE = "Ankieta";
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
@@ -30,13 +27,11 @@ public class MessageUpdate extends ListenerAdapter {
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
         if (!event.getUser().isBot()) {
-            event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
-                try {
-                    MessageEmbed messageEmbed = message.getEmbeds().get(0);
-                    String title = messageEmbed.getTitle();
-                    if (title.equalsIgnoreCase(QUESTIONNAIRE)) {
+            Questionnaires questionnaires = Repository.getQuestionnaires();
+            if (questionnaires.isQuestionnaire(event.getMessageId())) {
+                event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
+                    try {
                         String emoji = event.getReaction().getReactionEmote().getEmoji();
-                        Questionnaires questionnaires = Repository.getQuestionnaires();
                         if (!questionnaires.isPublic(event.getMessageId())) {
                             event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
                         } else {
@@ -45,12 +40,13 @@ public class MessageUpdate extends ListenerAdapter {
                             }
                         }
                         questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
+
+                    } catch (IndexOutOfBoundsException e) {
+                    } catch (IllegalStateException e) {
+                        event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
                     }
-                } catch (IndexOutOfBoundsException e) {
-                } catch (IllegalStateException e) {
-                    event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
-                }
-            });
+                });
+            }
         }
 
     }

@@ -1,5 +1,6 @@
 package questionnaire;
 
+import database.DBConnector;
 import helpers.Commands;
 import helpers.RoleID;
 import net.dv8tion.jda.api.JDA;
@@ -170,8 +171,26 @@ public class Questionnaires {
         if (isAuthor(messageID, userID)) {
             removeReactionsAndButtons(messageID, channelID);
             questionnaires.get(getIndex(messageID)).endedEmbed();
+            removeQuestionnaireFromDataBase(messageID);
             questionnaires.remove(getIndex(messageID));
         }
+    }
+
+    /**
+     * Usuwa wszystkie dane z bazy, ankiety o id messageID
+     *
+     * @param messageID ID ankiety
+     */
+    private void removeQuestionnaireFromDataBase(String messageID) {
+        //TODO do sprawdzania
+        String removeUserID = "DELETE FROM user_answer WHERE answer_id IN (" +
+                "SELECT id FROM answers WHERE msgID=\"" + messageID + "\")";
+        String removeAnswers = "DELETE FROM answers WHERE msgID=\"" + messageID + "\"";
+        String removeQuestionnaire = "DELETE FROM questionnaire WHERE msgID=\"" + messageID + "\"";
+        DBConnector connector = new DBConnector();
+        connector.executeQuery(removeUserID);
+        connector.executeQuery(removeAnswers);
+        connector.executeQuery(removeQuestionnaire);
     }
 
     /**
@@ -214,6 +233,9 @@ public class Questionnaires {
         questionnaire.remoweReaction(message, emoji, user);
     }
 
+    /**
+     * Pobiera z bazy danych wszystkie ankiety wraz z odpowiedziami i dodaje na liste.
+     */
     public void initialize() {
         QuestionnaireDatabase qdb = new QuestionnaireDatabase();
         ResultSet allQuestionnaire = qdb.getAllQuestionnaire();
@@ -229,10 +251,12 @@ public class Questionnaires {
                     if (!resultSet.next()) {
                         break;
                     }
+                    int id = resultSet.getInt("id");
                     String answerText = resultSet.getString("answer");
-                    String answerID = resultSet.getString("answerID");
+                    String answerID = resultSet.getString("emojiID");
                     Answer answer = new Answer(answerText, answerID);
-                    addAllUsersAnswersFromDatabase(qdb.getAllUserAnswer(), answer);
+                    answer.setIdDb(id);
+                    addAllUsersAnswersFromDatabase(qdb.getAllUserAnswerWithID(id), answer);
                     builder.addAnswer(answer);
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
@@ -278,11 +302,20 @@ public class Questionnaires {
                     if (isPublic) {
                         builder.asPublic();
                     }
-                    pullAllAnswersFromDataBase(qdb.getAllAnswers(), builder, qdb);
+                    pullAllAnswersFromDataBase(qdb.getAllAnswersFromQuestionnaireID(messageID), builder, qdb);
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
             }
         }
+    }
+
+    public boolean isQuestionnaire(String messageId) {
+        for (Questionnaire q : questionnaires){
+            if (q.getMessageID().equalsIgnoreCase(messageId)){
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -411,8 +411,8 @@ public class Recruits {
             guild.addRoleToMember(recruitID, roleClanMember).queue();
             guild.removeRoleFromMember(recruitID,roleRecruit).queue();
             //Wysłanie informacji o przyjęciu nowego członka.
-            TextChannel channelMemberOnly = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_MEMBER_ONLY);
-            channelMemberOnly.sendMessage("Witamy nowego członka klanu <@" + recruitID + ">.").queue();
+//            TextChannel channelMemberOnly = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_MEMBER_ONLY);
+//            channelMemberOnly.sendMessage("Witamy nowego członka klanu <@" + recruitID + ">.").queue();
         }
     }
 

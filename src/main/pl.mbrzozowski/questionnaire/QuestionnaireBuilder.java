@@ -65,7 +65,7 @@ class QuestionnaireBuilder extends Questionnaire {
         return this;
     }
 
-    QuestionnaireBuilder addAnswer(Answer answer){
+    QuestionnaireBuilder addAnswer(Answer answer) {
         answers.add(answer);
         return this;
     }
@@ -108,8 +108,21 @@ class QuestionnaireBuilder extends Questionnaire {
             ).queue();
             addReactions(message);
             this.setMessageID(msgID);
+            pushQuestionnaireToDataBase();
             Repository.getQuestionnaires().addQuestionnaire(this);
         });
+    }
+
+    private void pushQuestionnaireToDataBase() {
+        DBConnector connector = new DBConnector();
+        String query = "INSERT INTO questionnaire (`msgID`,`channelID`,`authorID`,`isMultiple`,`isPublic`) " +
+                "VALUES (\"%s\",\"%s\",\"%s\",%b,%b)";
+        connector.executeQuery(String.format(query, messageID, channelID, authorID, isMultiple, isPublic));
+        for (Answer a : answers) {
+            String queryAnswer = "INSERT INTO answers (`msgID`,`answer`,`emojiID`) " +
+                    "VALUES (\"%s\",\"%s\",\"%s\")";
+            connector.executeQuery(String.format(queryAnswer, messageID, a.getAnswer(), a.getEmojiID()));
+        }
     }
 
     /**
@@ -155,7 +168,7 @@ class QuestionnaireBuilder extends Questionnaire {
     private void addReactions(Message message) {
         switch (answers.size()) {
             case 2:
-                if (answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
+                if (answers.get(0).getEmojiID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
                     message.addReaction(QuestionnaireStaticHelpers.EMOJI_YES).queue();
                     message.addReaction(QuestionnaireStaticHelpers.EMOJI_NO).queue();
                 } else {
@@ -220,7 +233,7 @@ class QuestionnaireBuilder extends Questionnaire {
     private String getAnswersField() {
         String result = "";
         for (int i = 0; i < answers.size(); i++) {
-            if (!answers.get(0).getAnswerID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
+            if (!answers.get(0).getEmojiID().equalsIgnoreCase(QuestionnaireStaticHelpers.EMOJI_YES)) {
                 if (!isEnding) {
                     result += getEmoji(i);
                 }

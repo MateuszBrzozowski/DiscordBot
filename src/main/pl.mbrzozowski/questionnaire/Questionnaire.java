@@ -39,8 +39,8 @@ class Questionnaire {
             }
         }
         for (Answer a : answers) {
-            if (a.getAnswerID().equalsIgnoreCase(emoji)) {
-                a.addUser(userID);
+            if (a.getEmojiID().equalsIgnoreCase(emoji)) {
+                a.addUser(userID,messageID);
             }
         }
         updateEmbed();
@@ -48,7 +48,7 @@ class Questionnaire {
 
     private void removeUserAnswer(String userID) {
         for (Answer a : answers) {
-            a.removeUserAnswer(userID);
+            a.removeUserAnswer(userID,messageID);
         }
     }
 
@@ -109,9 +109,9 @@ class Questionnaire {
     void remoweReaction(Message message, String emoji, User user) {
         for (Answer a : answers) {
             if (a.wasUserAnswered(user.getId())) {
-                if (!emoji.equalsIgnoreCase(a.getAnswerID())) {
-                    a.removeUserAnswer(user.getId());
-                    message.removeReaction(a.getAnswerID(), user).queue();
+                if (!emoji.equalsIgnoreCase(a.getEmojiID())) {
+                    a.removeUserAnswer(user.getId(), messageID);
+                    message.removeReaction(a.getEmojiID(), user).queue();
                 }
             }
         }
