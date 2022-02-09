@@ -161,7 +161,7 @@ public class ActiveEvent {
         return false;
     }
 
-    private boolean checkMemberOnReserveList(String userID) {
+    public boolean checkMemberOnReserveList(String userID) {
         for (int i = 0; i < reserveList.size(); i++) {
             if (reserveList.get(i).getUserID().equalsIgnoreCase(userID)) {
                 return true;

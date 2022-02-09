@@ -671,12 +671,14 @@ public class Event {
                     }
                     break;
                 case SIGN_OUT:
-                    if (!threeHoursToEvent(indexOfActiveMatch)) {
-                        activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
-                    } else {
-                        EmbedInfo.youCantSingOut(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
-                        RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
-                                + activeEvents.get(indexOfActiveMatch).getName() + "] - Czas do eventu 3h lub mniej.");
+                    if (userOnMainList(indexOfActiveMatch, userID) || userOnReserveList(indexOfActiveMatch, userID)) {
+                        if (!threeHoursToEvent(indexOfActiveMatch)) {
+                            activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
+                        } else {
+                            EmbedInfo.youCantSingOut(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
+                            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
+                                    + activeEvents.get(indexOfActiveMatch).getName() + "] - Czas do eventu 3h lub mniej.");
+                        }
                     }
                     break;
             }
@@ -690,6 +692,10 @@ public class Event {
 
     private boolean userOnMainList(int index, String userID) {
         return activeEvents.get(index).checkMemberOnMainList(userID);
+    }
+
+    private boolean userOnReserveList(int index, String userID) {
+        return activeEvents.get(index).checkMemberOnReserveList(userID);
     }
 
     public void deleteChannelByID(String channelID) {
