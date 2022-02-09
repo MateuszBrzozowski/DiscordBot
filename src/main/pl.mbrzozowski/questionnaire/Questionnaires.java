@@ -1,13 +1,14 @@
 package questionnaire;
 
-import database.DBConnector;
 import helpers.Commands;
 import helpers.RoleID;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,8 +129,13 @@ public class Questionnaires {
         questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
     }
 
+    /**
+     * @param emoji     Emoji które zostało usunięte przez użytkownika
+     * @param messageId ID wiadomości w której emoji zostało usunięte
+     * @param userId    ID użytkownika który usunął emoji
+     */
     public void removeAnswer(String emoji, String messageId, String userId) {
-        questionnaires.get(getIndex(messageId)).removeAnswer(emoji,userId);
+        questionnaires.get(getIndex(messageId)).removeAnswer(emoji, userId);
     }
 
     /**
@@ -138,7 +144,7 @@ public class Questionnaires {
      * @param messageId ID wiadomości w której jest ankieta
      * @return
      */
-    private int getIndex(String messageId) {
+    public int getIndex(String messageId) {
         for (int i = 0; i < questionnaires.size(); i++) {
             if (questionnaires.get(i).getMessageID() != null) {
                 if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
@@ -185,6 +191,11 @@ public class Questionnaires {
         }
     }
 
+    /**
+     * Usuwa ankiętę z listy i z bazy danych
+     *
+     * @param messageID ID wiadomości w której jest ankieta
+     */
     public void removeQuestionnaire(String messageID) {
         removeQuestionnaireFromDataBase(messageID);
         questionnaires.remove(getIndex(messageID));
@@ -196,14 +207,8 @@ public class Questionnaires {
      * @param messageID ID ankiety
      */
     private void removeQuestionnaireFromDataBase(String messageID) {
-        String removeUserID = "DELETE FROM user_answer WHERE answer_id IN (" +
-                "SELECT id FROM answers WHERE msgID=\"" + messageID + "\")";
-        String removeAnswers = "DELETE FROM answers WHERE msgID=\"" + messageID + "\"";
-        String removeQuestionnaire = "DELETE FROM questionnaire WHERE msgID=\"" + messageID + "\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(removeUserID);
-        connector.executeQuery(removeAnswers);
-        connector.executeQuery(removeQuestionnaire);
+        QuestionnaireDatabase qdb = new QuestionnaireDatabase();
+        qdb.removeQuestionnaire(messageID);
     }
 
     /**
@@ -226,7 +231,7 @@ public class Questionnaires {
     /**
      * @param messageID ID wiadomości w której jest ankieta
      * @param userID    ID użytkownika którego sprawdzamy
-     * @return true - jeśli użytkownik to autor ankiety, w innym przypadku false
+     * @return true - jeśli użytkownik to autor ankiety lub developer, w innym przypadku false
      */
     private boolean isAuthor(String messageID, String userID) {
         if (questionnaires.get(getIndex(messageID)).getAuthorID().equalsIgnoreCase(userID)) {
@@ -254,9 +259,16 @@ public class Questionnaires {
         ResultSet allQuestionnaire = qdb.getAllQuestionnaire();
         QuestionnaireBuilder builder = new QuestionnaireBuilder();
         pullAllQuestionnairesFromDataBase(allQuestionnaire, builder, qdb);
-        addQuestionnaire(builder);
+        checkQuestionnnaires();
     }
 
+    /**
+     * Ustawia pobrane odpowiedzi do odpowiedniej ankiety
+     *
+     * @param resultSet Wszystkie odpowiedzi z bazy danych pasujace do ankiety.
+     * @param builder   ankiety do której chcemy przypisać odpowiedzi
+     * @param qdb       połączenie z bazą danych
+     */
     private void pullAllAnswersFromDataBase(ResultSet resultSet, QuestionnaireBuilder builder, QuestionnaireDatabase qdb) {
         if (resultSet != null) {
             while (true) {
@@ -269,7 +281,7 @@ public class Questionnaires {
                     String answerID = resultSet.getString("emojiID");
                     Answer answer = new Answer(answerText, answerID);
                     answer.setIdDb(id);
-                    addAllUsersAnswersFromDatabase(qdb.getAllUserAnswerWithID(id), answer);
+                    pullAllUsersAnswersFromDatabase(qdb.getAllUserAnswerWithID(id), answer);
                     builder.addAnswer(answer);
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
@@ -278,7 +290,13 @@ public class Questionnaires {
         }
     }
 
-    private void addAllUsersAnswersFromDatabase(ResultSet resultSet, Answer answer) {
+    /**
+     * Ustawia pobrane odpowiedzi użytkowników do odpowiedniej odpowiedzi/
+     *
+     * @param resultSet wszyscy użytkownicy danej odpowiedzi
+     * @param answer    odpowiedź do której są dodawani użytkownicy
+     */
+    private void pullAllUsersAnswersFromDatabase(ResultSet resultSet, Answer answer) {
         if (resultSet != null) {
             while (true) {
                 try {
@@ -294,6 +312,13 @@ public class Questionnaires {
         }
     }
 
+    /**
+     * Pobrane z bazy danych informację dodaje na listę ankiet
+     *
+     * @param resultSet pobrane z bazy danych wszystkie ankiety
+     * @param builder   ankieta tworzona na podstawie danych z baz danych
+     * @param qdb       połączenie z bazami danych
+     */
     private void pullAllQuestionnairesFromDataBase(ResultSet resultSet, QuestionnaireBuilder builder, QuestionnaireDatabase qdb) {
         if (resultSet != null) {
             while (true) {
@@ -316,6 +341,7 @@ public class Questionnaires {
                         builder.asPublic();
                     }
                     pullAllAnswersFromDataBase(qdb.getAllAnswersFromQuestionnaireID(messageID), builder, qdb);
+                    questionnaires.add(builder);
                 } catch (SQLException throwable) {
                     throwable.printStackTrace();
                 }
@@ -323,14 +349,43 @@ public class Questionnaires {
         }
     }
 
-    public int getQuestionnaireIndex(String messageId) {
-        for (int i = 0; i < questionnaires.size(); i++) {
-            if (questionnaires.get(i).getMessageID() != null) {
-                if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
-                    return i;
+    /**
+     * Sprawdza wszystkie ankiety czy istnieją
+     */
+    private void checkQuestionnnaires() {
+        for (Questionnaire q : questionnaires) {
+            checkQuestionnnaire(q.getChannelID(), q.getMessageID());
+        }
+    }
+
+    /**
+     * Sprawdza poszczególną ankiętę czy istnieje. Jeżeli nie istnieje usuwa ją z listy i z bazy danych
+     *
+     * @param channelID ID kanału na którym suzkamy ankiety
+     * @param messageID ID wiadomości w której szukamy ankiety
+     */
+    private void checkQuestionnnaire(String channelID, String messageID) {
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
+            logger.info("jest taka wiadomosc, bez tej lini to nie zadziała.");
+        }, (failure) -> {
+            if (failure instanceof ErrorResponseException) {
+                ErrorResponseException ex = (ErrorResponseException) failure;
+                if (ex.getErrorResponse() == ErrorResponse.UNKNOWN_MESSAGE) {
+                    removeQuestionnaire(messageID);
                 }
             }
-        }
-        return -1;
+        });
+    }
+
+    /**
+     * Sprawdza czy rekacja przekazana w parametrze jest właściwą dla danej ankiety
+     *
+     * @param index ankiety
+     * @param emoji które sprawdzamy czy jest prawidłowe
+     * @return true - jeżeli emoji istnieje jako odpowiedź do ankiety, w innym przypadku false
+     */
+    public boolean isCorrectReaction(int index, String emoji) {
+        return questionnaires.get(index).isCorrectReaction(emoji);
     }
 }

@@ -23,7 +23,7 @@ public class MessageUpdate extends ListenerAdapter {
             e.cancelEvent(event.getMessageId());
         }
         Questionnaires q = Repository.getQuestionnaires();
-        if (q.getQuestionnaireIndex(event.getMessageId()) != -1) {
+        if (q.getIndex(event.getMessageId()) != -1) {
             q.removeQuestionnaire(event.getMessageId());
         }
 
@@ -33,7 +33,7 @@ public class MessageUpdate extends ListenerAdapter {
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
         if (!event.getUser().isBot()) {
             Questionnaires questionnaires = Repository.getQuestionnaires();
-            int questionnaireIndex = questionnaires.getQuestionnaireIndex(event.getMessageId());
+            int questionnaireIndex = questionnaires.getIndex(event.getMessageId());
             if (questionnaireIndex != -1) {
                 event.getChannel().retrieveMessageById(event.getMessageId()).queue(message -> {
                     try {
@@ -44,8 +44,10 @@ public class MessageUpdate extends ListenerAdapter {
                             if (!questionnaires.isMultiple(questionnaireIndex)) {
                                 questionnaires.removeReaction(message, emoji, event.getUser());
                             }
+                            if (!questionnaires.isCorrectReaction(questionnaireIndex,emoji)){
+                                event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
+                            }
                         }
-                        logger.info(String.valueOf(questionnaireIndex));
                         questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
 
                     } catch (IndexOutOfBoundsException e) {
@@ -61,7 +63,7 @@ public class MessageUpdate extends ListenerAdapter {
     public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
         if (!event.getUser().isBot()) {
             Questionnaires questionnaires = Repository.getQuestionnaires();
-            int questionnaireIndex = questionnaires.getQuestionnaireIndex(event.getMessageId());
+            int questionnaireIndex = questionnaires.getIndex(event.getMessageId());
             if (questionnaireIndex != -1){
                 if (questionnaires.isPublic(questionnaireIndex)){
                     String emoji = event.getReaction().getReactionEmote().getEmoji();

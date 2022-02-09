@@ -46,7 +46,7 @@ class Questionnaire {
         updateEmbed();
     }
 
-    public void removeAnswer(String emoji, String userId) {
+    void removeAnswer(String emoji, String userId) {
         for (Answer a : answers) {
             if (a.getEmojiID().equalsIgnoreCase(emoji)) {
                 a.removeUserAnswer(userId, messageID);
@@ -124,5 +124,14 @@ class Questionnaire {
                 }
             }
         }
+    }
+
+    public boolean isCorrectReaction(String emoji) {
+        for (Answer a : answers) {
+            if (a.getEmojiID().equalsIgnoreCase(emoji)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

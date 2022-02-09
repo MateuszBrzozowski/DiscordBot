@@ -1,15 +1,10 @@
 package questionnaire;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 
 class Answer {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     private int idDb = -1;
     private String answer;
@@ -52,7 +47,7 @@ class Answer {
 
     private void getIDFromDataBase(String messageID, QuestionnaireDatabase qdb) {
         if (idDb == -1) {
-            ResultSet resultSet = qdb.getAnswerIDFromDatabase(messageID, emojiID);
+            ResultSet resultSet = qdb.getAnswerIDFromDatabase(messageID);
             setIdDB(resultSet);
         }
     }
@@ -76,7 +71,7 @@ class Answer {
         }
     }
 
-    public void setIdDb(int idDb) {
+    void setIdDb(int idDb) {
         this.idDb = idDb;
     }
 

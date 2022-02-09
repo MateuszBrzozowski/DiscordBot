@@ -1,6 +1,5 @@
 package questionnaire;
 
-import database.DBConnector;
 import embed.EmbedSettings;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -114,14 +113,10 @@ class QuestionnaireBuilder extends Questionnaire {
     }
 
     private void pushQuestionnaireToDataBase() {
-        DBConnector connector = new DBConnector();
-        String query = "INSERT INTO questionnaire (`msgID`,`channelID`,`authorID`,`isMultiple`,`isPublic`) " +
-                "VALUES (\"%s\",\"%s\",\"%s\",%b,%b)";
-        connector.executeQuery(String.format(query, messageID, channelID, authorID, isMultiple, isPublic));
+        QuestionnaireDatabase qdb = new QuestionnaireDatabase();
+        qdb.pushNewQuestionnaire(messageID, channelID, authorID, isMultiple, isPublic);
         for (Answer a : answers) {
-            String queryAnswer = "INSERT INTO answers (`msgID`,`answer`,`emojiID`) " +
-                    "VALUES (\"%s\",\"%s\",\"%s\")";
-            connector.executeQuery(String.format(queryAnswer, messageID, a.getAnswer(), a.getEmojiID()));
+            qdb.pushNewAnswer(messageID, a.getAnswer(), a.getEmojiID());
         }
     }
 
