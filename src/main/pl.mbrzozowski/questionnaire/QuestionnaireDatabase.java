@@ -13,7 +13,9 @@ public class QuestionnaireDatabase {
 
 
     ResultSet getAnswerIDFromDatabase(String messageID, String emojiID) {
-        String query = "SELECT id FROM answers WHERE msgID=\"" + messageID + "\" AND emojiID=\"" + emojiID + "\"";
+//        String query = "SELECT id FROM `answers` WHERE msgID=\"" + messageID + "\" AND emojiID=\"" + emojiID + "\"";
+        //Dlaczego to ^ nie dziala
+        String query = "SELECT * FROM `answers` WHERE msgID=\"" + messageID + "\"";
         ResultSet resultSet = null;
         resultSet = connector.executeSelect(query);
         return resultSet;

@@ -35,20 +35,29 @@ class Questionnaire {
     void addAnswer(String emoji, String userID) {
         if (!isMultiple) {
             if (wasUserAnswered(userID)) {
-                removeUserAnswer(userID);
+                removeUserAnswers(userID);
             }
         }
         for (Answer a : answers) {
             if (a.getEmojiID().equalsIgnoreCase(emoji)) {
-                a.addUser(userID,messageID);
+                a.addUser(userID, messageID);
             }
         }
         updateEmbed();
     }
 
-    private void removeUserAnswer(String userID) {
+    public void removeAnswer(String emoji, String userId) {
         for (Answer a : answers) {
-            a.removeUserAnswer(userID,messageID);
+            if (a.getEmojiID().equalsIgnoreCase(emoji)) {
+                a.removeUserAnswer(userId, messageID);
+            }
+        }
+        updateEmbed();
+    }
+
+    private void removeUserAnswers(String userID) {
+        for (Answer a : answers) {
+            a.removeUserAnswer(userID, messageID);
         }
     }
 
@@ -116,6 +125,4 @@ class Questionnaire {
             }
         }
     }
-
-
 }

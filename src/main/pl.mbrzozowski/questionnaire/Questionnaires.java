@@ -128,6 +128,10 @@ public class Questionnaires {
         questionnaires.get(getIndex(messageId)).addAnswer(emoji, userID);
     }
 
+    public void removeAnswer(String emoji, String messageId, String userId) {
+        questionnaires.get(getIndex(messageId)).removeAnswer(emoji,userId);
+    }
+
     /**
      * Zwraca index z listy ankiety przekazanej w parametrze
      *
@@ -136,27 +140,33 @@ public class Questionnaires {
      */
     private int getIndex(String messageId) {
         for (int i = 0; i < questionnaires.size(); i++) {
-            if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
-                return i;
+            if (questionnaires.get(i).getMessageID() != null) {
+                if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
+                    return i;
+                }
             }
         }
         return -1;
     }
 
     /**
-     * @param messageId ID wiadomości w której jest ankieta
+     * Sprawdza czy wskazana ankieta jest publiczna
+     *
+     * @param index index ankiety którą sprawdzamy
      * @return true - jeśli ankieta jest publiczna, w innym przypadku false
      */
-    public boolean isPublic(String messageId) {
-        return questionnaires.get(getIndex(messageId)).isPublic();
+    public boolean isPublic(int index) {
+        return questionnaires.get(index).isPublic();
     }
 
     /**
-     * @param messageId ID wiadomości w której jest ankieta
-     * @return true - jeśli ankieta jest wielokrotnego wyboru, w innym przypadku false
+     * Srawdza czy ankieta jest wielokrotnego wyboru
+     *
+     * @param index ankiety którą sprawdzamy
+     * @return true - jesli ankieta jest wielokrotnego wyboru, w innym przypadku false
      */
-    public boolean isMultiple(String messageId) {
-        return questionnaires.get(getIndex(messageId)).isMultiple();
+    public boolean isMultiple(int index) {
+        return questionnaires.get(index).isMultiple();
     }
 
     /**
@@ -171,9 +181,13 @@ public class Questionnaires {
         if (isAuthor(messageID, userID)) {
             removeReactionsAndButtons(messageID, channelID);
             questionnaires.get(getIndex(messageID)).endedEmbed();
-            removeQuestionnaireFromDataBase(messageID);
-            questionnaires.remove(getIndex(messageID));
+            removeQuestionnaire(messageID);
         }
+    }
+
+    public void removeQuestionnaire(String messageID) {
+        removeQuestionnaireFromDataBase(messageID);
+        questionnaires.remove(getIndex(messageID));
     }
 
     /**
@@ -182,7 +196,6 @@ public class Questionnaires {
      * @param messageID ID ankiety
      */
     private void removeQuestionnaireFromDataBase(String messageID) {
-        //TODO do sprawdzania
         String removeUserID = "DELETE FROM user_answer WHERE answer_id IN (" +
                 "SELECT id FROM answers WHERE msgID=\"" + messageID + "\")";
         String removeAnswers = "DELETE FROM answers WHERE msgID=\"" + messageID + "\"";
@@ -310,12 +323,14 @@ public class Questionnaires {
         }
     }
 
-    public boolean isQuestionnaire(String messageId) {
-        for (Questionnaire q : questionnaires){
-            if (q.getMessageID().equalsIgnoreCase(messageId)){
-                return true;
+    public int getQuestionnaireIndex(String messageId) {
+        for (int i = 0; i < questionnaires.size(); i++) {
+            if (questionnaires.get(i).getMessageID() != null) {
+                if (questionnaires.get(i).getMessageID().equalsIgnoreCase(messageId)) {
+                    return i;
+                }
             }
         }
-        return false;
+        return -1;
     }
 }

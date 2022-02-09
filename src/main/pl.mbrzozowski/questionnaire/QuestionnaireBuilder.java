@@ -106,10 +106,10 @@ class QuestionnaireBuilder extends Questionnaire {
             message.editMessage(mOld).setActionRow(
                     Button.danger("end_" + msgID, END)
             ).queue();
-            addReactions(message);
             this.setMessageID(msgID);
             pushQuestionnaireToDataBase();
             Repository.getQuestionnaires().addQuestionnaire(this);
+            addReactions(message);
         });
     }
 

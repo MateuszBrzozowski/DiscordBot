@@ -33,13 +33,15 @@ class Answer {
         return answer;
     }
 
-    void addUser(String userID) {
-        this.usersID.add(userID);
+    boolean addUser(String userID) {
+        return this.usersID.add(userID);
     }
 
     void addUser(String userID, String messageID) {
-        addUser(userID);
-        addUserToDataBase(userID, messageID);
+        boolean isAdded = addUser(userID);
+        if (isAdded) {
+            addUserToDataBase(userID, messageID);
+        }
     }
 
     private void addUserToDataBase(String userID, String messageID) {
@@ -57,11 +59,19 @@ class Answer {
 
     private void setIdDB(ResultSet resultSet) {
         if (resultSet != null) {
-            try {
-                resultSet.next();
-                idDb = resultSet.getInt("id");
-            } catch (SQLException throwable) {
-                throwable.printStackTrace();
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    }
+                    int id = resultSet.getInt("id");
+                    String emojiIDDB = resultSet.getString("emojiID");
+                    if (emojiID.equalsIgnoreCase(emojiIDDB)) {
+                        idDb = id;
+                    }
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
+                }
             }
         }
     }
@@ -90,12 +100,9 @@ class Answer {
         }
     }
 
-    void removeUserAnswerFromDatabase(String userID, String messageID) {
-        logger.info("Uzytkownik ma odpowiedz i usuwam go z bazy danych");
+    private void removeUserAnswerFromDatabase(String userID, String messageID) {
         QuestionnaireDatabase qdb = new QuestionnaireDatabase();
         getIDFromDataBase(messageID, qdb);
         qdb.removeUserAnswer(idDb, userID);
     }
-
-
 }
