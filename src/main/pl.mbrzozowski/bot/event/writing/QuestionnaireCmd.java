@@ -23,7 +23,7 @@ public class QuestionnaireCmd extends Proccess {
         } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC)) {
             Questionnaires.buildQuestionairePublic(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
             event.getMessage().delete().submit();
-        } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC_MULTIPLE)) {
+        } else if (message.getWords().length > 1 && (message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC_MULTIPLE) || message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_MULTIPLE_PUBLIC))) {
             Questionnaires.buildQuestionairePublicMultiple(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
             event.getMessage().delete().submit();
         } else if (message.getWords().length == 1 && isQuestionnaireCommand(message.getWords()[0])) {

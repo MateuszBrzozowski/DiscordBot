@@ -26,6 +26,7 @@ public class EmbedHelp {
     private static final String GAME = "game";
     private static final String SIGNIN = "zapisy";
     private static final String EVENT_SETTINGS = "event";
+    private static final String QUESTIONNAIRE = "ankieta";
 
     private static void mainHelp() {
         EmbedBuilder builder = new EmbedBuilder();
@@ -35,6 +36,7 @@ public class EmbedHelp {
         builder.setFooter(footer);
         builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Komendy do rekrutów. \n" +
                 "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
+                "**!help " + QUESTIONNAIRE + "** - Tworzenie ankiet.\n" +
                 "**!help " + CHANNEL + "** - Tworzenie nowego kanału. Pomocne przy bardziej zaawansowanych zapisach z dłuższym, własnym opisem. \n" +
                 "**!help " + SIGNIN + " cmd** - Tworzenie zapisów przy pomocy komend (zaawansowane)\n" +
                 "**!help " + EVENT_SETTINGS + "** - (Rada klanu) - Zarządzanie eventami.\n" +
@@ -76,6 +78,9 @@ public class EmbedHelp {
             } else if (message[1].equalsIgnoreCase(CHANNEL)) {
                 helpNewChannel();
                 RangerLogger.info("Wyświetlona pomoc nowy kanał");
+            } else if (message[1].equalsIgnoreCase(QUESTIONNAIRE)) {
+                helpQuestionnaire();
+                RangerLogger.info("Wyświetlona pomoc tworzenia ankiet");
             } else if (message[1].equalsIgnoreCase(EVENT_SETTINGS)) {
                 if (admin) {
                     helpEventsSettings();
@@ -88,6 +93,25 @@ public class EmbedHelp {
                 RangerLogger.info("Wyświetlona pomoc zapisy");
             }
         }
+    }
+
+    private static void helpQuestionnaire() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle(title + " - Tworzenie ankiet");
+        builder.setColor(Color.YELLOW);
+        builder.setDescription("Poniższe polecenia tworzą ankietę na kanale na którym zostały wpisane");
+        builder.addField("", "**!ankieta** - Domyślna ankieta jednokrotnego wyboru. Niepubliczna\n" +
+                "**!ankietaW** - Ankieta wielokrotnego wyboru. Niepubliczna\n" +
+                "**!ankietaP** - Ankieta publiczna. Reakcje nie są kasowane. Widać kto na co głosuje.\n" +
+                "**!ankietaPW** lub **!ankietaWP** - Ankieta wielokrotnego wyboru. Publiczna.\n\n" +
+                "Za poleceniem wpisujemy pytanie do ankiety. Pytanie jest **obowiązkowe**. Komenda + pytanie  jest minimalnym poleceniem które utowrzy ankietę. " +
+                "W takim przypadku domyślnymi odpowiedziami będą TAK/NIE\n" +
+                "**(np. !ankieta Czy lubisz lato?)**\n\n" +
+                "Możemy stworzyć odpoweidzi do ankiety wypisując je za pytaniem, separując znakiem \"|\". Każda odpowiedź również ma być odseparowana od siebie tym znakiem. \n" +
+                "Minimalnie możemy podać 2 odpowiedzi, maksymalnie 9. Jeżeli wypiszemy więcej odpowiedzi do ankiety zostaną dodane pierwsze 9.\n" +
+                "**(np. !ankieta Co bardziej lubisz? | Herabta | Kawa | Woda)**", false);
+        builder.setFooter("");
+        privateChannel.sendMessage(builder.build()).queue();
     }
 
     private static void helpEventsSettings() {
