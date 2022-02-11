@@ -1,5 +1,6 @@
 package bot.event.writing;
 
+import counter.Counter;
 import event.Event;
 import model.BotWriter;
 import model.DiceGames;
@@ -8,10 +9,11 @@ import recrut.Recruits;
 
 public abstract class Proccess {
 
-    private Recruits recruits = Repository.getRecruits();
-    private Event events = Repository.getEvent();
-    private DiceGames dice = Repository.getDiceGames();
-    private BotWriter botWriter = Repository.getBotWriter();
+    private final Recruits recruits = Repository.getRecruits();
+    private final Event events = Repository.getEvent();
+    private final DiceGames dice = Repository.getDiceGames();
+    private final BotWriter botWriter = Repository.getBotWriter();
+    private final Counter counter = Repository.getCounter();
     private Proccess nextProccess;
 
     abstract public void proccessMessage(Message message);
@@ -38,5 +40,9 @@ public abstract class Proccess {
 
     public BotWriter getBotWriter() {
         return botWriter;
+    }
+
+    public Counter getCounter() {
+        return counter;
     }
 }

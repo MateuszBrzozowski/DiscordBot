@@ -1,5 +1,6 @@
 package ranger;
 
+import counter.Counter;
 import event.Event;
 import event.EventsGeneratorModel;
 import event.EventsSettingsModel;
@@ -12,14 +13,15 @@ import recrut.Recruits;
 
 public class Repository {
 
-    private static Event event = new Event();
-    private static Recruits recruits = new Recruits();
-    private static DiceGames diceGames = new DiceGames();
-    private static EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
-    private static EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
-    private static Timers timers = new Timers();
-    private static Questionnaires questionnaires = new Questionnaires();
-    private static BotWriter botWriter = new BotWriter();
+    private static final Event event = new Event();
+    private static final Recruits recruits = new Recruits();
+    private static final DiceGames diceGames = new DiceGames();
+    private static final EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
+    private static final EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
+    private static final Timers timers = new Timers();
+    private static final Questionnaires questionnaires = new Questionnaires();
+    private static final BotWriter botWriter = new BotWriter();
+    private static final Counter counter = new Counter();
     private static JDA jda;
 
     public static Event getEvent() {
@@ -58,7 +60,11 @@ public class Repository {
         return botWriter;
     }
 
-    public static Questionnaires getQuestionnaires(){
+    public static Questionnaires getQuestionnaires() {
         return questionnaires;
+    }
+
+    public static Counter getCounter() {
+        return counter;
     }
 }

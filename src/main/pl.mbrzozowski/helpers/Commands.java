@@ -38,6 +38,9 @@ public class Commands {
     public static final String QUESTIONNAIRE_PUBLIC = PREFIX + "ankietaP";
     public static final String QUESTIONNAIRE_PUBLIC_MULTIPLE = PREFIX + "ankietaPW";
     public static final String QUESTIONNAIRE_MULTIPLE_PUBLIC = PREFIX + "ankietaWP";
+    public static final String TOP_THREE = PREFIX + "top";
+    public static final String TOP_TEN = PREFIX + "topTen";
+    public static final String COUNT = PREFIX + "showMe";
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";

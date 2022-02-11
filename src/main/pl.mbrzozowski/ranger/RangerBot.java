@@ -1,6 +1,7 @@
 package ranger;
 
 import bot.event.*;
+import counter.Counter;
 import event.Event;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -55,5 +56,7 @@ public class RangerBot {
         events.initialize(jda);
         Questionnaires questionnaires = Repository.getQuestionnaires();
         questionnaires.initialize();
+        Counter counter = Repository.getCounter();
+        counter.initialize();
     }
 }
