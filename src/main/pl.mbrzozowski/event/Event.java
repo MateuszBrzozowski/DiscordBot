@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -573,9 +572,14 @@ public class Event {
         connector.executeQuery(String.format(query, match.getChannelID(), match.getMessageID()));
     }
 
-    public void updateEmbed(@NotNull ButtonClickEvent event, int indexOfMatch) {
-        String messageID = event.getMessage().getId();
-        event.getChannel().retrieveMessageById(messageID).queue(message -> {
+    /**
+     * @param channelID    ID kanału na którym jest lista
+     * @param messageID    ID wiadomości w której jest lista
+     * @param indexOfMatch index na liscie eventu
+     */
+    public void updateEmbed(String channelID, String messageID, int indexOfMatch) {
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed mOld = embeds.get(0);
             List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
@@ -673,7 +677,7 @@ public class Event {
                 case SIGN_OUT:
                     if (userOnMainList(indexOfActiveMatch, userID) || userOnReserveList(indexOfActiveMatch, userID)) {
                         if (!threeHoursToEvent(indexOfActiveMatch)) {
-                            activeEvents.get(indexOfActiveMatch).removeFromMatch(userID);
+                            activeEvents.get(indexOfActiveMatch).removeFromEvent(userID);
                         } else {
                             EmbedInfo.youCantSingOut(userID, activeEvents.get(indexOfActiveMatch).getMessageID());
                             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
@@ -1171,5 +1175,16 @@ public class Event {
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String value = fields.get(2).getValue();
         return value;
+    }
+
+    public void removeUserFromEvent(String userID, String eventID) {
+        int index = getIndexActiveEvent(eventID);
+        if (index >= 0) {
+            activeEvents.get(index).removeFromEventManually(userID);
+            String channelID = activeEvents.get(index).getChannelID();
+            updateEmbed(channelID, eventID, index);
+        } else {
+            RangerLogger.info("Nie ma takiego eventu [" + eventID + "]");
+        }
     }
 }

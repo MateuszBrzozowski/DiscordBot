@@ -30,6 +30,8 @@ public class DeveloperCmd extends Proccess {
             getBotWriter().setActive(false);
         } else if (getBotWriter().isActive()) {
             getBotWriter().sendMsg(privateEvent.getMessage().getContentDisplay());
+        } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.REMOVE_USER_FROM_EVENT)) {
+            getEvents().removeUserFromEvent(message.getWords()[1], message.getWords()[2]);
         } else {
             getNextProccess().proccessMessage(message);
         }

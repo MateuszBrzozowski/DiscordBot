@@ -16,6 +16,7 @@ public class Commands {
     public static final String ENABLE_BUTTONS = PREFIX + "enable";
     public static final String ACCEPT_RECRUT = PREFIX + "accept";
     public static final String CANCEL_EVENT = PREFIX + "cancelEvent";
+    public static final String REMOVE_USER_FROM_EVENT = PREFIX + "removeUserFromEvent";
     public static final String NAME = PREFIX + "name";
     public static final String GENERATOR_HERE = PREFIX + "generatorHere";
     public static final String NEW_CHANNEL = PREFIX + "newChannel";

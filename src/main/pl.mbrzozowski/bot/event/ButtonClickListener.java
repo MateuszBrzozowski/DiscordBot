@@ -40,13 +40,13 @@ public class ButtonClickListener extends ListenerAdapter {
             } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
                 events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_OUT);
             }
-            events.updateEmbed(event, indexOfMatch);
+            events.updateEmbed(event.getChannel().getId(), event.getMessage().getId(), indexOfMatch);
         }
 
         Questionnaires questionnaires = Repository.getQuestionnaires();
         if (event.getComponentId().equalsIgnoreCase("end_" + event.getMessage().getId())) {
             event.deferEdit().queue();
-            questionnaires.end(event.getMessage().getId(),event.getChannel().getId(),event.getUser().getId());
+            questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
         }
     }
 

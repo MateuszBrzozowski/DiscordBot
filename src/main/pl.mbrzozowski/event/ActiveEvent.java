@@ -3,6 +3,8 @@ package event;
 import database.DBConnector;
 import embed.EmbedInfo;
 import helpers.RangerLogger;
+import helpers.RoleID;
+import helpers.Users;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -180,7 +182,7 @@ public class ActiveEvent {
     }
 
 
-    public void removeFromMatch(String userID) {
+    public void removeFromEvent(String userID) {
         String userName = SearchAndGetUserName(userID);
         removeFromMainList(userID);
         removeFromReserveList(userID);
@@ -188,6 +190,17 @@ public class ActiveEvent {
             RangerLogger.info(userName + " wypisał się z listy", getChannelName(channelID));
         } else {
             EmbedInfo.cantSignOut(userID);
+        }
+    }
+
+    public void removeFromEventManually(String userID) {
+        String userName = SearchAndGetUserName(userID);
+        if (userName != null) {
+            removeFromMainList(userID);
+            removeFromReserveList(userID);
+            RangerLogger.info(userName + " pomyślnie wykreślony z eventu przez " + Users.getUserNicknameFromID(RoleID.DEV_ID), getChannelName(channelID));
+        }else {
+            RangerLogger.info("Ups! Coś poszło nie tak. Nie ma takiego użytkownika na liście z której próbowano go wykreślić.");
         }
 
     }
