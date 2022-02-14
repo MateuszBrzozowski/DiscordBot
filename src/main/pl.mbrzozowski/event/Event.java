@@ -573,12 +573,12 @@ public class Event {
     }
 
     /**
-     * @param channelID    ID kanału na którym jest lista
-     * @param messageID    ID wiadomości w której jest lista
      * @param indexOfMatch index na liscie eventu
      */
-    public void updateEmbed(String channelID, String messageID, int indexOfMatch) {
+    public void updateEmbed(int indexOfMatch) {
         JDA jda = Repository.getJda();
+        String channelID = activeEvents.get(indexOfMatch).getChannelID();
+        String messageID = activeEvents.get(indexOfMatch).getMessageID();
         jda.getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed mOld = embeds.get(0);
@@ -1181,8 +1181,7 @@ public class Event {
         int index = getIndexActiveEvent(eventID);
         if (index >= 0) {
             activeEvents.get(index).removeFromEventManually(userID);
-            String channelID = activeEvents.get(index).getChannelID();
-            updateEmbed(channelID, eventID, index);
+            updateEmbed(index);
         } else {
             RangerLogger.info("Nie ma takiego eventu [" + eventID + "]");
         }

@@ -40,7 +40,7 @@ public class ButtonClickListener extends ListenerAdapter {
             } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
                 events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_OUT);
             }
-            events.updateEmbed(event.getChannel().getId(), event.getMessage().getId(), indexOfMatch);
+            events.updateEmbed(indexOfMatch);
         }
 
         Questionnaires questionnaires = Repository.getQuestionnaires();
