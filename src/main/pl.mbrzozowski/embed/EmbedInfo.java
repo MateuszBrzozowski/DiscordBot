@@ -179,7 +179,7 @@ public class EmbedInfo {
         if (recruits.isRecruitChannel(channel.getId())) {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
-            builder.setTitle("WYNIK REKRUTACJI - NEGATYWNY");
+            builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
@@ -198,7 +198,7 @@ public class EmbedInfo {
         if (recruits.isRecruitChannel(channel.getId())) {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.GREEN);
-            builder.setTitle("WYNIK REKRUTACJI - POZYTYWNY");
+            builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));

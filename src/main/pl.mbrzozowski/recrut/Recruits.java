@@ -73,6 +73,8 @@ public class Recruits {
 
     public void initialize(JDA jda) {
         startUpList(jda);
+        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
+        cleaner.clean();
     }
 
 
@@ -381,6 +383,15 @@ public class Recruits {
         thread.start();
     }
 
+    public void deleteChannel(String channelID) {
+        int indexOfRecrut = getIndexOfRecrut(channelID);
+        String userName = activeRecruits.get(indexOfRecrut).getUserName();
+        deleteChannelByID(channelID);
+        JDA jda = Repository.getJda();
+        jda.getTextChannelById(channelID).delete().reason("Rekrutacja zakończona, upłynął czas wyświetlania informacji").queue();
+        RangerLogger.info("Usunięto kanał rekruta [" + userName + "]");
+    }
+
     public void sendInfo(PrivateChannel privateChannel) {
         EmbedBuilder activeRecruitsBuilder = new EmbedBuilder();
         activeRecruitsBuilder.setColor(Color.RED);
@@ -409,10 +420,7 @@ public class Recruits {
             Role roleRecruit = jda.getRoleById(RoleID.RECRUT_ID);
             String recruitID = getRecruitIDFromChannelID(channel.getId());
             guild.addRoleToMember(recruitID, roleClanMember).queue();
-            guild.removeRoleFromMember(recruitID,roleRecruit).queue();
-            //Wysłanie informacji o przyjęciu nowego członka.
-//            TextChannel channelMemberOnly = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_MEMBER_ONLY);
-//            channelMemberOnly.sendMessage("Witamy nowego członka klanu <@" + recruitID + ">.").queue();
+            guild.removeRoleFromMember(recruitID, roleRecruit).queue();
         }
     }
 

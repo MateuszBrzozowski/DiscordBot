@@ -37,7 +37,6 @@ public class DBConnector {
     }
 
     public ResultSet executeSelect(String selectQuery) {
-//        connection = connect();
         try {
             Statement statement = connection.createStatement();
             return statement.executeQuery(selectQuery);
@@ -48,7 +47,6 @@ public class DBConnector {
     }
 
     public void executeQuery(String query) {
-//        connection = connect();
         try {
             Statement statement = connection.createStatement();
             statement.execute(query);
