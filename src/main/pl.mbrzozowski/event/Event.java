@@ -32,8 +32,6 @@ public class Event {
 
     private List<ActiveEvent> activeEvents = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    public static final String NAME_LIST = ":white_check_mark: Lista ";
-    public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
     private final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
@@ -42,6 +40,8 @@ public class Event {
     public void initialize(JDA jda) {
         getAllDatabase(jda);
         checkAllListOfEvents();
+        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel();
+        cleanerEventChannel.clean();
     }
 
 
@@ -407,13 +407,13 @@ public class Event {
         if (description != "") {
             builder.setDescription(description);
         }
-        builder.addField(":date: Kiedy", date, true);
+        builder.addField(EmbedSettings.WHEN_DATE, date, true);
         builder.addBlankField(true);
-        builder.addField(":clock930: Godzina", time, true);
+        builder.addField(EmbedSettings.WHEN_TIME, time, true);
         builder.addBlankField(false);
-        builder.addField(NAME_LIST + "(0)", ">>> -", true);
+        builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
-        builder.addField(NAME_LIST_RESERVE + "(0)", ">>> -", true);
+        builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + userName);
         try {
             textChannel.sendMessage(msg).embed(builder.build()).setActionRow(
@@ -589,10 +589,10 @@ public class Event {
 
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i == 4) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST + "(" + activeEvents.get(indexOfMatch).getMainList().size() + ")", ">>> " + mainList, true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST + "(" + activeEvents.get(indexOfMatch).getMainList().size() + ")", ">>> " + mainList, true);
                     fieldsNew.add(fieldNew);
                 } else if (i == 6) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(NAME_LIST_RESERVE + "(" + activeEvents.get(indexOfMatch).getReserveList().size() + ")", ">>> " + reserveList, true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST_RESERVE + "(" + activeEvents.get(indexOfMatch).getReserveList().size() + ")", ">>> " + reserveList, true);
                     fieldsNew.add(fieldNew);
                 } else {
                     fieldsNew.add(fieldsOld.get(i));

@@ -9,5 +9,9 @@ public class EmbedSettings {
     public static final String THUMBNAIL_FLAG_ENG = "https://cdn.icon-icons.com/icons2/1694/PNG/512/gbunitedkingdomflag_111699.png";
 
     public static final String RESULT = "WYNIK REKRUTACJI - ";
+    public static final String NAME_LIST = ":white_check_mark: Lista ";
+    public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
+    public static final String WHEN_DATE = ":date: Kiedy";
+    public static final String WHEN_TIME = ":clock930: Godzina";
 }
 

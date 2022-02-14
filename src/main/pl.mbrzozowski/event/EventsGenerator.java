@@ -287,13 +287,13 @@ public class EventsGenerator {
         if (description != null) {
             builder.setDescription(description + "\n");
         }
-        builder.addField(":date: Kiedy", date, true);
+        builder.addField(EmbedSettings.WHEN_DATE, date, true);
         builder.addBlankField(true);
-        builder.addField(":clock930: Godzina", time, true);
+        builder.addField(EmbedSettings.WHEN_TIME, time, true);
         builder.addBlankField(false);
-        builder.addField(Event.NAME_LIST + "(0)", ">>> -", true);
+        builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
-        builder.addField(Event.NAME_LIST_RESERVE + "(0)", ">>> -", true);
+        builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         privateChannel.sendMessage(builder.build()).queue();
     }
 
