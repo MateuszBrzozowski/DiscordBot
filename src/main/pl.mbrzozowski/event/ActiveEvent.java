@@ -3,8 +3,6 @@ package event;
 import database.DBConnector;
 import embed.EmbedInfo;
 import helpers.RangerLogger;
-import helpers.RoleID;
-import helpers.Users;
 import model.MemberMy;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -193,16 +191,17 @@ public class ActiveEvent {
         }
     }
 
-    public void removeFromEventManually(String userID) {
+    public boolean removeFromEventManually(String userID) {
         String userName = SearchAndGetUserName(userID);
         if (userName != null) {
             removeFromMainList(userID);
             removeFromReserveList(userID);
-            RangerLogger.info(userName + " pomyślnie wykreślony z eventu przez " + Users.getUserNicknameFromID(RoleID.DEV_ID), getChannelName(channelID));
-        }else {
-            RangerLogger.info("Ups! Coś poszło nie tak. Nie ma takiego użytkownika na liście z której próbowano go wykreślić.");
+            RangerLogger.info(userName + " pomyślnie wykreślony z eventu. - [" + name + "]");
+            return true;
+        } else {
+            RangerLogger.info("Nie ma użytkownika na liście z której próbowano go wykreślić. - [" + name + "]");
+            return false;
         }
-
     }
 
     private String getChannelName(String channelID) {

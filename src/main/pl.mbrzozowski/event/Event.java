@@ -1186,4 +1186,13 @@ public class Event {
             RangerLogger.info("Nie ma takiego eventu [" + eventID + "]");
         }
     }
+
+    public void removeUserFromAllEvents(String userID) {
+        for (int i = 0; i < activeEvents.size(); i++) {
+            boolean remove = activeEvents.get(i).removeFromEventManually(userID);
+            if (remove) {
+                updateEmbed(i);
+            }
+        }
+    }
 }
