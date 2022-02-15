@@ -13,5 +13,7 @@ public class EmbedSettings {
     public static final String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
     public static final String WHEN_DATE = ":date: Kiedy";
     public static final String WHEN_TIME = ":clock930: Godzina";
+    public static final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
+    public static final String RED_CIRCLE = "\uD83D\uDD34┋";
 }
 

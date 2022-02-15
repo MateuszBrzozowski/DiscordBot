@@ -22,7 +22,7 @@ public class ActiveEvent {
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String name;
     private String channelID;
-    private String messageID; //message with embed List is IDEVENT
+    private String messageID;
     private List<MemberMy> mainList = new ArrayList<>();
     private List<MemberMy> reserveList = new ArrayList<>();
 
@@ -141,15 +141,13 @@ public class ActiveEvent {
     }
 
     private void AddPlayerDB(MemberMy member, boolean b) {
-        String query = "INSERT INTO players (`userID`, `userName`, `mainList`, `event`) VALUES (\"%s\", \"%s\", %b, \"%s\")";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, member.getUserID(), member.getUserName(), b, messageID));
+        EventDatabase edb = new EventDatabase();
+        edb.addPlayer(member.getUserID(), member.getUserName(), b, messageID);
     }
 
     private void RemovePlayerDB(String userID) {
-        String query = "DELETE FROM players WHERE userID=\"%s\" AND event=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, userID, messageID));
+        EventDatabase edb = new EventDatabase();
+        edb.removePlayer(userID, messageID);
     }
 
     private boolean checkMemberOnMainList(MemberMy member) {

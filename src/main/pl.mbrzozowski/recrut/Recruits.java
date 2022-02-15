@@ -1,6 +1,5 @@
 package recrut;
 
-import database.DBConnector;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
@@ -71,12 +70,11 @@ public class Recruits {
         logger.info("Nowe podanie złożone.");
     }
 
-    public void initialize(JDA jda) {
-        startUpList(jda);
+    public void initialize() {
+        startUpList();
         CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
         cleaner.clean();
     }
-
 
     public void newPodanie(ButtonClickEvent event) {
         String userName = event.getUser().getName();
@@ -189,16 +187,16 @@ public class Recruits {
     }
 
     private void addUserToDataBase(String userID, String userName, String channelID) {
-        String query = "INSERT INTO `recruts` (`userID`, `userName`, `channelID`) VALUES (\"%s\",\"%s\",\"%s\")";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, userID, userName, channelID));
+        RecruitDatabase rdb = new RecruitDatabase();
+        rdb.addUser(userID, userName, channelID);
     }
 
-    private void startUpList(JDA jda) {
-        ResultSet resultSet = getAllRecrutFromDataBase();
-        List<Recrut> recrutsToDeleteDataBase = new ArrayList<>();
+    private void startUpList() {
+        RecruitDatabase rdb = new RecruitDatabase();
+        ResultSet resultSet = rdb.getAllRecrut();
+        List<Recrut> recruitsToDeleteDataBase = new ArrayList<>();
         this.activeRecruits.clear();
-        List<TextChannel> allTextChannels = jda.getTextChannels();
+        List<TextChannel> allTextChannels = Repository.getJda().getTextChannels();
 
         if (resultSet != null) {
             while (true) {
@@ -219,7 +217,7 @@ public class Recruits {
                         if (isActive) {
                             activeRecruits.add(recrut);
                         } else {
-                            recrutsToDeleteDataBase.add(recrut);
+                            recruitsToDeleteDataBase.add(recrut);
                         }
                     }
                 } catch (SQLException throwables) {
@@ -227,29 +225,9 @@ public class Recruits {
                 }
             }
         }
-
-        for (Recrut rc : recrutsToDeleteDataBase) {
+        for (Recrut rc : recruitsToDeleteDataBase) {
             RemoveRecrutFromDataBase(rc.getChannelID());
         }
-//        rangerLogger.Info(String.format("Aktywnych rekrutacji: %d",activeRecruits.size()));
-        logger.info("Aktywnych rekrutacji: {}", activeRecruits.size());
-    }
-
-    private ResultSet getAllRecrutFromDataBase() {
-        String query = "SELECT * FROM `recruts`";
-        DBConnector connector = new DBConnector();
-        ResultSet resultSet = null;
-        try {
-            resultSet = connector.executeSelect(query);
-        } catch (Exception e) {
-            logger.info("Brak tabeli recruts w bazie danych -> Tworze tabele.");
-            String queryCreate = "CREATE TABLE recruts(" +
-                    "userID VARCHAR(30) PRIMARY KEY," +
-                    "userName VARCHAR(30) NOT NULL," +
-                    "channelID VARCHAR(30) NOT NULL)";
-            connector.executeQuery(queryCreate);
-        }
-        return resultSet;
     }
 
     /**
@@ -304,9 +282,8 @@ public class Recruits {
     }
 
     private void RemoveRecrutFromDataBase(String channelID) {
-        String query = "DELETE FROM `recruts` WHERE channelID=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, channelID));
+        RecruitDatabase rdb = new RecruitDatabase();
+        rdb.removeUser(channelID);
     }
 
     public void closeChannel(GuildMessageReceivedEvent event) {

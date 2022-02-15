@@ -44,16 +44,16 @@ public class RangerBot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        initialize(jda);
+        initialize();
 
         logger.info("Bot uruchomiony.");
     }
 
-    private static void initialize(JDA jda) {
+    private static void initialize( ) {
         Recruits recruits = Repository.getRecruits();
-        recruits.initialize(jda);
+        recruits.initialize();
         Event events = Repository.getEvent();
-        events.initialize(jda);
+        events.initialize();
         Questionnaires questionnaires = Repository.getQuestionnaires();
         questionnaires.initialize();
         Counter counter = Repository.getCounter();

@@ -30,39 +30,30 @@ import java.util.*;
 
 public class Event {
 
-    private List<ActiveEvent> activeEvents = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private List<ActiveEvent> activeEvents = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
-    private final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
-    private final String RED_CIRCLE = "\uD83D\uDD34┋";
 
-    public void initialize(JDA jda) {
-        getAllDatabase(jda);
+    public void initialize() {
+        getAllDatabase();
         checkAllListOfEvents();
         CleanerEventChannel cleanerEventChannel = new CleanerEventChannel();
         cleanerEventChannel.clean();
     }
 
 
-    private void getAllDatabase(JDA jda) {
-        downladMatchesDB(jda);
-        downloadPlayersInMatechesDB();
-//        loggingInput();
+    private void getAllDatabase() {
+        EventDatabase eventDatabase = new EventDatabase();
+        downladMatchesDB(eventDatabase);
+        downloadPlayersInMatechesDB(eventDatabase);
     }
 
-    private void loggingInput() {
-        RangerLogger.info(String.format("Ilość aktywnych eventów: [%d]", activeEvents.size()));
-        for (ActiveEvent ae : activeEvents) {
-            RangerLogger.info(String.format("Event [%s] - Ilość zapisanych: [%d]", ae.getMessageID(), ae.getNumberOfSignIn()));
-        }
-    }
-
-    private void downladMatchesDB(JDA jda) {
-        ResultSet resultSet = getAllMatches();
+    private void downladMatchesDB(EventDatabase eventDatabase) {
+        ResultSet resultSet = eventDatabase.getAllEvents();
         List<ActiveEvent> matchesToDeleteDB = new ArrayList<>();
         this.activeEvents.clear();
-        List<TextChannel> textChannels = jda.getTextChannels();
+        List<TextChannel> textChannels = Repository.getJda().getTextChannels();
 
         if (resultSet != null) {
             while (true) {
@@ -97,8 +88,8 @@ public class Event {
         }
     }
 
-    private void downloadPlayersInMatechesDB() {
-        ResultSet resultSet = getAllPlayers();
+    private void downloadPlayersInMatechesDB(EventDatabase eventDatabase) {
+        ResultSet resultSet = eventDatabase.getAllPlayers();
         if (resultSet != null) {
             while (true) {
                 try {
@@ -189,54 +180,6 @@ public class Event {
             return true;
         }
         return false;
-    }
-
-    private void removeMatchDB(String messageID) {
-        String query = "DELETE FROM `event` WHERE msgID=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, messageID));
-    }
-
-    private void removeMemberFromEventDB(String messageID) {
-        String query = "DELETE FROM `players` WHERE event=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, messageID));
-    }
-
-    private ResultSet getAllMatches() {
-        String query = "SELECT * FROM `event`";
-        DBConnector connector = new DBConnector();
-        ResultSet resultSet = null;
-        try {
-            resultSet = connector.executeSelect(query);
-        } catch (Exception e) {
-            logger.info("Brak tabeli event w bazie danych -> Tworze tabele");
-            String queryCreate = "CREATE TABLE event(" +
-                    "msgID VARCHAR(30) PRIMARY KEY," +
-                    "channelID VARCHAR(30) NOT NULL)";
-            connector.executeQuery(queryCreate);
-        }
-        return resultSet;
-    }
-
-    private ResultSet getAllPlayers() {
-        String query = "SELECT * FROM `players`";
-        DBConnector connector = new DBConnector();
-        ResultSet resultSet = null;
-        try {
-            resultSet = connector.executeSelect(query);
-        } catch (Exception e) {
-            logger.info("Brak tabeli players w bazie danych -> Tworze tabele");
-            String queryCreate = "CREATE TABLE players(" +
-                    "id INT(9) UNSIGNED AUTO_INCREMENT PRIMARY KEY, " +
-                    "userID VARCHAR(30)," +
-                    "userName VARCHAR(30) NOT NULL," +
-                    "mainList BOOLEAN," +
-                    "event VARCHAR(30) NOT NULL," +
-                    "FOREIGN KEY (event) REFERENCES event(msgID))";
-            connector.executeQuery(queryCreate);
-        }
-        return resultSet;
     }
 
     public void createNewEventFrom3Data(String[] message, String userID) {
@@ -361,7 +304,7 @@ public class Event {
         for (Category cat : categories) {
             if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
                 if (whoVisable == 1 || whoVisable == 2) {
-                    guild.createTextChannel(GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat)
+                    guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat)
                             .addPermissionOverride(guild.getPublicRole(), null, permissions)
                             .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
                             .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
@@ -373,7 +316,7 @@ public class Event {
 
                             });
                 } else {
-                    guild.createTextChannel(GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
+                    guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + nameEvent + "-" + date + "-" + time, cat).queue(textChannel -> {
                         createList(creatorName, textChannel, nameEvent, date, time, description, 3);
                     });
                 }
@@ -567,9 +510,8 @@ public class Event {
     }
 
     private void addEventDB(ActiveEvent match) {
-        String query = "INSERT INTO `event` (`channelID`,`msgID`) VALUES (\"%s\",\"%s\")";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(query, match.getChannelID(), match.getMessageID()));
+        EventDatabase edb = new EventDatabase();
+        edb.addEvent(match.getChannelID(), match.getMessageID());
     }
 
     /**
@@ -749,7 +691,7 @@ public class Event {
     public void changeTitleRedCircle(String channelID) {
         JDA jda = Repository.getJda();
         String buffor = jda.getTextChannelById(channelID).getName();
-        buffor = buffor.replace(GREEN_CIRCLE, RED_CIRCLE);
+        buffor = buffor.replace(EmbedSettings.GREEN_CIRCLE, EmbedSettings.RED_CIRCLE);
         jda.getTextChannelById(channelID).getManager()
                 .setName(buffor)
                 .queue();
@@ -772,7 +714,7 @@ public class Event {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
-                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
+                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 2) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
@@ -823,7 +765,7 @@ public class Event {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
-                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
+                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 0) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", date, true);
@@ -874,7 +816,7 @@ public class Event {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                     return;
                 }
-                textChannel.getManager().setName(GREEN_CIRCLE + activeEvents.get(index).getName() + dataTime).queue();
+                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + dataTime).queue();
                 for (int i = 0; i < fieldsOld.size(); i++) {
                     if (i == 0) {
                         MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
@@ -973,12 +915,8 @@ public class Event {
     }
 
     private void removeEventDB(String messageID) {
-        String queryPlayers = "DELETE FROM players WHERE event=\"%s\"";
-        DBConnector connector = new DBConnector();
-        connector.executeQuery(String.format(queryPlayers, messageID));
-
-        String queryEvent = "DELETE FROM event WHERE msgID=\"%s\"";
-        connector.executeQuery(String.format(queryEvent, messageID));
+        EventDatabase edb = new EventDatabase();
+        edb.removeEvent(messageID);
     }
 
     public void deleteChannel(GuildMessageReceivedEvent event) {
@@ -1003,7 +941,7 @@ public class Event {
         List<Category> categories = guild.getCategories();
         for (Category c : categories) {
             if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
-                guild.createTextChannel(GREEN_CIRCLE + "nowy-event", c)
+                guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + "nowy-event", c)
                         .addPermissionOverride(guild.getPublicRole(), null, permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                         .queue(textChannel -> {
