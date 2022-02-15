@@ -3,6 +3,7 @@ package event;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
+import helpers.RangerLogger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -96,6 +97,7 @@ public class CleanerEventChannel {
 
     private void deleteChannel(String channelID) {
         JDA jda = Repository.getJda();
+        RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie - [" + jda.getTextChannelById(channelID).getName() + "]");
         jda.getTextChannelById(channelID).delete().reason("Upłynął czas utrzymywania kanału").queue();
     }
 }

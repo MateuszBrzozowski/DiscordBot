@@ -15,7 +15,8 @@ import java.util.List;
 public class CleanerRecruitChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
-    private List<Recrut> activeRecruits;
+    private final List<Recrut> activeRecruits;
+    private final int DELAY_IN_DAYS = 7;
 
     public CleanerRecruitChannel(List<Recrut> activeRecruits) {
         this.activeRecruits = activeRecruits;
@@ -41,7 +42,7 @@ public class CleanerRecruitChannel {
         if (indexMessage != -1) {
             OffsetDateTime timeCreated = messages.get(indexMessage).getTimeCreated();
             OffsetDateTime timeNow = OffsetDateTime.now();
-            timeCreated = timeCreated.plusDays(7);
+            timeCreated = timeCreated.plusDays(DELAY_IN_DAYS);
             if (timeCreated.isBefore(timeNow)) {
                 return true;
             }
