@@ -389,7 +389,7 @@ public class Recruits {
         deleteChannelByID(channelID);
         JDA jda = Repository.getJda();
         jda.getTextChannelById(channelID).delete().reason("Rekrutacja zakończona, upłynął czas wyświetlania informacji").queue();
-        RangerLogger.info("Usunięto kanał rekruta [" + userName + "]");
+        RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + userName + "]");
     }
 
     public void sendInfo(PrivateChannel privateChannel) {
@@ -413,14 +413,19 @@ public class Recruits {
 
     public void positiveResult(TextChannel channel) {
         if (isRecruitChannel(channel.getId())) {
-            //przypisanie roli ClanMember
             JDA jda = Repository.getJda();
             Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
             Role roleClanMember = jda.getRoleById(RoleID.CLAN_MEMBER_ID);
             Role roleRecruit = jda.getRoleById(RoleID.RECRUT_ID);
             String recruitID = getRecruitIDFromChannelID(channel.getId());
-            guild.addRoleToMember(recruitID, roleClanMember).queue();
-            guild.removeRoleFromMember(recruitID, roleRecruit).queue();
+            boolean hasRoleClanMember = Users.hasUserRole(recruitID, RoleID.CLAN_MEMBER_ID);
+            boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
+            if (!hasRoleClanMember) {
+                guild.addRoleToMember(recruitID, roleClanMember).queue();
+            }
+            if (hasRoleRecrut) {
+                guild.removeRoleFromMember(recruitID, roleRecruit).queue();
+            }
         }
     }
 
@@ -430,7 +435,10 @@ public class Recruits {
             Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
             Role roleRecrut = jda.getRoleById(RoleID.RECRUT_ID);
             String recruitID = getRecruitIDFromChannelID(channel.getId());
-            guild.removeRoleFromMember(recruitID, roleRecrut).queue();
+            boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
+            if (hasRoleRecrut) {
+                guild.removeRoleFromMember(recruitID, roleRecrut).queue();
+            }
         }
     }
 }
