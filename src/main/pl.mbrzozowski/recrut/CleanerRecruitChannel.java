@@ -2,6 +2,7 @@ package recrut;
 
 import embed.EmbedInfo;
 import embed.EmbedSettings;
+import model.CleanerChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -12,7 +13,7 @@ import ranger.Repository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public class CleanerRecruitChannel {
+public class CleanerRecruitChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
     private final List<Recrut> activeRecruits;

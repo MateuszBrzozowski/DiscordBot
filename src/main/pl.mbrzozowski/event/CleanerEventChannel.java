@@ -4,6 +4,7 @@ import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
+import model.CleanerChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -17,7 +18,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class CleanerEventChannel {
+public class CleanerEventChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
     private final int DELAY_IN_DAYS = 30;
