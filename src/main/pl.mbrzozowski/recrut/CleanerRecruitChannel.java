@@ -78,7 +78,7 @@ public class CleanerRecruitChannel implements CleanerChannel {
      */
     private boolean isEmbedTitle(MessageEmbed embed) {
         String title = embed.getTitle();
-        if (title != null) {
+        if (title != null && title.length() >= EmbedSettings.RESULT.length()) {
             title = title.substring(0, EmbedSettings.RESULT.length());
             if (title.equalsIgnoreCase(EmbedSettings.RESULT)) {
                 return true;
