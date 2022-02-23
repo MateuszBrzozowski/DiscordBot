@@ -83,13 +83,17 @@ public class CleanerEventChannel implements CleanerChannel {
             if (!fields.get(2).getName().equalsIgnoreCase(EmbedSettings.WHEN_TIME)) {
                 return false;
             }
-            String list = fields.get(4).getName().substring(0, EmbedSettings.NAME_LIST.length());
-            if (!list.equalsIgnoreCase(EmbedSettings.NAME_LIST)) {
-                return false;
+            if (fields.get(4).getName().length() >= EmbedSettings.NAME_LIST.length()) {
+                String list = fields.get(4).getName().substring(0, EmbedSettings.NAME_LIST.length());
+                if (!list.equalsIgnoreCase(EmbedSettings.NAME_LIST)) {
+                    return false;
+                }
             }
-            String reserve = fields.get(6).getName().substring(0, EmbedSettings.NAME_LIST_RESERVE.length());
-            if (!reserve.equalsIgnoreCase(EmbedSettings.NAME_LIST_RESERVE)) {
-                return false;
+            if (fields.get(6).getName().length() >= EmbedSettings.NAME_LIST_RESERVE.length()) {
+                String reserve = fields.get(6).getName().substring(0, EmbedSettings.NAME_LIST_RESERVE.length());
+                if (!reserve.equalsIgnoreCase(EmbedSettings.NAME_LIST_RESERVE)) {
+                    return false;
+                }
             }
             return true;
         }
