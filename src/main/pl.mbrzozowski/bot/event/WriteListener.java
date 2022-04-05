@@ -2,8 +2,6 @@ package bot.event;
 
 
 import bot.event.writing.*;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
-import ranger.Repository;
 
 public class WriteListener extends ListenerAdapter {
 
@@ -33,6 +30,7 @@ public class WriteListener extends ListenerAdapter {
         ChannelCmd channelCmd = new ChannelCmd(event);
         QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
+        EmbedSender embedSender = new EmbedSender(event);
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
         Roles roles = new Roles(event);
@@ -47,7 +45,8 @@ public class WriteListener extends ListenerAdapter {
         channelCmd.setNextProccess(questionnaire);
         questionnaire.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
-        checkUserAdmin.setNextProccess(recrutCmd);
+        checkUserAdmin.setNextProccess(embedSender);
+        embedSender.setNextProccess(recrutCmd);
 
         diceCmd.proccessMessage(msg);
     }

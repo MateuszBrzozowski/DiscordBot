@@ -3,6 +3,7 @@ package helpers;
 public class Commands {
 
 
+
     private static final String PREFIX = "!";
 
     public static final String NO_NOTIFI = "-noNotifi";
@@ -43,6 +44,7 @@ public class Commands {
     public static final String TOP_THREE = PREFIX + "top";
     public static final String TOP_TEN = PREFIX + "topTen";
     public static final String COUNT = PREFIX + "showMe";
+    public static final String SQUAD_SEEDERS_INFO = PREFIX + "squadSeedersInfo";;
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";

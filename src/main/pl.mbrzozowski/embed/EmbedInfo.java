@@ -7,8 +7,10 @@ import helpers.RangerLogger;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -489,6 +491,16 @@ public class EmbedInfo {
             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
             privateChannel.sendMessage(builder.build()).queue();
         });
+    }
+
+    public static void seedersRoleJoining(TextChannel channel){
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.GREEN);
+        builder.setTitle("SQUAD SERVER SEEDER");
+        builder.addField("", "Jeśli chcesz pomóc nam w rozkręcaniu naszego serwera. Możesz dodać sobię rolę klikając w poniższy przucisk by otrzymwać ping.", false);
+        builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping.", false);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        channel.sendMessage(builder.build()).setActionRow(Button.success("seedrole", "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
     }
 
     public static void sendHelloMessagePrivate(String userID) {

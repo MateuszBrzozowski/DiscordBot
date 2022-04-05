@@ -2,6 +2,7 @@ package bot.event;
 
 import event.ButtonClick;
 import event.Event;
+import helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +42,12 @@ public class ButtonClickListener extends ListenerAdapter {
                 events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_OUT);
             }
             events.updateEmbed(indexOfMatch);
+        }
+
+        if (event.getComponentId().equalsIgnoreCase("seedrole")) {
+            RoleEditor roleEditor = new RoleEditor();
+            roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
+            event.deferEdit().queue();
         }
 
         Questionnaires questionnaires = Repository.getQuestionnaires();

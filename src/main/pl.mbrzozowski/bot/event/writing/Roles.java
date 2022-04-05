@@ -1,6 +1,9 @@
 package bot.event.writing;
 
-import helpers.*;
+import bot.event.RoleEditor;
+import helpers.CategoryAndChannelID;
+import helpers.Commands;
+import helpers.Users;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -25,38 +28,22 @@ public class Roles extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        RoleEditor roleEditor = new RoleEditor();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.TARKOV)) {
-            Role roleTarkov = jda.getRoleById(RoleID.TARKOV);
             if (message.isClanMember()) {
-                boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.TARKOV);
-                if (!hasRole) {
-                    guild.addRoleToMember(userID, roleTarkov).queue();
-                    sendConfirmation(roleTarkov, true);
-                } else {
-                    guild.removeRoleFromMember(userID, roleTarkov).queue();
-                    sendConfirmation(roleTarkov, false);
-                }
+                roleEditor.addRemoveRole(userID, Commands.TARKOV);
             } else {
-                sendMessageNoClanMember(roleTarkov);
+                sendMessageNoClanMember();
             }
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.VIRTUAL_REALITY)) {
-            Role roleVR = jda.getRoleById(RoleID.VIRTUAL_REALITY);
-            boolean hasRole = Users.hasUserRole(event.getAuthor().getId(), RoleID.VIRTUAL_REALITY);
-            if (!hasRole) {
-                guild.addRoleToMember(userID, roleVR).queue();
-                sendConfirmation(roleVR, true);
-            } else {
-                guild.removeRoleFromMember(userID, roleVR).queue();
-                sendConfirmation(roleVR, false);
-            }
+            roleEditor.addRemoveRole(userID, Commands.VIRTUAL_REALITY);
         } else {
             getNextProccess().proccessMessage(message);
         }
     }
 
-    private void sendMessageNoClanMember(Role role) {
+    private void sendMessageNoClanMember() {
         event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Rola niedostępna.").queue();
-        RangerLogger.info(role.getName() + " niedostępna dla " + Users.getUserNicknameFromID(userID) + " --- brak roli *Clan Member*");
     }
 
     /**

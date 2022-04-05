@@ -32,10 +32,10 @@ public class CleanerEventChannel implements CleanerChannel {
                 int isActive = event.isActiveMatchChannelID(textChannels.get(i).getId());
                 if (isActive == -1) {
                     textChannels.get(i).retrievePinnedMessages().queue(messages -> {
-                        if (isTimeToRemove(messages)) {
-                            String channelID = messages.get(0).getChannel().getId();
-                            deleteChannel(channelID);
-                        }
+//                        if (isTimeToRemove(messages)) {
+//                            String channelID = messages.get(0).getChannel().getId();
+//                            deleteChannel(channelID);
+//                        }
                     });
                 }
             }

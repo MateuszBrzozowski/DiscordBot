@@ -19,5 +19,6 @@ public class RoleID {
     public static final String RN_ID = "748800245575712910";
     public static final String TARKOV = "925864474034974780";
     public static final String VIRTUAL_REALITY = "884377874575007764";
+    public static final String SEED_ID = "960892010452103178";
 
 }
