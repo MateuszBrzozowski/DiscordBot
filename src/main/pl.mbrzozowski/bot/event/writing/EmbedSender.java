@@ -15,6 +15,7 @@ public class EmbedSender extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.SQUAD_SEEDERS_INFO)) {
+            guildEvent.getMessage().delete().submit();
             EmbedInfo.seedersRoleJoining(guildEvent.getChannel());
         } else {
             getNextProccess().proccessMessage(message);
