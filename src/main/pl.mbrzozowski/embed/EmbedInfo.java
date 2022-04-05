@@ -523,4 +523,32 @@ public class EmbedInfo {
             privateChannel.sendMessage(builderEng.build()).queue();
         });
     }
+
+    public static void serverService(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle("Server Rangers Polska - Create Ticket");
+        builder.setDescription("Jeśli potrzebujesz pomocy admina naszych serwerów, " +
+                "kliknij w odpowiedni przycisk poniżej.\n\n" +
+                "If you need help of Rangers Polska Servers Admins, please react with the correct button below.");
+        builder.addField("", "", false);
+        channel.sendMessage(builder.build()).setActionRow(
+                Button.primary("Report", "Report Player"),
+                Button.primary("Unban", "Unban appeal"),
+                Button.primary("Contact", "Contact With Admin")).queue();
+    }
+
+    public static void cantCreateServerServiceChannel(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            builder.setColor(Color.RED);
+            builder.setTitle("Nie możesz utowrzyć kanału.\nYou can't create a ticket.");
+            builder.setDescription("Prawdopodobnie masz już aktywny bilet. Jeśli go nie widzisz, skontaktuj się bezpośrednio z Adminem serwera.\n\n" +
+                    "Probably you have active ticket. If you can't see channel, please contact directly with Server Admin.");
+            privateChannel.sendMessage(builder.build()).queue();
+        });
+    }
 }

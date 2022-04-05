@@ -1,13 +1,12 @@
 package event;
 
-import database.DBConnector;
 import embed.EmbedHelp;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import event.reminder.CreateReminder;
 import event.reminder.Timers;
 import helpers.*;
-import model.MemberMy;
+import model.MemberOfServer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -99,7 +98,7 @@ public class Event {
                         String userName = resultSet.getString("userName");
                         Boolean mainList = resultSet.getBoolean("mainList");
                         String event = resultSet.getString("event");
-                        MemberMy memberMy = new MemberMy(userID, userName);
+                        MemberOfServer memberMy = new MemberOfServer(userID, userName);
                         for (ActiveEvent m : activeEvents) {
                             if (m.getMessageID().equalsIgnoreCase(event)) {
                                 if (mainList) {
@@ -597,7 +596,7 @@ public class Event {
         return -1;
     }
 
-    public void buttonClick(ButtonClickEvent event, int indexOfActiveMatch, ButtonClick buttonClick) {
+    public void buttonClick(ButtonClickEvent event, int indexOfActiveMatch, ButtonClickType buttonClick) {
         String userName = Users.getUserNicknameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
         if (eventIsAfter(indexOfActiveMatch)) {
@@ -992,11 +991,11 @@ public class Event {
         return false;
     }
 
-    public List<MemberMy> getMainList(int indexOfEvent) {
+    public List<MemberOfServer> getMainList(int indexOfEvent) {
         return activeEvents.get(indexOfEvent).getMainList();
     }
 
-    public List<MemberMy> getReserveList(int indexOfEvent) {
+    public List<MemberOfServer> getReserveList(int indexOfEvent) {
         return activeEvents.get(indexOfEvent).getReserveList();
     }
 
@@ -1027,8 +1026,8 @@ public class Event {
         activeEventsBuilder.addField("Aktywnych eventów", String.valueOf(activeEvents.size()), false);
         privateChannel.sendMessage(activeEventsBuilder.build()).queue();
         for (ActiveEvent ae : activeEvents) {
-            List<MemberMy> mainList = ae.getMainList();
-            List<MemberMy> reserveList = ae.getReserveList();
+            List<MemberOfServer> mainList = ae.getMainList();
+            List<MemberOfServer> reserveList = ae.getReserveList();
             JDA jda = Repository.getJda();
             String channelName = jda.getTextChannelById(ae.getChannelID()).getName();
             EmbedBuilder builder = new EmbedBuilder();
@@ -1040,12 +1039,12 @@ public class Event {
             builder.addField("Główna lista", String.valueOf(mainList.size()), true);
             builder.addField("Rezerwowa lista", String.valueOf(reserveList.size()), true);
             String stringMainList = "";
-            for (MemberMy m : mainList) {
+            for (MemberOfServer m : mainList) {
                 stringMainList += m.getUserName() + ", ";
             }
             builder.addField("Główna lista", stringMainList, false);
             String stringReserveList = "";
-            for (MemberMy m : reserveList) {
+            for (MemberOfServer m : reserveList) {
                 stringReserveList += m.getUserName() + ", ";
             }
             builder.addField("Rezerwowa lista", stringReserveList, false);

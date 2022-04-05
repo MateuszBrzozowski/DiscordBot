@@ -1,9 +1,8 @@
 package event;
 
-import database.DBConnector;
 import embed.EmbedInfo;
 import helpers.RangerLogger;
-import model.MemberMy;
+import model.MemberOfServer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -23,8 +22,8 @@ public class ActiveEvent {
     private String name;
     private String channelID;
     private String messageID;
-    private List<MemberMy> mainList = new ArrayList<>();
-    private List<MemberMy> reserveList = new ArrayList<>();
+    private List<MemberOfServer> mainList = new ArrayList<>();
+    private List<MemberOfServer> reserveList = new ArrayList<>();
 
     /**
      * @param channelID ID kanału na którym jest lista
@@ -62,11 +61,11 @@ public class ActiveEvent {
         return messageID;
     }
 
-    public List<MemberMy> getMainList() {
+    public List<MemberOfServer> getMainList() {
         return mainList;
     }
 
-    public List<MemberMy> getReserveList() {
+    public List<MemberOfServer> getReserveList() {
         return reserveList;
     }
 
@@ -74,7 +73,7 @@ public class ActiveEvent {
         return name;
     }
 
-    public void addToMainList(MemberMy member, ButtonClickEvent event) {
+    public void addToMainList(MemberOfServer member, ButtonClickEvent event) {
         if (checkMemberOnMainList(member)) {
             EmbedInfo.cantSignIn(event.getUser().getId());
         } else {
@@ -86,11 +85,11 @@ public class ActiveEvent {
     }
 
     public void addToMainList(String userID, String userName, ButtonClickEvent event) {
-        MemberMy memberMy = new MemberMy(userID, userName);
+        MemberOfServer memberMy = new MemberOfServer(userID, userName);
         addToMainList(memberMy, event);
     }
 
-    public void addToReserveList(MemberMy member, ButtonClickEvent event) {
+    public void addToReserveList(MemberOfServer member, ButtonClickEvent event) {
         if (checkMemberOnReserveList(member)) {
             EmbedInfo.cantSignInReserve(event.getUser().getId());
         } else {
@@ -103,7 +102,7 @@ public class ActiveEvent {
     }
 
     public void addToReserveList(String userID, String userName, ButtonClickEvent event) {
-        MemberMy memberMy = new MemberMy(userID, userName);
+        MemberOfServer memberMy = new MemberOfServer(userID, userName);
         addToReserveList(memberMy, event);
     }
 
@@ -131,7 +130,7 @@ public class ActiveEvent {
         }
     }
 
-    private boolean checkMemberOnReserveList(MemberMy member) {
+    private boolean checkMemberOnReserveList(MemberOfServer member) {
         for (int i = 0; i < reserveList.size(); i++) {
             if (reserveList.get(i).getUserID().equalsIgnoreCase(member.getUserID())) {
                 return true;
@@ -140,7 +139,7 @@ public class ActiveEvent {
         return false;
     }
 
-    private void AddPlayerDB(MemberMy member, boolean b) {
+    private void AddPlayerDB(MemberOfServer member, boolean b) {
         EventDatabase edb = new EventDatabase();
         edb.addPlayer(member.getUserID(), member.getUserName(), b, messageID);
     }
@@ -150,7 +149,7 @@ public class ActiveEvent {
         edb.removePlayer(userID, messageID);
     }
 
-    private boolean checkMemberOnMainList(MemberMy member) {
+    private boolean checkMemberOnMainList(MemberOfServer member) {
         for (int i = 0; i < mainList.size(); i++) {
             if (mainList.get(i).getUserID().equalsIgnoreCase(member.getUserID())) {
                 return true;
@@ -214,12 +213,12 @@ public class ActiveEvent {
     }
 
     private String SearchAndGetUserName(String userID) {
-        for (MemberMy m : mainList) {
+        for (MemberOfServer m : mainList) {
             if (m.getUserID().equalsIgnoreCase(userID)) {
                 return m.getUserName();
             }
         }
-        for (MemberMy m : reserveList) {
+        for (MemberOfServer m : reserveList) {
             if (m.getUserID().equalsIgnoreCase(userID)) {
                 return m.getUserName();
             }
@@ -251,11 +250,11 @@ public class ActiveEvent {
         }
     }
 
-    public void addToMainList(MemberMy memberMy) {
+    public void addToMainList(MemberOfServer memberMy) {
         mainList.add(memberMy);
     }
 
-    public void addToReserveList(MemberMy memberMy) {
+    public void addToReserveList(MemberOfServer memberMy) {
         reserveList.add(memberMy);
     }
 

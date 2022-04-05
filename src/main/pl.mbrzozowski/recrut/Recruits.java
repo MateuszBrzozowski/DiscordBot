@@ -6,6 +6,7 @@ import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
 import helpers.RoleID;
 import helpers.Users;
+import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -28,8 +29,8 @@ import java.util.List;
 
 public class Recruits {
 
-    private List<Recrut> activeRecruits = new ArrayList<>();
-    private List<Recrut> thinkingRecruits = new ArrayList<>();
+    private List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
+    private List<MemberWithPrivateChannel> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
     private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
@@ -79,7 +80,6 @@ public class Recruits {
     public void newPodanie(ButtonClickEvent event) {
         String userName = event.getUser().getName();
         String userID = event.getUser().getId();
-        event.deferEdit().queue();
         if (!checkUser(userID)) {
             if (!checkThinkingUser(userID)) {
                 if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
@@ -93,7 +93,7 @@ public class Recruits {
 
     private void confirmMessage(String userID, String userName) {
         rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
-        thinkingRecruits.add(new Recrut(userID, userName));
+        thinkingRecruits.add(new MemberWithPrivateChannel(userID, userName));
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
@@ -181,7 +181,7 @@ public class Recruits {
     }
 
     private void addUserToList(String userID, String userName, String channelID) {
-        Recrut member = new Recrut(userID, userName, channelID);
+        MemberWithPrivateChannel member = new MemberWithPrivateChannel(userID, userName, channelID);
         activeRecruits.add(member);
         addUserToDataBase(userID, userName, channelID);
     }
@@ -194,7 +194,7 @@ public class Recruits {
     private void startUpList() {
         RecruitDatabase rdb = new RecruitDatabase();
         ResultSet resultSet = rdb.getAllRecrut();
-        List<Recrut> recruitsToDeleteDataBase = new ArrayList<>();
+        List<MemberWithPrivateChannel> recruitsToDeleteDataBase = new ArrayList<>();
         this.activeRecruits.clear();
         List<TextChannel> allTextChannels = Repository.getJda().getTextChannels();
 
@@ -206,7 +206,7 @@ public class Recruits {
                         String userID = resultSet.getString("userID");
                         String userName = resultSet.getString("userName");
                         String channelID = resultSet.getString("channelID");
-                        Recrut recrut = new Recrut(userID, userName, channelID);
+                        MemberWithPrivateChannel recrut = new MemberWithPrivateChannel(userID, userName, channelID);
                         boolean isActive = false;
                         for (TextChannel tc : allTextChannels) {
                             if (tc.getId().equalsIgnoreCase(channelID)) {
@@ -225,7 +225,7 @@ public class Recruits {
                 }
             }
         }
-        for (Recrut rc : recruitsToDeleteDataBase) {
+        for (MemberWithPrivateChannel rc : recruitsToDeleteDataBase) {
             RemoveRecrutFromDataBase(rc.getChannelID());
         }
     }
@@ -235,7 +235,7 @@ public class Recruits {
      * @return Zwraca true jeśli użytkownik ma otwarty kanał rekrutacji. W innym przypadku zwraca false.
      */
     private boolean checkUser(String userID) {
-        for (Recrut member : activeRecruits) {
+        for (MemberWithPrivateChannel member : activeRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
             }
@@ -249,7 +249,7 @@ public class Recruits {
      * zwraca false.
      */
     private boolean checkThinkingUser(String userID) {
-        for (Recrut member : thinkingRecruits) {
+        for (MemberWithPrivateChannel member : thinkingRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
             }
@@ -327,7 +327,7 @@ public class Recruits {
     }
 
     public boolean isRecruitChannel(String channelID) {
-        for (Recrut ar : activeRecruits) {
+        for (MemberWithPrivateChannel ar : activeRecruits) {
             if (ar.getChannelID().equalsIgnoreCase(channelID)) {
                 return true;
             }
@@ -336,7 +336,7 @@ public class Recruits {
     }
 
     public String getRecruitIDFromChannelID(String channelID) {
-        for (Recrut ar : activeRecruits) {
+        for (MemberWithPrivateChannel ar : activeRecruits) {
             if (ar.getChannelID().equalsIgnoreCase(channelID)) {
                 return ar.getUserID();
             }
@@ -375,7 +375,7 @@ public class Recruits {
         activeRecruitsBuilder.setTitle("Rekruci");
         activeRecruitsBuilder.addField("Aktywnych rekrutacji", String.valueOf(activeRecruits.size()), false);
         privateChannel.sendMessage(activeRecruitsBuilder.build()).queue();
-        for (Recrut r : activeRecruits) {
+        for (MemberWithPrivateChannel r : activeRecruits) {
             JDA jda = Repository.getJda();
             String channelName = jda.getTextChannelById(r.getChannelID()).getName();
             EmbedBuilder builder = new EmbedBuilder();

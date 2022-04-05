@@ -3,6 +3,7 @@ package recrut;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import model.CleanerChannel;
+import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -16,10 +17,10 @@ import java.util.List;
 public class CleanerRecruitChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
-    private final List<Recrut> activeRecruits;
+    private final List<MemberWithPrivateChannel> activeRecruits;
     private final int DELAY_IN_DAYS = 7;
 
-    public CleanerRecruitChannel(List<Recrut> activeRecruits) {
+    public CleanerRecruitChannel(List<MemberWithPrivateChannel> activeRecruits) {
         this.activeRecruits = activeRecruits;
     }
 

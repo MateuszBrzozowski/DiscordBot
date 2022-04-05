@@ -34,6 +34,7 @@ public class WriteListener extends ListenerAdapter {
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
         Roles roles = new Roles(event);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
 
         diceCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(roles);
@@ -45,7 +46,8 @@ public class WriteListener extends ListenerAdapter {
         channelCmd.setNextProccess(questionnaire);
         questionnaire.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
-        checkUserAdmin.setNextProccess(embedSender);
+        checkUserAdmin.setNextProccess(serverServiceCmd);
+        serverServiceCmd.setNextProccess(embedSender);
         embedSender.setNextProccess(recrutCmd);
 
         diceCmd.proccessMessage(msg);

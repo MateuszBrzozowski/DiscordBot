@@ -1,6 +1,6 @@
 package bot.event;
 
-import event.ButtonClick;
+import event.ButtonClickType;
 import event.Event;
 import helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -12,50 +12,57 @@ import questionnaire.Questionnaires;
 import ranger.RangerBot;
 import ranger.Repository;
 import recrut.Recruits;
+import server.service.ServerService;
 
 public class ButtonClickListener extends ListenerAdapter {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
+    private final Event events = Repository.getEvent();
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
         Recruits recrut = Repository.getRecruits();
-        if (event.getComponentId().equalsIgnoreCase("newRecrut")) {
+        Questionnaires questionnaires = Repository.getQuestionnaires();
+        ServerService serverService = Repository.getServerService();
+        int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
+        boolean isIDCorrect = true;
+
+        if (indexOfMatch >= 0) {
+            eventsButtonClick(event, indexOfMatch);
+        } else if (event.getComponentId().equalsIgnoreCase("newRecrut")) {
             recrut.newPodanie(event);
         } else if (event.getComponentId().equalsIgnoreCase("recrutY")) {
-            event.deferEdit().queue();
             recrut.confirm(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
         } else if (event.getComponentId().equalsIgnoreCase("recrutN")) {
-            event.deferEdit().queue();
             recrut.cancel(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
-        }
-
-        Event events = Repository.getEvent();
-        int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
-        if (indexOfMatch >= 0) {
-            event.deferEdit().queue();
-            if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
-                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_IN);
-            } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
-                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_IN_RESERVE);
-            } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
-                events.buttonClick(event, indexOfMatch, ButtonClick.SIGN_OUT);
-            }
-            events.updateEmbed(indexOfMatch);
-        }
-
-        if (event.getComponentId().equalsIgnoreCase("seedrole")) {
+        } else if (event.getComponentId().equalsIgnoreCase("end_" + event.getMessage().getId())) {
+            questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
+        } else if (event.getComponentId().equalsIgnoreCase("Report")) {
+            serverService.buttonClick(event, ButtonClickType.REPORT);
+        } else if (event.getComponentId().equalsIgnoreCase("Unban")) {
+            serverService.buttonClick(event, ButtonClickType.UNBAN);
+        } else if (event.getComponentId().equalsIgnoreCase("Contact")) {
+            serverService.buttonClick(event, ButtonClickType.CONTACT);
+        } else if (event.getComponentId().equalsIgnoreCase("seedrole")) {
             RoleEditor roleEditor = new RoleEditor();
             roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
-            event.deferEdit().queue();
+        } else {
+            isIDCorrect = false;
         }
 
-        Questionnaires questionnaires = Repository.getQuestionnaires();
-        if (event.getComponentId().equalsIgnoreCase("end_" + event.getMessage().getId())) {
+        if (isIDCorrect){
             event.deferEdit().queue();
-            questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
         }
     }
 
-
+    private void eventsButtonClick(@NotNull ButtonClickEvent event, int indexOfMatch) {
+        if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
+            events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN);
+        } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
+            events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN_RESERVE);
+        } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
+            events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_OUT);
+        }
+        events.updateEmbed(indexOfMatch);
+    }
 }

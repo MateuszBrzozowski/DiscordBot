@@ -4,7 +4,7 @@ import embed.EmbedSettings;
 import event.Event;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
-import model.MemberMy;
+import model.MemberOfServer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import org.slf4j.Logger;
@@ -40,8 +40,8 @@ public class Reminder extends TimerTask {
         int indexOfEvent = event.getIndexActiveEvent(eventID);
         if (indexOfEvent >= 0) {
             UsersReminderOFF reminderOFF = new UsersReminderOFF();
-            List<MemberMy> mainList = event.getMainList(indexOfEvent);
-            List<MemberMy> reserveList = event.getReserveList(indexOfEvent);
+            List<MemberOfServer> mainList = event.getMainList(indexOfEvent);
+            List<MemberOfServer> reserveList = event.getReserveList(indexOfEvent);
             RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam przypomnienia.", eventID);
             String linkToEvent = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
             String dateTimeEvent = event.getDateAndTimeFromEmbed(eventID);
