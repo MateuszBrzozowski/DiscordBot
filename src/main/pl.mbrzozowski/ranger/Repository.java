@@ -10,6 +10,7 @@ import model.DiceGames;
 import net.dv8tion.jda.api.JDA;
 import questionnaire.Questionnaires;
 import recrut.Recruits;
+import server.service.ServerService;
 
 public class Repository {
 
@@ -22,6 +23,7 @@ public class Repository {
     private static final Questionnaires questionnaires = new Questionnaires();
     private static final BotWriter botWriter = new BotWriter();
     private static final Counter counter = new Counter();
+    private static final ServerService serverService = new ServerService();
     private static JDA jda;
 
     public static Event getEvent() {
@@ -66,5 +68,9 @@ public class Repository {
 
     public static Counter getCounter() {
         return counter;
+    }
+
+    public static ServerService getServerService() {
+        return serverService;
     }
 }

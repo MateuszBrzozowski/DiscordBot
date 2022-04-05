@@ -1,17 +1,13 @@
 package model;
 
-public class MemberMy {
+public class MemberOfServer {
 
     private String userID;
     private String userName;
 
-    public MemberMy(String userID, String userName) {
+    public MemberOfServer(String userID, String userName) {
         this.userName = userName;
         this.userID = userID;
-    }
-
-    public String getUserName() {
-        return userName;
     }
 
     public String getUserNameWithoutRangers() {
@@ -28,7 +24,7 @@ public class MemberMy {
         return userID;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public String getUserName() {
+        return userName;
     }
 }

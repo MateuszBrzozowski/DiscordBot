@@ -43,6 +43,7 @@ public class Commands {
     public static final String TOP_THREE = PREFIX + "top";
     public static final String TOP_TEN = PREFIX + "topTen";
     public static final String COUNT = PREFIX + "showMe";
+    public static final String EMBED_SERVER_SERVICE = PREFIX + "ServerService";
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";
