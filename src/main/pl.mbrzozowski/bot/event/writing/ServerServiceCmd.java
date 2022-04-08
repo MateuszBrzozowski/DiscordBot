@@ -18,11 +18,8 @@ public class ServerServiceCmd extends Proccess {
         ServerService serverService = Repository.getServerService();
         boolean isChannelSS = serverService.isChannelOnList(channelID);
         if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE)) {
+            guildEvent.getMessage().delete().submit();
             EmbedInfo.serverService(guildEvent.getChannel());
-//            TextChannel channel = guildEvent.getChannel();
-//            EmbedInfo.sendEmbedUnban(channel);
-//            EmbedInfo.sendEmbedReport(channel);
-//            EmbedInfo.sendEmbedContact(channel);
         } else if (isChannelSS && message.getWords()[0].equalsIgnoreCase(Commands.CLOSE)) {
             guildEvent.getMessage().delete().submit();
             serverService.closeChannel(guildEvent);

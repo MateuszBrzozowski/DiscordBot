@@ -1,5 +1,6 @@
 package bot.event;
 
+import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -42,11 +43,17 @@ public class ButtonClickListener extends ListenerAdapter {
             serverService.buttonClick(event, ButtonClickType.UNBAN);
         } else if (event.getComponentId().equalsIgnoreCase("Contact")) {
             serverService.buttonClick(event, ButtonClickType.CONTACT);
-        }else {
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannel")) {
+            EmbedInfo.confirmRemoveChannel(event.getTextChannel());
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannelYes")) {
+            serverService.removeChannel(event);
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannelNo")) {
+            event.getMessage().delete().queue();
+        } else {
             isIDCorrect = false;
         }
 
-        if (isIDCorrect){
+        if (isIDCorrect) {
             event.deferEdit().queue();
         }
     }

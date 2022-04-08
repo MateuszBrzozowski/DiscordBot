@@ -5,7 +5,6 @@ import embed.EmbedSettings;
 import event.ButtonClickType;
 import helpers.CategoryAndChannelID;
 import model.MemberServerService;
-import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -62,6 +61,28 @@ public class ServerService {
         EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
     }
 
+    public void removeChannel(ButtonClickEvent event) {
+        EmbedInfo.removedChannel(event.getTextChannel());
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            event.getGuild().getTextChannelById(event.getChannel().getId()).delete().queue();
+        });
+        removeUserFromList(event.getChannel().getId());
+        thread.start();
+    }
+
+    private void removeUserFromList(String channelID) {
+        for (int i = 0; i < reports.size(); i++) {
+            if (reports.get(i).getChannelID().equalsIgnoreCase(channelID)) {
+                reports.remove(i);
+            }
+        }
+    }
+
     private String getUserID(String channelID) {
         for (MemberServerService r : reports) {
             if (r.getChannelID().equalsIgnoreCase(channelID)) {
@@ -75,7 +96,7 @@ public class ServerService {
         JDA jda = Repository.getJda();
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RANGER);
-        String channelName = channelNamePrefix(buttonType) + userName;
+        String channelName = channelNamePrefix(buttonType) + "┋" + userName;
         guild.createTextChannel(channelName, category)
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
