@@ -15,9 +15,9 @@ public class EmbedSettings {
     public static final String WHEN_TIME = ":clock930: Godzina";
     public static final String GREEN_CIRCLE = "\uD83D\uDFE2┋";
     public static final String RED_CIRCLE = "\uD83D\uDD34┋";
-    public static final String BOOK_RED = "\uD83D\uDCD5┋";
-    public static final String BOOK_BLUE = "\uD83D\uDCD8┋";
-    public static final String BOOK_GREEN = "\uD83D\uDCD7┋";
+    public static final String BOOK_RED = "\uD83D\uDCD5";
+    public static final String BOOK_BLUE = "\uD83D\uDCD8";
+    public static final String BOOK_GREEN = "\uD83D\uDCD7";
     public static final String BIN = "\uD83D\uDDD1";
 }
 

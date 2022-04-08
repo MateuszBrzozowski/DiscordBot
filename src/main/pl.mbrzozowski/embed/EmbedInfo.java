@@ -4,7 +4,6 @@ import event.Event;
 import event.EventChanges;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
-import helpers.RoleID;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -141,7 +140,17 @@ public class EmbedInfo {
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         channel.sendMessage(builder.build())
-                .setActionRow(Button.danger("remove","Usuń kanał").withEmoji(Emoji.fromUnicode(EmbedSettings.BIN)))
+                .setActionRow(Button.danger("removeChannel", "Usuń kanał"))
+                .queue();
+    }
+
+    public static void confirmRemoveChannel(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setTitle("Potwierdź czy chcesz usunąć kanał?");
+        channel.sendMessage(builder.build())
+                .setActionRow(Button.success("removeChannelYes", "Tak"),
+                        Button.danger("removeChannelNo", "Nie"))
                 .queue();
     }
 
@@ -167,7 +176,7 @@ public class EmbedInfo {
      */
     public static void removedChannel(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
+        builder.setColor(Color.GREEN);
         builder.setTitle("Kanał usunięty.");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         channel.sendMessage(builder.build()).queue();
@@ -527,21 +536,31 @@ public class EmbedInfo {
         });
     }
 
+    /**
+     * Formatka z opisem jak stworzyć ticket.
+     *
+     * @param channel Kanał na którym wstawiana jest formatka.
+     */
     public static void serverService(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle("Rangers Polska Servers - Create Ticket :ticket:");
-        builder.addField("","Jeśli potrzebujesz pomocy admina naszych serwerów, " +
-                "kliknij w odpowiedni przycisk poniżej.",false);
-        builder.addField("--------------------","If you need help of Rangers Polska Servers Admins, " +
-                "please react with the correct button below.",false);
+        builder.addField("", "Jeśli potrzebujesz pomocy admina naszych serwerów, " +
+                "kliknij w odpowiedni przycisk poniżej.", false);
+        builder.addField("--------------------", "If you need help of Rangers Polska Servers Admins, " +
+                "please react with the correct button below.", false);
         channel.sendMessage(builder.build()).setActionRow(
                 Button.primary("Report", "Report Player").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
                 Button.primary("Unban", "Unban appeal").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
                 Button.primary("Contact", "Contact With Admin").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
     }
 
+    /**
+     * Wysyła do użytkownika prywatną wiadomość, że nie może utworzyć nowego ticketu
+     *
+     * @param userID ID użytkownika do którego wysyłana jest prywatna wiadomość
+     */
     public static void cantCreateServerServiceChannel(String userID) {
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
@@ -555,47 +574,62 @@ public class EmbedInfo {
         });
     }
 
+    /**
+     * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
+     *
+     * @param channel Kanał na którym wysyłana jest wiadomość
+     */
     public static void sendEmbedReport(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.RED);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle("Report player");
-        builder.addField("","Zgłoś gracza według poniższego formularza.\n\n" +
+        builder.addField("", "Zgłoś gracza według poniższego formularza.\n\n" +
                 "1. Podaj nick.\n" +
                 "2. Opisz sytuację i podaj powód dlaczego zgłaszasz gracza.\n" +
                 "3. Podaj nazwę serwera.\n" +
-                "4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).",false);
-        builder.addField("--------------------","Report player according to the form below.\n\n" +
+                "4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).", false);
+        builder.addField("--------------------", "Report player according to the form below.\n\n" +
                 "1. Player nick.\n" +
                 "2. Describe of bad behaviour.\n" +
                 "3. Server name.\n" +
-                "4. Add evidence. Screenshot or video link (e.g. Youtube).",false);
+                "4. Add evidence. Screenshot or video link (e.g. Youtube).", false);
         channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
     }
 
+    /**
+     * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
+     *
+     * @param channel Kanał na którym wysyłana jest wiadomość
+     */
     public static void sendEmbedUnban(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLUE);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle("Unban player");
-        builder.addField("","Napisz tutaj jeżeli chcesz odowłać swój ban.\n" +
+        builder.addField("", "Napisz tutaj jeżeli chcesz odowłać swój ban.\n" +
                 "1. Podaj swój nick i/lub steamid.\n" +
-                "2. Podaj nazwę serwera.",false);
-        builder.addField("--------------------","Write here if you want to revoke your ban.\n" +
+                "2. Podaj nazwę serwera.", false);
+        builder.addField("--------------------", "Write here if you want to revoke your ban.\n" +
                 "1. Provide your ingame nick and/or steamid.\n" +
-                "2. Server name.",false);
+                "2. Server name.", false);
         channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
     }
 
+    /**
+     * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
+     *
+     * @param channel Kanał na którym wysyłana jest wiadomość
+     */
     public static void sendEmbedContact(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle("Contact with Admin");
-        builder.addField("","Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. " +
-                "Twój nick w grze lub/i steamId64.",false);
-        builder.addField("--------------------","Please describe your problem with more details, " +
-                "screenshots, servername the issue occured on and related steamId64",false);
+        builder.addField("", "Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. " +
+                "Twój nick w grze lub/i steamId64.", false);
+        builder.addField("--------------------", "Please describe your problem with more details, " +
+                "screenshots, servername the issue occured on and related steamId64", false);
         channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
     }
 }

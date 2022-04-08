@@ -1,5 +1,6 @@
 package bot.event;
 
+import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
 import helpers.RoleID;
@@ -43,6 +44,12 @@ public class ButtonClickListener extends ListenerAdapter {
             serverService.buttonClick(event, ButtonClickType.UNBAN);
         } else if (event.getComponentId().equalsIgnoreCase("Contact")) {
             serverService.buttonClick(event, ButtonClickType.CONTACT);
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannel")) {
+            EmbedInfo.confirmRemoveChannel(event.getTextChannel());
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannelYes")) {
+            serverService.removeChannel(event);
+        } else if (event.getComponentId().equalsIgnoreCase("removeChannelNo")) {
+            event.getMessage().delete().queue();
         } else if (event.getComponentId().equalsIgnoreCase("seedrole")) {
             RoleEditor roleEditor = new RoleEditor();
             roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
@@ -50,7 +57,7 @@ public class ButtonClickListener extends ListenerAdapter {
             isIDCorrect = false;
         }
 
-        if (isIDCorrect){
+        if (isIDCorrect) {
             event.deferEdit().queue();
         }
     }
