@@ -8,6 +8,8 @@ public class CategoryAndChannelID {
     //KATEGORIE
     public static final String CATEGORY_RECRUT_ID = "694916869252972570";
     public static final String CATEGORY_EVENT_ID = "861657261403406376";
+    public static final String CATEGORY_SERVER = "694911873317077073";
+    public static final String CATEGORY_RANGER = "842886351346860112";
 
     //KANAŁY
     public static final String CHANNEL_MEMBER_ONLY = "407196935162822658";
