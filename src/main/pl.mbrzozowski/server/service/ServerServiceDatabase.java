@@ -22,9 +22,9 @@ public class ServerServiceDatabase {
         return resultSet;
     }
 
-    public void addNewUser(String userID, String channelID, String userName, int typeOfReport) {
-        String query = "INSERT INTO " + SERVER_SERVICE + " (`channelID`,`userID`,`userName`,`typeOfReport`) " +
-                "VALUES (\"" + channelID + "\",\"" + userID + "\",\"" + userName + "\"," + typeOfReport + ")";
+    public void addNewUser(String userID, String channelID, String userName) {
+        String query = "INSERT INTO " + SERVER_SERVICE + " (`channelID`,`userID`,`userName`) " +
+                "VALUES (\"" + channelID + "\",\"" + userID + "\",\"" + userName + "\")";
         connector.executeQuery(query);
     }
 
@@ -37,8 +37,7 @@ public class ServerServiceDatabase {
         String queryCreate = "CREATE TABLE " + SERVER_SERVICE + "(" +
                 "channelID VARCHAR(30) PRIMARY KEY," +
                 "userID VARCHAR(30) NOT NULL," +
-                "userName VARCHAR(30) NOT NULL," +
-                "typeOfReport TINYINT(1) NOT NULL)";
+                "userName VARCHAR(30) NOT NULL)";
         connector.executeQuery(queryCreate);
     }
 
