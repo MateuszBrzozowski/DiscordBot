@@ -5,7 +5,7 @@ import embed.EmbedSettings;
 import event.ButtonClickType;
 import helpers.CategoryAndChannelID;
 import helpers.RoleID;
-import model.MemberServerService;
+import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -31,7 +31,7 @@ public class ServerService {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
-    private List<MemberServerService> reports = new ArrayList<>();
+    private List<MemberWithPrivateChannel> reports = new ArrayList<>();
 
     public void initialize() {
         pullUsersFromDatabase();
@@ -40,7 +40,7 @@ public class ServerService {
     public void buttonClick(ButtonClickEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
         String userName = event.getUser().getName();
-        if (!isUserOnList(userID, buttonType)) {
+        if (!isUserOnList(userID)) {
             createChannel(userID, userName, buttonType);
         } else {
             EmbedInfo.cantCreateServerServiceChannel(userID);
@@ -48,7 +48,7 @@ public class ServerService {
     }
 
     public boolean isChannelOnList(String channelID) {
-        for (MemberServerService l : reports) {
+        for (MemberWithPrivateChannel l : reports) {
             if (l.getChannelID().equalsIgnoreCase(channelID)) {
                 return true;
             }
@@ -97,7 +97,7 @@ public class ServerService {
         ResultSet resultSet = ssdb.pullAllUsers();
         this.reports.clear();
 
-        List<MemberServerService> memberServerServicesToDeleete = new ArrayList<>();
+        List<MemberWithPrivateChannel> memberServerServicesToDeleete = new ArrayList<>();
         List<TextChannel> allTextChannels = Repository.getJda().getTextChannels();
 
         if (resultSet != null) {
@@ -109,9 +109,7 @@ public class ServerService {
                         String userID = resultSet.getString("userID");
                         String userName = resultSet.getString("userName");
                         String channelID = resultSet.getString("channelID");
-                        int typeOfReport = resultSet.getInt("typeOfReport");
-                        ButtonClickType buttonClickType = getButtonTypeFromInt(typeOfReport);
-                        MemberServerService m = new MemberServerService(userID, userName, channelID, buttonClickType);
+                        MemberWithPrivateChannel m = new MemberWithPrivateChannel(userID, userName, channelID);
                         boolean isActive = false;
                         for (TextChannel tc : allTextChannels) {
                             if (tc.getId().equalsIgnoreCase(channelID)) {
@@ -130,13 +128,13 @@ public class ServerService {
                 }
             }
         }
-        for (MemberServerService m : memberServerServicesToDeleete) {
+        for (MemberWithPrivateChannel m : memberServerServicesToDeleete) {
             ssdb.removeRecord(m.getChannelID());
         }
     }
 
     private String getUserID(String channelID) {
-        for (MemberServerService r : reports) {
+        for (MemberWithPrivateChannel r : reports) {
             if (r.getChannelID().equalsIgnoreCase(channelID)) {
                 return r.getUserID();
             }
@@ -188,43 +186,16 @@ public class ServerService {
     }
 
     private void addUserToList(String userID, String userName, String channelID, ButtonClickType buttonType) {
-        MemberServerService member = new MemberServerService(userID, userName, channelID, buttonType);
+        MemberWithPrivateChannel member = new MemberWithPrivateChannel(userID, userName, channelID);
         reports.add(member);
-        int intFromButtonType = getIntFromButtonType(buttonType);
         ServerServiceDatabase ssdb = new ServerServiceDatabase();
-        ssdb.addNewUser(userID, channelID, userName, intFromButtonType);
+        ssdb.addNewUser(userID, channelID, userName);
     }
 
-    private ButtonClickType getButtonTypeFromInt(int type) {
-        switch (type) {
-            case 1:
-                return ButtonClickType.REPORT;
-            case 2:
-                return ButtonClickType.UNBAN;
-            default:
-                return ButtonClickType.CONTACT;
-        }
-    }
-
-    private int getIntFromButtonType(ButtonClickType buttonType) {
-        switch (buttonType) {
-            case REPORT:
-                return 1;
-            case UNBAN:
-                return 2;
-            case CONTACT:
-                return 3;
-            default:
-                return 0;
-        }
-    }
-
-    private boolean isUserOnList(String userID, ButtonClickType type) {
-        for (MemberServerService m : reports) {
+    private boolean isUserOnList(String userID) {
+        for (MemberWithPrivateChannel m : reports) {
             if (m.getUserID().equalsIgnoreCase(userID)) {
-                if (m.getButtonClickType().equals(type)) {
-                    return true;
-                }
+                return true;
             }
         }
         return false;
