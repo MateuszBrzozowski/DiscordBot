@@ -4,6 +4,7 @@ import event.Event;
 import event.EventChanges;
 import helpers.CategoryAndChannelID;
 import helpers.RangerLogger;
+import helpers.RoleID;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -594,7 +595,7 @@ public class EmbedInfo {
                 "2. Describe of bad behaviour.\n" +
                 "3. Server name.\n" +
                 "4. Add evidence. Screenshot or video link (e.g. Youtube).", false);
-        channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
+        channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">").embed(builder.build()).queue();
     }
 
     /**
@@ -613,7 +614,7 @@ public class EmbedInfo {
         builder.addField("--------------------", "Write here if you want to revoke your ban.\n" +
                 "1. Provide your ingame nick and/or steamid.\n" +
                 "2. Server name.", false);
-        channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
+        channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">").embed(builder.build()).queue();
     }
 
     /**
@@ -630,6 +631,6 @@ public class EmbedInfo {
                 "Twój nick w grze lub/i steamId64.", false);
         builder.addField("--------------------", "Please describe your problem with more details, " +
                 "screenshots, servername the issue occured on and related steamId64", false);
-        channel.sendMessage("<@&" + "RoleID.SERVER_ADMIN" + ">").embed(builder.build()).queue();
+        channel.sendMessage(builder.build()).queue();
     }
 }
