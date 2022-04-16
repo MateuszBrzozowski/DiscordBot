@@ -1,9 +1,6 @@
 package bot.event;
 
-import helpers.CategoryAndChannelID;
-import helpers.Commands;
-import helpers.RoleID;
-import helpers.Users;
+import helpers.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -21,9 +18,11 @@ public class RoleEditor {
             if (!hasRole) {
                 guild.addRoleToMember(userID, role).queue();
                 sendConfirmation(role, userID, true);
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał roblę **SEED**");
             } else {
                 guild.removeRoleFromMember(userID, role).queue();
                 sendConfirmation(role, userID, false);
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął roblę **SEED**");
             }
         }
     }
