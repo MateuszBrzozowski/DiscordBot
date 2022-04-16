@@ -19,5 +19,6 @@ public class EmbedSettings {
     public static final String BOOK_BLUE = "\uD83D\uDCD8";
     public static final String BOOK_GREEN = "\uD83D\uDCD7";
     public static final String BIN = "\uD83D\uDDD1";
+    public static final String LOCK = "\uD83D\uDD12";
 }
 
