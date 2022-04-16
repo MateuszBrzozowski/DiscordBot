@@ -520,8 +520,10 @@ public class EmbedInfo {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setTitle("SQUAD SERVER SEEDER");
-        builder.addField("", "Jeśli chcesz pomóc nam w rozkręcaniu naszego serwera. Możesz przypisać sobię rolę klikając w poniższy przycisk by otrzymywać ping.", false);
-        builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping.", false);
+        builder.addField("", "Jeśli chcesz pomóc nam w rozkręcaniu naszego serwera. Możesz przypisać sobię rolę klikając w poniższy przycisk by otrzymywać ping. \n" +
+                "**Dodatkowo każdy seeder otrzyma whitelistę na nasz serwer.**", false);
+        builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping. \n" +
+                "**All seeders will recive whitelist.**", false);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         channel.sendMessage(builder.build()).setActionRow(Button.success("seedrole", "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
     }
