@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import questionnaire.Questionnaires;
 import recrut.Recruits;
+import server.service.ServerService;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class RangerBot {
         logger.info("Bot uruchomiony.");
     }
 
-    private static void initialize( ) {
+    private static void initialize() {
         Recruits recruits = Repository.getRecruits();
         recruits.initialize();
         Event events = Repository.getEvent();
@@ -58,5 +59,7 @@ public class RangerBot {
         questionnaires.initialize();
         Counter counter = Repository.getCounter();
         counter.initialize();
+        ServerService serverService = Repository.getServerService();
+        serverService.initialize();
     }
 }

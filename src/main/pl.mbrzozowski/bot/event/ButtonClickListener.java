@@ -44,7 +44,14 @@ public class ButtonClickListener extends ListenerAdapter {
             serverService.buttonClick(event, ButtonClickType.UNBAN);
         } else if (event.getComponentId().equalsIgnoreCase("Contact")) {
             serverService.buttonClick(event, ButtonClickType.CONTACT);
+        } else if (event.getComponentId().equalsIgnoreCase("close")) {
+            EmbedInfo.confirmCloseChannel(event.getTextChannel());
+        } else if (event.getComponentId().equalsIgnoreCase("closeYes")) {
+            serverService.closeChannel(event);
+        } else if (event.getComponentId().equalsIgnoreCase("closeNo")) {
+            event.getMessage().delete().queue();
         } else if (event.getComponentId().equalsIgnoreCase("removeChannel")) {
+            serverService.disableButtons(event.getChannel().getId(), event.getMessageId());
             EmbedInfo.confirmRemoveChannel(event.getTextChannel());
         } else if (event.getComponentId().equalsIgnoreCase("removeChannelYes")) {
             serverService.removeChannel(event);

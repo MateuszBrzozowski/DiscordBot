@@ -8,12 +8,10 @@ import helpers.RoleID;
 import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.ChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +66,21 @@ public class ServerService {
         EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
     }
 
+    public void closeChannel(ButtonClickEvent event) {
+        disableButtons(event.getChannel().getId(), event.getMessageId());
+        ChannelManager manager = event.getTextChannel().getManager();
+        String channelID = event.getTextChannel().getId();
+        String userID = getUserID(channelID);
+        Member member = event.getGuild().getMemberById(userID);
+        if (member != null) {
+            manager.putPermissionOverride(member, null, permissions);
+            manager.queue();
+        }
+        EmbedInfo.closeChannel(event.getUser().getId(), event.getTextChannel());
+    }
+
     public void removeChannel(ButtonClickEvent event) {
+        disableButtons(event.getChannel().getId(), event.getMessageId());
         EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
             try {
@@ -90,6 +102,22 @@ public class ServerService {
                 ssdb.removeRecord(channelID);
             }
         }
+    }
+
+    public void disableButtons(String channelID, String messageID) {
+        JDA jda = Repository.getJda();
+        TextChannel textChannel = jda.getTextChannelById(channelID);
+        textChannel.retrieveMessageById(messageID).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            List<Button> buttons = message.getButtons();
+            List<Button> buttonsNew = new ArrayList<>();
+            for (Button b : buttons) {
+                b = b.asDisabled();
+                buttonsNew.add(b);
+            }
+            MessageEmbed messageEmbed = embeds.get(0);
+            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+        });
     }
 
     private void pullUsersFromDatabase() {
@@ -145,7 +173,7 @@ public class ServerService {
     private void createChannel(String userID, String userName, ButtonClickType buttonType) {
         JDA jda = Repository.getJda();
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RANGER);
+        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_SERVER);
         String channelName = channelNamePrefix(buttonType) + userName;
         guild.createTextChannel(channelName, category)
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
