@@ -5,12 +5,17 @@ import database.DBFactory;
 import database.DBType;
 import database.Factory;
 import helpers.RangerLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ranger.RangerBot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class StatsDatabase {
 
+    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private final String DISCORD_USERS = "discrduser";
     private Factory factory = new DBFactory();
     private DBConnector connector = factory.createDB(DBType.STATS);
@@ -56,5 +61,162 @@ public class StatsDatabase {
             }
         }
         return profileName;
+    }
+
+    public int pullKills(String steamID) {
+        ResultSet resultSet = null;
+        int kills = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_deaths` WHERE attacker=\"" + steamID + "\"";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        kills = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return kills;
+    }
+
+    public int pullDeaths(String steamID) {
+        ResultSet resultSet = null;
+        int deaths = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_deaths` WHERE victim=\"" + steamID + "\"";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        deaths = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return deaths;
+    }
+
+    public int pullWounds(String steamID) {
+        ResultSet resultSet = null;
+        int wounds = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\"";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        wounds = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return wounds;
+    }
+
+    public int pullRevives(String steamID) {
+        ResultSet resultSet = null;
+        int revives = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_revives` WHERE reviver=\"" + steamID + "\"";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        revives = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return revives;
+    }
+
+    public int pullRevivesYou(String steamID) {
+        ResultSet resultSet = null;
+        int revives = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_revives` WHERE victim=\"" + steamID + "\"";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        revives = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return revives;
+    }
+
+    public int pullTeamkills(String steamID) {
+        ResultSet resultSet = null;
+        int teamkills = 0;
+        String query = "SELECT COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\" AND teamkill=1";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        teamkills = resultSet.getInt("COUNT(*)");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return teamkills;
+    }
+
+    public ArrayList<Gun> pullGuns(String steamID) {
+        ResultSet resultSet = null;
+        ArrayList<Gun> guns = new ArrayList<>();
+        String query = "SELECT weapon, COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\"" +
+                "GROUP BY `weapon` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String gunName = resultSet.getString("weapon");
+                        int count = resultSet.getInt("COUNT(*)");
+                        Gun gun = new Gun(gunName, count);
+                        guns.add(gun);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+
+        return guns;
+    }
+
+    public ArrayList<Player> pullMostKills(String steamID) {
+        ArrayList<Player> players = new ArrayList<>();
+        return players;
     }
 }

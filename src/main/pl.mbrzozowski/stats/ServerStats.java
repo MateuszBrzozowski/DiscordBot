@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class ServerStats {
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
-        pullStatsFromDatabase(connectedPlayers.get(getIndex(userID)));
-        sendEmbedWithStats(userID, channel);
+        PlayerStats playerStats = pullStatsFromDatabase(connectedPlayers.get(getIndex(userID)));
+        sendEmbedWithStats(userID, channel, playerStats);
     }
 
     public boolean isUserConnected(String userID) {
@@ -49,34 +50,48 @@ public class ServerStats {
         }
     }
 
-    private void sendEmbedWithStats(String userID, TextChannel channel) {
+    private void sendEmbedWithStats(String userID, TextChannel channel, PlayerStats playerStats) {
+        DecimalFormat df = new DecimalFormat("0.00");
+
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLACK);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle(Users.getUserNicknameFromID(userID) + " profile");
-        builder.setDescription("Profile info:\n" +
-                "NAZWA GRACZA Z GRY");
+        builder.setDescription("**Profile info:**```yaml\n" + playerStats.getProfileName() + "\n```");
         builder.addBlankField(false);
-        builder.addField("⚔ K/D", "0", true);
-        builder.addField("\uD83D\uDDE1 Kills", "0", true);
-        builder.addField("⚰ Deaths", "0", true);
-        builder.addField("\uD83E\uDE78 Wounds", "0", true);
-        builder.addField("⚕ Revives", "0", true);
-        builder.addField("⚕ Revives you", "0", true);
-        builder.addField("\uD83D\uDC9E Gun", "-", true);
-        builder.addField("\uD83D\uDEAB TeamKills", "0", true);
+        builder.addField("⚔ K/D", "**" + df.format(playerStats.getKd()) + "**%", true);
+        builder.addField("⚔ Kills/Wounds", "**" + df.format(playerStats.getEffectiveness()) + "**% effectiveness", true);
+        builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
+        builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
+        builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);
+        builder.addField("⚕ Revives", "**" + playerStats.getRevives() + "** revive(s)", true);
+        builder.addField("⚕ Revives you", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
+        builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
+        builder.addField("\uD83D\uDC9E Gun", playerStats.getGun(), true);
         builder.addBlankField(false);
         builder.addField("Most kills", "-", true);
-        builder.addField("Most kills by", "-", true);
+        builder.addField("Most killed by", "-", true);
         builder.addField("Most revives", "-", true);
-        builder.addField("Most revives by", "-", true);
+        builder.addField("Most revived by", "-", true);
+        builder.setFooter("Data from 8.04.2022r.");
         channel.sendMessage(builder.build()).queue();
     }
 
-    private void pullStatsFromDatabase(Player player) {
+    private PlayerStats pullStatsFromDatabase(Player player) {
         StatsDatabase database = new StatsDatabase();
-        String profileName = database.pullProfileName(player.getSteamID());
         PlayerStats playerStats = new PlayerStats(player);
+        playerStats.setProfileName(database.pullProfileName(player.getSteamID()));
+        playerStats.setKills(database.pullKills(player.getSteamID()))
+                .setDeaths(database.pullDeaths(player.getSteamID()))
+                .setWounds(database.pullWounds(player.getSteamID()))
+                .setRevives(database.pullRevives(player.getSteamID()))
+                .setRevivesYou(database.pullRevivesYou(player.getSteamID()))
+                .setTeamkills(database.pullTeamkills(player.getSteamID()))
+                .setGuns(database.pullGuns(player.getSteamID()))
+                .setMostKills(database.pullMostKills(player.getSteamID()))
+                .setKd()
+                .setEffectiveness();
+        return playerStats;
     }
 
     private int getIndex(String userID) {
