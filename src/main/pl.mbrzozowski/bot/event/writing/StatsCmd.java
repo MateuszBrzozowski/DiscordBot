@@ -21,7 +21,6 @@ public class StatsCmd extends Proccess {
     public void proccessMessage(Message message) {
         ServerStats serverStats = Repository.getServerStats();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS)) {
-            //TODO wyswietlić embed jeśli konto podlaczone ze statystykami
             if (serverStats.isUserConnected(guildEvent.getAuthor().getId())) {
                 serverStats.viewStatsForUser(guildEvent.getAuthor().getId(),guildEvent.getChannel());
             } else {
