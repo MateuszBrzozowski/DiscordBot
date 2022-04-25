@@ -2,7 +2,6 @@ package ranger;
 
 import bot.event.*;
 import counter.Counter;
-import event.Event;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -10,9 +9,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import questionnaire.Questionnaires;
-import recrut.Recruits;
 import server.service.ServerService;
+import stats.ServerStats;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -51,15 +49,17 @@ public class RangerBot {
     }
 
     private static void initialize() {
-        Recruits recruits = Repository.getRecruits();
-        recruits.initialize();
-        Event events = Repository.getEvent();
-        events.initialize();
-        Questionnaires questionnaires = Repository.getQuestionnaires();
-        questionnaires.initialize();
+//        Recruits recruits = Repository.getRecruits();
+//        recruits.initialize();
+//        Event events = Repository.getEvent();
+//        events.initialize();
+//        Questionnaires questionnaires = Repository.getQuestionnaires();
+//        questionnaires.initialize();
         Counter counter = Repository.getCounter();
         counter.initialize();
         ServerService serverService = Repository.getServerService();
         serverService.initialize();
+        ServerStats serverStats = Repository.getServerStats();
+        serverStats.initialize();
     }
 }

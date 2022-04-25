@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.JDA;
 import questionnaire.Questionnaires;
 import recrut.Recruits;
 import server.service.ServerService;
+import stats.ServerStats;
 
 public class Repository {
 
@@ -24,6 +25,7 @@ public class Repository {
     private static final BotWriter botWriter = new BotWriter();
     private static final Counter counter = new Counter();
     private static final ServerService serverService = new ServerService();
+    private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
 
     public static Event getEvent() {
@@ -72,5 +74,9 @@ public class Repository {
 
     public static ServerService getServerService() {
         return serverService;
+    }
+
+    public static ServerStats getServerStats() {
+        return serverStats;
     }
 }

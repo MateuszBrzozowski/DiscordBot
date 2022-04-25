@@ -516,7 +516,7 @@ public class EmbedInfo {
         });
     }
 
-    public static void seedersRoleJoining(TextChannel channel){
+    public static void seedersRoleJoining(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setTitle("SQUAD SERVER SEEDER");
@@ -659,5 +659,36 @@ public class EmbedInfo {
                 .queue(message -> {
                     message.pin().queue();
                 });
+    }
+
+    public static void notConnectedAccount(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLACK);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle("Your discord account isn't linked to your Steam profile.");
+        builder.setDescription("If you want to link your discord account to your steam account use the command **!profile <steam64ID>**\n\n" +
+                "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/ example - 76561197990543288\n\n" +
+                "e.g. \n*!profile 76561197990543288*");
+        channel.sendMessage(builder.build()).queue();
+    }
+
+    public static void connectSuccessfully(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.GREEN);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle("Successfully");
+        builder.setDescription("Your discord account is linked to your Steam profile.\n" +
+                "You can use command **!stats** to view your statistic from our server.");
+        channel.sendMessage(builder.build()).queue();
+    }
+
+    public static void connectUnSuccessfully(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.RED);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle("Steam64ID is not valid");
+        builder.setDescription("Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/ example - 76561197990543288\n\n" +
+                "e.g. \n*!profile 76561197990543288*");
+        channel.sendMessage(builder.build()).queue();
     }
 }

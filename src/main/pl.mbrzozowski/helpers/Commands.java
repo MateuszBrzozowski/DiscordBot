@@ -42,8 +42,10 @@ public class Commands {
     public static final String TOP_THREE = PREFIX + "top";
     public static final String TOP_TEN = PREFIX + "topTen";
     public static final String COUNT = PREFIX + "showMe";
-    public static final String SQUAD_SEEDERS_INFO = PREFIX + "squadSeedersInfo";;
+    public static final String SQUAD_SEEDERS_INFO = PREFIX + "squadSeedersInfo";
     public static final String EMBED_SERVER_SERVICE = PREFIX + "ServerService";
+    public static final String STATS = PREFIX + "stats";
+    public static final String STATS_PROFILE = PREFIX + "profile";
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov";
     public static final String VIRTUAL_REALITY = PREFIX + "vr";
