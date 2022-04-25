@@ -6,21 +6,17 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
-public class DBConnector {
-    private static String database = "rangerbot";
-    private static String serwer = "localhost";
-    private static String url = "jdbc:mysql://" + serwer + "/" + database + "?useUnicode=true&characterEncoding=UTF-8";
-    private static String user = "root";
-    private static String pass = "";
+public abstract class DBConnector {
+    protected String database = "";
+    protected String server = "";
+    protected String url = "jdbc:mysql://" + server + "/" + database + "?useUnicode=true&characterEncoding=UTF-8";
+    protected String user = "root";
+    protected String pass = "";
     private static RangerLogger rangerLogger = new RangerLogger();
     protected static final Logger logger = LoggerFactory.getLogger(DBConnector.class);
     private static Connection connection = null;
 
-    public DBConnector() {
-        connection = connect();
-    }
-
-    public static Connection connect() {
+    protected Connection connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, pass);
@@ -54,6 +50,9 @@ public class DBConnector {
             rangerLogger.info("Zapytanie do bazy danych zakończone niepowodzeniem: {}", query);
             throw new RuntimeException(throwables.getMessage());
         }
+    }
 
+    protected void setUrl() {
+        this.url = "jdbc:mysql://" + server + "/" + database + "?useUnicode=true&characterEncoding=UTF-8";
     }
 }
