@@ -1,11 +1,8 @@
 package stats;
 
-public class PlayerStats extends Player{
+public class PlayerStats extends Player {
 
-    public PlayerStats(String userDiscordID, String steamID) {
-        super(userDiscordID, steamID);
-    }
-
+    private String profileName;
     private float kd;
     private int kills;
     private int deaths;
@@ -14,4 +11,13 @@ public class PlayerStats extends Player{
     private int revivesYou;
     private int teamkills;
     private String gun;
+
+    public PlayerStats(Player player) {
+        super(player.getUserDiscordID(), player.getSteamID());
+    }
+
+    public PlayerStats setProfileName(String profileName) {
+        this.profileName = profileName;
+        return this;
+    }
 }
