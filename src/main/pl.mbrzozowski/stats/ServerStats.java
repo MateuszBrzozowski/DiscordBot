@@ -69,10 +69,10 @@ public class ServerStats {
         builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
         builder.addField("\uD83D\uDC9E Gun", playerStats.getGun(), true);
         builder.addBlankField(false);
-        builder.addField("Most kills", "-", true);
-        builder.addField("Most killed by", "-", true);
-        builder.addField("Most revives", "-", true);
-        builder.addField("Most revived by", "-", true);
+        builder.addField("Most kills", playerStats.getMostKills(), true);
+        builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
+        builder.addField("Most revives", playerStats.getMostRevives(), true);
+        builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
         channel.sendMessage(builder.build()).queue();
     }
@@ -89,6 +89,9 @@ public class ServerStats {
                 .setTeamkills(database.pullTeamkills(player.getSteamID()))
                 .setGuns(database.pullGuns(player.getSteamID()))
                 .setMostKills(database.pullMostKills(player.getSteamID()))
+                .setMostKilledBy(database.pullMostKilledBy(player.getSteamID()))
+                .setMostRevives(database.pullMostRevives(player.getSteamID()))
+                .setMostRevivedBy(database.pullMostRevivedBy(player.getSteamID()))
                 .setKd()
                 .setEffectiveness();
         return playerStats;

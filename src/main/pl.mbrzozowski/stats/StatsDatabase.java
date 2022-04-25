@@ -215,8 +215,115 @@ public class StatsDatabase {
         return guns;
     }
 
-    public ArrayList<Player> pullMostKills(String steamID) {
-        ArrayList<Player> players = new ArrayList<>();
+    public ArrayList<PlayerCount> pullMostKills(String steamID) {
+        ResultSet resultSet = null;
+        ArrayList<PlayerCount> players = new ArrayList<>();
+        String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_deaths` WHERE attacker=\"" + steamID + "\"" +
+                "GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String victim = resultSet.getString("victim");
+                        String victimName = resultSet.getString("victimName");
+                        int count = resultSet.getInt("COUNT(*)");
+                        PlayerCount player = new PlayerCount("", victim);
+                        player.setPlayerName(victimName);
+                        player.setCount(count);
+                        players.add(player);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return players;
+    }
+
+    public ArrayList<PlayerCount> pullMostKilledBy(String steamID) {
+        ResultSet resultSet = null;
+        ArrayList<PlayerCount> players = new ArrayList<>();
+        String query = "SELECT attackerName, attacker, COUNT(*) FROM `dblog_deaths` WHERE victim=\"" + steamID + "\"" +
+                "GROUP BY `attacker` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String attacker = resultSet.getString("attacker");
+                        String attackerName = resultSet.getString("attackerName");
+                        int count = resultSet.getInt("COUNT(*)");
+                        PlayerCount player = new PlayerCount("", attacker);
+                        player.setPlayerName(attackerName);
+                        player.setCount(count);
+                        players.add(player);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return players;
+    }
+
+    public ArrayList<PlayerCount> pullMostRevives(String steamID) {
+        ResultSet resultSet = null;
+        ArrayList<PlayerCount> players = new ArrayList<>();
+        String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_revives` WHERE reviver=\"" + steamID + "\"" +
+                "GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String victim = resultSet.getString("victim");
+                        String victimName = resultSet.getString("victimName");
+                        int count = resultSet.getInt("COUNT(*)");
+                        PlayerCount player = new PlayerCount("", victim);
+                        player.setPlayerName(victimName);
+                        player.setCount(count);
+                        players.add(player);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return players;
+    }
+
+    public ArrayList<PlayerCount> pullMostRevivedBy(String steamID) {
+        ResultSet resultSet = null;
+        ArrayList<PlayerCount> players = new ArrayList<>();
+        String query = "SELECT reviverName, reviver, COUNT(*) FROM `dblog_revives` WHERE victim=\"" + steamID + "\"" +
+                "GROUP BY `reviver` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String reviver = resultSet.getString("reviver");
+                        String reviverName = resultSet.getString("reviverName");
+                        int count = resultSet.getInt("COUNT(*)");
+                        PlayerCount player = new PlayerCount("", reviver);
+                        player.setPlayerName(reviverName);
+                        player.setCount(count);
+                        players.add(player);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
         return players;
     }
 }
