@@ -1,6 +1,9 @@
 package recrut;
 
 import database.DBConnector;
+import database.DBFactory;
+import database.DBType;
+import database.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,11 +12,11 @@ import java.sql.ResultSet;
 public class RecruitDatabase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private DBConnector connector = new DBConnector();
+    private Factory factory = new DBFactory();
+    private DBConnector connector = factory.createDB(DBType.RANGER);
 
     ResultSet getAllRecrut() {
         String query = "SELECT * FROM `recruts`";
-        DBConnector connector = new DBConnector();
         ResultSet resultSet = null;
         try {
             resultSet = connector.executeSelect(query);
@@ -33,7 +36,7 @@ public class RecruitDatabase {
         connector.executeQuery(String.format(query, userID, userName, channelID));
     }
 
-    void removeUser(String channelID){
+    void removeUser(String channelID) {
         String query = "DELETE FROM `recruts` WHERE channelID=\"%s\"";
         connector.executeQuery(String.format(query, channelID));
     }

@@ -1,6 +1,9 @@
 package counter;
 
 import database.DBConnector;
+import database.DBFactory;
+import database.DBType;
+import database.Factory;
 import helpers.RangerLogger;
 
 import java.sql.ResultSet;
@@ -8,7 +11,8 @@ import java.sql.ResultSet;
 class CounterDatabase {
 
     private static final String COUNTER = "counter";
-    private DBConnector connector = new DBConnector();
+    private Factory factory = new DBFactory();
+    private DBConnector connector = factory.createDB(DBType.RANGER);
 
     ResultSet pullAllUsers() {
         ResultSet resultSet = null;

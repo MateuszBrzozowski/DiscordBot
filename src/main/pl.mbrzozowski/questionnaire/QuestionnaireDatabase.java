@@ -1,6 +1,9 @@
 package questionnaire;
 
 import database.DBConnector;
+import database.DBFactory;
+import database.DBType;
+import database.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +12,8 @@ import java.sql.ResultSet;
 public class QuestionnaireDatabase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private DBConnector connector = new DBConnector();
+    private Factory factory = new DBFactory();
+    private DBConnector connector = factory.createDB(DBType.RANGER);
 
 
     /**

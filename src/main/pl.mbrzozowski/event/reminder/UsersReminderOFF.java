@@ -1,6 +1,9 @@
 package event.reminder;
 
 import database.DBConnector;
+import database.DBFactory;
+import database.DBType;
+import database.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +15,8 @@ import java.util.List;
 public class UsersReminderOFF {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private Factory factory = new DBFactory();
+    private DBConnector connector = factory.createDB(DBType.RANGER);
     private List<String> usersOff = new ArrayList<>();
 
     public UsersReminderOFF() {
@@ -36,7 +41,6 @@ public class UsersReminderOFF {
 
     private ResultSet getAllUsers() {
         String query = "SELECT * FROM `reminderoff`";
-        DBConnector connector = new DBConnector();
         ResultSet resultSet = null;
         try {
             resultSet = connector.executeSelect(query);
@@ -65,7 +69,6 @@ public class UsersReminderOFF {
     public void add(String userID) {
         if (!userHasOff(userID)){
             String query = "INSERT INTO reminderoff(`userID`) VALUES (\"%s\")";
-            DBConnector connector = new DBConnector();
             connector.executeQuery(String.format(query,userID));
             usersOff.add(userID);
         }
@@ -74,7 +77,6 @@ public class UsersReminderOFF {
     public void remove(String userID) {
         if (userHasOff(userID)){
             String query = "DELETE FROM reminderoff WHERE userID=\"%s\"";
-            DBConnector connector = new DBConnector();
             connector.executeQuery(String.format(query,userID));
             usersOff.remove(getIndex(userID));
         }

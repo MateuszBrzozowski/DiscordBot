@@ -1,6 +1,9 @@
 package server.service;
 
 import database.DBConnector;
+import database.DBFactory;
+import database.DBType;
+import database.Factory;
 import helpers.RangerLogger;
 
 import java.sql.ResultSet;
@@ -8,7 +11,8 @@ import java.sql.ResultSet;
 public class ServerServiceDatabase {
 
     private final String SERVER_SERVICE = "serverservice";
-    private DBConnector connector = new DBConnector();
+    private Factory factory = new DBFactory();
+    private DBConnector connector = factory.createDB(DBType.RANGER);
 
     ResultSet pullAllUsers() {
         ResultSet resultSet = null;
