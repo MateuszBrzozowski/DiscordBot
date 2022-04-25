@@ -65,9 +65,9 @@ public class ServerStats {
         builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
         builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);
         builder.addField("⚕ Revives", "**" + playerStats.getRevives() + "** revive(s)", true);
-        builder.addField("⚕ Revives you", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
+        builder.addField("⚕ Revived", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
         builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
-        builder.addField("\uD83D\uDC9E Gun", playerStats.getGun(), true);
+        builder.addField("\uD83D\uDC9E Weapon", playerStats.getWeapon(), true);
         builder.addBlankField(false);
         builder.addField("Most kills", playerStats.getMostKills(), true);
         builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
@@ -87,7 +87,7 @@ public class ServerStats {
                 .setRevives(database.pullRevives(player.getSteamID()))
                 .setRevivesYou(database.pullRevivesYou(player.getSteamID()))
                 .setTeamkills(database.pullTeamkills(player.getSteamID()))
-                .setGuns(database.pullGuns(player.getSteamID()))
+                .setWeapon(database.pullGuns(player.getSteamID()))
                 .setMostKills(database.pullMostKills(player.getSteamID()))
                 .setMostKilledBy(database.pullMostKilledBy(player.getSteamID()))
                 .setMostRevives(database.pullMostRevives(player.getSteamID()))

@@ -18,7 +18,7 @@ public class PlayerStats extends Player {
     private int revivesYou;
     private int teamkills;
     private float effectiveness;
-    private String gun;
+    private String weapon;
     private String mostKills;
     private String mostKilledBy;
     private String mostRevives;
@@ -70,18 +70,28 @@ public class PlayerStats extends Player {
         return this;
     }
 
-    public PlayerStats setGuns(ArrayList<Gun> guns) {
-        for (int i = 0; i < 3; i++) {
-            setGun(guns.get(i).getName(), i);
+    public PlayerStats setWeapon(ArrayList<Gun> guns) {
+        if (guns.size() > 0) {
+            for (int i = 0; i < 3; i++) {
+                setWeapon(guns.get(i).getName(), i);
+            }
+        } else {
+            this.weapon = "-";
         }
+
         return this;
     }
 
     public PlayerStats setMostKills(ArrayList<PlayerCount> players) {
-        removeNull(players);
-        for (int i = 0; i < 1; i++) {
-            setMostKills(players.get(i).getPlayerName(), i, players.get(i).getCount());
+        if (players.size() > 0) {
+            removeNull(players);
+            for (int i = 0; i < 1; i++) {
+                setMostKills(players.get(i).getPlayerName(), i, players.get(i).getCount());
+            }
+        } else {
+            this.mostKills = "-";
         }
+
         return this;
     }
 
@@ -94,9 +104,13 @@ public class PlayerStats extends Player {
     }
 
     public PlayerStats setMostKilledBy(ArrayList<PlayerCount> players) {
-        removeNull(players);
-        for (int i = 0; i < 1; i++) {
-            setMostKilledBy(players.get(i).getPlayerName(), i, players.get(i).getCount());
+        if (players.size() > 0) {
+            removeNull(players);
+            for (int i = 0; i < 1; i++) {
+                setMostKilledBy(players.get(i).getPlayerName(), i, players.get(i).getCount());
+            }
+        } else {
+            this.mostKilledBy = "-";
         }
         return this;
     }
@@ -110,14 +124,18 @@ public class PlayerStats extends Player {
     }
 
     public PlayerStats setMostRevives(ArrayList<PlayerCount> players) {
-        removeNull(players);
-        for (int i = 0; i < 1; i++) {
-            setMostRevives(players.get(i).getPlayerName(), i, players.get(i).getCount());
+        if (players.size() > 0) {
+            removeNull(players);
+            for (int i = 0; i < 1; i++) {
+                setMostRevives(players.get(i).getPlayerName(), i, players.get(i).getCount());
+            }
+        } else {
+            this.mostRevives = "-";
         }
         return this;
     }
 
-    private void setMostRevives(String playerName, int index, int count){
+    private void setMostRevives(String playerName, int index, int count) {
         if (index == 0) {
             this.mostRevives = "**" + playerName + "**- (" + count + ")\n";
         } else {
@@ -126,14 +144,18 @@ public class PlayerStats extends Player {
     }
 
     public PlayerStats setMostRevivedBy(ArrayList<PlayerCount> players) {
-        removeNull(players);
-        for (int i = 0; i < 1; i++) {
-            setMostRevivedBy(players.get(i).getPlayerName(), i, players.get(i).getCount());
+        if (players.size() > 0) {
+            removeNull(players);
+            for (int i = 0; i < 1; i++) {
+                setMostRevivedBy(players.get(i).getPlayerName(), i, players.get(i).getCount());
+            }
+        } else {
+            this.mostRevivedBy = "-";
         }
         return this;
     }
 
-    private void setMostRevivedBy(String playerName, int index, int count){
+    private void setMostRevivedBy(String playerName, int index, int count) {
         if (index == 0) {
             this.mostRevivedBy = "**" + playerName + "**- (" + count + ")\n";
         } else {
@@ -149,12 +171,11 @@ public class PlayerStats extends Player {
         }
     }
 
-
-    private void setGun(String gun, int index) {
+    private void setWeapon(String gun, int index) {
         if (index == 0) {
-            this.gun = "**" + (index + 1) + "." + gun + "**\n";
+            this.weapon = "**" + (index + 1) + "." + gun + "**\n";
         } else {
-            this.gun += (index + 1) + "." + gun + "\n";
+            this.weapon += (index + 1) + "." + gun + "\n";
         }
 
     }
@@ -198,8 +219,8 @@ public class PlayerStats extends Player {
         return teamkills;
     }
 
-    public String getGun() {
-        return gun;
+    public String getWeapon() {
+        return weapon;
     }
 
     public float getEffectiveness() {
