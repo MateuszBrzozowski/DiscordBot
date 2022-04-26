@@ -27,9 +27,7 @@ public class WriteListener extends ListenerAdapter {
         CounterMachine counterMachine = new CounterMachine(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event);
-        EventsCmd eventsCmd = new EventsCmd(event);
         ReminderCmd reminderCmd = new ReminderCmd(event);
-        ChannelCmd channelCmd = new ChannelCmd(event);
         QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
         EmbedSender embedSender = new EmbedSender(event);
@@ -40,25 +38,26 @@ public class WriteListener extends ListenerAdapter {
         Roles roles = new Roles(event);
         ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
         InvalidCmd invalidCmd = new InvalidCmd(event);
+        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
         diceCmd.setNextProccess(statsCmd);
-        statsCmd.setNextProccess(logChannel);
-        logChannel.setNextProccess(roles);
-        roles.setNextProccess(checkUser);
+        statsCmd.setNextProccess(roles);
+        roles.setNextProccess(logChannel);
+        logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(counterMachine);
         counterMachine.setNextProccess(generatorCmd);
-        generatorCmd.setNextProccess(eventsCmd);
-        eventsCmd.setNextProccess(reminderCmd);
-        reminderCmd.setNextProccess(channelCmd);
-        channelCmd.setNextProccess(questionnaire);
-        questionnaire.setNextProccess(helpCmd);
+        generatorCmd.setNextProccess(questionnaire);
+        questionnaire.setNextProccess(reminderCmd);
+        reminderCmd.setNextProccess(serverServiceCmd);
+        serverServiceCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
-        checkUserAdmin.setNextProccess(eventsSettingsCmd);
-        eventsSettingsCmd.setNextProccess(developerCmd);
-        developerCmd.setNextProccess(serverServiceCmd);
-        serverServiceCmd.setNextProccess(embedSender);
+        checkUserAdmin.setNextProccess(embedSender);
         embedSender.setNextProccess(recrutCmd);
-        recrutCmd.setNextProccess(invalidCmd);
+        recrutCmd.setNextProccess(checkIsPrivateChannel);
+        checkIsPrivateChannel.setNextProccess(eventsSettingsCmd);
+        eventsSettingsCmd.setNextProccess(developerCmd);
+        developerCmd.setNextProccess(invalidCmd);
+
 
         diceCmd.proccessMessage(msg);
     }

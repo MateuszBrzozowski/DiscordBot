@@ -15,7 +15,6 @@ public class Roles extends Proccess {
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
     private String userID;
-    private JDA jda = Repository.getJda();
 
     public Roles(MessageReceivedEvent messageReceivedEvent) {
         super(messageReceivedEvent);

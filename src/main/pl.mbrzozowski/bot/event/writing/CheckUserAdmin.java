@@ -1,5 +1,6 @@
 package bot.event.writing;
 
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CheckUserAdmin extends Proccess {
@@ -13,7 +14,7 @@ public class CheckUserAdmin extends Proccess {
         if (message.isAdmin()) {
             getNextProccess().proccessMessage(message);
         } else {
-            if (messageReceived != null) {
+            if (messageReceived != null && messageReceived.isFromType(ChannelType.PRIVATE)) {
                 InvalidCmd invalidCmd = new InvalidCmd(messageReceived);
                 invalidCmd.proccessMessage(message);
             }
