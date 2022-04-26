@@ -17,7 +17,7 @@ public class ServerServiceCmd extends Proccess {
         String channelID = messageReceived.getChannel().getId();
         ServerService serverService = Repository.getServerService();
         boolean isChannelSS = serverService.isChannelOnList(channelID);
-        if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE)) {
+        if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && message.isAdmin()) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.serverService(messageReceived.getChannel());
         } else if (isChannelSS && message.getWords()[0].equalsIgnoreCase(Commands.CLOSE)) {

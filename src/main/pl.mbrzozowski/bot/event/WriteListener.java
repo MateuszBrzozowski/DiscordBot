@@ -29,7 +29,7 @@ public class WriteListener extends ListenerAdapter {
         GeneratorCmd generatorCmd = new GeneratorCmd(event);
         ReminderCmd reminderCmd = new ReminderCmd(event);
         QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
-        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(null);
+        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event);
         HelpCmd helpCmd = new HelpCmd(event);
