@@ -10,19 +10,19 @@ public class PlayerStats extends Player {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String profileName;
-    private float kd;
-    private int kills;
-    private int deaths;
-    private int wounds;
-    private int revives;
-    private int revivesYou;
-    private int teamkills;
-    private float effectiveness;
-    private String weapon;
-    private String mostKills;
-    private String mostKilledBy;
-    private String mostRevives;
-    private String mostRevivedBy;
+    private float kd = 0;
+    private int kills = 0;
+    private int deaths = 0;
+    private int wounds = 0;
+    private int revives = 0;
+    private int revivesYou = 0;
+    private int teamkills = 0;
+    private float effectiveness = 0;
+    private String weapon = "-";
+    private String mostKills = "-";
+    private String mostKilledBy = "-";
+    private String mostRevives = "-";
+    private String mostRevivedBy = "-";
 
     public PlayerStats(Player player) {
         super(player.getUserDiscordID(), player.getSteamID());
