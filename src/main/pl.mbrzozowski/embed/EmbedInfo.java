@@ -708,4 +708,11 @@ public class EmbedInfo {
                 "e.g. \n*!profile 76561197990543288*");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
+
+    public static void youCanLinkedYourProfileOnChannel(TextChannel textChannel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLACK);
+        builder.setDescription("Use command !profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
+        textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
 }
