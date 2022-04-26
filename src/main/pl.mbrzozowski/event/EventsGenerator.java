@@ -27,7 +27,6 @@ public class EventsGenerator {
     private String perm;
     private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
     MessageReceivedEvent messageReceived = null;
-//    PrivateMessageReceivedEvent eventPrivateMsgRec = null;
 
 
     public EventsGenerator(MessageReceivedEvent event) {
@@ -42,15 +41,10 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("WITAJ " + userName.toUpperCase() + " W GENERATORZE EVENTÓW!");
             builder.setColor(Color.YELLOW);
-            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setDescription("Odpowiedz na kilka moich pytań. Nastepnie na podstawie Twoich odpowiedzi " +
                     "utworzę listę na Twój mecz/szkolenie/event.\n\n" +
-                    "Przerwanie generowania - Wpisz tutaj **!cancel**\n" +
-                    "Maksymalna liczba znaków w tytule - 256\n" +
-                    "Maksymalna liczba znaków w opisie znajdującym się na liście - 2048\n\n" +
-                    "Jeżeli chcesz dodać dłuższy opis wydarzenia najpierw stwórz kanał za pomocą komendy **!newChannel** \n" +
-                    "-(tworzy kanał w kategorii Mecze/Szkolenia/Eventy), następnie napisz na tym kanale osobiście opis, " +
-                    "zmień nazwę kanału przy pomocy komendy **!name <Twoja_Nazwa>** i stwórz listę przy pomocy komendy **!generatorHere**");
+                    "Przerwanie generowania - Wpisz tutaj **!cancel**\n");
             EmbedBuilder getEventName = new EmbedBuilder();
             getEventName.setColor(Color.YELLOW);
             getEventName.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);

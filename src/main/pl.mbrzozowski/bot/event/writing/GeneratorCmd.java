@@ -54,7 +54,7 @@ public class GeneratorCmd extends Proccess {
                     }
                 }
             }
-        } else if (indexOfGenerator >= 0 && messageReceived != null) {
+        } else if (indexOfGenerator >= 0 && messageReceived.isFromType(ChannelType.PRIVATE)) {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
                 EmbedInfo.cancelEventGenerator(message.getUserID());
                 eventsGeneratorModel.removeGenerator(indexOfGenerator);
