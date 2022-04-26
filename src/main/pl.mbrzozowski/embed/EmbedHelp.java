@@ -21,10 +21,8 @@ public class EmbedHelp {
 
     private static final String REKRUT = "recrut";
     private static final String GENERATOR = "generator";
-    private static final String CHANNEL = "channel";
     private static final String REMINDER = "reminder";
     private static final String GAME = "game";
-    private static final String SIGNIN = "zapisy";
     private static final String EVENT_SETTINGS = "event";
     private static final String QUESTIONNAIRE = "ankieta";
 
@@ -37,8 +35,6 @@ public class EmbedHelp {
         builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Komendy do rekrutów. \n" +
                 "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
                 "**!help " + QUESTIONNAIRE + "** - Tworzenie ankiet.\n" +
-                "**!help " + CHANNEL + "** - Tworzenie nowego kanału. Pomocne przy bardziej zaawansowanych zapisach z dłuższym, własnym opisem. \n" +
-                "**!help " + SIGNIN + " cmd** - Tworzenie zapisów przy pomocy komend (zaawansowane)\n" +
                 "**!help " + EVENT_SETTINGS + "** - (Rada klanu) - Zarządzanie eventami.\n" +
                 "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n" +
                 "**!help " + GAME + "** - Gry", false);
@@ -72,12 +68,6 @@ public class EmbedHelp {
             } else if (message[1].equalsIgnoreCase(GAME)) {
                 helpGame();
                 RangerLogger.info("Wyświetlona pomoc game");
-            } else if (message[1].equalsIgnoreCase(SIGNIN)) {
-                helpSignInCommand();
-                RangerLogger.info("Wyświetlona pomoc zapisy");
-            } else if (message[1].equalsIgnoreCase(CHANNEL)) {
-                helpNewChannel();
-                RangerLogger.info("Wyświetlona pomoc nowy kanał");
             } else if (message[1].equalsIgnoreCase(QUESTIONNAIRE)) {
                 helpQuestionnaire();
                 RangerLogger.info("Wyświetlona pomoc tworzenia ankiet");
@@ -86,11 +76,6 @@ public class EmbedHelp {
                     helpEventsSettings();
                     RangerLogger.info("Wyświetlona pomoc zarządzania eventami.");
                 }
-            }
-        } else if (message.length == 3) {
-            if (message[1].equalsIgnoreCase(SIGNIN) && message[2].equalsIgnoreCase("cmd")) {
-                helpSignInCommand();
-                RangerLogger.info("Wyświetlona pomoc zapisy");
             }
         }
     }
@@ -168,66 +153,6 @@ public class EmbedHelp {
         builder.addField("", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
                 "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
         builder.setFooter("Komendy można wpisać na dowolnym kanale na discordzie Rangers Polska.");
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    private static void helpSignInCommand() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
-        builder.setTitle(title + " - ZAPISY Komendy (zaawansowane)");
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.addField("ZAPISY/LISTA podstawowa", "\n>>> **!zapisy <nazwa> <data> <godzina>** - tworzy kanał i na nim listę.\n**!zapisyhere <nazwa> <data> <godzina>** - tworzy listę na kanale na którym się znajdujemy. " +
-                "Użyteczne przy tworzeniu w pierwszej kolejności kanału dla eventu, a potem jeżeli chcemy dodać listę. (Nowy kanał) \n\n " +
-                "Polecenie !zapisy wpisujemy na dowolnym kanale lub w prywatnej wiadomości do bota.\n" +
-                "Format daty: dd.MM.yyyy; Format czasu: hh:mm.\n" +
-                "Nazwa eventu jednoczłonowa bez opisu zawartego na liście. \n**UWAGA** Kolejność parametrów ma znaczenie! \n" +
-                "Dodatkowo możemy dodać tylko jeden parametr na końcu komendy.\n" +
-                "**-ac** kanał widoczny i ping dla ClanMember i Rekrut\n" +
-                "**-r** kanał widoczny dla Clan Member i rekrut, Pinguje tylko rekrutów.\n" +
-                "defaultowo widzi i pinguje Clan Memberów.\n\n" +
-                "(przykład: !zapisy CCFN 19.06.2021 19:30)\n" +
-                "(przykład: !zapisy CCFN 19.06.2021 19:30 -ac)\n" +
-                "(przykład: !zapisy CCFN 19.06.2021 19:30 -r)\n\n", false);
-        builder.addField("ZAPISY/LISTA zaawansowana z tworzeniem kanału", "\n>>> **!zapisy \n-name <nazwa> \n-date <data> \n-time <czas> \n-o <opis>** \n\n " +
-                "Polecenie wpisujemy na dowolnym kanale lub w prywatnej wiadomości do bota.\n" +
-                "Format daty: dd.MM.yyyy; Format czasu: hh:mm.\n" +
-                "Otwiera nowy kanał, tworzy listę. Używamy gdy nazwa eventu składa się więcej niż z jendego wyrazu " +
-                "lub chcemy dodać krótki opis eventu zawarty w na liscie\n" +
-                "Dodatkowe parametry:\n" +
-                "**-ac** kanał widoczny i ping dla ClanMember i Rekrut\n" +
-                "**-r** kanał widoczny dla Clan Member i rekrut, Pinguje tylko rekrutów.\n" +
-                "Defaultowo widzi i pinguje Clan Memberów.\n" +
-                "Maksymalna liczba znaków:\n" +
-                "Nazwa eventu - 256\n" +
-                "Tekst (opis eventu) - 2048 - Jeżeli chcesz wpisać własnoręcznie lub twój opis będzie dłuższy patrz **Nowy kanał**\n\n" +
-                "(przykład: !zapisy -name Event testowy -date 19.06.2021 -time 19:30 -o opis eventu -ac)\n\n", false);
-        builder.addField("ZAPISY/LISTA zaawansowana na kanale.", "\n>>> **!zapisyhere \n-name <nazwa> \n-date <data> \n-time <czas> \n-o <opis>** \n\n " +
-                "Format daty: dd.MM.yyyy; Format czasu: hh:mm.\n" +
-                "Tworzy listę na mecz na kanale na którym się znajdujemy. Używamy gdy nazwa eventu składa się więcej niż z jendego wyrazu " +
-                "lub chcemy dodać krótki opis eventu zawarty w na liscie\n" +
-                "Dodatkowe parametry:\n" +
-                "**-ac** kanał widoczny i ping dla ClanMember i Rekrut\n" +
-                "**-r** kanał widoczny dla Clan Member i rekrut, Pinguje tylko rekrutów.\n" +
-                "**-c** kanał widoczny dla Clan Member, Pinguje tylko Clan Memberów.\n" +
-                "defaultowo lista tworzy się bez pingowania żadnej roli nie nadpisując uprawnień kanału.\n" +
-                "Maksymalna liczba znaków:\n" +
-                "Nazwa eventu - 256\n" +
-                "Tekst (opis eventu) - 2048\n\n" +
-                "(przykład: !zapisyhere -name Event testowy -date 19.06.2021 -time 19:30 -o opis eventu -ac)\n\n", false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    private static void helpNewChannel() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(title + " - NOWY KANAŁ");
-        builder.setColor(Color.YELLOW);
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.addField("Tworzymy gdy opis eventu jest zbyt długi by zmieścić go na liście.", ">>> **!newChannel** - Tworzy nowy kanał.\n" +
-                "*(Polecenie możesz wpisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*\n" +
-                "**!name <nazwa>** - wpisz na nowo utworzonym kanale aby zmienić nazwe kanału (najlepiej nazwa eventu)\n\n" +
-                "Następnie wpisz swój opis i użyj komendy !generatorhere", false);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
