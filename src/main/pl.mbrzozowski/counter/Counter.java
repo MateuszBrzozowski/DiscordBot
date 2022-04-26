@@ -40,7 +40,7 @@ public class Counter {
         builder.setTitle(TITLE);
         builder.addField(getFirstPlace(), getSecondThirdPlace(), false);
         builder.setFooter(FOOTER);
-        jda.getTextChannelById(channelID).sendMessage(builder.build()).queue();
+        jda.getTextChannelById(channelID).sendMessageEmbeds(builder.build()).queue();
     }
 
     public void showTopTen(String channelID) {
@@ -51,7 +51,7 @@ public class Counter {
         builder.setTitle(TITLE);
         builder.addField(getFirstThreePlace(), getPlaceFromFourToTen(), false);
         builder.setFooter(FOOTER);
-        jda.getTextChannelById(channelID).sendMessage(builder.build()).queue();
+        jda.getTextChannelById(channelID).sendMessageEmbeds(builder.build()).queue();
     }
 
     public void showUser(String userID, String channelID) {
@@ -84,7 +84,7 @@ public class Counter {
                     false);
         }
         builder.setFooter(FOOTER);
-        jda.getTextChannelById(channelID).sendMessage(builder.build()).queue();
+        jda.getTextChannelById(channelID).sendMessageEmbeds(builder.build()).queue();
     }
 
     private int msgAfterUser(List<CounterUser> sortedUsers, int place) {

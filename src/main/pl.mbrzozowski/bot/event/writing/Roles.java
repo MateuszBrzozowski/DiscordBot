@@ -4,7 +4,7 @@ import bot.event.RoleEditor;
 import helpers.Commands;
 import helpers.Users;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -13,13 +13,13 @@ import ranger.Repository;
 public class Roles extends Proccess {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private GuildMessageReceivedEvent event;
+
     private String userID;
     private JDA jda = Repository.getJda();
 
-    public Roles(GuildMessageReceivedEvent event) {
-        this.event = event;
-        this.userID = event.getAuthor().getId();
+    public Roles(MessageReceivedEvent messageReceivedEvent) {
+        super(messageReceivedEvent);
+        this.userID = messageReceived.getAuthor().getId();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Roles extends Proccess {
     }
 
     private void sendMessageNoClanMember() {
-        event.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Rola niedostępna.").queue();
+        messageReceived.getChannel().sendMessage("*" + Users.getUserNicknameFromID(userID) + "*, Rola niedostępna.").queue();
     }
 
 }

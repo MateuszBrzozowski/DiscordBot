@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -73,7 +73,7 @@ public class ActiveEvent {
         return name;
     }
 
-    public void addToMainList(MemberOfServer member, ButtonClickEvent event) {
+    public void addToMainList(MemberOfServer member, ButtonInteractionEvent event) {
         if (checkMemberOnMainList(member)) {
             EmbedInfo.cantSignIn(event.getUser().getId());
         } else {
@@ -84,12 +84,12 @@ public class ActiveEvent {
         }
     }
 
-    public void addToMainList(String userID, String userName, ButtonClickEvent event) {
+    public void addToMainList(String userID, String userName, ButtonInteractionEvent event) {
         MemberOfServer memberMy = new MemberOfServer(userID, userName);
         addToMainList(memberMy, event);
     }
 
-    public void addToReserveList(MemberOfServer member, ButtonClickEvent event) {
+    public void addToReserveList(MemberOfServer member, ButtonInteractionEvent event) {
         if (checkMemberOnReserveList(member)) {
             EmbedInfo.cantSignInReserve(event.getUser().getId());
         } else {
@@ -101,7 +101,7 @@ public class ActiveEvent {
         }
     }
 
-    public void addToReserveList(String userID, String userName, ButtonClickEvent event) {
+    public void addToReserveList(String userID, String userName, ButtonInteractionEvent event) {
         MemberOfServer memberMy = new MemberOfServer(userID, userName);
         addToReserveList(memberMy, event);
     }

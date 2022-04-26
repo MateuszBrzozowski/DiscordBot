@@ -70,7 +70,7 @@ public class Reminder extends TimerTask {
             builder.setDescription(chooseDescription());
             builder.addField("Szczegóły eventu", linkToEvent + "\n:date: " + dateTimeEvent, false);
             builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help reminder");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 

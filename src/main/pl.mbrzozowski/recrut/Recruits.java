@@ -11,10 +11,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.managers.ChannelManager;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -32,7 +33,7 @@ public class Recruits {
     private List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
     private List<MemberWithPrivateChannel> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RangerLogger rangerLogger = new RangerLogger();
 
@@ -61,7 +62,7 @@ public class Recruits {
                             textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
                                     "<@&" + RoleID.RADA_KLANU + "> ")
-                                    .embed(builder.build())
+                                    .setEmbeds(builder.build())
                                     .queue();
                             textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
                             addUserToList(userID, userName, textChannel.getId());
@@ -77,7 +78,7 @@ public class Recruits {
         cleaner.clean();
     }
 
-    public void newPodanie(ButtonClickEvent event) {
+    public void newPodanie(@NotNull ButtonInteractionEvent event) {
         String userName = event.getUser().getName();
         String userID = event.getUser().getId();
         if (!checkUser(userID)) {
@@ -102,7 +103,7 @@ public class Recruits {
             builder.setDescription("Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Skontaktuję się z Tobą jeden z naszych Drillów aby wprowadzić Cię" +
                     " w nasze szeregi. Poprosimy również o wypełnienie krótkiego formularza.");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessage(builder.build()).setActionRow(Button.success("recrutY", "Potwierdzam"), Button.danger("recrutN", "Rezygnuję")).queue(message -> {
+            privateChannel.sendMessageEmbeds(builder.build()).setActionRow(Button.success("recrutY", "Potwierdzam"), Button.danger("recrutN", "Rezygnuję")).queue(message -> {
                 Thread timer = new Thread(() -> {
                     try {
                         Thread.sleep(1000 * 60 * 2); //2 minuty oczekiwania na odpowiedź
@@ -126,7 +127,7 @@ public class Recruits {
         builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
         builder.setTitle("Uwaga");
         builder.setDescription("Brak odpowiedzi. Anuluje podanie.");
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public void confirm(String userID, MessageChannel privateChannel, String messageID) {
@@ -176,7 +177,7 @@ public class Recruits {
         channel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessage(messageEmbed).setActionRow(Button.success("recrutY", "Potwierdzam").asDisabled(), Button.danger("recrutN", "Rezygnuję").asDisabled()).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success("recrutY", "Potwierdzam").asDisabled(), Button.danger("recrutN", "Rezygnuję").asDisabled()).queue();
         });
     }
 
@@ -286,13 +287,13 @@ public class Recruits {
         rdb.removeUser(channelID);
     }
 
-    public void closeChannel(GuildMessageReceivedEvent event) {
-        TextChannel textChannel = event.getChannel();
-        boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
+    public void closeChannel(MessageReceivedEvent event) {
+        MessageChannel messageChannel = event.getTextChannel();
+        boolean isRecruitChannel = isRecruitChannel(messageChannel.getId());
         if (isRecruitChannel) {
             int indexOfRecrut = getIndexOfRecrut(event.getChannel().getId());
             Member member = event.getGuild().getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
-            ChannelManager manager = textChannel.getManager();
+            TextChannelManager manager = event.getTextChannel().getManager();
             manager.putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
             if (member != null)
                 manager.putPermissionOverride(member, null, permissions);
@@ -311,18 +312,18 @@ public class Recruits {
         return -1;
     }
 
-    public void reOpenChannel(GuildMessageReceivedEvent event) {
-        TextChannel textChannel = event.getChannel();
-        boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
+    public void reOpenChannel(MessageReceivedEvent event) {
+        MessageChannel messageChannel = event.getChannel();
+        boolean isRecruitChannel = isRecruitChannel(messageChannel.getId());
         if (isRecruitChannel) {
-            int indexOfRecrut = getIndexOfRecrut(textChannel.getId());
+            int indexOfRecrut = getIndexOfRecrut(messageChannel.getId());
             Member member = event.getGuild().getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
-            ChannelManager manager = textChannel.getManager();
+            TextChannelManager manager = event.getTextChannel().getManager();
             manager.putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), permViewChannel, null);
             if (member != null)
                 manager.putPermissionOverride(member, permissions, null);
             manager.queue();
-            EmbedInfo.openChannel(event.getAuthor().getId(), event.getChannel());
+            EmbedInfo.openChannel(event.getAuthor().getId(), event.getTextChannel());
         }
     }
 
@@ -344,9 +345,9 @@ public class Recruits {
         return "-1";
     }
 
-    public void deleteChannel(GuildMessageReceivedEvent event) {
+    public void deleteChannel(MessageReceivedEvent event) {
         logger.info("Kanał jest kanałem rekrutacyjnym.");
-        EmbedInfo.removedChannel(event.getChannel());
+        EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);
@@ -374,7 +375,7 @@ public class Recruits {
         activeRecruitsBuilder.setColor(Color.RED);
         activeRecruitsBuilder.setTitle("Rekruci");
         activeRecruitsBuilder.addField("Aktywnych rekrutacji", String.valueOf(activeRecruits.size()), false);
-        privateChannel.sendMessage(activeRecruitsBuilder.build()).queue();
+        privateChannel.sendMessageEmbeds(activeRecruitsBuilder.build()).queue();
         for (MemberWithPrivateChannel r : activeRecruits) {
             JDA jda = Repository.getJda();
             String channelName = jda.getTextChannelById(r.getChannelID()).getName();
@@ -384,7 +385,7 @@ public class Recruits {
             builder.addField("Nazwa użytkownika", r.getUserName(), true);
             builder.addField("ID kanału", r.getChannelID(), false);
             builder.addField("Nazwa kanału", channelName, true);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         }
     }
 
@@ -398,10 +399,10 @@ public class Recruits {
             boolean hasRoleClanMember = Users.hasUserRole(recruitID, RoleID.CLAN_MEMBER_ID);
             boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
             if (!hasRoleClanMember) {
-                guild.addRoleToMember(recruitID, roleClanMember).queue();
+                guild.addRoleToMember(UserSnowflake.fromId(recruitID), roleClanMember).queue();
             }
             if (hasRoleRecrut) {
-                guild.removeRoleFromMember(recruitID, roleRecruit).queue();
+                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecruit).queue();
             }
         }
     }
@@ -414,7 +415,7 @@ public class Recruits {
             String recruitID = getRecruitIDFromChannelID(channel.getId());
             boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
             if (hasRoleRecrut) {
-                guild.removeRoleFromMember(recruitID, roleRecrut).queue();
+                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecrut).queue();
             }
         }
     }

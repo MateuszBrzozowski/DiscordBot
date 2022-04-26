@@ -9,9 +9,10 @@ import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class EmbedInfo {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("Oszalałeś? Nie możesz zmienić nazwy tego kanału!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -54,7 +55,7 @@ public class EmbedInfo {
             builder.setTitle("Jesteś już na liście");
             builder.setDescription("Jesteś już na głównej liście w meczu na który próbowałeś się zapisać.");
             builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -72,7 +73,7 @@ public class EmbedInfo {
             builder.setTitle("Jesteś już na liście rezerwowej");
             builder.setDescription("Jesteś już na rezerwowej liście w meczu na który próbowałeś się zapisać.");
             builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -90,7 +91,7 @@ public class EmbedInfo {
             builder.setTitle("Nie możesz wypisać się z tego meczu.");
             builder.setDescription("Nie możesz wypisać się z meczu na który się nie zapisałeś!");
             builder.addField("", "Jeżeli jednak jesteś na liście a nadal otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -107,7 +108,7 @@ public class EmbedInfo {
             builder.setTitle("Podałeś nieprawidłowe dane.");
             builder.setDescription("Format daty: dd.MM.yyyy\n" +
                     "Format czasu: hh:mm");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -124,23 +125,22 @@ public class EmbedInfo {
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
             builder.setTitle("Podałeś nielogiczną datę i czas. Event w przeszłości?");
             builder.setDescription("Podaj prawidłową datę i czas.");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
     /**
      * Wyświetla informację, że kanał podany w parametrze został zamknięty.
-     *
-     * @param userID  ID użytkownika który zamyka kanał
+     *  @param userID  ID użytkownika który zamyka kanał
      * @param channel Kanał który został zamknięty.
      */
-    public static void closeChannel(String userID, TextChannel channel) {
+    public static void closeChannel(String userID, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        channel.sendMessage(builder.build())
+        channel.sendMessageEmbeds(builder.build())
                 .setActionRow(Button.danger("removeChannel", "Usuń kanał"))
                 .queue();
     }
@@ -149,7 +149,7 @@ public class EmbedInfo {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Do you want close the ticket?");
-        channel.sendMessage(builder.build())
+        channel.sendMessageEmbeds(builder.build())
                 .setActionRow(Button.success("closeYes", "Yes"),
                         Button.danger("closeNo", "No"))
                 .queue();
@@ -159,7 +159,7 @@ public class EmbedInfo {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Potwierdź czy chcesz usunąć kanał?");
-        channel.sendMessage(builder.build())
+        channel.sendMessageEmbeds(builder.build())
                 .setActionRow(Button.success("removeChannelYes", "Tak"),
                         Button.danger("removeChannelNo", "Nie"))
                 .queue();
@@ -177,7 +177,7 @@ public class EmbedInfo {
         builder.setTitle("Kanał otwarty");
         builder.setDescription("Kanał otwarty przez " + Users.getUserNicknameFromID(userID) + ".");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     /**
@@ -190,7 +190,7 @@ public class EmbedInfo {
         builder.setColor(Color.GREEN);
         builder.setTitle("Kanał usunięty.");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     /**
@@ -208,7 +208,7 @@ public class EmbedInfo {
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-            channel.sendMessage("<@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").embed(builder.build()).queue();
+            channel.sendMessage("<@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").setEmbeds(builder.build()).queue();
         }
     }
 
@@ -227,7 +227,7 @@ public class EmbedInfo {
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-            channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").embed(builder.build()).queue();
+            channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").setEmbeds(builder.build()).queue();
         }
     }
 
@@ -249,7 +249,7 @@ public class EmbedInfo {
             builder.addField("1. Spradź kanały", "Znajdź kanał przypisany do twojej rekrutacji i napisz do nas.", false);
             builder.addField("2.Nie widze kanału.", "Jeżeli nie widzisz kanału przypisanego do twojej rekrutacji " +
                     "skontaktuj się z Drill Instrutor. Znajdziesz ich po prawej stronie na liście użytkowników.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
             RangerLogger.info("Użytkonik [" + Users.getUserName(userID) + "] chciał złożyć podanie. Ma otwarty kanał rekrutacji.");
         });
     }
@@ -267,7 +267,7 @@ public class EmbedInfo {
             builder.setColor(Color.red);
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
             builder.setDescription("Jesteś już w naszym klanie dzbanie!");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
             RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Jest już w naszym klanie.");
         });
     }
@@ -288,7 +288,7 @@ public class EmbedInfo {
             builder.addBlankField(false);
             builder.addField("- Nie należę do żadnego klanu", "Proszę znajdź użytkownika z rolą Rada klanu na naszym discordzie i " +
                     "napisz do nas.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
             RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
         });
     }
@@ -304,7 +304,7 @@ public class EmbedInfo {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setTitle("MIAŁEŚ AKTYWNY GENERATOR");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -320,7 +320,7 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("OTWIERAM NOWY GENERATOR");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -329,7 +329,7 @@ public class EmbedInfo {
      *
      * @param event Wydarzenie napisania wiadomości na kanale tekstowym.
      */
-    public static void noWriteOnLoggerChannel(@NotNull GuildMessageReceivedEvent event) {
+    public static void noWriteOnLoggerChannel(@NotNull MessageReceivedEvent event) {
         if (!event.getAuthor().isBot()) {
             event.getMessage().delete().submit();
             JDA jda = Repository.getJda();
@@ -340,7 +340,7 @@ public class EmbedInfo {
                 builder.setDescription("Panie administratorze! Zachowajmy czystość na kanale do loggowania. Proszę nie wtrącać się w moje wypociny.");
                 builder.setFooter("RangerBot created by Brzozaaa © 2021");
                 builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-                privateChannel.sendMessage(builder.build()).queue();
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
             });
         }
     }
@@ -358,7 +358,7 @@ public class EmbedInfo {
             builder.setColor(Color.RED);
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
             builder.setTitle("Event już się wydarzył. Nie możesz się zapisać.");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -381,7 +381,7 @@ public class EmbedInfo {
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
             builder.addField("Link do eventu", linkToEventChannel, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -404,7 +404,7 @@ public class EmbedInfo {
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
             builder.addField("Link do eventu", linkToEventChannel, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -438,7 +438,7 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("Przypomnienia wyłączone.");
             builder.setDescription("Aby włączyć ponownie przypomnienia użyj komendy **!reminder On**");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -454,7 +454,7 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("Przypomnienia włączone.");
             builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -484,7 +484,7 @@ public class EmbedInfo {
             builder.setTitle("**UWAGA:** Zmiany w wydarzeniu.");
             builder.setDescription(finalDescription);
             builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
             logger.info("USER: {} -  wysłałem powiadomienie", userID);
         });
     }
@@ -501,7 +501,7 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -512,7 +512,7 @@ public class EmbedInfo {
             builder.setColor(Color.GREEN);
             builder.setTitle("Edytor zamknięty");
             builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -525,7 +525,7 @@ public class EmbedInfo {
         builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping. \n" +
                 "**All seeders will recive whitelist.**", false);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        channel.sendMessage(builder.build()).setActionRow(Button.success("seedrole", "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
+        channel.sendMessageEmbeds(builder.build()).setActionRow(Button.success("seedrole", "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
     }
 
     public static void sendHelloMessagePrivate(String userID) {
@@ -537,7 +537,7 @@ public class EmbedInfo {
             builder.setDescription("Bla bla bla bla bla\nBla bla bla bla bla\nBla bla bla bla bla\n");
             builder.setThumbnail(EmbedSettings.THUMBNAIL_FLAG_PL);
             builder.setImage(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
 
             EmbedBuilder builderEng = new EmbedBuilder();
             builderEng.setColor(Color.YELLOW);
@@ -545,7 +545,7 @@ public class EmbedInfo {
             builderEng.setDescription("Bla bla bla bla bla\nBla bla bla bla bla\nBla bla bla bla bla\n");
             builderEng.setThumbnail(EmbedSettings.THUMBNAIL_FLAG_ENG);
             builderEng.setImage(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessage(builderEng.build()).queue();
+            privateChannel.sendMessageEmbeds(builderEng.build()).queue();
         });
     }
 
@@ -554,7 +554,7 @@ public class EmbedInfo {
      *
      * @param channel Kanał na którym wstawiana jest formatka.
      */
-    public static void serverService(TextChannel channel) {
+    public static void serverService(MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
@@ -563,7 +563,7 @@ public class EmbedInfo {
                 "kliknij w odpowiedni przycisk poniżej.", false);
         builder.addField("--------------------", "If you need help of Rangers Polska Servers Admins, " +
                 "please react with the correct button below.", false);
-        channel.sendMessage(builder.build()).setActionRow(
+        channel.sendMessageEmbeds(builder.build()).setActionRow(
                 Button.primary("Report", "Report Player").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
                 Button.primary("Unban", "Unban appeal").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
                 Button.primary("Contact", "Contact With Admin").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
@@ -583,7 +583,7 @@ public class EmbedInfo {
             builder.setTitle("Nie możesz utowrzyć kanału.\nYou can't create a ticket.");
             builder.setDescription("Prawdopodobnie masz już aktywny bilet. Jeśli go nie widzisz, skontaktuj się bezpośrednio z Adminem serwera.\n\n" +
                     "Probably you have active ticket. If you can't see channel, please contact directly with Server Admin.");
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -608,7 +608,7 @@ public class EmbedInfo {
                 "3. Server name.\n" +
                 "4. Add evidence. Screenshot or video link (e.g. Youtube).", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
-                .embed(builder.build())
+                .setEmbeds(builder.build())
                 .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> {
                     message.pin().queue();
@@ -632,7 +632,7 @@ public class EmbedInfo {
                 "1. Provide your ingame nick and/or steamid.\n" +
                 "2. Server name.", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
-                .embed(builder.build())
+                .setEmbeds(builder.build())
                 .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> {
                     message.pin().queue();
@@ -654,7 +654,7 @@ public class EmbedInfo {
         builder.addField("--------------------", "Please describe your problem with more details, " +
                 "screenshots, servername the issue occured on and related steamId64", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
-                .embed(builder.build())
+                .setEmbeds(builder.build())
                 .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> {
                     message.pin().queue();
@@ -669,7 +669,7 @@ public class EmbedInfo {
         builder.setDescription("If you want to link your discord account to your steam account use the command **!profile <steam64ID>**\n\n" +
                 "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
                 "e.g. \n*!profile 76561197990543288*");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void connectSuccessfully(TextChannel channel) {
@@ -679,7 +679,7 @@ public class EmbedInfo {
         builder.setTitle("Successfully");
         builder.setDescription("Your discord account is linked to your Steam profile.\n" +
                 "You can use command **!stats** to view your statistic from our server.");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void connectUnSuccessfully(TextChannel channel) {
@@ -689,14 +689,14 @@ public class EmbedInfo {
         builder.setTitle("Steam64ID is not valid");
         builder.setDescription("Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
                 "e.g. \n*!profile 76561197990543288*");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void youCanCheckStatsOnChannel(TextChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLACK);
         builder.setDescription("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void noDataToShow(TextChannel channel) {
@@ -706,6 +706,6 @@ public class EmbedInfo {
         builder.setDescription("If you played on our server and there is no data, please check your Steam64ID and update it by command !profile.\n\n" +
                 "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
                 "e.g. \n*!profile 76561197990543288*");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 }

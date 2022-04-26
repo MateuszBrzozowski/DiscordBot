@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -223,7 +223,7 @@ public class Questionnaires {
             Button b = Button.primary("null", "Ankieta zakończona.");
             b = b.asDisabled();
             MessageEmbed messageEmbed = message.getEmbeds().get(0);
-            message.editMessage(messageEmbed).setActionRow(b).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(b).queue();
             message.clearReactions().queue();
         });
     }

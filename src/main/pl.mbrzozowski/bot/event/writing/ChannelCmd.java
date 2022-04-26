@@ -3,21 +3,13 @@ package bot.event.writing;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 
 public class ChannelCmd extends Proccess {
 
-    private GuildMessageReceivedEvent guildEvent;
-    private PrivateMessageReceivedEvent privateEvent;
-
-    public ChannelCmd(GuildMessageReceivedEvent receivedEvent) {
-        this.guildEvent = receivedEvent;
-    }
-
-    public ChannelCmd(PrivateMessageReceivedEvent privateEvent) {
-        this.privateEvent = privateEvent;
+    public ChannelCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override
@@ -25,27 +17,27 @@ public class ChannelCmd extends Proccess {
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.NEW_CHANNEL)) {
             String userID = message.getUserID();
             Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-            if (guildEvent != null) {
-                guildEvent.getMessage().delete().submit();
+            if (messageReceived != null) {
+                messageReceived.getMessage().delete().submit();
             }
             getEvents().createNewChannel(guild, userID);
         } else if (message.getWords().length > 1 && message.getWords().length < 100 && message.getWords()[0].equalsIgnoreCase(Commands.NAME)) {
-            if (guildEvent != null) {
-                if (getEvents().checkChannelIsInEventCategory(guildEvent)) {
+            if (messageReceived != null) {
+                if (getEvents().checkChannelIsInEventCategory(messageReceived)) {
                     String name = getNewChannelNameFromMsg(message.getWords());
-                    guildEvent.getMessage().delete().submit();
-                    guildEvent.getChannel().getManager().setName(name).queue();
+                    messageReceived.getMessage().delete().submit();
+                    messageReceived.getTextChannel().getManager().setName(name).queue();
                 }
             }
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.REMOVE_CHANNEL)) {
             if (message.isAdmin()) {
-                if (guildEvent != null) {
-                    guildEvent.getMessage().delete().submit();
-                    String channelID = guildEvent.getChannel().getId();
+                if (messageReceived != null) {
+                    messageReceived.getMessage().delete().submit();
+                    String channelID = messageReceived.getTextChannel().getId();
                     if (getRecruits().isRecruitChannel(channelID)) {
-                        getRecruits().deleteChannel(guildEvent);
+                        getRecruits().deleteChannel(messageReceived);
                     } else if (getEvents().isActiveMatchChannelID(channelID) >= 0) {
-                        getEvents().deleteChannel(guildEvent);
+                        getEvents().deleteChannel(messageReceived);
                     }
                 }
             }

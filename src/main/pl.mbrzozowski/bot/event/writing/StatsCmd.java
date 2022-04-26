@@ -3,43 +3,38 @@ package bot.event.writing;
 import embed.EmbedInfo;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ranger.RangerBot;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 import stats.ServerStats;
 
 public class StatsCmd extends Proccess {
 
-    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-
-    public StatsCmd(GuildMessageReceivedEvent event) {
-        super.setGuildEvent(event);
+    public StatsCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override
     public void proccessMessage(Message message) {
         ServerStats serverStats = Repository.getServerStats();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS)) {
-            if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
-                if (serverStats.isUserConnected(guildEvent.getAuthor().getId())) {
-                    serverStats.viewStatsForUser(guildEvent.getAuthor().getId(), guildEvent.getChannel());
+            if (messageReceived.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                if (serverStats.isUserConnected(messageReceived.getAuthor().getId())) {
+                    serverStats.viewStatsForUser(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
                 } else {
-                    EmbedInfo.notConnectedAccount(guildEvent.getChannel());
+                    EmbedInfo.notConnectedAccount(messageReceived.getTextChannel());
                 }
             } else {
-                EmbedInfo.youCanCheckStatsOnChannel(guildEvent.getChannel());
+                EmbedInfo.youCanCheckStatsOnChannel(messageReceived.getTextChannel());
             }
         } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_PROFILE)) {
-            if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
-                if (serverStats.connectUserToSteam(guildEvent.getAuthor().getId(), message.getWords()[1])) {
-                    EmbedInfo.connectSuccessfully(guildEvent.getChannel());
+            if (messageReceived.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                if (serverStats.connectUserToSteam(messageReceived.getAuthor().getId(), message.getWords()[1])) {
+                    EmbedInfo.connectSuccessfully(messageReceived.getTextChannel());
                 } else {
-                    EmbedInfo.connectUnSuccessfully(guildEvent.getChannel());
+                    EmbedInfo.connectUnSuccessfully(messageReceived.getTextChannel());
                 }
             } else {
-                EmbedInfo.youCanCheckStatsOnChannel(guildEvent.getChannel());
+                EmbedInfo.youCanCheckStatsOnChannel(messageReceived.getTextChannel());
             }
         } else {
             getNextProccess().proccessMessage(message);

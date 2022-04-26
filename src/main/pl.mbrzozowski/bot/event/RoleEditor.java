@@ -4,6 +4,7 @@ import helpers.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import ranger.Repository;
 
 public class RoleEditor {
@@ -16,11 +17,11 @@ public class RoleEditor {
         if (role != null) {
             boolean hasRole = Users.hasUserRole(userID, role.getId());
             if (!hasRole) {
-                guild.addRoleToMember(userID, role).queue();
+                guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, true);
                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał roblę **SEED**");
             } else {
-                guild.removeRoleFromMember(userID, role).queue();
+                guild.removeRoleFromMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, false);
                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął roblę **SEED**");
             }

@@ -1,7 +1,7 @@
 package bot.event;
 
 import event.Event;
-import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ public class ChannelUpdate extends ListenerAdapter {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
-    public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
+    public void onChannelDelete(@NotNull ChannelDeleteEvent event) {
         Recruits recruits = Repository.getRecruits();
         Event events = Repository.getEvent();
         ServerService serverService = Repository.getServerService();

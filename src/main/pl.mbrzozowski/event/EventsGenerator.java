@@ -5,9 +5,7 @@ import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -19,7 +17,7 @@ public class EventsGenerator {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private JDA jda = Repository.getJda();
-    private boolean here = false;
+    private boolean isSpecificChannel = false;
     private String userID;
     private String userName;
     private String nameEvent;
@@ -28,21 +26,14 @@ public class EventsGenerator {
     private String description = "";
     private String perm;
     private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
-    GuildMessageReceivedEvent eventMsgRec = null;
-    PrivateMessageReceivedEvent eventPrivateMsgRec = null;
+    MessageReceivedEvent messageReceived = null;
+//    PrivateMessageReceivedEvent eventPrivateMsgRec = null;
 
 
-    public EventsGenerator(@NotNull GuildMessageReceivedEvent event) {
+    public EventsGenerator(MessageReceivedEvent event) {
         userID = event.getMessage().getAuthor().getId();
         userName = event.getMessage().getAuthor().getName();
-        this.eventMsgRec = event;
-        embedStart();
-    }
-
-    public EventsGenerator(@NotNull PrivateMessageReceivedEvent event) {
-        userID = event.getMessage().getAuthor().getId();
-        userName = event.getMessage().getAuthor().getName();
-        this.eventPrivateMsgRec = event;
+        this.messageReceived = event;
         embedStart();
     }
 
@@ -63,8 +54,8 @@ public class EventsGenerator {
             EmbedBuilder getEventName = new EmbedBuilder();
             getEventName.setColor(Color.YELLOW);
             getEventName.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
-            privateChannel.sendMessage(builder.build()).queue();
-            privateChannel.sendMessage(getEventName.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(getEventName.build()).queue();
         });
     }
 
@@ -72,7 +63,7 @@ public class EventsGenerator {
         return userID;
     }
 
-    void saveAnswerAndSetNextStage(PrivateMessageReceivedEvent event) {
+    void saveAnswerAndSetNextStage(MessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
         switch (stageOfGenerator) {
             case SET_NAME: {
@@ -238,9 +229,11 @@ public class EventsGenerator {
         Event e = Repository.getEvent();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
-        if (eventMsgRec != null)
-            e.createNewEventFromSpecificData(cmdTable, userID, eventMsgRec.getChannel());
-        else e.createNewEventFromSpecificData(cmdTable, userID, null);
+        if (isSpecificChannel) {
+            e.createNewEventFromSpecificData(cmdTable, userID, messageReceived.getTextChannel());
+        } else {
+            e.createNewEventFromSpecificData(cmdTable, userID, null);
+        }
         embedFinish();
         removeThisGenerator();
     }
@@ -268,7 +261,7 @@ public class EventsGenerator {
                     "SHOW - zobacz jak bedzie wygladac lista\n" +
                     "END - kończy generowanie listy.\n" +
                     "!CANCEL - anuluje generowanie listy", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -294,12 +287,12 @@ public class EventsGenerator {
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
         builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private String createCommand() {
         String command = "";
-        if (here) command = "!zapisyhere ";
+        if (isSpecificChannel) command = "!zapisyhere ";
         else command = "!zapisy ";
         return command + "-name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
     }
@@ -310,7 +303,7 @@ public class EventsGenerator {
             builder.setColor(Color.GREEN);
             builder.setTitle("GENEROWANIE LISTY ZAKOŃCZONE.");
             builder.addField("", "Sprawdź kanały na discordzie. Twój kanał i lista powinny być teraz widoczne.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -320,7 +313,7 @@ public class EventsGenerator {
             builder.setColor(Color.RED);
             builder.setTitle("BŁĄD");
             builder.addField("", "Generowanie Listy przerwane.", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -330,7 +323,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Twoja odpowiedź jest niepoprawna", "", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -341,7 +334,7 @@ public class EventsGenerator {
             builder.setColor(Color.RED);
             builder.addField("UWAGA - Długi opis!", "Twój opis jest za długi żebym mógł go umieścić " +
                     "bezpośrednio na liście. Maksymalna liczba znaków - 2048", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -350,7 +343,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Do kogo kierowane są zapisy.", "c - Clan Member\nac - Clan Member + Rekrut\nr - Rekrut", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -359,7 +352,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj opis, który umieszczę na liście.", "Maksymalna liczba znaków - 2048", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -368,7 +361,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowa odpowiedź", "", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -377,7 +370,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "T - TAK\nN - NIE", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -387,7 +380,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format czasu eventu lub data i czas jest z przeszłości.", "", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -396,7 +389,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj czas rozpoczęcia twojego eventu", "Format: hh:mm", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -406,7 +399,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format daty eventu lub podałeś czas z przeszłości.", "", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -415,7 +408,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj datę twojego eventu", "Format: dd.MM.yyyy", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -424,7 +417,7 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowa nazwa eventu", "", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
@@ -433,12 +426,12 @@ public class EventsGenerator {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 
-    public void setHere(boolean here) {
-        this.here = here;
+    public void setSpecificChannel(boolean specificChannel) {
+        this.isSpecificChannel = specificChannel;
     }
 
 }

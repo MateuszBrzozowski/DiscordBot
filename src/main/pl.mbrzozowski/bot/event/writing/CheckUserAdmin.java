@@ -1,13 +1,11 @@
 package bot.event.writing;
 
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CheckUserAdmin extends Proccess {
 
-    private PrivateMessageReceivedEvent privateEvent;
-
-    public CheckUserAdmin(PrivateMessageReceivedEvent privateEvent) {
-        this.privateEvent = privateEvent;
+    public CheckUserAdmin(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override
@@ -15,8 +13,8 @@ public class CheckUserAdmin extends Proccess {
         if (message.isAdmin()) {
             getNextProccess().proccessMessage(message);
         } else {
-            if (privateEvent != null){
-                InvalidCmd invalidCmd = new InvalidCmd();
+            if (messageReceived != null) {
+                InvalidCmd invalidCmd = new InvalidCmd(messageReceived);
                 invalidCmd.proccessMessage(message);
             }
         }

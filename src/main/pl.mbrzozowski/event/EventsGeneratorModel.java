@@ -1,6 +1,6 @@
 package event;
 
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class EventsGeneratorModel {
 
     }
 
-    public void saveAnswerAndNextStage(PrivateMessageReceivedEvent event, int indexOfGenerator) {
+    public void saveAnswerAndNextStage(MessageReceivedEvent event, int indexOfGenerator) {
         eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(event);
     }
 

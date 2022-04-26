@@ -3,7 +3,7 @@ package model;
 import embed.EmbedSettings;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -15,15 +15,16 @@ public class DiceGame {
     private String player1Name;
     private String player2Name;
 
-    public DiceGame(String[] gameName, @NotNull GuildMessageReceivedEvent event) {
+    public DiceGame(String[] gameName, @NotNull MessageReceivedEvent event) {
         this.gameName = getNameFromTable(gameName);
         this.channelID = event.getChannel().getId();
         embedInviteToGame(event);
     }
 
-    public DiceGame() {}
+    public DiceGame() {
+    }
 
-    private void embedInviteToGame(GuildMessageReceivedEvent event) {
+    private void embedInviteToGame(MessageReceivedEvent event) {
         player1Name = getUserNameFromEvent(event);
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
@@ -32,10 +33,10 @@ public class DiceGame {
         if (gameName != null) {
             builder.addField("Temat gry:", gameName, false);
         }
-        event.getChannel().sendMessage(builder.build()).queue();
+        event.getChannel().sendMessageEmbeds(builder.build()).queue();
     }
 
-    private String getUserNameFromEvent(GuildMessageReceivedEvent event) {
+    private String getUserNameFromEvent(MessageReceivedEvent event) {
         String userName = event.getMessage().getMember().getNickname();
         if (userName == null) {
             userName = event.getMessage().getAuthor().getName();
@@ -59,7 +60,7 @@ public class DiceGame {
         return channelID;
     }
 
-    public void play(GuildMessageReceivedEvent event) {
+    public void play(MessageReceivedEvent event) {
         player2Name = getUserNameFromEvent(event);
         while (true) {
             int player1 = losujLiczbę();
@@ -74,14 +75,14 @@ public class DiceGame {
         }
     }
 
-    private void showResult(String playerWinName, int winInt, String playerLoseName, int loseInt, GuildMessageReceivedEvent event) {
+    private void showResult(String playerWinName, int winInt, String playerLoseName, int loseInt, MessageReceivedEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail("https://www.iconsdb.com/icons/download/white/dice-64.png");
         if (gameName != null) builder.setTitle(gameName);
         builder.addField(playerWinName + " wygrał z " + playerLoseName, playerWinName + " : " + winInt + "\n" +
                 playerLoseName + " : " + loseInt, false);
-        event.getChannel().sendMessage(builder.build()).queue();
+        event.getChannel().sendMessageEmbeds(builder.build()).queue();
     }
 
     private int losujLiczbę() {
@@ -90,15 +91,15 @@ public class DiceGame {
         return liczba;
     }
 
-    public void playSolo(@NotNull GuildMessageReceivedEvent event) {
+    public void playSolo(@NotNull MessageReceivedEvent event) {
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
         EmbedBuilder builder = new EmbedBuilder();
         int liczba = losujLiczbę();
         builder.setColor(Color.WHITE);
         builder.setTitle("Wylosowana liczba:");
-        builder.addField(String.valueOf(liczba), "",false);
+        builder.addField(String.valueOf(liczba), "", false);
         builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
         builder.setFooter(userName);
-        event.getChannel().sendMessage(builder.build()).queue();
+        event.getChannel().sendMessageEmbeds(builder.build()).queue();
     }
 }

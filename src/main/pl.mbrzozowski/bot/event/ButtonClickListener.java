@@ -4,7 +4,7 @@ import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
 import helpers.RoleID;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class ButtonClickListener extends ListenerAdapter {
     private final Event events = Repository.getEvent();
 
     @Override
-    public void onButtonClick(@NotNull ButtonClickEvent event) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         Recruits recrut = Repository.getRecruits();
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
@@ -69,7 +69,7 @@ public class ButtonClickListener extends ListenerAdapter {
         }
     }
 
-    private void eventsButtonClick(@NotNull ButtonClickEvent event, int indexOfMatch) {
+    private void eventsButtonClick(@NotNull ButtonInteractionEvent event, int indexOfMatch) {
         if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
             events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN);
         } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {

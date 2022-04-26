@@ -1,33 +1,31 @@
 package bot.event.writing;
 
 import helpers.Commands;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import questionnaire.Questionnaires;
 
 public class QuestionnaireCmd extends Proccess {
 
-    private final GuildMessageReceivedEvent event;
-
-    public QuestionnaireCmd(GuildMessageReceivedEvent event) {
-        this.event = event;
+    public QuestionnaireCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE)) {
-            Questionnaires.buildQuestionaire(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
-            event.getMessage().delete().submit();
+            Questionnaires.buildQuestionaire(message.getContentDisplay(), message.getUserID(), messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_MULTIPLE)) {
-            Questionnaires.buildQuestionaireMultiple(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
-            event.getMessage().delete().submit();
+            Questionnaires.buildQuestionaireMultiple(message.getContentDisplay(), message.getUserID(), messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length > 1 && message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC)) {
-            Questionnaires.buildQuestionairePublic(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
-            event.getMessage().delete().submit();
+            Questionnaires.buildQuestionairePublic(message.getContentDisplay(), message.getUserID(), messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length > 1 && (message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_PUBLIC_MULTIPLE) || message.getWords()[0].equalsIgnoreCase(Commands.QUESTIONNAIRE_MULTIPLE_PUBLIC))) {
-            Questionnaires.buildQuestionairePublicMultiple(message.getContentDisplay(), message.getUserID(), event.getChannel().getId());
-            event.getMessage().delete().submit();
+            Questionnaires.buildQuestionairePublicMultiple(message.getContentDisplay(), message.getUserID(), messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length == 1 && isQuestionnaireCommand(message.getWords()[0])) {
-            event.getChannel().sendMessage("Podaj pytanie do ankiety. np. ***!ankieta Czy lubisz lato?***").queue();
+            messageReceived.getChannel().sendMessage("Podaj pytanie do ankiety. np. ***!ankieta Czy lubisz lato?***").queue();
         } else {
             getNextProccess().proccessMessage(message);
         }

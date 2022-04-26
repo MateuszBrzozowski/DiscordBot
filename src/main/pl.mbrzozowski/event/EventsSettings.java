@@ -5,7 +5,7 @@ import helpers.RangerLogger;
 import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -32,13 +32,11 @@ public class EventsSettings {
     private boolean ifEndingEvent = false;
     private boolean sendNotifi = false;
 
-    private final PrivateMessageReceivedEvent privateMsgEvent;
     private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
 
-    public EventsSettings(PrivateMessageReceivedEvent privateEvent) {
+    public EventsSettings(MessageReceivedEvent privateEvent) {
         this.userID = privateEvent.getAuthor().getId();
         this.userName = privateEvent.getMessage().getAuthor().getName();
-        this.privateMsgEvent = privateEvent;
         embedStart();
     }
 
@@ -51,7 +49,7 @@ public class EventsSettings {
             builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
                     "Wybierz event który chcesz edytować.\n\n" +
                     event.getActiveEventsIndexAndName());
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
             indexsWithAllEventsID = event.getAllEventID();
         });
     }
@@ -60,8 +58,8 @@ public class EventsSettings {
         return userID;
     }
 
-    public void saveAnswerAndSetNextStage(PrivateMessageReceivedEvent privateMsgEvent) {
-        String msg = privateMsgEvent.getMessage().getContentDisplay();
+    public void saveAnswerAndSetNextStage(MessageReceivedEvent messageReceivedEvent) {
+        String msg = messageReceivedEvent.getMessage().getContentDisplay();
         switch (stageOfSettings) {
             case CHOOSE_EVENT: {
                 int msgInteger = 0;
@@ -312,7 +310,7 @@ public class EventsSettings {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("Dalsze edytowanie niemożliwe. Spróbuj ponownie za chwilę uruchomić edytor.");
             builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-            privateChannel.sendMessage(builder.build());
+            privateChannel.sendMessageEmbeds(builder.build());
         });
 
     }
@@ -392,7 +390,7 @@ public class EventsSettings {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(color);
             builder.addField(title, description, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 

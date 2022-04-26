@@ -42,7 +42,7 @@ public class EmbedHelp {
                 "**!help " + EVENT_SETTINGS + "** - (Rada klanu) - Zarządzanie eventami.\n" +
                 "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n" +
                 "**!help " + GAME + "** - Gry", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void help(String userID, String[] message) {
@@ -111,7 +111,7 @@ public class EmbedHelp {
                 "Minimalnie możemy podać 2 odpowiedzi, maksymalnie 9. Jeżeli wypiszemy więcej odpowiedzi do ankiety zostaną dodane pierwsze 9.\n" +
                 "**(np. !ankieta Co bardziej lubisz? | Herabta | Kawa | Woda)**", false);
         builder.setFooter("");
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpEventsSettings() {
@@ -127,7 +127,7 @@ public class EmbedHelp {
                 "Wysyła powiadomienia do każdego uczestnika o odwołaniu.\n" +
                 "**!cancelEvent [msgID] -noNotifi** - Jak wyżej bez powiadomienia o odwołaniu.", false);
         builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpDevCommand() {
@@ -143,7 +143,7 @@ public class EmbedHelp {
                 "**!msgCancel** - Anuluje wysyłanie wiadomości jako bot.\n" +
                 "**!removeUserFromEvent [USER_ID] [EVENT_ID]** - Wykreśla użytkownika z eventu.\n" +
                 "**!removeUserFromEvents [USER_ID]** - Wykreśla użytkownika ze wszystkich eventów.", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpReminder() {
@@ -156,7 +156,7 @@ public class EmbedHelp {
                 "**!reminder Off** - Wyłącza powiadomienia\n" +
                 "**!reminder On** - Włącza powiadomienia");
         builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpGame() {
@@ -168,7 +168,7 @@ public class EmbedHelp {
         builder.addField("", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
                 "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
         builder.setFooter("Komendy można wpisać na dowolnym kanale na discordzie Rangers Polska.");
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpSignInCommand() {
@@ -215,7 +215,7 @@ public class EmbedHelp {
                 "Nazwa eventu - 256\n" +
                 "Tekst (opis eventu) - 2048\n\n" +
                 "(przykład: !zapisyhere -name Event testowy -date 19.06.2021 -time 19:30 -o opis eventu -ac)\n\n", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpNewChannel() {
@@ -228,7 +228,7 @@ public class EmbedHelp {
                 "*(Polecenie możesz wpisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*\n" +
                 "**!name <nazwa>** - wpisz na nowo utworzonym kanale aby zmienić nazwe kanału (najlepiej nazwa eventu)\n\n" +
                 "Następnie wpisz swój opis i użyj komendy !generatorhere", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpGenerator() {
@@ -244,7 +244,7 @@ public class EmbedHelp {
                         "Używać gdy opis eventu jest zbyt długi i nie zmieści się bezpośrednio na liście. (Maksymalna liczba znaków - 2048)\n" +
                         "Stwórz kanał, dodaj swój opis, a następnie wywołaj tą komendę. " +
                         "*(POMOC - Nowy kanał - !help channel)*\n\n", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private static void helpRecrut() {
@@ -259,7 +259,7 @@ public class EmbedHelp {
                 "**!open** - Otwiera kanał rekrutacji - rekrut ponownie może widzieć i pisać na kanale.\n" +
                 "**!remove** - Usuwa kanał rekrutacji. Możesz usunąć kanał ręcznie bez komendy.\n\n" +
                 "", false);
-        privateChannel.sendMessage(builder.build()).queue();
+        privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void infoEditEventChannel(String userID) {
@@ -276,7 +276,7 @@ public class EmbedHelp {
                     "**!generatorHere** - uruchamia generator tworzenia eventów\n" +
                     "lub stwórz listę bez generatora używając komendy **!zapisyhere** <- więcej informacji jak tworzyć " +
                     "listę w pomocy bota pod komendą **!help**", false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
     }
 

@@ -2,30 +2,24 @@ package bot.event.writing;
 
 import embed.EmbedHelp;
 import helpers.Commands;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class HelpCmd extends Proccess {
 
-    private GuildMessageReceivedEvent guildEvent;
-    private PrivateMessageReceivedEvent privateEvent;
-
-    public HelpCmd(GuildMessageReceivedEvent guildEvent) {
-        this.guildEvent = guildEvent;
+    public HelpCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
-
-    public HelpCmd(PrivateMessageReceivedEvent privateEvent) {
-        this.privateEvent = privateEvent;
-    }
-
 
     @Override
     public void proccessMessage(Message message) {
-        if (message.getWords().length >= 1 && message.getWords()[0].equalsIgnoreCase(Commands.HELPS)) {
-            if (guildEvent != null) {
-                guildEvent.getMessage().delete().submit();
+        if (messageReceived.isFromType(ChannelType.PRIVATE)) {
+            if (message.getWords().length >= 1 && message.getWords()[0].equalsIgnoreCase(Commands.HELPS)) {
+                if (messageReceived != null) {
+                    messageReceived.getMessage().delete().submit();
+                }
+                EmbedHelp.help(message.getUserID(), message.getWords());
             }
-            EmbedHelp.help(message.getUserID(), message.getWords());
         } else {
             getNextProccess().proccessMessage(message);
         }

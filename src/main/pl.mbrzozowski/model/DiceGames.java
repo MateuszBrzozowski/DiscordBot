@@ -1,6 +1,6 @@
 package model;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class DiceGames {
         return false;
     }
 
-    public void play(GuildMessageReceivedEvent event) {
+    public void play(MessageReceivedEvent event) {
         int index = getIndexOfGame(event.getChannel().getId());
         diceGames.get(index).play(event);
         diceGames.remove(index);

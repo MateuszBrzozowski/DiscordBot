@@ -9,10 +9,11 @@ import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.managers.ChannelManager;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
@@ -28,14 +29,14 @@ import java.util.List;
 public class ServerService {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
-    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private List<MemberWithPrivateChannel> reports = new ArrayList<>();
 
     public void initialize() {
         pullUsersFromDatabase();
     }
 
-    public void buttonClick(ButtonClickEvent event, ButtonClickType buttonType) {
+    public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
         String userName = event.getUser().getName();
         if (!isUserOnList(userID)) {
@@ -54,8 +55,8 @@ public class ServerService {
         return false;
     }
 
-    public void closeChannel(GuildMessageReceivedEvent event) {
-        ChannelManager manager = event.getChannel().getManager();
+    public void closeChannel(MessageReceivedEvent event) {
+        TextChannelManager manager = event.getTextChannel().getManager();
         String channelID = event.getChannel().getId();
         String userID = getUserID(channelID);
         Member member = event.getGuild().getMemberById(userID);
@@ -66,9 +67,9 @@ public class ServerService {
         EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
     }
 
-    public void closeChannel(ButtonClickEvent event) {
+    public void closeChannel(@NotNull ButtonInteractionEvent event) {
         disableButtons(event.getChannel().getId(), event.getMessageId());
-        ChannelManager manager = event.getTextChannel().getManager();
+        TextChannelManager manager = event.getTextChannel().getManager();
         String channelID = event.getTextChannel().getId();
         String userID = getUserID(channelID);
         Member member = event.getGuild().getMemberById(userID);
@@ -79,7 +80,7 @@ public class ServerService {
         EmbedInfo.closeChannel(event.getUser().getId(), event.getTextChannel());
     }
 
-    public void removeChannel(ButtonClickEvent event) {
+    public void removeChannel(@NotNull ButtonInteractionEvent event) {
         disableButtons(event.getChannel().getId(), event.getMessageId());
         EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
@@ -116,7 +117,7 @@ public class ServerService {
                 buttonsNew.add(b);
             }
             MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
         });
     }
 

@@ -3,37 +3,34 @@ package bot.event.writing;
 import embed.EmbedInfo;
 import embed.Recruiter;
 import helpers.Commands;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RecrutCmd extends Proccess {
 
-    private GuildMessageReceivedEvent guildEvent;
-
-    public RecrutCmd(GuildMessageReceivedEvent guildEvent) {
-        this.guildEvent = guildEvent;
+    public RecrutCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
-
 
     @Override
     public void proccessMessage(Message message) {
         String cmd = message.getWords()[0];
         if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
-            guildEvent.getMessage().delete().submit();
-            new Recruiter(guildEvent);
+            messageReceived.getMessage().delete().submit();
+            new Recruiter(messageReceived);
         } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
-            guildEvent.getMessage().delete().submit();
-            EmbedInfo.endNegative(guildEvent.getAuthor().getId(), guildEvent.getChannel());
-            getRecruits().negativeResult(guildEvent.getChannel());
+            messageReceived.getMessage().delete().submit();
+            EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+            getRecruits().negativeResult(messageReceived.getTextChannel());
         } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
-            guildEvent.getMessage().delete().submit();
-            EmbedInfo.endPositive(guildEvent.getAuthor().getId(), guildEvent.getChannel());
-            getRecruits().positiveResult(guildEvent.getChannel());
+            messageReceived.getMessage().delete().submit();
+            EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+            getRecruits().positiveResult(messageReceived.getTextChannel());
         } else if (cmd.equalsIgnoreCase(Commands.REOPEN)) {
-            guildEvent.getMessage().delete().submit();
-            getRecruits().reOpenChannel(guildEvent);
+            messageReceived.getMessage().delete().submit();
+            getRecruits().reOpenChannel(messageReceived);
         } else if (cmd.equalsIgnoreCase(Commands.CLOSE)) {
-            guildEvent.getMessage().delete().submit();
-            getRecruits().closeChannel(guildEvent);
+            messageReceived.getMessage().delete().submit();
+            getRecruits().closeChannel(messageReceived);
         }
     }
 

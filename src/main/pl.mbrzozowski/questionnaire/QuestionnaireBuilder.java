@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,10 +99,10 @@ class QuestionnaireBuilder extends Questionnaire {
     private void sendInterfaceToTextChannel(EmbedBuilder builder) {
         JDA jda = Repository.getJda();
         TextChannel textChannel = jda.getTextChannelById(channelID);
-        textChannel.sendMessage(builder.build()).queue(message -> {
+        textChannel.sendMessageEmbeds(builder.build()).queue(message -> {
             MessageEmbed mOld = message.getEmbeds().get(0);
             String msgID = message.getId();
-            message.editMessage(mOld).setActionRow(
+            message.editMessageEmbeds(mOld).setActionRow(
                     Button.danger("end_" + msgID, END)
             ).queue();
             this.setMessageID(msgID);
@@ -298,7 +298,7 @@ class QuestionnaireBuilder extends Questionnaire {
                     , mOld.getFooter()
                     , mOld.getImage()
                     , fieldsNew);
-            message.editMessage(m).queue();
+            message.editMessageEmbeds(m).queue();
         });
     }
 
@@ -332,7 +332,7 @@ class QuestionnaireBuilder extends Questionnaire {
                     , mOld.getFooter()
                     , mOld.getImage()
                     , fieldsNew);
-            message.editMessage(m).queue();
+            message.editMessageEmbeds(m).queue();
         });
     }
 

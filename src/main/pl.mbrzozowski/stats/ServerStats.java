@@ -83,7 +83,7 @@ public class ServerStats {
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
-        channel.sendMessage(builder.build()).queue();
+        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     private PlayerStats pullStatsFromDatabase(Player player) {

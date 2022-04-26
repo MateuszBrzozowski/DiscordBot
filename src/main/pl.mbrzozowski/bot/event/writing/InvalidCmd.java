@@ -1,8 +1,13 @@
 package bot.event.writing;
 
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 
 public class InvalidCmd extends Proccess {
+
+    public InvalidCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
+    }
 
     @Override
     public void proccessMessage(Message message) {

@@ -1,7 +1,6 @@
 package bot.event;
 
 import event.Event;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
@@ -39,20 +38,20 @@ public class MessageUpdate extends ListenerAdapter {
                     try {
                         String emoji = event.getReaction().getReactionEmote().getEmoji();
                         if (!questionnaires.isPublic(questionnaireIndex)) {
-                            event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
+                            event.getReaction().removeReaction(event.getUser()).queue();
                         } else {
                             if (!questionnaires.isMultiple(questionnaireIndex)) {
                                 questionnaires.removeReaction(message, emoji, event.getUser());
                             }
-                            if (!questionnaires.isCorrectReaction(questionnaireIndex,emoji)){
-                                event.getReaction().removeReaction(User.fromId(event.getUserId())).queue();
+                            if (!questionnaires.isCorrectReaction(questionnaireIndex, emoji)) {
+                                event.getReaction().removeReaction(event.getUser()).queue();
                             }
                         }
                         questionnaires.saveAnswer(emoji, event.getMessageId(), event.getUser().getId());
 
                     } catch (IndexOutOfBoundsException e) {
                     } catch (IllegalStateException e) {
-                        event.getReaction().removeReaction(User.fromId(event.getUser().getId())).queue();
+                        event.getReaction().removeReaction(event.getUser()).queue();
                     }
                 });
             }
@@ -64,10 +63,10 @@ public class MessageUpdate extends ListenerAdapter {
         if (!event.getUser().isBot()) {
             Questionnaires questionnaires = Repository.getQuestionnaires();
             int questionnaireIndex = questionnaires.getIndex(event.getMessageId());
-            if (questionnaireIndex != -1){
-                if (questionnaires.isPublic(questionnaireIndex)){
+            if (questionnaireIndex != -1) {
+                if (questionnaires.isPublic(questionnaireIndex)) {
                     String emoji = event.getReaction().getReactionEmote().getEmoji();
-                    questionnaires.removeAnswer(emoji,event.getMessageId(),event.getUser().getId());
+                    questionnaires.removeAnswer(emoji, event.getMessageId(), event.getUser().getId());
                 }
             }
         }

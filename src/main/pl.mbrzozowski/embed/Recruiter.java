@@ -1,14 +1,14 @@
 package embed;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
 
 public class Recruiter {
 
-    public Recruiter(GuildMessageReceivedEvent event) {
+    public Recruiter(MessageReceivedEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("PODANIE");
@@ -16,6 +16,6 @@ public class Recruiter {
                 "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością. \n", false);
         builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        event.getChannel().sendMessage(builder.build()).setActionRow(Button.success("newRecrut", "Podanie")).queue();
+        event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success("newRecrut", "Podanie")).queue();
     }
 }

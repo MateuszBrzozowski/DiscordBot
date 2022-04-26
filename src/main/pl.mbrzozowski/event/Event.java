@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
@@ -31,7 +31,7 @@ public class Event {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private List<ActiveEvent> activeEvents = new ArrayList<>();
-    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_WRITE);
+    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
     public void initialize() {
@@ -357,15 +357,16 @@ public class Event {
         builder.addBlankField(true);
         builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + userName);
+
         try {
-            textChannel.sendMessage(msg).embed(builder.build()).setActionRow(
+            textChannel.sendMessage(msg).setEmbeds(builder.build()).setActionRow(
                     Button.primary("in_", "Zapisz"),
                     Button.secondary("reserve_", "Rezerwa"),
                     Button.danger("out_", "Wypisz"))
                     .queue(message -> {
                         MessageEmbed mOld = message.getEmbeds().get(0);
                         String msgID = message.getId();
-                        message.editMessage(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
+                        message.editMessageEmbeds(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
                                 Button.secondary("reserve_" + msgID, "Rezerwa"),
                                 Button.danger("out_" + msgID, "Wypisz")).queue();
                         message.pin().queue();
@@ -560,7 +561,7 @@ public class Event {
                     , mOld.getFooter()
                     , mOld.getImage()
                     , fieldsNew);
-            message.editMessage(m).queue();
+            message.editMessageEmbeds(m).queue();
 
         });
     }
@@ -596,7 +597,7 @@ public class Event {
         return -1;
     }
 
-    public void buttonClick(ButtonClickEvent event, int indexOfActiveMatch, ButtonClickType buttonClick) {
+    public void buttonClick(ButtonInteractionEvent event, int indexOfActiveMatch, ButtonClickType buttonClick) {
         String userName = Users.getUserNicknameFromID(event.getUser().getId());
         String userID = event.getUser().getId();
         if (eventIsAfter(indexOfActiveMatch)) {
@@ -736,7 +737,7 @@ public class Event {
                         , mOld.getFooter()
                         , mOld.getImage()
                         , fieldsNew);
-                message.editMessage(mNew).queue(message1 -> {
+                message.editMessageEmbeds(mNew).queue(message1 -> {
                     updateTimer(messageID);
                     if (notifi) {
                         activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
@@ -787,7 +788,7 @@ public class Event {
                         , mOld.getFooter()
                         , mOld.getImage()
                         , fieldsNew);
-                message.editMessage(mNew).queue(message1 -> {
+                message.editMessageEmbeds(mNew).queue(message1 -> {
                     updateTimer(messageID);
                     if (notifi) {
                         activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
@@ -841,7 +842,7 @@ public class Event {
                         , mOld.getFooter()
                         , mOld.getImage()
                         , fieldsNew);
-                message.editMessage(mNew).queue(message1 -> {
+                message.editMessageEmbeds(mNew).queue(message1 -> {
                     updateTimer(eventID);
                     if (notifi) {
                         activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
@@ -886,7 +887,7 @@ public class Event {
                 buttonsNew.add(b);
             }
             MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
         });
     }
 
@@ -909,7 +910,7 @@ public class Event {
                 buttonsNew.add(b);
             }
             MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessage(messageEmbed).setActionRow(buttonsNew).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
         });
     }
 
@@ -918,9 +919,9 @@ public class Event {
         edb.removeEvent(messageID);
     }
 
-    public void deleteChannel(GuildMessageReceivedEvent event) {
+    public void deleteChannel(MessageReceivedEvent event) {
         logger.info("Na kanale znajdują się listy/zapisy na eventy");
-        EmbedInfo.removedChannel(event.getChannel());
+        EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);
@@ -957,8 +958,8 @@ public class Event {
      * @return Zwraca true jeżeli użytkownik stworzył wcześniej kanał na którym pisze. Kanał musi znajdować się
      * w kategori eventy. W innym przypadku zwraca false.
      */
-    public boolean checkChannelIsInEventCategory(GuildMessageReceivedEvent event) {
-        if (userHaveChannel(event.getMessage().getAuthor().getId(), event.getChannel())) {
+    public boolean checkChannelIsInEventCategory(MessageReceivedEvent event) {
+        if (userHaveChannel(event.getMessage().getAuthor().getId(), event.getTextChannel())) {
             List<Category> categories = event.getGuild().getCategories();
             for (Category c : categories) {
                 if (c.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
@@ -1024,7 +1025,7 @@ public class Event {
         activeEventsBuilder.setColor(Color.RED);
         activeEventsBuilder.setTitle("Eventy");
         activeEventsBuilder.addField("Aktywnych eventów", String.valueOf(activeEvents.size()), false);
-        privateChannel.sendMessage(activeEventsBuilder.build()).queue();
+        privateChannel.sendMessageEmbeds(activeEventsBuilder.build()).queue();
         for (ActiveEvent ae : activeEvents) {
             List<MemberOfServer> mainList = ae.getMainList();
             List<MemberOfServer> reserveList = ae.getReserveList();
@@ -1048,7 +1049,7 @@ public class Event {
                 stringReserveList += m.getUserName() + ", ";
             }
             builder.addField("Rezerwowa lista", stringReserveList, false);
-            privateChannel.sendMessage(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
         }
     }
 

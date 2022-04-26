@@ -2,31 +2,29 @@ package bot.event.writing;
 
 import counter.Counter;
 import helpers.Commands;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 
 public class CounterMachine extends Proccess {
 
-    private final GuildMessageReceivedEvent event;
-
-    public CounterMachine(GuildMessageReceivedEvent event) {
-        this.event = event;
+    public CounterMachine(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override
     public void proccessMessage(Message message) {
-        if (!event.getAuthor().isBot()) {
+        if (!messageReceived.getAuthor().isBot()) {
             getCounter().userPlusOneMsg(message.getUserID());
         }
         Counter counter = Repository.getCounter();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.TOP_THREE)) {
-            counter.showTopThree(event.getChannel().getId());
-            event.getMessage().delete().submit();
+            counter.showTopThree(messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.TOP_TEN)) {
-            counter.showTopTen(event.getChannel().getId());
-            event.getMessage().delete().submit();
+            counter.showTopTen(messageReceived.getChannel().getId());
+            messageReceived.getMessage().delete().submit();
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.COUNT)) {
-            counter.showUser(event.getAuthor().getId(), event.getChannel().getId());
+            counter.showUser(messageReceived.getAuthor().getId(), messageReceived.getChannel().getId());
         } else {
             getNextProccess().proccessMessage(message);
         }
