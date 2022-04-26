@@ -691,4 +691,21 @@ public class EmbedInfo {
                 "e.g. \n*!profile 76561197990543288*");
         channel.sendMessage(builder.build()).queue();
     }
+
+    public static void youCanCheckStatsOnChannel(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLACK);
+        builder.setDescription("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
+        channel.sendMessage(builder.build()).queue();
+    }
+
+    public static void noDataToShow(TextChannel channel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLACK);
+        builder.setTitle("No data to show.");
+        builder.setDescription("If you played on our server and there is no data, please check your Steam64ID and update it by command !profile.\n\n" +
+                "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
+                "e.g. \n*!profile 76561197990543288*");
+        channel.sendMessage(builder.build()).queue();
+    }
 }

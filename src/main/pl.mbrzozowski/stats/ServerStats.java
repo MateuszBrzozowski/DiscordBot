@@ -1,5 +1,6 @@
 package stats;
 
+import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,7 +23,15 @@ public class ServerStats {
 
     public void viewStatsForUser(String userID, TextChannel channel) {
         PlayerStats playerStats = pullStatsFromDatabase(connectedPlayers.get(getIndex(userID)));
-        sendEmbedWithStats(userID, channel, playerStats);
+        if (isPlayerData(playerStats)) {
+            sendEmbedWithStats(userID, channel, playerStats);
+        } else {
+            EmbedInfo.noDataToShow(channel);
+        }
+    }
+
+    private boolean isPlayerData(PlayerStats playerStats) {
+        return playerStats.getKills() != 0 || playerStats.getDeaths() != 0 || playerStats.getWounds() != 0;
     }
 
     public boolean isUserConnected(String userID) {
@@ -59,8 +68,8 @@ public class ServerStats {
         builder.setTitle(Users.getUserNicknameFromID(userID) + " profile");
         builder.setDescription("**Profile info:**```yaml\n" + playerStats.getProfileName() + "\n```");
         builder.addBlankField(false);
-        builder.addField("⚔ K/D", "**" + df.format(playerStats.getKd()) + "**%", true);
-        builder.addField("⚔ Kills/Wounds", "**" + df.format(playerStats.getEffectiveness()) + "**% effectiveness", true);
+        builder.addField("⚔ K/D", "**" + df.format(playerStats.getKd()) + "**", true);
+        builder.addField("⚔ Kills/Wounds", "**" + df.format(playerStats.getEffectiveness()) + "** effectiveness", true);
         builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
         builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
         builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);

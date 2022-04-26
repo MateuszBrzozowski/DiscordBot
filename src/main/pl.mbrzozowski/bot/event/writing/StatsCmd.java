@@ -1,6 +1,7 @@
 package bot.event.writing;
 
 import embed.EmbedInfo;
+import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
@@ -21,16 +22,24 @@ public class StatsCmd extends Proccess {
     public void proccessMessage(Message message) {
         ServerStats serverStats = Repository.getServerStats();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS)) {
-            if (serverStats.isUserConnected(guildEvent.getAuthor().getId())) {
-                serverStats.viewStatsForUser(guildEvent.getAuthor().getId(),guildEvent.getChannel());
+            if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                if (serverStats.isUserConnected(guildEvent.getAuthor().getId())) {
+                    serverStats.viewStatsForUser(guildEvent.getAuthor().getId(), guildEvent.getChannel());
+                } else {
+                    EmbedInfo.notConnectedAccount(guildEvent.getChannel());
+                }
             } else {
-                EmbedInfo.notConnectedAccount(guildEvent.getChannel());
+                EmbedInfo.youCanCheckStatsOnChannel(guildEvent.getChannel());
             }
         } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_PROFILE)) {
-            if (serverStats.connectUserToSteam(guildEvent.getAuthor().getId(), message.getWords()[1])){
-                EmbedInfo.connectSuccessfully(guildEvent.getChannel());
-            }else {
-                EmbedInfo.connectUnSuccessfully(guildEvent.getChannel());
+            if (guildEvent.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                if (serverStats.connectUserToSteam(guildEvent.getAuthor().getId(), message.getWords()[1])) {
+                    EmbedInfo.connectSuccessfully(guildEvent.getChannel());
+                } else {
+                    EmbedInfo.connectUnSuccessfully(guildEvent.getChannel());
+                }
+            } else {
+                EmbedInfo.youCanCheckStatsOnChannel(guildEvent.getChannel());
             }
         } else {
             getNextProccess().proccessMessage(message);
