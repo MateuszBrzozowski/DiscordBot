@@ -219,7 +219,7 @@ public class StatsDatabase {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
         String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_deaths` WHERE attacker=\"" + steamID + "\"" +
-                "GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
+                "AND attacker!=victim GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -247,7 +247,7 @@ public class StatsDatabase {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
         String query = "SELECT attackerName, attacker, COUNT(*) FROM `dblog_deaths` WHERE victim=\"" + steamID + "\"" +
-                "GROUP BY `attacker` ORDER BY `COUNT(*)` DESC";
+                "AND attacker!=victim GROUP BY `attacker` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -275,7 +275,7 @@ public class StatsDatabase {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
         String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_revives` WHERE reviver=\"" + steamID + "\"" +
-                "GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
+                "AND reviver!=victim GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -303,7 +303,7 @@ public class StatsDatabase {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
         String query = "SELECT reviverName, reviver, COUNT(*) FROM `dblog_revives` WHERE victim=\"" + steamID + "\"" +
-                "GROUP BY `reviver` ORDER BY `COUNT(*)` DESC";
+                "AND reviver!=victim GROUP BY `reviver` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
