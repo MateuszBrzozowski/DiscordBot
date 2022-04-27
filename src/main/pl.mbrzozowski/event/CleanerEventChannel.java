@@ -75,6 +75,9 @@ public class CleanerEventChannel implements CleanerChannel {
     }
 
     private boolean checkEmbeds(List<MessageEmbed> embeds) {
+        if (embeds.isEmpty()) {
+            return false;
+        }
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         if (!fields.isEmpty()) {
             if (!fields.get(0).getName().equalsIgnoreCase(EmbedSettings.WHEN_DATE)) {
