@@ -374,7 +374,7 @@ public class EventsSettings {
         String title = "Co chcesz zrobić?";
         String description = "1 - Zmień godzinę\n" +
                 "2 - Zmień datę\n" +
-                "3 - Anuluj event\n" +
+                "3 - Odwołaj event\n" +
                 "0 - Zakończ edytowanie.";
         embedPatternOneField(Color.YELLOW, title, description);
     }
