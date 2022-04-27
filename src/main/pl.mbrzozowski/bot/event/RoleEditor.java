@@ -19,11 +19,11 @@ public class RoleEditor {
             if (!hasRole) {
                 guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, true);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał roblę **SEED**");
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał roblę **" + role.getName() + "**");
             } else {
                 guild.removeRoleFromMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, false);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął roblę **SEED**");
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął roblę **" + role.getName() + "**");
             }
         }
     }
