@@ -27,6 +27,8 @@ public class ReminderCmd extends Proccess {
                 usersReminderOFF.remove(messageReceived.getAuthor().getId());
                 EmbedInfo.reminderOn(message.getUserID());
                 RangerLogger.info("Użykownik: [" + Users.getUserNicknameFromID(message.getUserID()) + "] włączył powiadomienia dla eventów.");
+            } else {
+                getNextProccess().proccessMessage(message);
             }
         } else {
             getNextProccess().proccessMessage(message);

@@ -14,7 +14,7 @@ public class CheckUserAdmin extends Proccess {
         if (message.isAdmin()) {
             getNextProccess().proccessMessage(message);
         } else {
-            if (messageReceived != null && messageReceived.isFromType(ChannelType.PRIVATE)) {
+            if (messageReceived.isFromType(ChannelType.PRIVATE) && !messageReceived.getAuthor().isBot()) {
                 InvalidCmd invalidCmd = new InvalidCmd(messageReceived);
                 invalidCmd.proccessMessage(message);
             }

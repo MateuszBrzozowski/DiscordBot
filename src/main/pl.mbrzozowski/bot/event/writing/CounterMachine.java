@@ -2,6 +2,7 @@ package bot.event.writing;
 
 import counter.Counter;
 import helpers.Commands;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 
@@ -13,7 +14,7 @@ public class CounterMachine extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        if (!messageReceived.getAuthor().isBot()) {
+        if (!messageReceived.getAuthor().isBot() && !messageReceived.isFromType(ChannelType.PRIVATE)) {
             getCounter().userPlusOneMsg(message.getUserID());
         }
         Counter counter = Repository.getCounter();

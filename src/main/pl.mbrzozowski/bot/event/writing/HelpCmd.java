@@ -16,6 +16,8 @@ public class HelpCmd extends Proccess {
         if (messageReceived.isFromType(ChannelType.PRIVATE)) {
             if (message.getWords().length >= 1 && message.getWords()[0].equalsIgnoreCase(Commands.HELPS)) {
                 EmbedHelp.help(message.getUserID(), message.getWords());
+            } else {
+                getNextProccess().proccessMessage(message);
             }
         } else {
             getNextProccess().proccessMessage(message);

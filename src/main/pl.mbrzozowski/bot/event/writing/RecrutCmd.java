@@ -31,6 +31,8 @@ public class RecrutCmd extends Proccess {
         } else if (cmd.equalsIgnoreCase(Commands.CLOSE)) {
             messageReceived.getMessage().delete().submit();
             getRecruits().closeChannel(messageReceived);
+        } else {
+            getNextProccess().proccessMessage(message);
         }
     }
 

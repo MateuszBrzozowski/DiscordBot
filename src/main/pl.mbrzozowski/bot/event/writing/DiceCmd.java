@@ -13,7 +13,7 @@ public class DiceCmd extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        if (!messageReceived.isFromType(ChannelType.PRIVATE)){
+        if (!messageReceived.isFromType(ChannelType.PRIVATE)) {
             if (message.getWords()[0].equalsIgnoreCase(Commands.DICE)) {
                 messageReceived.getMessage().delete().submit();
                 if (message.getWords().length == 1) {
@@ -31,7 +31,7 @@ public class DiceCmd extends Proccess {
                     getNextProccess().proccessMessage(message);
                 }
             }
-        }else {
+        } else {
             getNextProccess().proccessMessage(message);
         }
     }
