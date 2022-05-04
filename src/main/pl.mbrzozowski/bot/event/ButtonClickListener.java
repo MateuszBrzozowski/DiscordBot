@@ -3,6 +3,7 @@ package bot.event;
 import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
+import helpers.Commands;
 import helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,34 +31,34 @@ public class ButtonClickListener extends ListenerAdapter {
 
         if (indexOfMatch >= 0) {
             eventsButtonClick(event, indexOfMatch);
-        } else if (event.getComponentId().equalsIgnoreCase("newRecrut")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.NEW_RECRUT)) {
             recrut.newPodanie(event);
-        } else if (event.getComponentId().equalsIgnoreCase("recrutY")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.NEW_RECRUT_CONFIRM)) {
             recrut.confirm(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
-        } else if (event.getComponentId().equalsIgnoreCase("recrutN")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.NEW_RECRUT_DISCARD)) {
             recrut.cancel(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
-        } else if (event.getComponentId().equalsIgnoreCase("end_" + event.getMessage().getId())) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.QUESTIONNAIRE_END + event.getMessage().getId())) {
             questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
-        } else if (event.getComponentId().equalsIgnoreCase("Report")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.SERVER_SERVICE_REPORT)) {
             serverService.buttonClick(event, ButtonClickType.REPORT);
-        } else if (event.getComponentId().equalsIgnoreCase("Unban")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.SERVER_SERVICE_UNBAN)) {
             serverService.buttonClick(event, ButtonClickType.UNBAN);
-        } else if (event.getComponentId().equalsIgnoreCase("Contact")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.SERVER_SERVICE_CONTACT)) {
             serverService.buttonClick(event, ButtonClickType.CONTACT);
-        } else if (event.getComponentId().equalsIgnoreCase("close")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.CLOSE)) {
             EmbedInfo.confirmCloseChannel(event.getTextChannel());
-        } else if (event.getComponentId().equalsIgnoreCase("closeYes")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.CLOSE_YES)) {
             serverService.closeChannel(event);
-        } else if (event.getComponentId().equalsIgnoreCase("closeNo")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.CLOSE_NO)) {
             event.getMessage().delete().queue();
-        } else if (event.getComponentId().equalsIgnoreCase("removeChannel")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.REMOVE)) {
             serverService.disableButtons(event.getChannel().getId(), event.getMessageId());
             EmbedInfo.confirmRemoveChannel(event.getTextChannel());
-        } else if (event.getComponentId().equalsIgnoreCase("removeChannelYes")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.REMOVE_YES)) {
             serverService.removeChannel(event);
-        } else if (event.getComponentId().equalsIgnoreCase("removeChannelNo")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.REMOVE_NO)) {
             event.getMessage().delete().queue();
-        } else if (event.getComponentId().equalsIgnoreCase("seedrole")) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.SEED_ROLE)) {
             RoleEditor roleEditor = new RoleEditor();
             roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
         } else {
@@ -70,11 +71,11 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void eventsButtonClick(@NotNull ButtonInteractionEvent event, int indexOfMatch) {
-        if (event.getComponentId().equalsIgnoreCase("in_" + event.getMessage().getId())) {
+        if (event.getComponentId().equalsIgnoreCase(Commands.EVENTS_SIGN_IN + event.getMessage().getId())) {
             events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN);
-        } else if (event.getComponentId().equalsIgnoreCase("reserve_" + event.getMessage().getId())) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.EVENTS_SIGN_IN_RESERVE + event.getMessage().getId())) {
             events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN_RESERVE);
-        } else if (event.getComponentId().equalsIgnoreCase("out_" + event.getMessage().getId())) {
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.EVENTS_SIGN_OUT + event.getMessage().getId())) {
             events.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_OUT);
         }
         events.updateEmbed(indexOfMatch);
