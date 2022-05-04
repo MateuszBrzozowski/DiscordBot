@@ -44,6 +44,7 @@ public class Commands {
     public static final String EMBED_SERVER_SERVICE = PREFIX + "ServerService" + SUFFIX;
     public static final String STATS = PREFIX + "stats" + SUFFIX;
     public static final String STATS_PROFILE = PREFIX + "profile" + SUFFIX;
+    public static final String SERVER_RULES = PREFIX + "serverrules" + SUFFIX;
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
     public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;
