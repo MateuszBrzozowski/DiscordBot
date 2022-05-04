@@ -720,4 +720,11 @@ public class EmbedInfo {
         builder.setDescription("Use command !profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
+
+    public static void noActiveEvents(TextChannel textChannel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Brak aktywnych eventów");
+        builder.setColor(Color.RED);
+        textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
 }

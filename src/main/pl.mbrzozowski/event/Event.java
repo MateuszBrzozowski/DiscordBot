@@ -996,4 +996,8 @@ public class Event {
             }
         }
     }
+
+    public boolean isActiveEvents() {
+        return activeEvents.size() > 0;
+    }
 }

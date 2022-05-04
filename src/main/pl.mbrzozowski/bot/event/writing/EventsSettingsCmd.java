@@ -1,6 +1,7 @@
 package bot.event.writing;
 
 import embed.EmbedInfo;
+import event.Event;
 import event.EventsSettings;
 import event.EventsSettingsModel;
 import helpers.Commands;
@@ -16,14 +17,20 @@ public class EventsSettingsCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         EventsSettingsModel eventsSettingsModel = Repository.getEventsSettingsModel();
+        Event event = Repository.getEvent();
+        event.isActiveEvents();
         int indexOfSettings = eventsSettingsModel.userHaveActiveSettingsPanel(message.getUserID());
 
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.EVENTS_SETTINGS)) {
             if (indexOfSettings >= 0) {
                 eventsSettingsModel.removeSettingsPanel(indexOfSettings);
             }
-            EventsSettings eventsSettings = new EventsSettings(messageReceived);
-            eventsSettingsModel.addEventsSettings(eventsSettings);
+            if (event.isActiveEvents()) {
+                EventsSettings eventsSettings = new EventsSettings(messageReceived);
+                eventsSettingsModel.addEventsSettings(eventsSettings);
+            } else {
+                EmbedInfo.noActiveEvents(messageReceived.getTextChannel());
+            }
         } else if (indexOfSettings >= 0) {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL) || !eventsSettingsModel.isPossibleEditing(indexOfSettings)) {
                 EmbedInfo.cancelEventEditing(messageReceived.getAuthor().getId());
