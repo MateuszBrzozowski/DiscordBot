@@ -15,5 +15,5 @@ public class CategoryAndChannelID {
     public static final String CHANNEL_MEMBER_ONLY = "407196935162822658";
     public static final String CHANNEL_RANGER_BOT_LOGGER = "860096729457098762";
     public static final String CHANNEL_STATS = "968422568094732288";
-    public static final String CHANNEL_ADMIN_FAQ = "969542114448900126";
+    public static final String CHANNEL_ADMIN_FAQ = "741629665487355914";
 }
