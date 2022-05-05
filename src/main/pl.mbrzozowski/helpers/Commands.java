@@ -22,9 +22,9 @@ public class Commands {
     public static final String DICE = PREFIX + "kostka" + SUFFIX;
     public static final String HELPS = PREFIX + "help" + SUFFIX;
     public static final String REOPEN = PREFIX + "open" + SUFFIX;
-    public static final String CLOSE = PREFIX + "close" + SUFFIX;
-    public static final String CLOSE_YES = PREFIX + "closeYes" + SUFFIX;
-    public static final String CLOSE_NO = PREFIX + "closeNo" + SUFFIX;
+    public static final String CLOSE = "close" + SUFFIX;
+    public static final String CLOSE_YES = "closeYes" + SUFFIX;
+    public static final String CLOSE_NO = "closeNo" + SUFFIX;
     public static final String START_REKRUT = PREFIX + "startRekrut" + SUFFIX;
     public static final String POSITIVE = PREFIX + "p" + SUFFIX;
     public static final String NEGATIVE = PREFIX + "n" + SUFFIX;
