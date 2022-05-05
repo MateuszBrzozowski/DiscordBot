@@ -326,4 +326,29 @@ public class StatsDatabase {
         }
         return players;
     }
+
+    public ArrayList<Maps> pullAllMaps() {
+        ResultSet resultSet = null;
+        ArrayList<Maps> maps = new ArrayList<>();
+        String query = "SELECT mapClassname, COUNT(*) FROM `dblog_matches` WHERE layerClassname NOT LIKE \"%seed%\" " +
+                "AND `winner` IS NOT NULL GROUP BY `mapClassname` ORDER BY `COUNT(*)` DESC";
+        resultSet = connector.executeSelect(query);
+        if (resultSet != null) {
+            while (true) {
+                try {
+                    if (!resultSet.next()) {
+                        break;
+                    } else {
+                        String name = resultSet.getString("mapClassname");
+                        int count = resultSet.getInt("COUNT(*)");
+                        Maps map = new Maps(name, count);
+                        maps.add(map);
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return maps;
+    }
 }

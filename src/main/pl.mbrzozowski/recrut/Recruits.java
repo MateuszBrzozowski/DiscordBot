@@ -144,7 +144,7 @@ public class Recruits {
     public void cancel(String userID, MessageChannel privateChannel, String messageID) {
         int index = userIsThinking(userID);
         if (index >= 0) {
-            rangerLogger.info("Użytkownik [" + thinkingRecruits.get(index).getUserName() + "] zrezygnował ze złożenia podania.");
+            RangerLogger.info("Użytkownik [" + thinkingRecruits.get(index).getUserName() + "] zrezygnował ze złożenia podania.");
             thinkingRecruits.remove(index);
         } else {
             sendMessageBotReload(userID);
