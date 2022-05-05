@@ -46,6 +46,7 @@ public class Commands {
     public static final String STATS_PROFILE = PREFIX + "profile" + SUFFIX;
     public static final String SERVER_RULES = PREFIX + "serverrules" + SUFFIX;
     public static final String STATS_MAPS = PREFIX + "mapstats" + SUFFIX;
+    public static final String REFRESH_MAP_STATS = PREFIX + "refreshMap" + SUFFIX;
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
     public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;

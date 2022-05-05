@@ -15,6 +15,7 @@ import ranger.RangerBot;
 import ranger.Repository;
 import recrut.Recruits;
 import server.service.ServerService;
+import stats.ServerStats;
 
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -26,6 +27,7 @@ public class ButtonClickListener extends ListenerAdapter {
         Recruits recrut = Repository.getRecruits();
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
+        ServerStats serverStats = Repository.getServerStats();
         int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
         boolean isIDCorrect = true;
 
@@ -61,6 +63,8 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(Commands.SEED_ROLE)) {
             RoleEditor roleEditor = new RoleEditor();
             roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.REFRESH_MAP_STATS)) {
+            serverStats.refreshMapStats();
         } else {
             isIDCorrect = false;
         }

@@ -23,6 +23,7 @@ public class EmbedSender extends Proccess {
             messageReceived.getMessage().delete().submit();
             EmbedServerRules.sendServerRules(messageReceived);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_MAPS)) {
+            messageReceived.getMessage().delete().submit();
             serverStats.sendMapsStats(messageReceived);
         } else {
             getNextProccess().proccessMessage(message);

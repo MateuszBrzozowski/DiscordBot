@@ -19,13 +19,9 @@ public class ServerStats {
     private List<Player> connectedPlayers = new ArrayList<>();
     private MapStats mapStats = new MapStats();
 
-    public void sendMapsStats(MessageReceivedEvent messageReceived) {
-        mapStats.initialize();
-        mapStats.sendMapsStats(messageReceived);
-    }
-
     public void initialize() {
         pullConnectedUsers();
+        mapStats.initialize();
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
@@ -152,5 +148,14 @@ public class ServerStats {
                 }
             }
         }
+    }
+
+
+    public void sendMapsStats(MessageReceivedEvent messageReceived) {
+        mapStats.sendMapsStats(messageReceived);
+    }
+
+    public void refreshMapStats() {
+        mapStats.refreshMapStats();
     }
 }
