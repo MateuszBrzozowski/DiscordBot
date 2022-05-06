@@ -330,9 +330,13 @@ public class StatsDatabase {
     public ArrayList<Maps> pullAllMaps() {
         ResultSet resultSet = null;
         ArrayList<Maps> maps = new ArrayList<>();
-        String query = "SELECT mapClassname, COUNT(*) FROM `dblog_matches` WHERE layerClassname NOT LIKE \"%seed%\" " +
-                "AND `winner` IS NOT NULL GROUP BY `mapClassname` ORDER BY `COUNT(*)` DESC";
-        resultSet = connector.executeSelect(query);
+        String query = "CREATE TEMPORARY TABLE IF NOT EXISTS temp_table SELECT dblog_matches.id, dblog_matches.mapClassname, AVG(dblog_playercounts.players) AS players " +
+                "FROM `dblog_matches` JOIN `dblog_playercounts` ON dblog_matches.id = dblog_playercounts.match " +
+                "WHERE players > 10 AND dblog_matches.layerClassname NOT LIKE \"%seed%\" " +
+                "GROUP BY dblog_matches.id";
+        String querySecond = "SELECT mapClassname, COUNT(*) FROM temp_table GROUP BY mapClassname ORDER BY COUNT(*) DESC";
+        connector.executeQuery(query);
+        resultSet = connector.executeSelect(querySecond);
         if (resultSet != null) {
             while (true) {
                 try {
@@ -352,3 +356,4 @@ public class StatsDatabase {
         return maps;
     }
 }
+//,
