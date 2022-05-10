@@ -14,6 +14,7 @@ import questionnaire.Questionnaires;
 import ranger.RangerBot;
 import ranger.Repository;
 import recrut.Recruits;
+import recrut.RecruitOpinions;
 import server.service.ServerService;
 import stats.ServerStats;
 
@@ -65,6 +66,10 @@ public class ButtonClickListener extends ListenerAdapter {
             roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SEED_ID);
         } else if (event.getComponentId().equalsIgnoreCase(Commands.REFRESH_MAP_STATS)) {
             serverStats.refreshMapStats();
+        } else if (event.getComponentId().equalsIgnoreCase(Commands.OPEN_FORM)) {
+            isIDCorrect = false;
+            RecruitOpinions recrutOpinions = new RecruitOpinions();
+            recrutOpinions.openForm(event);
         } else {
             isIDCorrect = false;
         }
