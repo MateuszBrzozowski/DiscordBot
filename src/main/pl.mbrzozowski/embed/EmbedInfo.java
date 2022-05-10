@@ -2,10 +2,7 @@ package embed;
 
 import event.Event;
 import event.EventChanges;
-import helpers.CategoryAndChannelID;
-import helpers.RangerLogger;
-import helpers.RoleID;
-import helpers.Users;
+import helpers.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -726,5 +723,18 @@ public class EmbedInfo {
         builder.setTitle("Brak aktywnych eventów");
         builder.setColor(Color.RED);
         textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
+
+    public static void recrutOpinionsFormOpening(MessageReceivedEvent messageReceived) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Rekrut opinie");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setColor(Color.YELLOW);
+        builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.",
+                "Jeżeli masz coś do powiedzenia na temat rekruta podziel się z nami twoją opinią. "
+                , false);
+        messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
+                .setActionRow(Button.primary(Commands.OPEN_FORM,"Otwórz formularz"))
+                .queue();
     }
 }

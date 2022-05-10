@@ -25,6 +25,9 @@ public class EmbedSender extends Proccess {
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_MAPS)) {
             messageReceived.getMessage().delete().submit();
             serverStats.sendMapsStats(messageReceived);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RECRUT_OPINIONS)) {
+            messageReceived.getMessage().delete().submit();
+            EmbedInfo.recrutOpinionsFormOpening(messageReceived);
         } else {
             getNextProccess().proccessMessage(message);
         }

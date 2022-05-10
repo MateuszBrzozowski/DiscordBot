@@ -47,6 +47,7 @@ public class Commands {
     public static final String SERVER_RULES = PREFIX + "serverrules" + SUFFIX;
     public static final String STATS_MAPS = PREFIX + "mapstats" + SUFFIX;
     public static final String REFRESH_MAP_STATS = PREFIX + "refreshMap" + SUFFIX;
+    public static final String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
     public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;
@@ -65,4 +66,5 @@ public class Commands {
     public static final String EVENTS_SIGN_IN = "in_" + SUFFIX;
     public static final String EVENTS_SIGN_IN_RESERVE = "reserve_" + SUFFIX;
     public static final String EVENTS_SIGN_OUT = "out_" + SUFFIX;
+    public static final String OPEN_FORM = "openForm" + SUFFIX;
 }
