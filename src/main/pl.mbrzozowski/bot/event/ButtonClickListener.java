@@ -4,7 +4,6 @@ import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
 import helpers.*;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import questionnaire.Questionnaires;
 import ranger.RangerBot;
 import ranger.Repository;
-import recrut.Recruits;
 import recrut.RecruitOpinions;
+import recrut.Recruits;
 import server.service.ServerService;
 import stats.ServerStats;
 
@@ -55,10 +54,11 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
             event.getMessage().delete().queue();
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE)) {
-            boolean isDrill = Users.hasUserRole(event.getUser().getId(), RoleID.DRILL_INSTRUCTOR_ID);
+            boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
             String parentCategoryId = event.getTextChannel().getParentCategoryId();
-            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)){
-                if (!isDrill){
+            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
+                if (!isRadaKlanu) {
+                    event.deferEdit().queue();
                     return;
                 }
             }
