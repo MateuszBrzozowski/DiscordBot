@@ -229,7 +229,7 @@ public class EmbedInfo {
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
             channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").setEmbeds(builder.build()).queue();
             String oldName = channel.getName();
-            channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName);
+            channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
         }
     }
 

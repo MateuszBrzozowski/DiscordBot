@@ -21,12 +21,16 @@ public class RecrutCmd extends Proccess {
             new Recruiter(messageReceived);
         } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
             messageReceived.getMessage().delete().submit();
-            EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-            getRecruits().negativeResult(messageReceived.getTextChannel());
+            if (!getRecruits().isResult(messageReceived.getTextChannel())) {
+                EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+                getRecruits().negativeResult(messageReceived.getTextChannel());
+            }
         } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
             messageReceived.getMessage().delete().submit();
-            EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-            getRecruits().positiveResult(messageReceived.getTextChannel());
+            if (!getRecruits().isResult(messageReceived.getTextChannel())) {
+                EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+                getRecruits().positiveResult(messageReceived.getTextChannel());
+            }
         } else if (cmd.equalsIgnoreCase(Commands.REOPEN)) {
             messageReceived.getMessage().delete().submit();
             getRecruits().reOpenChannel(messageReceived);
@@ -37,6 +41,4 @@ public class RecrutCmd extends Proccess {
             getNextProccess().proccessMessage(message);
         }
     }
-
-
 }

@@ -66,7 +66,7 @@ public class CleanerRecruitChannel implements CleanerChannel {
      * @param embeds -sprawdzane embeds
      * @return true jeśli wiadomść zawiera wynik rekrutacji, w innym przyadku false
      */
-    private boolean checkEmbeds(List<MessageEmbed> embeds) {
+    public static boolean checkEmbeds(List<MessageEmbed> embeds) {
         if (!embeds.isEmpty()) {
             return isEmbedTitle(embeds.get(0));
         }
@@ -77,7 +77,7 @@ public class CleanerRecruitChannel implements CleanerChannel {
      * @param embed sprawdzany embed
      * @return true jeśli Embed to wynik rekrutacji, w innym przypadku false
      */
-    private boolean isEmbedTitle(MessageEmbed embed) {
+    private static boolean isEmbedTitle(MessageEmbed embed) {
         String title = embed.getTitle();
         if (title != null && title.length() >= EmbedSettings.RESULT.length()) {
             title = title.substring(0, EmbedSettings.RESULT.length());

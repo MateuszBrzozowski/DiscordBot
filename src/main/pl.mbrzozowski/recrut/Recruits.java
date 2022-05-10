@@ -416,4 +416,15 @@ public class Recruits {
             }
         }
     }
+
+    public boolean isResult(TextChannel textChannel) {
+        List<Message> messages = textChannel.getHistory().retrievePast(100).complete();
+        for (int i = 0; i < messages.size(); i++) {
+            List<MessageEmbed> embeds = messages.get(i).getEmbeds();
+            if (CleanerRecruitChannel.checkEmbeds(embeds)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
