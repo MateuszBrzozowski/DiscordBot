@@ -296,15 +296,15 @@ public class Event {
 
         try {
             textChannel.sendMessage(msg).setEmbeds(builder.build()).setActionRow(
-                    Button.primary("in_", "Zapisz"),
-                    Button.secondary("reserve_", "Rezerwa"),
-                    Button.danger("out_", "Wypisz"))
+                    Button.primary(ComponentId.EVENTS_SIGN_IN, "Zapisz"),
+                    Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE, "Rezerwa"),
+                    Button.danger(ComponentId.EVENTS_SIGN_OUT, "Wypisz"))
                     .queue(message -> {
                         MessageEmbed mOld = message.getEmbeds().get(0);
                         String msgID = message.getId();
-                        message.editMessageEmbeds(mOld).setActionRow(Button.primary("in_" + msgID, "Zapisz"),
-                                Button.secondary("reserve_" + msgID, "Rezerwa"),
-                                Button.danger("out_" + msgID, "Wypisz")).queue();
+                        message.editMessageEmbeds(mOld).setActionRow(Button.primary(ComponentId.EVENTS_SIGN_IN + msgID, "Zapisz"),
+                                Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgID, "Rezerwa"),
+                                Button.danger(ComponentId.EVENTS_SIGN_OUT + msgID, "Wypisz")).queue();
                         message.pin().queue();
                         ActiveEvent event = new ActiveEvent(textChannel.getId(), msgID, nameEvent);
                         activeEvents.add(event);

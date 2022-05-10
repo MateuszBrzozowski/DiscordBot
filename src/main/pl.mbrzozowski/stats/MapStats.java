@@ -3,6 +3,7 @@ package stats;
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
+import helpers.ComponentId;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -61,13 +62,13 @@ public class MapStats {
     private void changeButtonToRed(Message message) {
         List<MessageEmbed> embeds = message.getEmbeds();
         message.editMessageEmbeds(embeds.get(0))
-                .setActionRow(Button.danger(Commands.REFRESH_MAP_STATS, "Odśwież")).queue();
+                .setActionRow(Button.danger(ComponentId.REFRESH_MAP_STATS, "Odśwież")).queue();
     }
 
     private void changeButtonToGreen(Message message) {
         List<MessageEmbed> embeds = message.getEmbeds();
         message.editMessageEmbeds(embeds.get(0))
-                .setActionRow(Button.success(Commands.REFRESH_MAP_STATS, "Odśwież")).queue();
+                .setActionRow(Button.success(ComponentId.REFRESH_MAP_STATS, "Odśwież")).queue();
     }
 
     private void checkMessages(List<Message> messages, boolean changetToGreen) {
@@ -162,7 +163,7 @@ public class MapStats {
         LocalDateTime dateTime = LocalDateTime.from(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")));
         builder.setFooter("Ostatnia aktualizacja: " + dateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
         event.getTextChannel().sendMessageEmbeds(builder.build())
-                .setActionRow(Button.danger(Commands.REFRESH_MAP_STATS, "Odśwież"))
+                .setActionRow(Button.danger(ComponentId.REFRESH_MAP_STATS, "Odśwież"))
                 .queue();
         startTimerToClearFreshStatus();
     }

@@ -43,6 +43,9 @@ public class Users {
      * @return Zwraca true jeśli użytkownik o ID userID ma role o ID roleID. W innym przypadku zwraca false.
      */
     public static boolean hasUserRole(String userID, String roleID) {
+        if (isUserDev(userID)){
+            return true;
+        }
         JDA jda = Repository.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {

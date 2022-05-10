@@ -4,6 +4,7 @@ import embed.EmbedInfo;
 import embed.EmbedSettings;
 import event.ButtonClickType;
 import helpers.CategoryAndChannelID;
+import helpers.ComponentService;
 import helpers.RoleID;
 import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
@@ -68,7 +69,7 @@ public class ServerService {
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
-        disableButtons(event.getChannel().getId(), event.getMessageId());
+        ComponentService.disableButtons(event.getChannel().getId(), event.getMessageId());
         TextChannelManager manager = event.getTextChannel().getManager();
         String channelID = event.getTextChannel().getId();
         String userID = getUserID(channelID);
@@ -81,18 +82,7 @@ public class ServerService {
     }
 
     public void removeChannel(@NotNull ButtonInteractionEvent event) {
-        disableButtons(event.getChannel().getId(), event.getMessageId());
-        EmbedInfo.removedChannel(event.getTextChannel());
-        Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            event.getGuild().getTextChannelById(event.getChannel().getId()).delete().queue();
-        });
         removeUserFromList(event.getChannel().getId());
-        thread.start();
     }
 
     public void removeUserFromList(String channelID) {
@@ -103,22 +93,6 @@ public class ServerService {
                 ssdb.removeRecord(channelID);
             }
         }
-    }
-
-    public void disableButtons(String channelID, String messageID) {
-        JDA jda = Repository.getJda();
-        TextChannel textChannel = jda.getTextChannelById(channelID);
-        textChannel.retrieveMessageById(messageID).queue(message -> {
-            List<MessageEmbed> embeds = message.getEmbeds();
-            List<Button> buttons = message.getButtons();
-            List<Button> buttonsNew = new ArrayList<>();
-            for (Button b : buttons) {
-                b = b.asDisabled();
-                buttonsNew.add(b);
-            }
-            MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
-        });
     }
 
     private void pullUsersFromDatabase() {

@@ -1,6 +1,7 @@
 package questionnaire;
 
 import embed.EmbedSettings;
+import helpers.ComponentId;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -103,7 +104,7 @@ class QuestionnaireBuilder extends Questionnaire {
             MessageEmbed mOld = message.getEmbeds().get(0);
             String msgID = message.getId();
             message.editMessageEmbeds(mOld).setActionRow(
-                    Button.danger("end_" + msgID, END)
+                    Button.danger(ComponentId.QUESTIONNAIRE_END + msgID, END)
             ).queue();
             this.setMessageID(msgID);
             pushQuestionnaireToDataBase();

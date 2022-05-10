@@ -139,7 +139,7 @@ public class EmbedInfo {
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.danger("removeChannel", "Usuń kanał"))
+                .setActionRow(Button.danger(ComponentId.REMOVE, "Usuń kanał"))
                 .queue();
     }
 
@@ -158,8 +158,8 @@ public class EmbedInfo {
         builder.setColor(Color.YELLOW);
         builder.setTitle("Potwierdź czy chcesz usunąć kanał?");
         channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.success("removeChannelYes", "Tak"),
-                        Button.danger("removeChannelNo", "Nie"))
+                .setActionRow(Button.success(ComponentId.REMOVE_YES, "Tak"),
+                        Button.danger(ComponentId.REMOVE_NO, "Nie"))
                 .queue();
     }
 
@@ -527,7 +527,7 @@ public class EmbedInfo {
         builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping. \n" +
                 "**All seeders will recive whitelist.**", false);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        channel.sendMessageEmbeds(builder.build()).setActionRow(Button.success("seedrole", "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
+        channel.sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.SEED_ROLE, "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
     }
 
     public static void sendHelloMessagePrivate(String userID) {
@@ -566,9 +566,9 @@ public class EmbedInfo {
         builder.addField("--------------------", "If you need help of Rangers Polska Servers Admins, " +
                 "please react with the correct button below.", false);
         channel.sendMessageEmbeds(builder.build()).setActionRow(
-                Button.primary("Report", "Report Player").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
-                Button.primary("Unban", "Unban appeal").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
-                Button.primary("Contact", "Contact With Admin").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
+                Button.primary(ComponentId.SERVER_SERVICE_REPORT, "Report Player").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
+                Button.primary(ComponentId.SERVER_SERVICE_UNBAN, "Unban appeal").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
+                Button.primary(ComponentId.SERVER_SERVICE_CONTACT, "Contact With Admin").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
     }
 
     /**
@@ -730,11 +730,9 @@ public class EmbedInfo {
         builder.setTitle("Rekrut opinie");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setColor(Color.YELLOW);
-        builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.",
-                "Jeżeli masz coś do powiedzenia na temat rekruta podziel się z nami twoją opinią. "
-                , false);
+        builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.", "", false);
         messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
-                .setActionRow(Button.primary(Commands.OPEN_FORM,"Otwórz formularz"))
+                .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
                 .queue();
     }
 }

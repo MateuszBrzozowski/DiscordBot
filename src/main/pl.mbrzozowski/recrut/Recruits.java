@@ -2,10 +2,7 @@ package recrut;
 
 import embed.EmbedInfo;
 import embed.EmbedSettings;
-import helpers.CategoryAndChannelID;
-import helpers.RangerLogger;
-import helpers.RoleID;
-import helpers.Users;
+import helpers.*;
 import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -103,7 +100,7 @@ public class Recruits {
             builder.setDescription("Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Skontaktuję się z Tobą jeden z naszych Drillów aby wprowadzić Cię" +
                     " w nasze szeregi. Poprosimy również o wypełnienie krótkiego formularza.");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessageEmbeds(builder.build()).setActionRow(Button.success("recrutY", "Potwierdzam"), Button.danger("recrutN", "Rezygnuję")).queue(message -> {
+            privateChannel.sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam"), Button.danger(ComponentId.NEW_RECRUT_DISCARD, "Rezygnuję")).queue(message -> {
                 Thread timer = new Thread(() -> {
                     try {
                         Thread.sleep(1000 * 60 * 2); //2 minuty oczekiwania na odpowiedź
@@ -177,7 +174,7 @@ public class Recruits {
         channel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success("recrutY", "Potwierdzam").asDisabled(), Button.danger("recrutN", "Rezygnuję").asDisabled()).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam").asDisabled(), Button.danger(ComponentId.NEW_RECRUT_DISCARD, "Rezygnuję").asDisabled()).queue();
         });
     }
 

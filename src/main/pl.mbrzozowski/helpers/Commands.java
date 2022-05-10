@@ -22,9 +22,7 @@ public class Commands {
     public static final String DICE = PREFIX + "kostka" + SUFFIX;
     public static final String HELPS = PREFIX + "help" + SUFFIX;
     public static final String REOPEN = PREFIX + "open" + SUFFIX;
-    public static final String CLOSE = "close" + SUFFIX;
-    public static final String CLOSE_YES = "closeYes" + SUFFIX;
-    public static final String CLOSE_NO = "closeNo" + SUFFIX;
+    public static final String CLOSE = PREFIX + "close" + SUFFIX;
     public static final String START_REKRUT = PREFIX + "startRekrut" + SUFFIX;
     public static final String POSITIVE = PREFIX + "p" + SUFFIX;
     public static final String NEGATIVE = PREFIX + "n" + SUFFIX;
@@ -46,25 +44,8 @@ public class Commands {
     public static final String STATS_PROFILE = PREFIX + "profile" + SUFFIX;
     public static final String SERVER_RULES = PREFIX + "serverrules" + SUFFIX;
     public static final String STATS_MAPS = PREFIX + "mapstats" + SUFFIX;
-    public static final String REFRESH_MAP_STATS = PREFIX + "refreshMap" + SUFFIX;
     public static final String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     //ROLE
     public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
     public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;
-    //ButtonClick
-    public static final String NEW_RECRUT = "newRecrut" + SUFFIX;
-    public static final String NEW_RECRUT_CONFIRM = "recrutY" + SUFFIX;
-    public static final String NEW_RECRUT_DISCARD = "recrutN" + SUFFIX;
-    public static final String QUESTIONNAIRE_END = "end_" + SUFFIX;
-    public static final String SERVER_SERVICE_REPORT = "Report" + SUFFIX;
-    public static final String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
-    public static final String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;
-    public static final String REMOVE = "removeChannel" + SUFFIX;
-    public static final String REMOVE_YES = "removeChannelYes" + SUFFIX;
-    public static final String REMOVE_NO = "removeChannelNo" + SUFFIX;
-    public static final String SEED_ROLE = "seedrole" + SUFFIX;
-    public static final String EVENTS_SIGN_IN = "in_" + SUFFIX;
-    public static final String EVENTS_SIGN_IN_RESERVE = "reserve_" + SUFFIX;
-    public static final String EVENTS_SIGN_OUT = "out_" + SUFFIX;
-    public static final String OPEN_FORM = "openForm" + SUFFIX;
 }
