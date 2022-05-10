@@ -24,4 +24,7 @@ public class ComponentId {
     public static final String CLOSE = "close" + SUFFIX;
     public static final String CLOSE_YES = "closeYes" + SUFFIX;
     public static final String CLOSE_NO = "closeNo" + SUFFIX;
+    public static final String RECRUIT_NAME = "RekrutName" + SUFFIX;
+    public static final String RECRUIT_OPINION_TEXT = "opinionID" + SUFFIX;
+    public static final String RECRUIT_OPINION_MODAL = "rekrutOpinion" + SUFFIX;
 }

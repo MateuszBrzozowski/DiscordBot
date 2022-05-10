@@ -2,6 +2,7 @@ package recrut;
 
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
+import helpers.ComponentId;
 import helpers.RangerLogger;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,23 +23,23 @@ public class RecruitOpinions {
 
 
     public void openForm(@NotNull ButtonInteractionEvent event) {
-        TextInput recruitName = TextInput.create("RekrutName", "Nick Rekruta", TextInputStyle.SHORT)
+        TextInput recruitName = TextInput.create(ComponentId.RECRUIT_NAME, "Nick Rekruta", TextInputStyle.SHORT)
                 .setMaxLength(100)
                 .setPlaceholder("Nick")
                 .build();
-        TextInput opinion = TextInput.create("opinionID", "opinia", TextInputStyle.PARAGRAPH)
-                .setRequiredRange(10,1024)
+        TextInput opinion = TextInput.create(ComponentId.RECRUIT_OPINION_TEXT, "opinia", TextInputStyle.PARAGRAPH)
+                .setRequiredRange(10, 1024)
                 .setPlaceholder("Opinia")
                 .build();
-        Modal modal = Modal.create("customID", "Rekrut opinie")
+        Modal modal = Modal.create(ComponentId.RECRUIT_OPINION_MODAL, "Rekrut opinie")
                 .addActionRows(ActionRow.of(recruitName), ActionRow.of(opinion))
                 .build();
         event.replyModal(modal).queue();
     }
 
     public void submitForm(ModalInteractionEvent event) {
-        String recruitName = event.getValue("RekrutName").getAsString();
-        String opinion = event.getValue("opinionID").getAsString();
+        String recruitName = event.getValue(ComponentId.RECRUIT_NAME).getAsString();
+        String opinion = event.getValue(ComponentId.RECRUIT_OPINION_TEXT).getAsString();
         String userNameWhoSendingOpinion = Users.getUserNicknameFromID(event.getUser().getId());
         event.deferEdit().queue();
         JDA jda = Repository.getJda();
@@ -51,11 +52,11 @@ public class RecruitOpinions {
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setColor(Color.YELLOW);
         try {
-            builder.addField("Użytkownik: " + userNameWhoSendingOpinion + " wystawił opinię.", "", false);
-            builder.addField("Na temat rekruta: " + recruitName, "", false);
+            builder.setTitle("Użytkownik: " + userNameWhoSendingOpinion + " wystawił opinię.");
+            builder.setDescription("Na temat rekruta: **" + recruitName + "**");
             builder.addField("", opinion, false);
             textChannel.sendMessageEmbeds(builder.build()).queue();
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             RangerLogger.info("Rekrut opinia - IllegalArgumentException " + e.getMessage());
         }
 
