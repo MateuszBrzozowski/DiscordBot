@@ -3,6 +3,7 @@ package recrut;
 import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.*;
+import model.MemberOfServer;
 import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -24,11 +25,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Recruits {
 
     private List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
-    private List<MemberWithPrivateChannel> thinkingRecruits = new ArrayList<>();
+    private List<MemberOfServer> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
@@ -91,7 +93,7 @@ public class Recruits {
 
     private void confirmMessage(String userID, String userName) {
         rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
-        thinkingRecruits.add(new MemberWithPrivateChannel(userID, userName));
+        thinkingRecruits.add(new MemberOfServer(userID, userName));
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
@@ -247,7 +249,7 @@ public class Recruits {
      * zwraca false.
      */
     private boolean checkThinkingUser(String userID) {
-        for (MemberWithPrivateChannel member : thinkingRecruits) {
+        for (MemberOfServer member : thinkingRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
             }
@@ -421,7 +423,7 @@ public class Recruits {
         List<Message> messages = textChannel.getHistory().retrievePast(100).complete();
         for (int i = 0; i < messages.size(); i++) {
             List<MessageEmbed> embeds = messages.get(i).getEmbeds();
-            if (CleanerRecruitChannel.checkEmbeds(embeds)){
+            if (CleanerRecruitChannel.checkEmbeds(embeds)) {
                 return true;
             }
         }

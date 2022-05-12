@@ -2,8 +2,8 @@ package model;
 
 public class MemberOfServer {
 
-    private String userID;
-    private String userName;
+    private final String userID;
+    private final String userName;
 
     public MemberOfServer(String userID, String userName) {
         this.userName = userName;
