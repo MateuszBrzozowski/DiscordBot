@@ -20,10 +20,10 @@ public class ActiveEvent {
 
     protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
     private String name;
-    private String channelID;
-    private String messageID;
-    private List<MemberOfServer> mainList = new ArrayList<>();
-    private List<MemberOfServer> reserveList = new ArrayList<>();
+    private final String channelID;
+    private final String messageID;
+    private final List<MemberOfServer> mainList = new ArrayList<>();
+    private final List<MemberOfServer> reserveList = new ArrayList<>();
 
     /**
      * @param channelID ID kanału na którym jest lista
@@ -111,7 +111,7 @@ public class ActiveEvent {
             for (int i = 0; i < mainList.size(); i++) {
                 if (mainList.get(i).getUserID().equalsIgnoreCase(userID)) {
                     mainList.remove(i);
-                    RemovePlayerDB(userID);
+                    removePlayerDB(userID);
                     logger.info("Usunieto z listy głównej");
                 }
             }
@@ -123,7 +123,7 @@ public class ActiveEvent {
             for (int i = 0; i < reserveList.size(); i++) {
                 if (reserveList.get(i).getUserID().equalsIgnoreCase(userID)) {
                     reserveList.remove(i);
-                    RemovePlayerDB(userID);
+                    removePlayerDB(userID);
                     logger.info("Usunieto z listy rezerwowej");
                 }
             }
@@ -144,7 +144,7 @@ public class ActiveEvent {
         edb.addPlayer(member.getUserID(), member.getUserName(), b, messageID);
     }
 
-    private void RemovePlayerDB(String userID) {
+    private void removePlayerDB(String userID) {
         EventDatabase edb = new EventDatabase();
         edb.removePlayer(userID, messageID);
     }
