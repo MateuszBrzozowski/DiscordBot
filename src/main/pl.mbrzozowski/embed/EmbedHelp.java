@@ -16,8 +16,8 @@ public class EmbedHelp {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private static PrivateChannel privateChannel;
-    private static String title = "Ranger Bot - POMOC";
-    private static String footer = "RangerBot created by Brzozaaa © 2021";
+    private static final String title = "Ranger Bot - POMOC";
+    private static final String footer = "RangerBot created by Brzozaaa © 2021";
 
     private static final String REKRUT = "recrut";
     private static final String GENERATOR = "generator";
@@ -186,23 +186,4 @@ public class EmbedHelp {
                 "", false);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
-
-    public static void infoEditEventChannel(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.YELLOW);
-            builder.setFooter(footer);
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setTitle("Tworzenie eventu na kanale - POMOC");
-            builder.addField("", "Jeżeli potrzebujesz dodaj swój opis na kanale eventu, a następnie stwórz listę " +
-                    "przy pomocy poniższych komend", false);
-            builder.addField("Wszystkie komendy wpisuj na kanale eventu", "**!name <nazwa>** - zmienia nazwę kanału\n" +
-                    "**!generatorHere** - uruchamia generator tworzenia eventów\n" +
-                    "lub stwórz listę bez generatora używając komendy **!zapisyhere** <- więcej informacji jak tworzyć " +
-                    "listę w pomocy bota pod komendą **!help**", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
 }

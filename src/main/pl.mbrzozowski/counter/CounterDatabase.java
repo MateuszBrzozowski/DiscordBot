@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 class CounterDatabase {
 
     private static final String COUNTER = "counter";
-    private Factory factory = new DBFactory();
-    private DBConnector connector = factory.createDB(DBType.RANGER);
+    private final Factory factory = new DBFactory();
+    private final DBConnector connector = factory.createDB(DBType.RANGER);
 
     ResultSet pullAllUsers() {
         ResultSet resultSet = null;

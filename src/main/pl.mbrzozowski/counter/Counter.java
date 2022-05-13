@@ -4,8 +4,6 @@ import embed.EmbedSettings;
 import helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ranger.Repository;
 
 import java.awt.*;
@@ -20,8 +18,7 @@ public class Counter {
 
     private static final String FOOTER = "Liczydło © od 11.02.2022r.";
     private static final String TITLE = "Najaktywniejsi na discordzie";
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private List<CounterUser> users = new ArrayList<>();
+    private final List<CounterUser> users = new ArrayList<>();
     private boolean isChange = false;
 
     public void initialize() {
@@ -108,8 +105,8 @@ public class Counter {
 
     private float getSum() {
         int result = 0;
-        for (int i = 0; i < users.size(); i++) {
-            result += users.get(i).getCountMsgAll();
+        for (CounterUser user : users) {
+            result += user.getCountMsgAll();
         }
         return result;
     }
@@ -148,10 +145,7 @@ public class Counter {
         List<CounterUser> sortedUsers = sortedUsers();
         String result = "";
         for (int i = 1; i <= 3; i++) {
-            result += getLine(i, sortedUsers);
-            if (i != 3) {
-                result += "\n";
-            }
+            result += getLine(i, sortedUsers) + "\n";
         }
         return result;
     }
@@ -160,10 +154,7 @@ public class Counter {
         List<CounterUser> sortedUsers = sortedUsers();
         String result = "";
         for (int i = 4; i <= 10; i++) {
-            result += getLine(i, sortedUsers);
-            if (i != 10) {
-                result += "\n";
-            }
+            result += getLine(i, sortedUsers) + "\n";
         }
         return result;
     }
@@ -190,7 +181,7 @@ public class Counter {
     }
 
     private TimerTask task() {
-        TimerTask timerTask = new TimerTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 if (isChange) {
@@ -202,7 +193,6 @@ public class Counter {
                 }
             }
         };
-        return timerTask;
     }
 
     public void userPlusOneMsg(String userID) {
