@@ -52,7 +52,8 @@ public abstract class DBConnector {
         }
     }
 
-    protected void setUrl() {
+    protected void setUrlAndConnect() {
         this.url = "jdbc:mysql://" + server + "/" + database + "?useUnicode=true&characterEncoding=UTF-8";
+        connect();
     }
 }

@@ -7,7 +7,6 @@ public class DBStats extends DBConnector {
         super.server = "localhost";
         super.user = "root";
         super.pass = "";
-        setUrl();
-        connect();
+        setUrlAndConnect();
     }
 }
