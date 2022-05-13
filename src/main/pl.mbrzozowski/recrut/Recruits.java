@@ -35,6 +35,7 @@ public class Recruits {
     private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RangerLogger rangerLogger = new RangerLogger();
+    private final int MAX_RECRUITS = 45;
 
     /**
      * @param userName Nazwa użytkownika
@@ -82,14 +83,21 @@ public class Recruits {
         String userID = event.getUser().getId();
         if (!checkUser(userID)) {
             if (!checkThinkingUser(userID)) {
-                if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
-                    if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
-                        confirmMessage(userID, userName);
-                    } else EmbedInfo.userIsInClanMember(userID);
-                } else EmbedInfo.userIsInClan(userID);
+                if (!isMaxRecruits()){
+                    if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
+                        if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
+                            confirmMessage(userID, userName);
+                        } else EmbedInfo.userIsInClanMember(userID);
+                    } else EmbedInfo.userIsInClan(userID);
+                } else EmbedInfo.maxRecrutis(userID);
             }
         } else EmbedInfo.userHaveRecrutChannel(userID);
     }
+
+    private boolean isMaxRecruits() {
+        return activeRecruits.size() >= MAX_RECRUITS;
+    }
+
 
     private void confirmMessage(String userID, String userName) {
         rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");

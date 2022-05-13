@@ -230,6 +230,16 @@ public class EmbedInfo extends EmbedCreator {
         });
     }
 
+    public static void maxRecrutis(String userID) {
+        JDA jda = Repository.getJda();
+        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
+            builder.setTitle("REKRTUACJA TYMCZASOWO ZAMKNIĘTA!");
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
+        });
+    }
+
     /**
      * Wysyła do użytkownika o ID userID informację że jest już w innym klanie nie może złożyć podania na rekrutację.
      *
