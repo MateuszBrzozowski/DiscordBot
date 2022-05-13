@@ -29,13 +29,11 @@ import java.util.function.Predicate;
 
 public class Recruits {
 
-    private List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
-    private List<MemberOfServer> thinkingRecruits = new ArrayList<>();
+    private final List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
+    private final List<MemberOfServer> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-    private Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
-    private final RangerLogger rangerLogger = new RangerLogger();
-    private final int MAX_RECRUITS = 45;
+    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+    private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
 
     /**
      * @param userName Nazwa użytkownika
@@ -95,12 +93,13 @@ public class Recruits {
     }
 
     private boolean isMaxRecruits() {
+        int MAX_RECRUITS = 45;
         return activeRecruits.size() >= MAX_RECRUITS;
     }
 
 
     private void confirmMessage(String userID, String userName) {
-        rangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
+        RangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
         thinkingRecruits.add(new MemberOfServer(userID, userName));
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
