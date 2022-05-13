@@ -5,6 +5,7 @@ import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
+import stats.MapsStats;
 import stats.ServerStats;
 
 public class StatsCmd extends Proccess {
@@ -36,6 +37,13 @@ public class StatsCmd extends Proccess {
                 }
             } else {
                 EmbedInfo.youCanLinkedYourProfileOnChannel(messageReceived.getTextChannel());
+            }
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_LAST_TEN_MAPS)) {
+            if (messageReceived.getTextChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_ADMIN_CZAT)) {
+                if (message.isClanMember()) {
+                    MapsStats.showLastTenMaps(messageReceived);
+                    messageReceived.getMessage().delete().submit();
+                }
             }
         } else {
             getNextProccess().proccessMessage(message);

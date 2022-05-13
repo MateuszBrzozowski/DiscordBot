@@ -12,6 +12,7 @@ import ranger.RangerBot;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class StatsDatabase {
 
@@ -327,9 +328,9 @@ public class StatsDatabase {
         return players;
     }
 
-    public ArrayList<Maps> pullAllMaps() {
+    public ArrayList<MapWithCountStatistic> pullAllMaps() {
         ResultSet resultSet = null;
-        ArrayList<Maps> maps = new ArrayList<>();
+        ArrayList<MapWithCountStatistic> maps = new ArrayList<>();
         String query = "CREATE TEMPORARY TABLE IF NOT EXISTS temp_table SELECT dblog_matches.id, dblog_matches.mapClassname, AVG(dblog_playercounts.players) AS players " +
                 "FROM `dblog_matches` JOIN `dblog_playercounts` ON dblog_matches.id = dblog_playercounts.match " +
                 "WHERE players > 10 AND dblog_matches.layerClassname NOT LIKE \"%seed%\" " +
@@ -345,7 +346,7 @@ public class StatsDatabase {
                     } else {
                         String name = resultSet.getString("mapClassname");
                         int count = resultSet.getInt("COUNT(*)");
-                        Maps map = new Maps(name, count);
+                        MapWithCountStatistic map = new MapWithCountStatistic(name, count);
                         maps.add(map);
                     }
                 } catch (SQLException throwables) {
@@ -355,5 +356,30 @@ public class StatsDatabase {
         }
         return maps;
     }
+
+    public List<MapLayer> pullLastTenMaps() {
+        List<MapLayer> maps = new ArrayList<>();
+        String query = "CREATE TEMPORARY TABLE IF NOT EXISTS temp_table_last_map SELECT dblog_matches.id, dblog_matches.map, dblog_matches.layer, AVG(dblog_playercounts.players) AS players " +
+                "FROM `dblog_matches` JOIN `dblog_playercounts` ON dblog_matches.id = dblog_playercounts.match " +
+                "WHERE players > 5 " +
+                "GROUP BY dblog_matches.id";
+        String querySecond = "SELECT map, layer FROM temp_table_last_map ORDER BY id DESC LIMIT 10";
+        connector.executeQuery(query);
+        ResultSet resultSet = connector.executeSelect(querySecond);
+        while (true) {
+            try {
+                if (!resultSet.next()) {
+                    break;
+                } else {
+                    String map = resultSet.getString("map");
+                    String layer = resultSet.getString("layer");
+                    MapLayer mapLayer = new MapLayer(map, layer);
+                    maps.add(mapLayer);
+                }
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        return maps;
+    }
 }
-//,

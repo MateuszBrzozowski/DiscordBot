@@ -17,7 +17,7 @@ import java.util.List;
 public class ServerStats {
 
     private List<Player> connectedPlayers = new ArrayList<>();
-    private MapStats mapStats = new MapStats();
+    private MapsStats mapStats = new MapsStats();
 
     public void initialize() {
         pullConnectedUsers();

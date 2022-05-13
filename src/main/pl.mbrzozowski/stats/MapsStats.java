@@ -1,8 +1,8 @@
 package stats;
 
+import embed.EmbedInfo;
 import embed.EmbedSettings;
 import helpers.CategoryAndChannelID;
-import helpers.Commands;
 import helpers.ComponentId;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -21,10 +21,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class MapStats {
+public class MapsStats {
 
     protected static final Logger logger = LoggerFactory.getLogger(Class.class.getName());
-    private ArrayList<Maps> maps = new ArrayList<>();
+    private ArrayList<MapWithCountStatistic> maps = new ArrayList<>();
     private boolean isFresh = false;
 
     public void initialize() {
@@ -39,7 +39,7 @@ public class MapStats {
     }
 
     private TimerTask task() {
-        TimerTask timerTask = new TimerTask() {
+        return new TimerTask() {
             @Override
             public void run() {
                 if (isFresh) {
@@ -48,7 +48,6 @@ public class MapStats {
                 }
             }
         };
-        return timerTask;
     }
 
     private void serachMessage(boolean changetToGreen) {
@@ -127,7 +126,7 @@ public class MapStats {
 
     private void calculatePercentage() {
         float sumAllMaps = sumAllMaps();
-        for (Maps m : maps) {
+        for (MapWithCountStatistic m : maps) {
             float count = m.getCount();
             float percent = count * 100 / sumAllMaps;
             m.setPercentage(percent);
@@ -136,7 +135,7 @@ public class MapStats {
 
     private int sumAllMaps() {
         int sum = 0;
-        for (Maps m : maps) {
+        for (MapWithCountStatistic m : maps) {
             sum += m.getCount();
         }
         return sum;
@@ -174,5 +173,10 @@ public class MapStats {
             serachMessage(false);
             startTimerToClearFreshStatus();
         }
+    }
+
+    public static void showLastTenMaps(MessageReceivedEvent event) {
+        List<MapLayer> mapLayers = new StatsDatabase().pullLastTenMaps();
+        EmbedInfo.showLastTenMaps(mapLayers,event);
     }
 }

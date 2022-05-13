@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
 import recrut.Recruits;
+import stats.MapLayer;
 
 import java.awt.*;
+import java.util.List;
 
 public class EmbedInfo extends EmbedCreator {
 
@@ -620,5 +622,16 @@ public class EmbedInfo extends EmbedCreator {
         messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
                 .queue();
+    }
+
+    public static void showLastTenMaps(List<MapLayer> mapLayers, MessageReceivedEvent event) {
+        EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
+        builder.setTitle("Ostatnie 10 map (min. 5 graczy)");
+        String mapsString = "";
+        for (int i = 0; i < mapLayers.size(); i++) {
+            mapsString += i + 1 + ". **" + mapLayers.get(i).getName() + "** - " + mapLayers.get(i).getLayerName() + "\n";
+        }
+        builder.setDescription(mapsString);
+        event.getTextChannel().sendMessageEmbeds(builder.build()).queue();
     }
 }
