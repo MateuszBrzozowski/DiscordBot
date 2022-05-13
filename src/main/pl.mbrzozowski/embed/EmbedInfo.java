@@ -18,63 +18,17 @@ import recrut.Recruits;
 
 import java.awt.*;
 
-public class EmbedInfo {
+public class EmbedInfo extends EmbedCreator {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
-    private static final String footer = "RangerBot created by Brzozaaa © 2022";
 
-    /**
-     * Created and returns a new Embedbuilder
-     * <p>
-     * WARNING = red + warning thumbnail</p>
-     * <p>
-     * INF_CONFIRM = only Green color</p>
-     * <p>
-     * INF_RED = only red color</p>
-     * <p>
-     * QUESTION = only Yellow color
-     * </p>
-     * <p>DEFAULT = Yellow color and thumbnail default (logo)</p>
-     *
-     * @param style of Embed
-     * @return Enbed builder with color and Thumbnail
-     */
-    private static EmbedBuilder getEmbedBuilder(EmbedStyle style) {
-        switch (style) {
-            case WARNING:
-                return getEmbedBuilder(Color.RED, ThumbnailType.WARNING);
-            case INF_GREEN:
-                return getEmbedBuilder(Color.GREEN);
-            case INF_RED:
-                return getEmbedBuilder(Color.RED);
-            case QUESTION:
-                return getEmbedBuilder(Color.YELLOW);
-            default:
-                return getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT);
-        }
-    }
-
-    private static EmbedBuilder getEmbedBuilder(Color color) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(color);
-        return builder;
-    }
-
-    private static EmbedBuilder getEmbedBuilder(Color color, ThumbnailType thumbnailType) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(color);
-        switch (thumbnailType) {
-            case DEFAULT:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL);
-                break;
-            case WARNING:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-                break;
-            case DICE:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
-                break;
-        }
-        return builder;
+    public static void recruiter(MessageReceivedEvent event) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        builder.setTitle("PODANIE");
+        builder.addField("", "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
+                "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością. \n", false);
+        builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
+        event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
     }
 
     /**
@@ -334,7 +288,7 @@ public class EmbedInfo {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
                 builder.setTitle("Zachowajmy porządek!");
                 builder.setDescription("Panie administratorze! Zachowajmy czystość na kanale do loggowania. Proszę nie wtrącać się w moje wypociny.");
-                builder.setFooter(footer);
+                builder.setFooter(getFooter());
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
             });
         }
@@ -666,19 +620,5 @@ public class EmbedInfo {
         messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
                 .queue();
-    }
-
-    private enum ThumbnailType {
-        DEFAULT,
-        WARNING,
-        DICE
-    }
-
-    private enum EmbedStyle {
-        DEFAULT,
-        WARNING,
-        QUESTION,
-        INF_GREEN,
-        INF_RED,
     }
 }

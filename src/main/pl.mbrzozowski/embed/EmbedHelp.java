@@ -12,12 +12,11 @@ import ranger.Repository;
 
 import java.awt.*;
 
-public class EmbedHelp {
+public class EmbedHelp extends EmbedCreator {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private static PrivateChannel privateChannel;
     private static final String title = "Ranger Bot - POMOC";
-    private static final String footer = "RangerBot created by Brzozaaa © 2021";
 
     private static final String REKRUT = "recrut";
     private static final String GENERATOR = "generator";
@@ -27,11 +26,9 @@ public class EmbedHelp {
     private static final String QUESTIONNAIRE = "ankieta";
 
     private static void mainHelp() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setColor(Color.YELLOW);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title);
-        builder.setFooter(footer);
+        builder.setFooter(getFooter());
         builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Komendy do rekrutów. \n" +
                 "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
                 "**!help " + QUESTIONNAIRE + "** - Tworzenie ankiet.\n" +
@@ -81,9 +78,8 @@ public class EmbedHelp {
     }
 
     private static void helpQuestionnaire() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - Tworzenie ankiet");
-        builder.setColor(Color.YELLOW);
         builder.setDescription("Poniższe polecenia tworzą ankietę na kanale na którym zostały wpisane");
         builder.addField("", "**!ankieta** - Domyślna ankieta jednokrotnego wyboru. Niepubliczna\n" +
                 "**!ankietaW** - Ankieta wielokrotnego wyboru. Niepubliczna\n" +
@@ -100,9 +96,8 @@ public class EmbedHelp {
     }
 
     private static void helpEventsSettings() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - Zarządznie eventami");
-        builder.setColor(Color.YELLOW);
         builder.setDescription("Niektóre z poniższych komend po poprawnym ich zastosowaniu wysyłają do każdego zapisanego wiadomość prywatną z informacją o zmianach w evencie.");
         builder.addField("", "**!time [msgID] [HH:mm]** - zmienia godzine w evencie\n" +
                 "**!time [msgID] [HH:mm] -noNotifi** - zmienia godzine w evencie bez powiadomienia uczestników\n" +
@@ -116,9 +111,8 @@ public class EmbedHelp {
     }
 
     private static void helpDevCommand() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Ranger Bot - POMOC - DEV");
-        builder.setColor(Color.RED);
         builder.addField("Komendy DEV", "**!disable [msgID]** -  Wyłącza buttony\n" +
                 "**!disable [msgID] [channID]** -  Wyłącza buttony\n" +
                 "**!enable [msgID]** - Włącza buttony\n" +
@@ -132,11 +126,9 @@ public class EmbedHelp {
     }
 
     private static void helpReminder() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - REMINDER");
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setColor(Color.YELLOW);
+        builder.setFooter(getFooter());
         builder.setDescription("Godzinę przed każdym eventem rozsyłane są przypomnienia do każdego zapisanego użytkownika. Możesz je dla siebie wyłączyć i włączyć przy pomocy komend.\n\n" +
                 "**!reminder Off** - Wyłącza powiadomienia\n" +
                 "**!reminder On** - Włącza powiadomienia");
@@ -145,11 +137,8 @@ public class EmbedHelp {
     }
 
     private static void helpGame() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - GRY");
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setColor(Color.YELLOW);
         builder.addField("", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
                 "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
         builder.setFooter("Komendy można wpisać na dowolnym kanale na discordzie Rangers Polska.");
@@ -157,11 +146,8 @@ public class EmbedHelp {
     }
 
     private static void helpGenerator() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - GENERATOR");
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setColor(Color.YELLOW);
         builder.addField("Po wpisaniu poniższych komend uruchamia się generator eventu. Postępuj zgodnie z instrukcjami.",
                 ">>> **!generator** - Tworzy kanał i listę w sekcji mecze/szkolenia/eventy\n" +
                         "*(Polecenie możesz napisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*\n" +
@@ -173,11 +159,8 @@ public class EmbedHelp {
     }
 
     private static void helpRecrut() {
-        EmbedBuilder builder = new EmbedBuilder();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(title + " - REKRUT");
-        builder.setFooter(footer);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setColor(Color.YELLOW);
         builder.addField("", "\n>>> **!p** - Pinguje rekruta i wysyła na kanale POZYTYWNY wynik rekrutacji\n" +
                 "**!n** - Pinguje rekruta i wysyła na kanale NEGATYWNY wynik rekrutacji\n" +
                 "**!close** - Zamyka kanał rekrutacji - rekrut nie widzi kanału/nie może pisać.\n" +

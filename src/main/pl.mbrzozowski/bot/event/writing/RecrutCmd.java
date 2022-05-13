@@ -1,7 +1,6 @@
 package bot.event.writing;
 
 import embed.EmbedInfo;
-import embed.Recruiter;
 import helpers.CategoryAndChannelID;
 import helpers.Commands;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -18,7 +17,7 @@ public class RecrutCmd extends Proccess {
         String parentCategoryId = messageReceived.getTextChannel().getParentCategoryId();
         if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
             messageReceived.getMessage().delete().submit();
-            new Recruiter(messageReceived);
+            EmbedInfo.recruiter(messageReceived);
         } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
             messageReceived.getMessage().delete().submit();
             if (!getRecruits().isResult(messageReceived.getTextChannel())) {
