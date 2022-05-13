@@ -130,15 +130,6 @@ public class ActiveEvent {
         }
     }
 
-    private boolean checkMemberOnReserveList(MemberOfServer member) {
-        for (int i = 0; i < reserveList.size(); i++) {
-            if (reserveList.get(i).getUserID().equalsIgnoreCase(member.getUserID())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void AddPlayerDB(MemberOfServer member, boolean b) {
         EventDatabase edb = new EventDatabase();
         edb.addPlayer(member.getUserID(), member.getUserName(), b, messageID);
@@ -149,31 +140,20 @@ public class ActiveEvent {
         edb.removePlayer(userID, messageID);
     }
 
+    private boolean checkMemberOnReserveList(MemberOfServer member) {
+        return reserveList.stream().anyMatch(memberOfServer -> memberOfServer.getUserID().equalsIgnoreCase(member.getUserID()));
+    }
+
     private boolean checkMemberOnMainList(MemberOfServer member) {
-        for (int i = 0; i < mainList.size(); i++) {
-            if (mainList.get(i).getUserID().equalsIgnoreCase(member.getUserID())) {
-                return true;
-            }
-        }
-        return false;
+        return mainList.stream().anyMatch(memberOfServer -> memberOfServer.getUserID().equalsIgnoreCase(member.getUserID()));
     }
 
     public boolean checkMemberOnReserveList(String userID) {
-        for (int i = 0; i < reserveList.size(); i++) {
-            if (reserveList.get(i).getUserID().equalsIgnoreCase(userID)) {
-                return true;
-            }
-        }
-        return false;
+        return reserveList.stream().anyMatch(memberOfServer -> memberOfServer.getUserID().equalsIgnoreCase(userID));
     }
 
     public boolean checkMemberOnMainList(String userID) {
-        for (int i = 0; i < mainList.size(); i++) {
-            if (mainList.get(i).getUserID().equalsIgnoreCase(userID)) {
-                return true;
-            }
-        }
-        return false;
+        return mainList.stream().anyMatch(memberOfServer -> memberOfServer.getUserID().equalsIgnoreCase(userID));
     }
 
 
