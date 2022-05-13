@@ -18,7 +18,7 @@ public class CleanerRecruitChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
     private final List<MemberWithPrivateChannel> activeRecruits;
-    private final int DELAY_IN_DAYS = 7;
+    private final int DELAY_IN_DAYS = 5;
 
     public CleanerRecruitChannel(List<MemberWithPrivateChannel> activeRecruits) {
         this.activeRecruits = activeRecruits;
