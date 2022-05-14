@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class Recruits {
 
@@ -62,7 +61,13 @@ public class Recruits {
                                     "<@&" + RoleID.RADA_KLANU + "> ")
                                     .setEmbeds(builder.build())
                                     .queue();
-                            textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.").queue();
+                            textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
+                                    .setActionRow(
+                                            Button.primary(ComponentId.RECRUIT_IN, " "),
+                                            Button.secondary(ComponentId.RECRUIT_CLOSE_CHANNEL, " "),
+                                            Button.success(ComponentId.RECRUIT_POSITIVE, " "),
+                                            Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
+                                    .queue();
                             addUserToList(userID, userName, textChannel.getId());
                         });
             }
@@ -81,7 +86,7 @@ public class Recruits {
         String userID = event.getUser().getId();
         if (!checkUser(userID)) {
             if (!checkThinkingUser(userID)) {
-                if (!isMaxRecruits()){
+                if (!isMaxRecruits()) {
                     if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
                         if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
                             confirmMessage(userID, userName);

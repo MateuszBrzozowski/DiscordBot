@@ -27,4 +27,8 @@ public class ComponentId {
     public static final String RECRUIT_NAME = "RekrutName" + SUFFIX;
     public static final String RECRUIT_OPINION_TEXT = "opinionID" + SUFFIX;
     public static final String RECRUIT_OPINION_MODAL = "rekrutOpinion" + SUFFIX;
+    public static final String RECRUIT_IN = "recruitIN" + SUFFIX;
+    public static final String RECRUIT_CLOSE_CHANNEL = "recruitCloseChannel" + SUFFIX;
+    public static final String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
+    public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
 }
