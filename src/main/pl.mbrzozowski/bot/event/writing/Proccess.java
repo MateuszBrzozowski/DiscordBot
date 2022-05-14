@@ -17,7 +17,6 @@ public abstract class Proccess {
     private final Counter counter = Repository.getCounter();
     private Proccess nextProccess;
     protected MessageReceivedEvent messageReceived;
-//    protected PrivateMessageReceivedEvent privateEvent;
 
 
     public Proccess(MessageReceivedEvent messageReceived) {
@@ -29,14 +28,6 @@ public abstract class Proccess {
     public void setNextProccess(Proccess nexxt) {
         this.nextProccess = nexxt;
     }
-
-    protected void setMessageReceived(MessageReceivedEvent messageReceived) {
-        this.messageReceived = messageReceived;
-    }
-
-//    public void setPrivateEvent(PrivateMessageReceivedEvent privateEvent) {
-//        this.privateEvent = privateEvent;
-//    }
 
     protected Proccess getNextProccess() {
         return nextProccess;
