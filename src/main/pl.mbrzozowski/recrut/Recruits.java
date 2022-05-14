@@ -299,19 +299,9 @@ public class Recruits {
     }
 
     public void closeChannel(MessageReceivedEvent event) {
-        MessageChannel messageChannel = event.getTextChannel();
-        boolean isRecruitChannel = isRecruitChannel(messageChannel.getId());
-        if (isRecruitChannel) {
-            int indexOfRecrut = getIndexOfRecrut(event.getChannel().getId());
-            Member member = event.getGuild().getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
-            TextChannelManager manager = event.getTextChannel().getManager();
-            manager.putPermissionOverride(event.getGuild().getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
-            if (member != null)
-                manager.putPermissionOverride(member, null, permissions);
-            manager.queue();
-            EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
-        }
-
+        TextChannel textChannel = event.getTextChannel();
+        String userID = event.getAuthor().getId();
+        closeChannel(textChannel, userID);
     }
 
     private int getIndexOfRecrut(String channelID) {
@@ -404,6 +394,7 @@ public class Recruits {
         if (isRecruitChannel(channel.getId())) {
             JDA jda = Repository.getJda();
             Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            removeSmallRInTag(channel.getId(), guild);
             Role roleClanMember = jda.getRoleById(RoleID.CLAN_MEMBER_ID);
             Role roleRecruit = jda.getRoleById(RoleID.RECRUT_ID);
             String recruitID = getRecruitIDFromChannelID(channel.getId());
@@ -418,10 +409,20 @@ public class Recruits {
         }
     }
 
+    private void removeSmallRInTag(String channelId, Guild guild) {
+        String userID = getRecruitIDFromChannelID(channelId);
+        String userNickname = Users.getUserNicknameFromID(userID);
+        if (userNickname.contains("<rRangersPL>")) {
+            userNickname = userNickname.replace("<rRangersPL>", "<RangersPL>");
+            guild.getMemberById(userID).modifyNickname(userNickname).queue();
+        }
+    }
+
     public void negativeResult(TextChannel channel) {
         if (isRecruitChannel(channel.getId())) {
             JDA jda = Repository.getJda();
             Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            removeTagFromNick(channel.getId(), guild);
             Role roleRecrut = jda.getRoleById(RoleID.RECRUT_ID);
             String recruitID = getRecruitIDFromChannelID(channel.getId());
             boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
@@ -429,6 +430,40 @@ public class Recruits {
                 guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecrut).queue();
             }
         }
+    }
+
+    private void removeTagFromNick(String channelID, Guild guild) {
+        String userID = getRecruitIDFromChannelID(channelID);
+        String userNickname = Users.getUserNicknameFromID(userID);
+        if (userNickname.contains("<rRangersPL>")) {
+            userNickname = userNickname.replace("<rRangersPL>", "");
+            guild.getMemberById(userID).modifyNickname(userNickname).queue();
+        }
+    }
+
+    private void addRoleRecruit(String channelID) {
+        JDA jda = Repository.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Role roleRecruit = jda.getRoleById(RoleID.RECRUT_ID);
+        String userID = getRecruitIDFromChannelID(channelID);
+        boolean hasRoleRocruit = Users.hasUserRole(userID, roleRecruit.getId());
+        if (!hasRoleRocruit) {
+            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).queue();
+        }
+    }
+
+    private void changeRecruitNickname(Guild guild, String channelID) {
+        String userID = getRecruitIDFromChannelID(channelID);
+        String nicknameOld = Users.getUserNicknameFromID(userID);
+        if (!isNicknameRNGSuffix(nicknameOld)) {
+            guild.getMemberById(userID).modifyNickname(nicknameOld + "<rRangersPL>").queue();
+        }
+    }
+
+    protected boolean isNicknameRNGSuffix(String nickname) {
+        nickname = nickname.replace(" ", "");
+        if (nickname.endsWith("<rRangersPL>")) return true;
+        else return nickname.endsWith("<RangersPL>");
     }
 
     public boolean isResult(TextChannel textChannel) {
@@ -440,5 +475,38 @@ public class Recruits {
             }
         }
         return false;
+    }
+
+    public void accepted(ButtonInteractionEvent event) {
+        //0. Wyłączyć przycisk accepted. - OSTATNIE
+        if (isRecruitChannel(event.getChannel().getId())) {
+            EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
+            EmbedInfo.recruitWhiteListInfo(event.getTextChannel());
+            addRoleRecruit(event.getTextChannel().getId());
+            changeRecruitNickname(event.getGuild(), event.getTextChannel().getId());
+        }
+    }
+
+    public void closeChannel(ButtonInteractionEvent event) {
+        //1. closechannel kolejna metoda z odpowiednimi parametrami i przekierowac dwie istniejace metody close channel
+        TextChannel textChannel = event.getTextChannel();
+        String userID = event.getUser().getId();
+        closeChannel(textChannel, userID);
+    }
+
+    private void closeChannel(TextChannel textChannel, String userID) {
+        JDA jda = Repository.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        boolean isRecruitChannel = isRecruitChannel(textChannel.getId());
+        if (isRecruitChannel) {
+            int indexOfRecrut = getIndexOfRecrut(textChannel.getId());
+            Member member = guild.getMemberById(activeRecruits.get(indexOfRecrut).getUserID());
+            TextChannelManager manager = textChannel.getManager();
+            manager.putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), null, permViewChannel);
+            if (member != null)
+                manager.putPermissionOverride(member, null, permissions);
+            manager.queue();
+            EmbedInfo.closeChannel(userID, textChannel);
+        }
     }
 }

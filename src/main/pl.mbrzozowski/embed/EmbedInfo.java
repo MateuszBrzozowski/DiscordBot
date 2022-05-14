@@ -644,4 +644,24 @@ public class EmbedInfo extends EmbedCreator {
         builder.setDescription(mapsString);
         event.getTextChannel().sendMessageEmbeds(builder.build()).queue();
     }
+
+    public static void recruitAccepted(String userName, TextChannel textChannel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        builder.setTitle("Przyjęty");
+        builder.setDescription("Przyjęty na rekrutację przez: " + userName);
+        textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
+
+    public static void recruitWhiteListInfo(TextChannel textChannel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        builder.setTitle("Whitelista");
+        builder.setDescription("Uzupełnij przesłany poniżej formularz aby dostać whitelistę na naszym " +
+                "serwerze oraz adminkę na serwery treningowe abyś mógł swobodnie trenować swoje umiejętności w grze - " +
+                "więcej info o serwerach treningowych tutaj <#841233590384853012>");
+        builder.addField(
+                "Formularz",
+                "https://docs.google.com/forms/d/e/1FAIpQLSeCl7SdQ_TwtmwjJMPmLiNCFKQHx0xEly_eIcvuXlSQO_VMEQ/viewform?usp=sf_link",
+                false);
+        textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
 }

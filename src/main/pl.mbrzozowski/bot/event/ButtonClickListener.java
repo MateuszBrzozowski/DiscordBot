@@ -30,6 +30,7 @@ public class ButtonClickListener extends ListenerAdapter {
         ServerStats serverStats = Repository.getServerStats();
         int indexOfMatch = events.getIndexActiveEvent(event.getMessage().getId());
         boolean isIDCorrect = true;
+        boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
 
         if (indexOfMatch >= 0) {
             eventsButtonClick(event, indexOfMatch);
@@ -54,7 +55,6 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
             event.getMessage().delete().queue();
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE)) {
-            boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
             String parentCategoryId = event.getTextChannel().getParentCategoryId();
             if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 if (!isRadaKlanu) {
@@ -77,11 +77,25 @@ public class ButtonClickListener extends ListenerAdapter {
             isIDCorrect = false;
             RecruitOpinions recrutOpinions = new RecruitOpinions();
             recrutOpinions.openForm(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_IN) && isRadaKlanu) {
+            recrut.accepted(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL) && isRadaKlanu) {
+            recrut.closeChannel(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE) && isRadaKlanu) {
+            if (!recrut.isResult(event.getTextChannel())) {
+                EmbedInfo.endPositive(event.getUser().getId(), event.getTextChannel());
+                recrut.positiveResult(event.getTextChannel());
+            }
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE) && isRadaKlanu) {
+            if (!recrut.isResult(event.getTextChannel())) {
+                EmbedInfo.endNegative(event.getUser().getId(), event.getTextChannel());
+                recrut.negativeResult(event.getTextChannel());
+            }
         } else {
             isIDCorrect = false;
         }
 
-        if (isIDCorrect) {
+        if (isIDCorrect || (!isIDCorrect && !isRadaKlanu)) {
             event.deferEdit().queue();
         }
     }
