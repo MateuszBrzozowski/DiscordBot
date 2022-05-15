@@ -401,10 +401,10 @@ public class Recruits {
             boolean hasRoleClanMember = Users.hasUserRole(recruitID, RoleID.CLAN_MEMBER_ID);
             boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
             if (!hasRoleClanMember) {
-                guild.addRoleToMember(UserSnowflake.fromId(recruitID), roleClanMember).queue();
+                guild.addRoleToMember(UserSnowflake.fromId(recruitID), roleClanMember).submit();
             }
             if (hasRoleRecrut) {
-                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecruit).queue();
+                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecruit).submit();
             }
         }
     }
@@ -414,7 +414,7 @@ public class Recruits {
         String userNickname = Users.getUserNicknameFromID(userID);
         if (userNickname.contains("<rRangersPL>")) {
             userNickname = userNickname.replace("<rRangersPL>", "<RangersPL>");
-            guild.getMemberById(userID).modifyNickname(userNickname).queue();
+            guild.getMemberById(userID).modifyNickname(userNickname).submit();
         }
     }
 
@@ -427,7 +427,7 @@ public class Recruits {
             String recruitID = getRecruitIDFromChannelID(channel.getId());
             boolean hasRoleRecrut = Users.hasUserRole(recruitID, RoleID.RECRUT_ID);
             if (hasRoleRecrut) {
-                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecrut).queue();
+                guild.removeRoleFromMember(UserSnowflake.fromId(recruitID), roleRecrut).submit();
             }
         }
     }
@@ -437,7 +437,7 @@ public class Recruits {
         String userNickname = Users.getUserNicknameFromID(userID);
         if (userNickname.contains("<rRangersPL>")) {
             userNickname = userNickname.replace("<rRangersPL>", "");
-            guild.getMemberById(userID).modifyNickname(userNickname).queue();
+            guild.getMemberById(userID).modifyNickname(userNickname).submit();
         }
     }
 
@@ -448,7 +448,8 @@ public class Recruits {
         String userID = getRecruitIDFromChannelID(channelID);
         boolean hasRoleRocruit = Users.hasUserRole(userID, roleRecruit.getId());
         if (!hasRoleRocruit) {
-            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).queue();
+            logger.info("daje role rekrut");
+            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).submit();
         }
     }
 
@@ -456,7 +457,8 @@ public class Recruits {
         String userID = getRecruitIDFromChannelID(channelID);
         String nicknameOld = Users.getUserNicknameFromID(userID);
         if (!isNicknameRNGSuffix(nicknameOld)) {
-            guild.getMemberById(userID).modifyNickname(nicknameOld + "<rRangersPL>").queue();
+            logger.info("Zmieniam nick");
+            guild.getMemberById(userID).modifyNickname(nicknameOld + "<rRangersPL>").submit();
         }
     }
 
@@ -478,17 +480,50 @@ public class Recruits {
     }
 
     public void accepted(ButtonInteractionEvent event) {
-        //0. Wyłączyć przycisk accepted. - OSTATNIE
-        if (isRecruitChannel(event.getChannel().getId())) {
-            EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
-            EmbedInfo.recruitWhiteListInfo(event.getTextChannel());
-            addRoleRecruit(event.getTextChannel().getId());
-            changeRecruitNickname(event.getGuild(), event.getTextChannel().getId());
+        if (!isAccepted(event.getTextChannel())) {
+            if (isRecruitChannel(event.getChannel().getId())) {
+                EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
+                EmbedInfo.recruitWhiteListInfo(event.getTextChannel());
+                addRoleRecruit(event.getTextChannel().getId());
+                changeRecruitNickname(event.getGuild(), event.getTextChannel().getId());
+            }
         }
     }
 
+    private boolean isAccepted(TextChannel textChannel) {
+        List<Message> messages = textChannel.getHistory().retrievePast(100).complete();
+        for (int i = 0; i < messages.size(); i++) {
+            List<MessageEmbed> embeds = messages.get(i).getEmbeds();
+            if (checkEmbedsIsAccepted(embeds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkEmbedsIsAccepted(List<MessageEmbed> embeds) {
+        if (!embeds.isEmpty()) {
+            return isEmbedIsAccepted(embeds.get(0));
+        }
+        return false;
+    }
+
+    private boolean isEmbedIsAccepted(MessageEmbed embed) {
+        String title = embed.getTitle();
+        String description = embed.getDescription();
+        String pattern = "Przyjęty na rekrutację przez: ";
+        if (title != null && title.equalsIgnoreCase("Przyjęty")) {
+            if (description != null && description.length() >= pattern.length()) {
+                description = description.substring(0, pattern.length());
+                if (description.equalsIgnoreCase(pattern)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void closeChannel(ButtonInteractionEvent event) {
-        //1. closechannel kolejna metoda z odpowiednimi parametrami i przekierowac dwie istniejace metody close channel
         TextChannel textChannel = event.getTextChannel();
         String userID = event.getUser().getId();
         closeChannel(textChannel, userID);
