@@ -19,7 +19,11 @@ public class WriteListener extends ListenerAdapter {
         String[] message = event.getMessage().getContentRaw().split(" ");
         String contentDisplay = event.getMessage().getContentDisplay();
 
-        Message msg = new Message(message, contentDisplay, event.getAuthor().getId());
+        Message msg = new Message(
+                message,
+                contentDisplay,
+                event.getAuthor().getId(),
+                event);
 
         DiceCmd diceCmd = new DiceCmd(event);
         StatsCmd statsCmd = new StatsCmd(event);

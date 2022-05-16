@@ -2,22 +2,27 @@ package bot.event.writing;
 
 import helpers.RoleID;
 import helpers.Users;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class Message {
 
-    private String[] words;
-    private String contentDisplay;
-    private boolean admin;
-    private boolean clanMember;
-    private String userID;
+    private final String[] words;
+    private final String contentDisplay;
+    private final boolean admin;
+    private final boolean clanMember;
+    private final boolean isPrivate;
+    private final String userID;
 
-    public Message(String[] words, String contentDisplay, String userID) {
+    public Message(String[] words, String contentDisplay, String userID, @NotNull MessageReceivedEvent event) {
         this.words = words;
         this.contentDisplay = contentDisplay;
         this.admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
         if (!this.admin) Users.isUserDev(userID);
         this.clanMember = Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID);
         this.userID = userID;
+        this.isPrivate = event.isFromType(ChannelType.PRIVATE);
     }
 
     public String[] getWords() {
@@ -38,5 +43,9 @@ public class Message {
 
     public String getUserID() {
         return userID;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
     }
 }
