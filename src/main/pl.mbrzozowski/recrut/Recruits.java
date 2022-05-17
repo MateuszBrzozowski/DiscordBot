@@ -346,22 +346,6 @@ public class Recruits {
         return "-1";
     }
 
-    public void deleteChannel(MessageReceivedEvent event) {
-        logger.info("Kanał jest kanałem rekrutacyjnym.");
-        EmbedInfo.removedChannel(event.getTextChannel());
-        Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            deleteChannelByID(event.getChannel().getId());
-            event.getGuild().getTextChannelById(event.getChannel().getId()).delete().reason("Rekrutacja zakończona").queue();
-            logger.info("Kanał został usunięty.");
-        });
-        thread.start();
-    }
-
     public void deleteChannels(List<MemberWithPrivateChannel> listToDelete) {
         JDA jda = Repository.getJda();
         RecruitDatabase rdb = new RecruitDatabase();
