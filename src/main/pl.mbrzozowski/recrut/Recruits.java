@@ -362,13 +362,18 @@ public class Recruits {
         thread.start();
     }
 
-    public void deleteChannel(String channelID) {
-        int indexOfRecrut = getIndexOfRecrut(channelID);
-        String userName = activeRecruits.get(indexOfRecrut).getUserName();
-        deleteChannelByID(channelID);
+    public void deleteChannels(List<MemberWithPrivateChannel> listToDelete) {
         JDA jda = Repository.getJda();
-        jda.getTextChannelById(channelID).delete().reason("Rekrutacja zakończona, upłynął czas wyświetlania informacji").queue();
-        RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + userName + "]");
+        RecruitDatabase rdb = new RecruitDatabase();
+        for (int i = 0; i < listToDelete.size(); i++) {
+            int indexOfRecrut = getIndexOfRecrut(listToDelete.get(i).getChannelID());
+            String userName = listToDelete.get(i).getUserName();
+            activeRecruits.remove(indexOfRecrut);
+            rdb.removeUser(listToDelete.get(i).getChannelID());
+            logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
+            jda.getTextChannelById(listToDelete.get(i).getChannelID()).delete().reason("Rekrutacja zakończona, upłynął czas wyświetlania informacji").queue();
+            RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + userName + "]");
+        }
     }
 
     public void sendInfo(PrivateChannel privateChannel) {

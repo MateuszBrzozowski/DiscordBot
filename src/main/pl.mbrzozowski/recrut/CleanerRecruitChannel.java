@@ -12,12 +12,14 @@ import org.slf4j.LoggerFactory;
 import ranger.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CleanerRecruitChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
     private final List<MemberWithPrivateChannel> activeRecruits;
+    private final List<MemberWithPrivateChannel> recruitsToDelete = new ArrayList<>();
     private final int DELAY_IN_DAYS = 5;
 
     public CleanerRecruitChannel(List<MemberWithPrivateChannel> activeRecruits) {
@@ -29,14 +31,13 @@ public class CleanerRecruitChannel implements CleanerChannel {
             JDA jda = Repository.getJda();
             for (int i = 0; i < activeRecruits.size(); i++) {
                 String channelID = activeRecruits.get(i).getChannelID();
-                jda.getTextChannelById(channelID).getHistory().retrievePast(100).queue(messages -> {
-                    if (isTimeToRemove(messages)) {
-                        Recruits recruits = Repository.getRecruits();
-                        recruits.deleteChannel(messages.get(0).getChannel().getId());
-                    }
-                });
+                List<Message> complete = jda.getTextChannelById(channelID).getHistory().retrievePast(100).complete();
+                if (isTimeToRemove(complete)){
+                    recruitsToDelete.add(activeRecruits.get(i));
+                }
             }
         }
+        Repository.getRecruits().deleteChannels(recruitsToDelete);
     }
 
     private boolean isTimeToRemove(List<Message> messages) {
