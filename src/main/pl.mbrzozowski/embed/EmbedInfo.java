@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -663,5 +664,16 @@ public class EmbedInfo extends EmbedCreator {
                 "https://docs.google.com/forms/d/e/1FAIpQLSeCl7SdQ_TwtmwjJMPmLiNCFKQHx0xEly_eIcvuXlSQO_VMEQ/viewform?usp=sf_link",
                 false);
         textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
+
+    public static void sendRoles(MessageReceivedEvent messageReceived) {
+        SelectMenu roles = RoleID.getRoleToSelectMenu();
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        builder.setTitle("Role na discordzie");
+        builder.setDescription("Przypisz rolę wybierająć ją z poniższej listy.");
+        messageReceived.getTextChannel()
+                .sendMessageEmbeds(builder.build())
+                .setActionRow(roles)
+                .queue();
     }
 }

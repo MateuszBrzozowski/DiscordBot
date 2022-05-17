@@ -31,4 +31,5 @@ public class ComponentId {
     public static final String RECRUIT_CLOSE_CHANNEL = "recruitCloseChannel" + SUFFIX;
     public static final String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
     public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
+    public static final String ROLES = "RolesMenu" + SUFFIX;
 }

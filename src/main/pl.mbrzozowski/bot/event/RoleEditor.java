@@ -12,31 +12,20 @@ public class RoleEditor {
     JDA jda = Repository.getJda();
 
     public void addRemoveRole(String userID, String roleString) {
-        Role role = getRole(roleString);
+        Role role = jda.getRoleById(roleString);
         Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (role != null) {
             boolean hasRole = Users.hasUserRole(userID, role.getId());
             if (!hasRole) {
                 guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, true);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał roblę **" + role.getName() + "**");
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał rolę **" + role.getName() + "**");
             } else {
                 guild.removeRoleFromMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, false);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął roblę **" + role.getName() + "**");
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął rolę **" + role.getName() + "**");
             }
         }
-    }
-
-    private Role getRole(String roleString) {
-        if (roleString.equalsIgnoreCase(Commands.TARKOV)) {
-            return jda.getRoleById(RoleID.TARKOV);
-        } else if (roleString.equalsIgnoreCase(Commands.VIRTUAL_REALITY)) {
-            return jda.getRoleById(RoleID.VIRTUAL_REALITY);
-        } else if (roleString.equalsIgnoreCase(RoleID.SEED_ID)) {
-            return jda.getRoleById(RoleID.SEED_ID);
-        }
-        return null;
     }
 
     /**

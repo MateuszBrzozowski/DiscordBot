@@ -47,6 +47,7 @@ public class Commands {
     public static final String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     public static final String STATS_LAST_TEN_MAPS = PREFIX + "maps" + SUFFIX;
     //ROLE
+    public static final String ROLES = PREFIX + "roles" + SUFFIX;
     public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
     public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;
 }
