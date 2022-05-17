@@ -19,6 +19,20 @@ public class Roles extends Proccess {
             roleEditor.addRemoveRole(message.getUserID(), RoleID.TARKOV);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.VIRTUAL_REALITY)) {
             roleEditor.addRemoveRole(message.getUserID(), RoleID.VIRTUAL_REALITY);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.SQUAD)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.SQUAD);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.CS)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.CS);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.WAR_THUNDER)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.WAR_THUNDER);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.MINECRAFT)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.MINECRAFT);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RAINBOW_SIX)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.RAINBOW_SIX);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.WARGAME)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.WARGAME);
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.ARMA)) {
+            roleEditor.addRemoveRole(message.getUserID(), RoleID.ARMA);
         } else {
             getNextProccess().proccessMessage(message);
         }

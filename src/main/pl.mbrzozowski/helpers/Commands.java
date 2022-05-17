@@ -47,7 +47,15 @@ public class Commands {
     public static final String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     public static final String STATS_LAST_TEN_MAPS = PREFIX + "maps" + SUFFIX;
     //ROLE
-    public static final String ROLES = PREFIX + "roles" + SUFFIX;
-    public static final String TARKOV = PREFIX + "tarkov" + SUFFIX;
-    public static final String VIRTUAL_REALITY = PREFIX + "vr" + SUFFIX;
+    public static final String ROLE = "role.";
+    public static final String ROLES = PREFIX + ROLE + "roles" + SUFFIX;
+    public static final String TARKOV = PREFIX + ROLE + "tarkov" + SUFFIX;
+    public static final String VIRTUAL_REALITY = PREFIX + ROLE + "vr" + SUFFIX;
+    public static final String SQUAD = PREFIX + ROLE + "squad" + SUFFIX;
+    public static final String CS = PREFIX + ROLE + "cs" + SUFFIX;
+    public static final String WAR_THUNDER = PREFIX + ROLE + "wt" + SUFFIX;
+    public static final String MINECRAFT = PREFIX + ROLE + "minecraft" + SUFFIX;
+    public static final String RAINBOW_SIX = PREFIX + ROLE + "r6" + SUFFIX;
+    public static final String WARGAME = PREFIX + ROLE + "wargame" + SUFFIX;
+    public static final String ARMA = PREFIX + ROLE + "arma" + SUFFIX;
 }
