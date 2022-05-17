@@ -449,7 +449,7 @@ public class Recruits {
         boolean hasRoleRocruit = Users.hasUserRole(userID, roleRecruit.getId());
         if (!hasRoleRocruit) {
             logger.info("daje role rekrut");
-            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).submit();
+            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).complete();
         }
     }
 
@@ -458,7 +458,7 @@ public class Recruits {
         String nicknameOld = Users.getUserNicknameFromID(userID);
         if (!isNicknameRNGSuffix(nicknameOld)) {
             logger.info("Zmieniam nick");
-            guild.getMemberById(userID).modifyNickname(nicknameOld + "<rRangersPL>").submit();
+            guild.getMemberById(userID).modifyNickname(nicknameOld + "<rRangersPL>").complete();
         }
     }
 
@@ -483,7 +483,6 @@ public class Recruits {
         if (!isAccepted(event.getTextChannel())) {
             if (isRecruitChannel(event.getChannel().getId())) {
                 EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
-                EmbedInfo.recruitWhiteListInfo(event.getTextChannel());
                 addRoleRecruit(event.getTextChannel().getId());
                 changeRecruitNickname(event.getGuild(), event.getTextChannel().getId());
             }
