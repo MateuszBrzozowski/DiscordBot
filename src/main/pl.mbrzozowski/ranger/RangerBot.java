@@ -38,6 +38,7 @@ public class RangerBot {
                 .addEventListeners(new MessageUpdate())
                 .addEventListeners(new Listener())
                 .addEventListeners(new ModalListener())
+                .addEventListeners(new SelecetMenuListener())
                 .build();
         Repository.setJDA(jda);
         jda.getPresence().setActivity(Activity.listening("Spotify"));
