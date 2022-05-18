@@ -655,7 +655,7 @@ public class EmbedInfo extends EmbedCreator {
         SelectMenu roles = RoleID.getRoleToSelectMenu();
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
         builder.setTitle("Role na discordzie");
-        builder.setDescription("Przypisz rolę wybierając ją z poniższej listy.");
+        builder.setDescription("Przypisz/usuń rolę wybierając ją z poniższej listy.");
         messageReceived.getTextChannel()
                 .sendMessageEmbeds(builder.build())
                 .setActionRow(roles)
