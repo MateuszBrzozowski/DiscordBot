@@ -438,7 +438,8 @@ public class Recruits {
         boolean hasRoleRocruit = Users.hasUserRole(userID, roleRecruit.getId());
         if (!hasRoleRocruit) {
             logger.info("daje role rekrut");
-            guild.addRoleToMember(UserSnowflake.fromId(userID), roleRecruit).complete();
+            Member member = guild.getMemberById(userID);
+            guild.addRoleToMember(member, roleRecruit).complete();
         }
     }
 
