@@ -33,7 +33,7 @@ public class RoleID {
 
     public static SelectMenu getRoleToSelectMenu() {
         return SelectMenu.create(ComponentId.ROLES)
-                .setPlaceholder("Wybierz rolę")
+                .setPlaceholder("Choose a role")
                 .setRequiredRange(1,1)
                 .addOption("VR", VIRTUAL_REALITY)
                 .addOption("Squad", SQUAD)
