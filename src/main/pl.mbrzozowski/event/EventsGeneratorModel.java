@@ -1,5 +1,7 @@
 package event;
 
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -26,6 +28,14 @@ public class EventsGeneratorModel {
     }
 
     public void saveAnswerAndNextStage(MessageReceivedEvent event, int indexOfGenerator) {
+        eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(event);
+    }
+
+    public void saveAnswerAndNextStage(ButtonInteractionEvent buttonAnswer, int indexOfGenerator) {
+        eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(buttonAnswer);
+    }
+
+    public void saveAnswerAndNextStage(SelectMenuInteractionEvent event, int indexOfGenerator) {
         eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(event);
     }
 

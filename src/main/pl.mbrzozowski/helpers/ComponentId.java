@@ -32,4 +32,20 @@ public class ComponentId {
     public static final String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
     public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
     public static final String ROLES = "RolesMenu" + SUFFIX;
+
+    //Generator Eventow
+    public static final String GENERATOR_DESC_YES = "generatorDescYes" + SUFFIX;
+    public static final String GENERATOR_DESC_NO = "generatorDescNo" + SUFFIX;
+    public static final String GENERATOR_PING_CLAN_MEMBER = "GenPingCM" + SUFFIX;
+    public static final String GENERATOR_PING_RECRUIT = "GenPingR" + SUFFIX;
+    public static final String GENERATOR_PING_BOTH = "GenPingB" + SUFFIX;
+    public static final String GENERATOR_FINISH_SELECT_MENU = "GenFinMenu" + SUFFIX;
+    public static final String GENERATOR_EVENT_NAME = "GenEventName" + SUFFIX;
+    public static final String GENERATOR_DATE = "GenDate" + SUFFIX;
+    public static final String GENERATOR_TIME = "GenTime" + SUFFIX;
+    public static final String GENERATOR_DESC = "GenDesc" + SUFFIX;
+    public static final String GENERATOR_WHO_PING = "GenWhoPing" + SUFFIX;
+    public static final String GENERATOR_SHOW = "GenShow" + SUFFIX;
+    public static final String GENERATOR_END = "GenEnd" + SUFFIX;
+    public static final String GENERATOR_CANCEL = "GenCancel" + SUFFIX;
 }

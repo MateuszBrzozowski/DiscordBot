@@ -1,17 +1,29 @@
 package event;
 
+import embed.EmbedInfo;
 import embed.EmbedSettings;
+import helpers.ComponentId;
 import helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.RangerBot;
 import ranger.Repository;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventsGenerator {
 
@@ -57,6 +69,78 @@ public class EventsGenerator {
         return userID;
     }
 
+    public void saveAnswerAndSetNextStage(ButtonInteractionEvent event) {
+        switch (stageOfGenerator) {
+            case IF_SET_DESCRIPTION: {
+                if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_DESC_YES)) {
+                    embedGetDescription();
+                    stageOfGenerator = EventGeneratorStatus.SET_DESCRIPTION;
+                } else {
+                    embedWhoPing();
+                    stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
+                }
+                disableButtons(event);
+                break;
+            }
+            case SET_PERMISSION: {
+                boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
+                boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
+                perm = getPermString(ac, r);
+                embedDoYouWantAnyChange(true);
+                stageOfGenerator = EventGeneratorStatus.FINISH;
+                disableButtons(event);
+                break;
+            }
+            case CHANGE_PERMISSION: {
+                boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
+                boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
+                perm = getPermString(ac, r);
+                embedDoYouWantAnyChange(false);
+                stageOfGenerator = EventGeneratorStatus.FINISH;
+                disableButtons(event);
+            }
+            case FINISH: {
+                if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_SHOW)) {
+                    embedDoYouWantAnyChange(true);
+                } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_END)) {
+                    end();
+                } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_CANCEL)) {
+                    EmbedInfo.cancelEventGenerator(event.getUser().getId());
+                    removeThisGenerator();
+                }
+                disableButtonsAndSelectMenu(event.getMessage());
+                break;
+            }
+        }
+    }
+
+    public void saveAnswerAndSetNextStage(SelectMenuInteractionEvent event) {
+        List<SelectOption> selectedOptions = event.getSelectedOptions();
+        String userChoose = selectedOptions.get(0).getValue();
+        switch (stageOfGenerator) {
+            case FINISH: {
+                if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_EVENT_NAME)) {
+                    embedGetName();
+                    stageOfGenerator = EventGeneratorStatus.CHANGE_NAME;
+                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DATE)) {
+                    embedGetDate();
+                    stageOfGenerator = EventGeneratorStatus.CHANGE_DATE;
+                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_TIME)) {
+                    embedGetTime();
+                    stageOfGenerator = EventGeneratorStatus.CHANGE_TIME;
+                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DESC)) {
+                    embedGetDescription();
+                    stageOfGenerator = EventGeneratorStatus.CHANGE_DESCRIPTION;
+                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_WHO_PING)) {
+                    embedWhoPing();
+                    stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
+                }
+                disableButtonsAndSelectMenu(event.getMessage());
+                break;
+            }
+        }
+    }
+
     void saveAnswerAndSetNextStage(MessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
         switch (stageOfGenerator) {
@@ -98,19 +182,6 @@ public class EventsGenerator {
                 }
                 break;
             }
-            case IF_SET_DESCRIPTION: {
-                if (msg.equalsIgnoreCase("T")) {
-                    embedGetDescription();
-                    stageOfGenerator = EventGeneratorStatus.SET_DESCRIPTION;
-                } else if (msg.equalsIgnoreCase("N")) {
-                    embedWhoPing();
-                    stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
-                } else {
-                    embedIsDescriptionNotCorrect();
-                    embedIsDescription();
-                }
-                break;
-            }
             case SET_DESCRIPTION: {
                 if (msg.length() < 2048) {
                     description = msg;
@@ -118,51 +189,6 @@ public class EventsGenerator {
                     embedWhoPing();
                 } else {
                     embedDescriptionLong();
-                }
-
-                break;
-            }
-            case SET_PERMISSION: {
-                boolean c = msg.equalsIgnoreCase("c");
-                boolean ac = msg.equalsIgnoreCase("ac");
-                boolean r = msg.equalsIgnoreCase("r");
-                if (c || ac || r) {
-                    perm = msg;
-                    embedDoYouWantAnyChange(true);
-                    stageOfGenerator = EventGeneratorStatus.FINISH;
-                } else {
-                    embedWhoPingNotCorrect();
-                    embedWhoPing();
-                }
-                break;
-            }
-            case FINISH: {
-                if (msg.equalsIgnoreCase("n")) {
-                    //zmiana nazwy
-                    embedGetName();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_NAME;
-                } else if (msg.equalsIgnoreCase("d")) {
-                    //zmiana daty
-                    embedGetDate();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_DATE;
-                } else if (msg.equalsIgnoreCase("t")) {
-                    //zmiana czasu eventu
-                    embedGetTime();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_TIME;
-                } else if (msg.equalsIgnoreCase("o")) {
-                    //zmiana opisu eventu zawartego na liście.
-                    embedGetDescription();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_DESCRIPTION;
-                } else if (msg.equalsIgnoreCase("p")) {
-                    embedWhoPing();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
-                } else if (msg.equalsIgnoreCase("show")) {
-                    embedDoYouWantAnyChange(true);
-                } else if (msg.equalsIgnoreCase("end")) {
-                    end();
-                } else {
-                    embedWhoPingNotCorrect();
-                    embedDoYouWantAnyChange(false);
                 }
                 break;
             }
@@ -212,6 +238,11 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
+            case IF_SET_DESCRIPTION:
+            case SET_PERMISSION:
+            case FINISH: {
+                break;
+            }
             default:
                 embedError();
                 removeThisGenerator();
@@ -244,18 +275,26 @@ public class EventsGenerator {
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             if (showList) embedListExample(privateChannel);
 
+            SelectMenu selectMenu = SelectMenu
+                    .create(ComponentId.GENERATOR_FINISH_SELECT_MENU)
+                    .setRequiredRange(1, 1)
+                    .setPlaceholder("Czy chcesz wprowadzić jakieś zmiany?")
+                    .addOption("Nazwa eventu", ComponentId.GENERATOR_EVENT_NAME)
+                    .addOption("Data eventu", ComponentId.GENERATOR_DATE)
+                    .addOption("Czas eventu", ComponentId.GENERATOR_TIME)
+                    .addOption("Opis eventu", ComponentId.GENERATOR_DESC)
+                    .addOption("Do kogo są zapisy?", ComponentId.GENERATOR_WHO_PING)
+                    .build();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.GREEN);
             builder.setTitle("Generwoanie listy zakończone.");
-            builder.addField("Czy chcesz wprowadzić jakieś zmiany?", "N - nazwa eventu\n" +
-                    "D - data eventu\n" +
-                    "T - czas eventu\n" +
-                    "O - opis eventu zawarty na liście\n" +
-                    "P - Do kogo kierowana jest lista\n\n" +
-                    "SHOW - zobacz jak bedzie wygladac lista\n" +
-                    "END - kończy generowanie listy.\n" +
-                    "!CANCEL - anuluje generowanie listy", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build())
+                    .setActionRows(
+                            ActionRow.of(selectMenu),
+                            ActionRow.of(Button.primary(ComponentId.GENERATOR_SHOW, "Pokaż listę"),
+                                    Button.success(ComponentId.GENERATOR_END, "Zakończ"),
+                                    Button.danger(ComponentId.GENERATOR_CANCEL, "Anuluj")))
+                    .queue();
         });
     }
 
@@ -312,7 +351,6 @@ public class EventsGenerator {
     }
 
     private void embedWhoPingNotCorrect() {
-
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
@@ -336,8 +374,14 @@ public class EventsGenerator {
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
-            builder.addField("Do kogo kierowane są zapisy.", "c - Clan Member\nac - Clan Member + Rekrut\nr - Rekrut", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            builder.addField("Do kogo kierowane są zapisy?", "", false);
+            privateChannel.sendMessageEmbeds(builder.build())
+                    .setActionRow(
+                            Button.primary(ComponentId.GENERATOR_PING_CLAN_MEMBER, "Tylko Clan Member"),
+                            Button.primary(ComponentId.GENERATOR_PING_RECRUIT, "Tylko Rekrut"),
+                            Button.primary(ComponentId.GENERATOR_PING_BOTH, "Clan Member + Rekrut")
+                    )
+                    .queue();
         });
     }
 
@@ -363,8 +407,12 @@ public class EventsGenerator {
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
-            builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "T - TAK\nN - NIE", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "", false);
+            privateChannel.sendMessageEmbeds(builder.build())
+                    .setActionRow(
+                            Button.success(ComponentId.GENERATOR_DESC_YES, "Tak"),
+                            Button.danger(ComponentId.GENERATOR_DESC_NO, "Nie"))
+                    .queue();
         });
     }
 
@@ -428,4 +476,26 @@ public class EventsGenerator {
         this.isSpecificChannel = specificChannel;
     }
 
+    private void disableButtons(ButtonInteractionEvent event) {
+        Message message = event.getMessage();
+        List<Button> buttons = message.getButtons();
+        List<Button> buttonsNew = new ArrayList<>();
+        List<MessageEmbed> embeds = message.getEmbeds();
+        buttons.forEach(button -> {
+            button = button.asDisabled();
+            buttonsNew.add(button);
+        });
+        MessageEmbed messageEmbed = embeds.get(0);
+        message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
+    }
+
+    private void disableButtonsAndSelectMenu(Message message) {
+        message.delete().queue();
+    }
+
+    private String getPermString(boolean ac, boolean r) {
+        if (r) return "r";
+        else if (ac) return "ac";
+        else return "c";
+    }
 }

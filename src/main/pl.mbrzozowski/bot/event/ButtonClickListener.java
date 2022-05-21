@@ -3,6 +3,7 @@ package bot.event;
 import embed.EmbedInfo;
 import event.ButtonClickType;
 import event.Event;
+import event.EventsGeneratorModel;
 import helpers.*;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,6 +25,8 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
+        int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(event.getUser().getId());
         Recruits recrut = Repository.getRecruits();
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
@@ -91,6 +94,8 @@ public class ButtonClickListener extends ListenerAdapter {
                 EmbedInfo.endNegative(event.getUser().getId(), event.getTextChannel());
                 recrut.negativeResult(event.getTextChannel());
             }
+        } else if (indexOfGenerator >= 0) {
+            eventsGenerator.saveAnswerAndNextStage(event, indexOfGenerator);
         } else {
             isIDCorrect = false;
         }

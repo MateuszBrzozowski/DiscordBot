@@ -1,5 +1,6 @@
 package bot.event;
 
+import event.EventsGeneratorModel;
 import helpers.ComponentId;
 import helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
+import ranger.Repository;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ public class SelecetMenuListener extends ListenerAdapter {
 
     @Override
     public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+        EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
+        int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         if (isRoles) {
@@ -45,6 +49,9 @@ public class SelecetMenuListener extends ListenerAdapter {
             } else if (roleID.equalsIgnoreCase(RoleID.ARMA)) {
                 roleEditor.addRemoveRole(event.getUser().getId(), RoleID.ARMA);
             }
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
+            event.getInteraction().deferEdit().queue();
+            eventsGenerator.saveAnswerAndNextStage(event, indexOfGenerator);
         }
     }
 }
