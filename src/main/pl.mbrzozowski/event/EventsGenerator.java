@@ -225,22 +225,10 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
-            case CHANGE_PERMISSION: {
-                boolean c = msg.equalsIgnoreCase("c");
-                boolean ac = msg.equalsIgnoreCase("ac");
-                boolean r = msg.equalsIgnoreCase("r");
-                if (c || ac || r) {
-                    perm = msg;
-                } else {
-                    embedWhoPingNotCorrect();
-                }
-                embedDoYouWantAnyChange(false);
-                stageOfGenerator = EventGeneratorStatus.FINISH;
-                break;
-            }
             case IF_SET_DESCRIPTION:
             case SET_PERMISSION:
-            case FINISH: {
+            case FINISH:
+            case CHANGE_PERMISSION:{
                 break;
             }
             default:
