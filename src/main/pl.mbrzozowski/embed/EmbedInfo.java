@@ -162,15 +162,23 @@ public class EmbedInfo extends EmbedCreator {
      */
     public static void endNegative(String userID, TextChannel channel) {
         Recruits recruits = Repository.getRecruits();
+        String recruitID = recruits.getRecruitIDFromChannelID(channel.getId());
         if (recruits.isRecruitChannel(channel.getId())) {
             EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
             builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
             builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-            channel.sendMessage("<@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").setEmbeds(builder.build()).queue();
+            channel.sendMessage("<@" + recruitID + ">").setEmbeds(builder.build()).queue();
             String oldName = channel.getName();
             channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
+
+            JDA jda = Repository.getJda();
+            jda.openPrivateChannelById(recruitID).queue(privateChannel -> {
+                EmbedBuilder builderPrivate = builder;
+                builderPrivate.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
+                privateChannel.sendMessageEmbeds(builderPrivate.build()).queue();
+            });
         }
     }
 
