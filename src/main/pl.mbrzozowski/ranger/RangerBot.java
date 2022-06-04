@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import questionnaire.Questionnaires;
 import recrut.Recruits;
 import server.service.ServerService;
+import server.whitelist.Whitelist;
 import stats.ServerStats;
 
 import javax.security.auth.login.LoginException;
@@ -54,6 +55,11 @@ public class RangerBot {
     }
 
     private static void initialize() {
+        Thread whitelistThread = new Thread(() -> {
+            Whitelist whitelist = new Whitelist();
+            whitelist.whitelistUpdate();
+        });
+        whitelistThread.start();
         Recruits recruits = Repository.getRecruits();
         recruits.initialize();
         Event events = Repository.getEvent();
