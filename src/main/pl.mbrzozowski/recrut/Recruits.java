@@ -76,9 +76,11 @@ public class Recruits {
     }
 
     public void initialize() {
-        startUpList();
-        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
-        cleaner.clean();
+        System.out.println(isMaxRecruits());
+
+//        startUpList();
+//        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
+//        cleaner.clean();
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
@@ -98,8 +100,14 @@ public class Recruits {
     }
 
     private boolean isMaxRecruits() {
-        int MAX_RECRUITS = 45;
-        return activeRecruits.size() >= MAX_RECRUITS;
+        int MAX_CHANNELS = 50;
+        int howManyChannelsNow = howManyChannelsInCategory(CategoryAndChannelID.CATEGORY_RECRUT_ID);
+        return howManyChannelsNow >= MAX_CHANNELS;
+    }
+
+    private int howManyChannelsInCategory(String categoryID) {
+        Guild guildRangersPL = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        return guildRangersPL.getCategoryById(categoryID).getChannels().size();
     }
 
 
