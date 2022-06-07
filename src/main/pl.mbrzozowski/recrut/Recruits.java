@@ -76,17 +76,15 @@ public class Recruits {
     }
 
     public void initialize() {
-        System.out.println(isMaxRecruits());
-
-//        startUpList();
-//        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
-//        cleaner.clean();
+        startUpList();
+        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
+        cleaner.clean();
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
         String userName = event.getUser().getName();
         String userID = event.getUser().getId();
-        if (!checkUser(userID)) {
+        if (!userHasRecruitChannel(userID)) {
             if (!checkThinkingUser(userID)) {
                 if (!isMaxRecruits()) {
                     if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
@@ -254,7 +252,7 @@ public class Recruits {
      * @param userID ID użytkownika którego sprawdzamy
      * @return Zwraca true jeśli użytkownik ma otwarty kanał rekrutacji. W innym przypadku zwraca false.
      */
-    private boolean checkUser(String userID) {
+    public boolean userHasRecruitChannel(String userID) {
         for (MemberWithPrivateChannel member : activeRecruits) {
             if (member.getUserID().equalsIgnoreCase(userID)) {
                 return true;
@@ -349,6 +347,15 @@ public class Recruits {
         for (MemberWithPrivateChannel ar : activeRecruits) {
             if (ar.getChannelID().equalsIgnoreCase(channelID)) {
                 return ar.getUserID();
+            }
+        }
+        return "-1";
+    }
+
+    public String getChannelIDFromRecruitID(String userID) {
+        for (MemberWithPrivateChannel ar : activeRecruits) {
+            if (ar.getUserID().equalsIgnoreCase(userID)) {
+                return ar.getChannelID();
             }
         }
         return "-1";
