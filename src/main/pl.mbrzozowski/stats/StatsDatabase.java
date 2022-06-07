@@ -333,7 +333,7 @@ public class StatsDatabase {
         ArrayList<MapWithCountStatistic> maps = new ArrayList<>();
         String query = "CREATE TEMPORARY TABLE IF NOT EXISTS temp_table SELECT dblog_matches.id, dblog_matches.mapClassname, AVG(dblog_playercounts.players) AS players " +
                 "FROM `dblog_matches` JOIN `dblog_playercounts` ON dblog_matches.id = dblog_playercounts.match " +
-                "WHERE players > 10 AND dblog_matches.layerClassname NOT LIKE \"%seed%\" " +
+                "WHERE players > 20 AND dblog_matches.layerClassname NOT LIKE \"%seed%\" " +
                 "GROUP BY dblog_matches.id";
         String querySecond = "SELECT mapClassname, COUNT(*) FROM temp_table GROUP BY mapClassname ORDER BY COUNT(*) DESC";
         connector.executeQuery(query);
@@ -361,7 +361,7 @@ public class StatsDatabase {
         List<MapLayer> maps = new ArrayList<>();
         String query = "CREATE TEMPORARY TABLE IF NOT EXISTS temp_table_last_map SELECT dblog_matches.id, dblog_matches.map, dblog_matches.layer, AVG(dblog_playercounts.players) AS players " +
                 "FROM `dblog_matches` JOIN `dblog_playercounts` ON dblog_matches.id = dblog_playercounts.match " +
-                "WHERE players > 10 " +
+                "WHERE players > 20 " +
                 "GROUP BY dblog_matches.id";
         String querySecond = "SELECT map, layer FROM temp_table_last_map ORDER BY id DESC LIMIT 10";
         connector.executeQuery(query);
