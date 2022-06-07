@@ -55,11 +55,11 @@ public class RangerBot {
     }
 
     private static void initialize() {
-        Thread whitelistThread = new Thread(() -> {
-            Whitelist whitelist = new Whitelist();
-            whitelist.whitelistUpdate();
-        });
-        whitelistThread.start();
+//        Thread whitelistThread = new Thread(() -> {
+//            Whitelist whitelist = new Whitelist();
+//            whitelist.whitelistUpdate();
+//        });
+//        whitelistThread.start();
         Recruits recruits = Repository.getRecruits();
         recruits.initialize();
         Event events = Repository.getEvent();

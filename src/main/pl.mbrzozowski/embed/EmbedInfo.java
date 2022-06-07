@@ -654,8 +654,8 @@ public class EmbedInfo extends EmbedCreator {
 
     public static void recruitAccepted(String userName, TextChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
-        builder.setTitle("Przyjęty");
-        builder.setDescription("Przyjęty na rekrutację przez: " + userName);
+        builder.setDescription("Rozpoczęto rekrutację");
+        builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
