@@ -235,7 +235,7 @@ public class EmbedInfo extends EmbedCreator {
             builder.setTitle("NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!");
             builder.setDescription("Jesteś już w naszym klanie dzbanie!");
             privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Jest już w naszym klanie.");
+            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Jest już w naszym klanie.");
         });
     }
 
@@ -243,9 +243,9 @@ public class EmbedInfo extends EmbedCreator {
         JDA jda = Repository.getJda();
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("REKRTUACJA TYMCZASOWO ZAMKNIĘTA!");
+            builder.setTitle("REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!");
             privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
+            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
         });
     }
 
@@ -264,7 +264,7 @@ public class EmbedInfo extends EmbedCreator {
             builder.addField("- Nie należę do żadnego klanu", "Proszę znajdź użytkownika z rolą Rada klanu na naszym discordzie i " +
                     "napisz do nas.", false);
             privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + jda.getUserById(userID).getName() + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
+            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
         });
     }
 
