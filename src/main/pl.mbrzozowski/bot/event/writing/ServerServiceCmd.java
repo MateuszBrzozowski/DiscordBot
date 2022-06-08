@@ -2,9 +2,11 @@ package bot.event.writing;
 
 import embed.EmbedInfo;
 import helpers.Commands;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 import server.service.ServerService;
+import server.whitelist.Whitelist;
 
 public class ServerServiceCmd extends Proccess {
 
@@ -23,6 +25,11 @@ public class ServerServiceCmd extends Proccess {
         } else if (isChannelSS && message.getWords()[0].equalsIgnoreCase(Commands.CLOSE)) {
             messageReceived.getMessage().delete().submit();
             serverService.closeChannel(messageReceived);
+        } else if (message.getWords()[0].equalsIgnoreCase(Commands.UPDATE_WL) && message.isAdmin() && messageReceived.isFromType(ChannelType.PRIVATE)) {
+            new Thread(() -> {
+                Whitelist whitelist = new Whitelist();
+                whitelist.whitelistUpdate();
+            }).start();
         } else {
             getNextProccess().proccessMessage(message);
         }

@@ -46,6 +46,7 @@ public class Commands {
     public static final String STATS_MAPS = PREFIX + "mapstats" + SUFFIX;
     public static final String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     public static final String STATS_LAST_TEN_MAPS = PREFIX + "maps" + SUFFIX;
+    public static final String UPDATE_WL = PREFIX + "updateWL" + SUFFIX;
     //ROLE
     public static final String ROLE = "role.";
     public static final String ROLES = PREFIX + "roles" + SUFFIX;
