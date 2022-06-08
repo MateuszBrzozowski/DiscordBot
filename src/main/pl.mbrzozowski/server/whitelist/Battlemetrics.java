@@ -47,7 +47,6 @@ public class Battlemetrics {
                         if (steamID != null) {
                             Player p = new Player(name, id, steamID, time);
                             players.add(p);
-                            System.out.println("Pobrano: " + p);
                         }
                     }
                 } else {

@@ -3,6 +3,7 @@ package ranger;
 import bot.event.*;
 import counter.Counter;
 import event.Event;
+import helpers.RangerLogger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -51,15 +52,15 @@ public class RangerBot {
         }
         initialize();
 
-        logger.info("Bot uruchomiony.");
+        RangerLogger.info("Bot uruchomiony.");
     }
 
     private static void initialize() {
-//        Thread whitelistThread = new Thread(() -> {
-//            Whitelist whitelist = new Whitelist();
-//            whitelist.whitelistUpdate();
-//        });
-//        whitelistThread.start();
+        Thread whitelistThread = new Thread(() -> {
+            Whitelist whitelist = new Whitelist();
+            whitelist.whitelistUpdate();
+        });
+        whitelistThread.start();
         Recruits recruits = Repository.getRecruits();
         recruits.initialize();
         Event events = Repository.getEvent();

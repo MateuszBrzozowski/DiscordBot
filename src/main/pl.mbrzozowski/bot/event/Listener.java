@@ -1,7 +1,6 @@
 package bot.event;
 
 import helpers.CategoryAndChannelID;
-import helpers.RangerLogger;
 import helpers.RoleID;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
