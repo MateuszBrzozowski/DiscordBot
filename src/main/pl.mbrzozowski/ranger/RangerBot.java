@@ -1,8 +1,6 @@
 package ranger;
 
 import bot.event.*;
-import counter.Counter;
-import event.Event;
 import helpers.RangerLogger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -11,15 +9,13 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import questionnaire.Questionnaires;
-import recrut.Recruits;
-import server.service.ServerService;
 import server.whitelist.Whitelist;
-import stats.ServerStats;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RangerBot {
 
@@ -56,21 +52,14 @@ public class RangerBot {
     }
 
     private static void initialize() {
-        new Thread(() -> {
-            Whitelist whitelist = new Whitelist();
-            whitelist.whitelistUpdate();
-        }).start();
-        Recruits recruits = Repository.getRecruits();
-        recruits.initialize();
-        Event events = Repository.getEvent();
-        events.initialize();
-        Questionnaires questionnaires = Repository.getQuestionnaires();
-        questionnaires.initialize();
-        Counter counter = Repository.getCounter();
-        counter.initialize();
-        ServerService serverService = Repository.getServerService();
-        serverService.initialize();
-        ServerStats serverStats = Repository.getServerStats();
-        serverStats.initialize();
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        executorService.submit(() -> Repository.getRecruits().initialize());
+        executorService.submit(() -> Repository.getEvent().initialize());
+        executorService.submit(() -> Repository.getQuestionnaires().initialize());
+        executorService.submit(() -> Repository.getCounter().initialize());
+        executorService.submit(() -> Repository.getServerService().initialize());
+        executorService.submit(() -> Repository.getServerStats().initialize());
+        executorService.submit(Whitelist::whitelistUpdate);
+        executorService.shutdown();
     }
 }
