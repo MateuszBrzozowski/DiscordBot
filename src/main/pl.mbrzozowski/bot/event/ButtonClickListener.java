@@ -39,10 +39,10 @@ public class ButtonClickListener extends ListenerAdapter {
             eventsButtonClick(event, indexOfMatch);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
             recrut.newPodanie(event);
+            isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
-            recrut.confirm(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
-        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_DISCARD)) {
-            recrut.cancel(event.getUser().getId(), event.getChannel(), event.getMessage().getId());
+            recrut.confirm(event);
+            isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.QUESTIONNAIRE_END + event.getMessage().getId())) {
             questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {

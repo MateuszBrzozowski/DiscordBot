@@ -1,9 +1,7 @@
 package recrut;
 
 import embed.EmbedInfo;
-import embed.EmbedSettings;
 import helpers.*;
-import model.MemberOfServer;
 import model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -29,7 +27,6 @@ import java.util.List;
 public class Recruits {
 
     private final List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
-    private final List<MemberOfServer> thinkingRecruits = new ArrayList<>();
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
@@ -82,19 +79,16 @@ public class Recruits {
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
-        String userName = event.getUser().getName();
         String userID = event.getUser().getId();
         if (!userHasRecruitChannel(userID)) {
-            if (!checkThinkingUser(userID)) {
-                if (!isMaxRecruits()) {
-                    if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
-                        if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
-                            confirmMessage(userID, userName);
-                        } else EmbedInfo.userIsInClanMember(userID);
-                    } else EmbedInfo.userIsInClan(userID);
-                } else EmbedInfo.maxRecrutis(userID);
-            }
-        } else EmbedInfo.userHaveRecrutChannel(userID);
+            if (!isMaxRecruits()) {
+                if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
+                    if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
+                        confirmMessage(event);
+                    } else EmbedInfo.userIsInClanMember(event);
+                } else EmbedInfo.userIsInClan(event);
+            } else EmbedInfo.maxRecrutis(event);
+        } else EmbedInfo.userHaveRecrutChannel(event);
     }
 
     private boolean isMaxRecruits() {
@@ -108,94 +102,28 @@ public class Recruits {
         return guildRangersPL.getCategoryById(categoryID).getChannels().size();
     }
 
-
-    private void confirmMessage(String userID, String userName) {
-        RangerLogger.info("Użytkownik [" + userName + "] chce złożyć podanie.");
-        thinkingRecruits.add(new MemberOfServer(userID, userName));
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.YELLOW);
-            builder.setTitle("Potwierdź czy chcesz złożyć podanie?");
-            builder.setDescription("Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Skontaktuję się z Tobą jeden z naszych Drillów aby wprowadzić Cię" +
-                    " w nasze szeregi. Poprosimy również o wypełnienie krótkiego formularza.");
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            privateChannel.sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam"), Button.danger(ComponentId.NEW_RECRUT_DISCARD, "Rezygnuję")).queue(message -> {
-                Thread timer = new Thread(() -> {
-                    try {
-                        Thread.sleep(1000 * 60 * 2); //2 minuty oczekiwania na odpowiedź
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (userIsThinking(userID) >= 0) {
-                        sendCancelInfo(privateChannel);
-                        cancel(userID, privateChannel, message.getId());
-                        disableButtons(privateChannel, message.getId());
-                    }
-                });
-                timer.start();
-            });
-        });
+    private void confirmMessage(@NotNull ButtonInteractionEvent event) {
+        RangerLogger.info("Użytkownik [" + event.getUser().getName() + "] chce złożyć podanie.");
+        event.reply("**Potwierdź czy chcesz złożyć podanie?**\n\n" +
+                "Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Poprosimy o wypełnienie krótkiego formularza. " +
+                "Następnie skontaktuję się z Tobą jeden z naszych Drillów.")
+                .setEphemeral(true)
+                .addActionRow(
+                        Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam")
+                )
+                .queue();
     }
 
-    private void sendCancelInfo(PrivateChannel privateChannel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.RED);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-        builder.setTitle("Uwaga");
-        builder.setDescription("Brak odpowiedzi. Anuluje podanie.");
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    public void confirm(String userID, MessageChannel privateChannel, String messageID) {
-        int index = userIsThinking(userID);
-        if (index >= 0) {
-            createChannelForNewRecrut(thinkingRecruits.get(index).getUserName(), userID);
-            thinkingRecruits.remove(index);
+    public void confirm(ButtonInteractionEvent event) {
+        String userID = event.getUser().getId();
+        String userName = Users.getUserNicknameFromID(userID);
+        boolean isActiveRecruit = activeRecruits.stream().anyMatch(member -> member.getUserID().equalsIgnoreCase(userID));
+        if (!isActiveRecruit) {
+            createChannelForNewRecrut(userName, userID);
+            event.deferEdit().queue();
         } else {
-            sendMessageBotReload(userID);
+            EmbedInfo.userHaveRecrutChannel(event);
         }
-        disableButtons(privateChannel, messageID);
-    }
-
-    public void cancel(String userID, MessageChannel privateChannel, String messageID) {
-        int index = userIsThinking(userID);
-        if (index >= 0) {
-            RangerLogger.info("Użytkownik [" + thinkingRecruits.get(index).getUserName() + "] zrezygnował ze złożenia podania.");
-            thinkingRecruits.remove(index);
-        } else {
-            sendMessageBotReload(userID);
-        }
-        disableButtons(privateChannel, messageID);
-    }
-
-    private void sendMessageBotReload(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            privateChannel.sendMessage("UPS! Coś poszło nie tak. Jeżeli chcesz złóż ponownie podanie.").queue();
-        });
-    }
-
-    /**
-     * @param userID ID użytkowanika który składa podanie
-     * @return Zwraca index na liście thinkingRecruits, jeżeli użytkownik dostał wiadomość z prośbą o potwierdzenie
-     * złożenie podania i dalej ma możliwość akceptacji; W innym przypadku zwraca -1
-     */
-    private int userIsThinking(String userID) {
-        for (int i = 0; i < thinkingRecruits.size(); i++) {
-            if (userID.equalsIgnoreCase(thinkingRecruits.get(i).getUserID())) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public void disableButtons(MessageChannel channel, String messageID) {
-        channel.retrieveMessageById(messageID).queue(message -> {
-            List<MessageEmbed> embeds = message.getEmbeds();
-            MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam").asDisabled(), Button.danger(ComponentId.NEW_RECRUT_DISCARD, "Rezygnuję").asDisabled()).queue();
-        });
     }
 
     private void addUserToList(String userID, String userName, String channelID) {
@@ -261,19 +189,6 @@ public class Recruits {
         return false;
     }
 
-    /**
-     * @param userID ID użytkownika którego sprawdzamy
-     * @return Zwraca true jeśli użytkownik kliknął Złóż podanie i program cozekuje na odpowiedź. W innym przypoadku
-     * zwraca false.
-     */
-    private boolean checkThinkingUser(String userID) {
-        for (MemberOfServer member : thinkingRecruits) {
-            if (member.getUserID().equalsIgnoreCase(userID)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public void deleteChannelByID(String channelID) {
         for (int i = 0; i < activeRecruits.size(); i++) {

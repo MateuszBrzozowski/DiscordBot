@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -205,67 +206,50 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła do użytkownika o ID userID informację że ma już złożone podanie i nie może mieć więcej niż jednego.
      *
-     * @param userID ID użytkownika do którego jest wysyłana informacja.
+     * @param event ButtonInteractionEvent
      */
-    public static void userHaveRecrutChannel(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("NIE MOŻESZ ZŁOŻYĆ WIĘCEJ NIŻ JEDNO PODANIE!");
-            builder.setDescription("Zlożyłeś już podanie do naszego klanu i\n" +
-                    "jesteś w trakcie rekrutacji.\n");
-            builder.addField("Jeżeli masz pytania w związku z Twoją rekrutacją", "", false);
-            builder.addField("1. Spradź kanały", "Znajdź kanał przypisany do twojej rekrutacji i napisz do nas.", false);
-            builder.addField("2.Nie widze kanału.", "Jeżeli nie widzisz kanału przypisanego do twojej rekrutacji " +
-                    "skontaktuj się z Drill Instrutor. Znajdziesz ich po prawej stronie na liście użytkowników.", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + Users.getUserName(userID) + "] chciał złożyć podanie. Ma otwarty kanał rekrutacji.");
-        });
+    public static void userHaveRecrutChannel(ButtonInteractionEvent event) {
+        event.reply("**Złożyłeś już podanie do naszego klanu. Sprawdź kanały ponieżej**")
+                .setEphemeral(true)
+                .queue();
     }
 
     /**
      * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.
      *
-     * @param userID ID użytkownika do którego jest wysyłana informacja.
+     * @param event ButtonInteractionEvent
      */
-    public static void userIsInClanMember(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!");
-            builder.setDescription("Jesteś już w naszym klanie dzbanie!");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Jest już w naszym klanie.");
-        });
+    public static void userIsInClanMember(ButtonInteractionEvent event) {
+        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
+                "Jesteś już w naszym klanie dzbanie!")
+                .setEphemeral(true)
+                .queue();
+        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
     }
 
-    public static void maxRecrutis(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
-        });
+    /**
+     * Wysyła do użytkownika wiadomość że rekrutacja została tymczasowo zamknięta
+     *
+     * @param event ButtonInteractionEvent
+     */
+    public static void maxRecrutis(ButtonInteractionEvent event) {
+        event.reply("**REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
+                .setEphemeral(true)
+                .queue();
+        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
     }
 
     /**
      * Wysyła do użytkownika o ID userID informację że jest już w innym klanie nie może złożyć podania na rekrutację.
      *
-     * @param userID ID użytkownika do którego jest wysyłana informacja.
+     * @param event ButtonInteractionEvent
      */
-    public static void userIsInClan(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!");
-            builder.setDescription("Masz przypisaną rolę innego klanu na naszym discordzie.");
-            builder.addBlankField(false);
-            builder.addField("- Nie należę do żadnego klanu", "Proszę znajdź użytkownika z rolą Rada klanu na naszym discordzie i " +
-                    "napisz do nas.", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-            RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(userID) + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
-        });
+    public static void userIsInClan(ButtonInteractionEvent event) {
+        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
+                "Masz przypisaną rolę innego klanu na naszym discordzie.")
+                .setEphemeral(true)
+                .queue();
+        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
     }
 
     /**
