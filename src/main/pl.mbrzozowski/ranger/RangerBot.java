@@ -10,13 +10,10 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import server.whitelist.Whitelist;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RangerBot {
 
@@ -53,14 +50,11 @@ public class RangerBot {
     }
 
     private static void initialize() {
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        executorService.submit(() -> Repository.getRecruits().initialize());
-        executorService.submit(() -> Repository.getEvent().initialize());
-        executorService.submit(() -> Repository.getQuestionnaires().initialize());
-        executorService.submit(() -> Repository.getCounter().initialize());
-        executorService.submit(() -> Repository.getServerService().initialize());
-        executorService.submit(() -> Repository.getServerStats().initialize());
-        executorService.submit(Whitelist::whitelistUpdate);
-        executorService.shutdown();
+        Repository.getRecruits().initialize();
+        Repository.getEvent().initialize();
+        Repository.getQuestionnaires().initialize();
+        Repository.getCounter().initialize();
+        Repository.getServerService().initialize();
+        Repository.getServerStats().initialize();
     }
 }
