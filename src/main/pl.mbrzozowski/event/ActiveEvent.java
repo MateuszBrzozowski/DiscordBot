@@ -212,6 +212,7 @@ public class ActiveEvent {
             for (int i = 0; i < mainList.size(); i++) {
                 result += mainList.get(i).getUserNameWithoutRangers() + "\n";
             }
+            result = removeMarkdown(result);
             return result;
         } else {
             return "-";
@@ -224,10 +225,22 @@ public class ActiveEvent {
             for (int i = 0; i < reserveList.size(); i++) {
                 result += reserveList.get(i).getUserNameWithoutRangers() + "\n";
             }
+            result = removeMarkdown(result);
             return result;
         } else {
             return "-";
         }
+    }
+
+    private String removeMarkdown(String result) {
+        String backslash = "\\";
+        String star = "\\*";
+        String underscore = "_";
+        String tilde = "~";
+        result = result.replaceAll(star, backslash + star);
+        result = result.replaceAll(underscore, backslash + underscore);
+        result = result.replaceAll(tilde, backslash + tilde);
+        return result;
     }
 
     public void addToMainList(MemberOfServer memberMy) {
