@@ -1,6 +1,7 @@
 package ranger.event;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
 @AllArgsConstructor
 public class Event {
     @Id
@@ -18,6 +20,6 @@ public class Event {
     private String msgId;
     private String channelId;
     private LocalDateTime date;
-    @OneToMany
+    @OneToMany(mappedBy = "event", orphanRemoval = true)
     private List<Player> players;
 }

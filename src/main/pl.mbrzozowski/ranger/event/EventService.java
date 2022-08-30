@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,6 @@ import ranger.helpers.*;
 import ranger.model.MemberOfServer;
 
 import java.awt.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -27,113 +26,118 @@ import java.util.*;
 
 @Service
 public class EventService {
+    private final EventRepository eventRepository;
+
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private List<ranger.event.ActiveEvent> activeEvents = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
+    public EventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     public void initialize() {
-        getAllDatabase();
-        checkAllListOfEvents();
+//        getAllDatabase();
+//        checkAllListOfEvents();
         CleanerEventChannel cleanerEventChannel = new CleanerEventChannel();
         cleanerEventChannel.clean();
     }
 
 
-    private void getAllDatabase() {
-        EventDatabase eventDatabase = new EventDatabase();
-        downladMatchesDB(eventDatabase);
-        downloadPlayersInMatechesDB(eventDatabase);
-    }
+//    private void getAllDatabase() {
+//        EventDatabase eventDatabase = new EventDatabase();
+//        downladMatchesDB(eventDatabase);
+//        downloadPlayersInMatechesDB(eventDatabase);
+//    }
 
-    private void downladMatchesDB(EventDatabase eventDatabase) {
-        ResultSet resultSet = eventDatabase.getAllEvents();
-        List<ranger.event.ActiveEvent> matchesToDeleteDB = new ArrayList<>();
-        this.activeEvents.clear();
-        List<TextChannel> textChannels = Repository.getJda().getTextChannels();
+//    private void downladMatchesDB(EventDatabase eventDatabase) {
+//        ResultSet resultSet = eventDatabase.getAllEvents();
+//        List<ranger.event.ActiveEvent> matchesToDeleteDB = new ArrayList<>();
+//        this.activeEvents.clear();
+//        List<TextChannel> textChannels = Repository.getJda().getTextChannels();
+//
+//        if (resultSet != null) {
+//            while (true) {
+//                try {
+//                    if (!resultSet.next()) break;
+//                    else {
+//                        String channelID = resultSet.getString("channelID");
+//                        String messageID = resultSet.getString("msgID");
+//                        ranger.event.ActiveEvent match = new ranger.event.ActiveEvent(channelID, messageID);
+//                        boolean isActive = false;
+//                        for (TextChannel tc : textChannels) {
+//                            if (tc.getId().equalsIgnoreCase(channelID)) {
+//                                isActive = true;
+//                                break;
+//                            }
+//                        }
+//                        if (isActive) {
+//                            activeEvents.add(match);
+//                            CreateReminder reminder = new CreateReminder(messageID);
+//                            reminder.create();
+//                        } else {
+//                            matchesToDeleteDB.add(match);
+//                        }
+//                    }
+//                } catch (SQLException throwables) {
+//                    throwables.printStackTrace();
+//                }
+//            }
+//        }
+//        for (ranger.event.ActiveEvent a : matchesToDeleteDB) {
+//            removeEventDB(a.getMessageID());
+//        }
+//    }
 
-        if (resultSet != null) {
-            while (true) {
-                try {
-                    if (!resultSet.next()) break;
-                    else {
-                        String channelID = resultSet.getString("channelID");
-                        String messageID = resultSet.getString("msgID");
-                        ranger.event.ActiveEvent match = new ranger.event.ActiveEvent(channelID, messageID);
-                        boolean isActive = false;
-                        for (TextChannel tc : textChannels) {
-                            if (tc.getId().equalsIgnoreCase(channelID)) {
-                                isActive = true;
-                                break;
-                            }
-                        }
-                        if (isActive) {
-                            activeEvents.add(match);
-                            CreateReminder reminder = new CreateReminder(messageID);
-                            reminder.create();
-                        } else {
-                            matchesToDeleteDB.add(match);
-                        }
-                    }
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-        }
-        for (ranger.event.ActiveEvent a : matchesToDeleteDB) {
-            removeEventDB(a.getMessageID());
-        }
-    }
+//    private void downloadPlayersInMatechesDB(EventDatabase eventDatabase) {
+//        ResultSet resultSet = eventDatabase.getAllPlayers();
+//        if (resultSet != null) {
+//            while (true) {
+//                try {
+//                    if (!resultSet.next()) break;
+//                    else {
+//                        String userID = resultSet.getString("userID");
+//                        String userName = resultSet.getString("userName");
+//                        Boolean mainList = resultSet.getBoolean("mainList");
+//                        String event = resultSet.getString("event");
+//                        MemberOfServer memberMy = new MemberOfServer(userID, userName);
+//                        for (ranger.event.ActiveEvent m : activeEvents) {
+//                            if (m.getMessageID().equalsIgnoreCase(event)) {
+//                                if (mainList) {
+//                                    m.addToMainList(memberMy);
+//                                } else {
+//                                    m.addToReserveList(memberMy);
+//                                }
+//                            }
+//                        }
+//                    }
+//                } catch (SQLException throwables) {
+//                    throwables.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
-    private void downloadPlayersInMatechesDB(EventDatabase eventDatabase) {
-        ResultSet resultSet = eventDatabase.getAllPlayers();
-        if (resultSet != null) {
-            while (true) {
-                try {
-                    if (!resultSet.next()) break;
-                    else {
-                        String userID = resultSet.getString("userID");
-                        String userName = resultSet.getString("userName");
-                        Boolean mainList = resultSet.getBoolean("mainList");
-                        String event = resultSet.getString("event");
-                        MemberOfServer memberMy = new MemberOfServer(userID, userName);
-                        for (ranger.event.ActiveEvent m : activeEvents) {
-                            if (m.getMessageID().equalsIgnoreCase(event)) {
-                                if (mainList) {
-                                    m.addToMainList(memberMy);
-                                } else {
-                                    m.addToReserveList(memberMy);
-                                }
-                            }
-                        }
-                    }
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /**
-     * Sprawdza każdy event i jeżeli data i czas jest przeszły (event się wydarzył) wyłacza buttony i usuwa z bazy.
-     */
-    private void checkAllListOfEvents() {
-        for (ranger.event.ActiveEvent ae : activeEvents) {
-            TextChannel channel = Repository.getJda().getTextChannelById(ae.getChannelID());
-            channel.retrieveMessageById(ae.getMessageID()).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-                String stringDate = fields.get(0).getValue() + " " + fields.get(2).getValue();
-                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
-                LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
-                LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
-                if (date.isBefore(dateNow)) {
-                    cancelEvent(ae.getMessageID());
-                }
-            });
-        }
-    }
+//    /**
+//     * Sprawdza każdy event i jeżeli data i czas jest przeszły (event się wydarzył) wyłacza buttony i usuwa z bazy.
+//     */
+//    private void checkAllListOfEvents() {
+//        for (ranger.event.ActiveEvent ae : activeEvents) {
+//            TextChannel channel = Repository.getJda().getTextChannelById(ae.getChannelID());
+//            channel.retrieveMessageById(ae.getMessageID()).queue(message -> {
+//                List<MessageEmbed> embeds = message.getEmbeds();
+//                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+//                String stringDate = fields.get(0).getValue() + " " + fields.get(2).getValue();
+//                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+//                LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+//                LocalDateTime date = LocalDateTime.parse(stringDate, dateFormat);
+//                if (date.isBefore(dateNow)) {
+//                    cancelEvent(ae.getMessageID());
+//                }
+//            });
+//        }
+//    }
 
     /**
      * Sprawdza czy event już się wydarzył.
@@ -180,7 +184,7 @@ public class EventService {
     public void createNewEvent(String[] message, String userID) {
         String userName = Users.getUserNicknameFromID(userID);
         RangerLogger.info(userName + " - tworzy nowy event.");
-        if (checkMessage(message)) {
+        if (checkRequest(message)) {
             String nameEvent = getEventName(message);
             String date = getDate(message);
             String time = getTime(message);
@@ -201,6 +205,42 @@ public class EventService {
             }
         } else {
             RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+        }
+    }
+
+    public void createNewEvent(EventRequest eventRequest) {
+        String userName = Users.getUserNicknameFromID(eventRequest.getAuthorId());
+        RangerLogger.info(userName + " - tworzy nowy event.");
+        if (checkRequest(eventRequest)) {
+            if (Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
+                createEventChannel(eventRequest);
+            }
+        } else {
+            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+        }
+    }
+
+    private void createEventChannel(final EventRequest eventRequest) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild == null) {
+            return;
+        }
+        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID);
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
+            guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
+                            "-" + eventRequest.getDate() + "-" + eventRequest.getTime(), category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .queue(textChannel -> {
+                        createList(textChannel, eventRequest);
+                    });
+        } else {
+            guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
+                            "-" + eventRequest.getDate() + "-" + eventRequest.getTime(), category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         }
     }
 
@@ -241,6 +281,75 @@ public class EventService {
                 }
                 break;
             }
+        }
+    }
+
+    private void createList(TextChannel textChannel, EventRequest eventRequest) {
+        String msg = "";
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
+            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!";
+        } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
+            msg = "<@&" + RoleID.RECRUT_ID + "> Zapisy!";
+        } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
+            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
+        }
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle(eventRequest.getName());
+        if (StringUtils.isNotBlank(eventRequest.getDescription())) {
+            builder.setDescription(eventRequest.getDescription());
+        }
+        builder.addField(EmbedSettings.WHEN_DATE, eventRequest.getDate(), true);
+        builder.addBlankField(true);
+        builder.addField(EmbedSettings.WHEN_TIME, eventRequest.getTime(), true);
+        builder.addBlankField(false);
+        builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
+        builder.addBlankField(true);
+        builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
+        builder.setFooter("Utworzony przez " + Users.getUserNicknameFromID(eventRequest.getAuthorId()));
+        try {
+            textChannel.sendMessage(msg).setEmbeds(builder.build()).setActionRow(
+                            Button.primary(ComponentId.EVENTS_SIGN_IN, "Zapisz"),
+                            Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE, "Rezerwa"),
+                            Button.danger(ComponentId.EVENTS_SIGN_OUT, "Wypisz"))
+                    .queue(message -> {
+                        MessageEmbed mOld = message.getEmbeds().get(0);
+                        String msgID = message.getId();
+                        message.editMessageEmbeds(mOld).setActionRow(Button.primary(ComponentId.EVENTS_SIGN_IN + msgID, "Zapisz"),
+                                Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgID, "Rezerwa"),
+                                Button.danger(ComponentId.EVENTS_SIGN_OUT + msgID, "Wypisz")).queue();
+                        message.pin().queue();
+                        LocalDateTime dateTime = getDateTime(eventRequest.getDate(), eventRequest.getTime());
+                        Event event = Event.builder()
+                                .name(eventRequest.getName())
+                                .msgId(message.getId())
+                                .channelId(textChannel.getId())
+                                .date(dateTime)
+                                .build();
+                        save(event);
+                        CreateReminder reminder = new CreateReminder(eventRequest.getDate(), eventRequest.getTime(), message.getId());
+                        reminder.create();
+                    });
+        } catch (Exception e) {
+            RangerLogger.info("Zbudowanie listy niemożliwe. Maksymalna liczba znaków\n" +
+                    "Nazwa eventu - 256\n" +
+                    "Tekst (opis eventu) - 2048");
+        }
+    }
+
+    private void save(Event event) {
+
+    }
+
+    private LocalDateTime getDateTime(String date, String time) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+        String dateTime = date + " " + time;
+        try {
+            return LocalDateTime.parse(dateTime, dateTimeFormatter);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -408,7 +517,7 @@ public class EventService {
      * @return true - jeżeli zostały wpisane wszystkie 3 parametry; false - jeżeli parametry zostały nie zostały
      * wpisane prawidłowo
      */
-    public boolean checkMessage(String[] message) {
+    public boolean checkRequest(String[] message) {
         boolean name = false;
         boolean date = false;
         boolean time = false;
@@ -427,6 +536,16 @@ public class EventService {
             return false;
         }
 
+    }
+
+    public boolean checkRequest(EventRequest eventRequest) {
+        if (StringUtils.isBlank(eventRequest.getName())) {
+            return false;
+        }
+        if (StringUtils.isBlank(eventRequest.getDate())) {
+            return false;
+        }
+        return !StringUtils.isBlank(eventRequest.getTime());
     }
 
     private void addEventDB(ranger.event.ActiveEvent match) {

@@ -19,4 +19,6 @@ public class Player {
     @Column(length = 30, nullable = false)
     private String userName;
     private boolean mainList;
+    @ManyToOne
+    private Event event;
 }

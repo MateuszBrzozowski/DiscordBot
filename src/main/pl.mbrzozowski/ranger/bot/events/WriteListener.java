@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ranger.bot.events.writing.*;
 import ranger.event.EventService;
-import ranger.event.writing.*;
 
 @Service
 public class WriteListener extends ListenerAdapter {
 
     private final EventService eventService;
+
     @Autowired
     public WriteListener(EventService eventService) {
         this.eventService = eventService;

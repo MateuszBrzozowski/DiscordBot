@@ -26,31 +26,32 @@ import java.util.List;
 
 public class EventsGenerator {
 
-    private boolean isSpecificChannel = false;
-    private String userID;
-    private String userName;
-    private String nameEvent;
-    private String date;
-    private String time;
-    private String description = "";
-    private String perm;
+    //    private boolean isSpecificChannel = false;
+    //    private String userID;
+//    private String userName;
+//    private String nameEvent;
+//    private String date;
+//    private String time;
+//    private String description = "";
+//    private String perm;
+    private final EventRequest eventRequest = new EventRequest();
     private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
-    MessageReceivedEvent messageReceived = null;
+    //    MessageReceivedEvent messageReceived = null;
     private final EventService eventService;
 
     @Autowired
     public EventsGenerator(@NotNull MessageReceivedEvent event, EventService eventService) {
         this.eventService = eventService;
-        userID = event.getMessage().getAuthor().getId();
-        userName = event.getMessage().getAuthor().getName();
-        this.messageReceived = event;
+        eventRequest.setAuthorId(event.getMessage().getAuthor().getId());
+        eventRequest.setAuthorName(event.getMessage().getAuthor().getName());
+//        this.messageReceived = event;
         embedStart();
     }
 
     private void embedStart() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("WITAJ " + userName.toUpperCase() + " W GENERATORZE EVENTÓW!");
+            builder.setTitle("WITAJ " + eventRequest.getAuthorName().toUpperCase() + " W GENERATORZE EVENTÓW!");
             builder.setColor(Color.YELLOW);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setDescription("Odpowiedz na kilka moich pytań. Nastepnie na podstawie Twoich odpowiedzi " +
@@ -65,7 +66,7 @@ public class EventsGenerator {
     }
 
     public String getUserID() {
-        return userID;
+        return eventRequest.getAuthorId();
     }
 
     public void saveAnswerAndSetNextStage(ButtonInteractionEvent event) {
@@ -84,7 +85,7 @@ public class EventsGenerator {
             case SET_PERMISSION: {
                 boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
                 boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
-                perm = getPermString(ac, r);
+                eventRequest.setEventFor(getPerm(ac, r));
                 embedDoYouWantAnyChange(true);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 disableButtons(event);
@@ -93,7 +94,7 @@ public class EventsGenerator {
             case CHANGE_PERMISSION: {
                 boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
                 boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
-                perm = getPermString(ac, r);
+                eventRequest.setEventFor(getPerm(ac, r));
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 disableButtons(event);
@@ -145,7 +146,7 @@ public class EventsGenerator {
         switch (stageOfGenerator) {
             case SET_NAME: {
                 if (msg.length() < 256 && msg.length() > 0) {
-                    nameEvent = msg;
+                    eventRequest.setName(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_DATE;
                     embedGetDate();
                 } else {
@@ -158,7 +159,7 @@ public class EventsGenerator {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 boolean isDateAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && isDateAfterNow) {
-                    date = msg;
+                    eventRequest.setDate(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
                 } else {
@@ -170,9 +171,9 @@ public class EventsGenerator {
             case SET_TIME: {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(date + " " + msg);
+                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 if (isTimeFormat && isTimeAfterNow) {
-                    time = msg;
+                    eventRequest.setTime(msg);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
                 } else {
@@ -183,7 +184,7 @@ public class EventsGenerator {
             }
             case SET_DESCRIPTION: {
                 if (msg.length() < 2048) {
-                    description = msg;
+                    eventRequest.setDescription(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
                     embedWhoPing();
                 } else {
@@ -192,15 +193,21 @@ public class EventsGenerator {
                 break;
             }
             case CHANGE_NAME: {
-                if (msg.length() < 256 && msg.length() > 0) nameEvent = msg;
-                else embedGetNameCorrect();
+                if (msg.length() < 256 && msg.length() > 0) {
+                    eventRequest.setName(msg);
+                } else {
+                    embedGetNameCorrect();
+                }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
             case CHANGE_DESCRIPTION: {
-                if (msg.length() < 2048 && msg.length() > 0) description = msg;
-                else embedDescriptionLong();
+                if (msg.length() < 2048 && msg.length() > 0) {
+                    eventRequest.setDescription(msg);
+                } else {
+                    embedDescriptionLong();
+                }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
@@ -208,8 +215,11 @@ public class EventsGenerator {
             case CHANGE_DATE: {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 boolean timeAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
-                if (isDateFormat && timeAfterNow) date = msg;
-                else embedDateNotCorrect();
+                if (isDateFormat && timeAfterNow) {
+                    eventRequest.setDate(msg);
+                } else {
+                    embedDateNotCorrect();
+                }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
@@ -217,9 +227,12 @@ public class EventsGenerator {
             case CHANGE_TIME: {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
-                boolean timeAfterNow = Validation.eventDateTimeAfterNow(date + " " + msg);
-                if (isTimeFormat && timeAfterNow) time = msg;
-                else embedTimeNotCorrect();
+                boolean timeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                if (isTimeFormat && timeAfterNow) {
+                    eventRequest.setTime(msg);
+                } else {
+                    embedTimeNotCorrect();
+                }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
@@ -237,24 +250,21 @@ public class EventsGenerator {
     }
 
     private void end() {
-        EventService e = Repository.getEvent();
-        String cmd = createCommand();
-        String[] cmdTable = cmd.split(" ");
-        e.createNewEvent(cmdTable, userID);
+        eventService.createNewEvent(eventRequest);
         embedFinish();
         removeThisGenerator();
     }
 
     private void removeThisGenerator() {
         EventsGeneratorModel model = Repository.getEventsGeneratorModel();
-        int index = model.userHaveActiveGenerator(userID);
+        int index = model.userHaveActiveGenerator(eventRequest.getAuthorId());
         if (index >= 0) {
             model.removeGenerator(index);
         }
     }
 
     private void embedDoYouWantAnyChange(boolean showList) {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             if (showList) embedListExample(privateChannel);
 
             SelectMenu selectMenu = SelectMenu
@@ -281,23 +291,23 @@ public class EventsGenerator {
     }
 
     private void embedListExample(PrivateChannel privateChannel) {
-        if (perm.equalsIgnoreCase("ac")) {
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
             privateChannel.sendMessage("CLAN_MEMBER RECRUT Zapisy!").queue();
-        } else if (perm.equalsIgnoreCase("r")) {
+        } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
             privateChannel.sendMessage("RECRUT Zapisy!").queue();
-        } else if (perm.equalsIgnoreCase("c")) {
+        } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
             privateChannel.sendMessage("CLAN_MEMBER Zapisy!").queue();
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setTitle(nameEvent);
-        if (description != null) {
-            builder.setDescription(description + "\n");
+        builder.setTitle(eventRequest.getName());
+        if (eventRequest.getDescription() != null) {
+            builder.setDescription(eventRequest.getDescription() + "\n");
         }
-        builder.addField(EmbedSettings.WHEN_DATE, date, true);
+        builder.addField(EmbedSettings.WHEN_DATE, eventRequest.getDate(), true);
         builder.addBlankField(true);
-        builder.addField(EmbedSettings.WHEN_TIME, time, true);
+        builder.addField(EmbedSettings.WHEN_TIME, eventRequest.getTime(), true);
         builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
@@ -305,14 +315,8 @@ public class EventsGenerator {
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    private String createCommand() {
-        String command = "";
-        command = "!zapisy ";
-        return command + "-name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
-    }
-
     private void embedFinish() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.GREEN);
             builder.setTitle("GENEROWANIE LISTY ZAKOŃCZONE.");
@@ -322,7 +326,7 @@ public class EventsGenerator {
     }
 
     private void embedError() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setTitle("BŁĄD");
@@ -331,18 +335,9 @@ public class EventsGenerator {
         });
     }
 
-    private void embedWhoPingNotCorrect() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.RED);
-            builder.addField("Twoja odpowiedź jest niepoprawna", "", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
     private void embedDescriptionLong() {
         JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        jda.getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("UWAGA - Długi opis!", "Twój opis jest za długi żebym mógł go umieścić " +
@@ -352,7 +347,7 @@ public class EventsGenerator {
     }
 
     private void embedWhoPing() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Do kogo kierowane są zapisy?", "", false);
@@ -367,7 +362,7 @@ public class EventsGenerator {
     }
 
     private void embedGetDescription() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj opis, który umieszczę na liście.", "Maksymalna liczba znaków - 2048", false);
@@ -375,17 +370,8 @@ public class EventsGenerator {
         });
     }
 
-    private void embedIsDescriptionNotCorrect() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.RED);
-            builder.addField("Nieprawidłowa odpowiedź", "", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
     private void embedIsDescription() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "", false);
@@ -398,7 +384,7 @@ public class EventsGenerator {
     }
 
     private void embedTimeNotCorrect() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format czasu eventu lub data i czas jest z przeszłości.", "", false);
@@ -407,7 +393,7 @@ public class EventsGenerator {
     }
 
     private void embedGetTime() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj czas rozpoczęcia twojego eventu", "Format: hh:mm", false);
@@ -416,7 +402,7 @@ public class EventsGenerator {
     }
 
     private void embedDateNotCorrect() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format daty eventu lub podałeś czas z przeszłości.", "", false);
@@ -425,7 +411,7 @@ public class EventsGenerator {
     }
 
     private void embedGetDate() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj datę twojego eventu", "Format: dd.MM.yyyy", false);
@@ -434,7 +420,7 @@ public class EventsGenerator {
     }
 
     private void embedGetNameCorrect() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowa nazwa eventu", "", false);
@@ -443,16 +429,12 @@ public class EventsGenerator {
     }
 
     private void embedGetName() {
-        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(eventRequest.getAuthorId()).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);
             privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
-    }
-
-    public void setSpecificChannel(boolean specificChannel) {
-        this.isSpecificChannel = specificChannel;
     }
 
     private void disableButtons(ButtonInteractionEvent event) {
@@ -472,9 +454,9 @@ public class EventsGenerator {
         message.delete().queue();
     }
 
-    private String getPermString(boolean ac, boolean r) {
-        if (r) return "r";
-        else if (ac) return "ac";
-        else return "c";
+    private EventFor getPerm(boolean ac, boolean r) {
+        if (r) return EventFor.RECRUIT;
+        else if (ac) return EventFor.CLAN_MEMBER_ADN_RECRUIT;
+        else return EventFor.CLAN_MEMBER;
     }
 }
