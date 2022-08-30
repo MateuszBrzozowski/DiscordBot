@@ -1,10 +1,8 @@
 package ranger;
 
-import helpers.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import ranger.helpers.Constants;
 
 import javax.security.auth.login.LoginException;
 
@@ -12,10 +10,9 @@ import javax.security.auth.login.LoginException;
 public class RangerBot {
 
     private static final String BOT_TOKEN = Constants.TOKEN_RANGER_TESTER;
-    protected static final Logger logger = LoggerFactory.getLogger(RangerBot.class.getName());
 
     public static void main(String[] args) throws LoginException {
-        SpringApplication.run(RangerBot.class, args);
+        SpringApplication.run(ranger.RangerBot.class, args);
 
 //        Collection<GatewayIntent> intents = new ArrayList<>();
 //        intents.add(GatewayIntent.GUILD_MEMBERS);
@@ -44,12 +41,13 @@ public class RangerBot {
 //        RangerLogger.info("Bot uruchomiony.");
     }
 
+
     private static void initialize() {
-        Repository.getRecruits().initialize();
-        Repository.getEvent().initialize();
-        Repository.getQuestionnaires().initialize();
-        Repository.getCounter().initialize();
-        Repository.getServerService().initialize();
-        Repository.getServerStats().initialize();
+//        Repository.getRecruits().initialize();
+//        Repository.getEvent().initialize();
+//        Repository.getQuestionnaires().initialize();
+//        Repository.getCounter().initialize();
+//        Repository.getServerService().initialize();
+//        Repository.getServerStats().initialize();
     }
 }
