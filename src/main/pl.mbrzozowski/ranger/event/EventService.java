@@ -7,9 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ranger.DiscordBot;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
 import ranger.embed.EmbedSettings;
@@ -29,17 +27,11 @@ import java.util.*;
 
 @Service
 public class EventService {
-    private final DiscordBot discordBot;
-
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private List<ranger.event.ActiveEvent> activeEvents = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
-    @Autowired
-    public EventService(DiscordBot discordBot) {
-        this.discordBot = discordBot;
-    }
 
     public void initialize() {
         getAllDatabase();
@@ -59,7 +51,7 @@ public class EventService {
         ResultSet resultSet = eventDatabase.getAllEvents();
         List<ranger.event.ActiveEvent> matchesToDeleteDB = new ArrayList<>();
         this.activeEvents.clear();
-        List<TextChannel> textChannels = discordBot.getJda().getTextChannels();
+        List<TextChannel> textChannels = Repository.getJda().getTextChannels();
 
         if (resultSet != null) {
             while (true) {
@@ -128,7 +120,7 @@ public class EventService {
      */
     private void checkAllListOfEvents() {
         for (ranger.event.ActiveEvent ae : activeEvents) {
-            TextChannel channel = discordBot.getJda().getTextChannelById(ae.getChannelID());
+            TextChannel channel = Repository.getJda().getTextChannelById(ae.getChannelID());
             channel.retrieveMessageById(ae.getMessageID()).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 List<MessageEmbed.Field> fields = embeds.get(0).getFields();
@@ -150,7 +142,7 @@ public class EventService {
      * @return Zwraca true jeśli event się jeszcze nie wydarzył. W innym przypadku zwraca false.
      */
     private boolean eventIsAfter(int indexOfActiveMatch) {
-        TextChannel channel = discordBot.getJda().getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
+        TextChannel channel = Repository.getJda().getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
         List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
@@ -170,7 +162,7 @@ public class EventService {
      * @return Zwraca true jeżeli pozostały trzy godziny lub mniej do eventu, w innym przypadku zwraca false
      */
     private boolean threeHoursToEvent(int indexOfActiveMatch) {
-        TextChannel channel = discordBot.getJda().getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
+        TextChannel channel = Repository.getJda().getTextChannelById(activeEvents.get(indexOfActiveMatch).getChannelID());
         List<MessageEmbed> embeds = channel.retrieveMessageById(activeEvents.get(indexOfActiveMatch).getMessageID()).complete().getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String dateString = fields.get(0).getValue() + " " + fields.get(2).getValue();
@@ -185,8 +177,7 @@ public class EventService {
         return false;
     }
 
-    public void createNewEventFromSpecificData(String[] message, String userID, TextChannel channel) {
-        Guild guild = discordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+    public void createNewEvent(String[] message, String userID) {
         String userName = Users.getUserNicknameFromID(userID);
         RangerLogger.info(userName + " - tworzy nowy event.");
         if (checkMessage(message)) {
@@ -199,25 +190,9 @@ public class EventService {
             boolean c = searchParametrInMessage(message, "-c");
             if (nameEvent != null && date != null && time != null) {
                 if (Validation.eventDateTimeAfterNow(date + " " + time)) {
-                    if (message[0].equalsIgnoreCase(Commands.NEW_EVENT_HERE)) {
-                        if (ac || r) {
-                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.RECRUT_ID), permissions, null).queue();
-                        }
-                        if (ac) {
-                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 1);
-                        } else if (r) {
-                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 2);
-                        } else if (c) {
-                            channel.getManager().putPermissionOverride(guild.getRoleById(RoleID.CLAN_MEMBER_ID), permissions, null).queue();
-                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, 3);
-                        } else
-                            createList(Users.getUserNicknameFromID(userID), channel, nameEvent, date, time, description, -1);
-                    } else {
-                        if (ac) createEventChannel(userID, nameEvent, date, time, description, 1);
-                        else if (r) createEventChannel(userID, nameEvent, date, time, description, 2);
-                        else createEventChannel(userID, nameEvent, date, time, description, 3);
-                    }
+                    if (ac) createEventChannel(userID, nameEvent, date, time, description, 1);
+                    else if (r) createEventChannel(userID, nameEvent, date, time, description, 2);
+                    else createEventChannel(userID, nameEvent, date, time, description, 3);
                 } else {
                     EmbedInfo.dateTimeIsBeforeNow(userID);
                 }
@@ -238,9 +213,11 @@ public class EventService {
      * @param whoVisable  1 - rekrut + clanMember; 2 - rekrut
      */
     private void createEventChannel(String userID, String nameEvent, String date, String time, String description, int whoVisable) {
-        Guild guild = discordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         String creatorName = Users.getUserNicknameFromID(userID);
-
+        if (guild == null) {
+            return;
+        }
         List<Category> categories = guild.getCategories();
         for (Category cat : categories) {
             if (cat.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_EVENT_ID)) {
@@ -250,10 +227,11 @@ public class EventService {
                             .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
                             .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                             .queue(textChannel -> {
-                                if (whoVisable == 1)
+                                if (whoVisable == 1) {
                                     createList(creatorName, textChannel, nameEvent, date, time, description, 1);
-                                else if (whoVisable == 2)
+                                } else {
                                     createList(creatorName, textChannel, nameEvent, date, time, description, 2);
+                                }
 
                             });
                 } else {
@@ -462,7 +440,7 @@ public class EventService {
     public void updateEmbed(int indexOfMatch) {
         String channelID = activeEvents.get(indexOfMatch).getChannelID();
         String messageID = activeEvents.get(indexOfMatch).getMessageID();
-        discordBot.getJda().getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
+        Repository.getJda().getTextChannelById(channelID).retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed mOld = embeds.get(0);
             List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
@@ -600,7 +578,7 @@ public class EventService {
         logger.info("Odwołujemy event");
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            discordBot.getJda().getTextChannelById(activeEvents.get(index).getChannelID()).retrieveMessageById(messageID).queue(message -> {
+            Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID()).retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 List<MessageEmbed.Field> fields = embeds.get(0).getFields();
                 String dateTime = getDateAndTimeFromEmbed(fields);
@@ -629,9 +607,9 @@ public class EventService {
      * @param channelID ID kanału którego jest zmieniana nazwa
      */
     public void changeTitleRedCircle(String channelID) {
-        String buffor = discordBot.getJda().getTextChannelById(channelID).getName();
+        String buffor = Repository.getJda().getTextChannelById(channelID).getName();
         buffor = buffor.replace(EmbedSettings.GREEN_CIRCLE, EmbedSettings.RED_CIRCLE);
-        discordBot.getJda().getTextChannelById(channelID).getManager()
+        Repository.getJda().getTextChannelById(channelID).getManager()
                 .setName(buffor)
                 .queue();
     }
@@ -640,7 +618,7 @@ public class EventService {
         if (!Validation.isTimeFormat(time)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            TextChannel textChannel = discordBot.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
+            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 MessageEmbed mOld = embeds.get(0);
@@ -690,7 +668,7 @@ public class EventService {
         if (!Validation.isDateFormat(date)) return;
         int index = getIndexActiveEvent(messageID);
         if (index >= 0) {
-            TextChannel textChannel = discordBot.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
+            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 MessageEmbed mOld = embeds.get(0);
@@ -741,7 +719,7 @@ public class EventService {
         if (!Validation.isTimeFormat(newTime)) return;
         int index = getIndexActiveEvent(eventID);
         if (index >= 0) {
-            TextChannel textChannel = discordBot.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
+            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
             textChannel.retrieveMessageById(eventID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
                 MessageEmbed mOld = embeds.get(0);
@@ -812,7 +790,7 @@ public class EventService {
      * @param channelID ID kanału na którym znajduję sie event
      */
     public void disableButtons(String messageID, String channelID) {
-        TextChannel textChannel = discordBot.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             List<Button> buttons = message.getButtons();
@@ -834,7 +812,7 @@ public class EventService {
     }
 
     public void enableButtons(String messageID, String channelID) {
-        TextChannel textChannel = discordBot.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             List<Button> buttons = message.getButtons();
@@ -890,7 +868,7 @@ public class EventService {
         for (ranger.event.ActiveEvent ae : activeEvents) {
             List<MemberOfServer> mainList = ae.getMainList();
             List<MemberOfServer> reserveList = ae.getReserveList();
-            String channelName = discordBot.getJda().getTextChannelById(ae.getChannelID()).getName();
+            String channelName = Repository.getJda().getTextChannelById(ae.getChannelID()).getName();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.WHITE);
             builder.addField("ID eventu", ae.getMessageID(), false);
@@ -921,7 +899,7 @@ public class EventService {
     public String getDateAndTimeFromEmbed(String eventID) {
         int indexActiveEvent = getIndexActiveEvent(eventID);
         String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = discordBot.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
         List<MessageEmbed> embeds = message.getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String date = fields.get(0).getValue();
@@ -955,7 +933,7 @@ public class EventService {
     public String getDateFromEmbed(String eventID) {
         int indexActiveEvent = getIndexActiveEvent(eventID);
         String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = discordBot.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
         List<MessageEmbed> embeds = message.getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String value = fields.get(0).getValue();
@@ -965,7 +943,7 @@ public class EventService {
     public String getTimeFromEmbed(String eventID) {
         int indexActiveEvent = getIndexActiveEvent(eventID);
         String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = discordBot.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
+        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
         List<MessageEmbed> embeds = message.getEmbeds();
         List<MessageEmbed.Field> fields = embeds.get(0).getFields();
         String value = fields.get(2).getValue();

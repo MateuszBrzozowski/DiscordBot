@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
+import ranger.event.ButtonClickType;
+import ranger.event.EventService;
+import ranger.event.EventsGeneratorModel;
 import ranger.helpers.*;
 import ranger.questionnaire.Questionnaires;
 import ranger.recrut.RecruitOpinions;

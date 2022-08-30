@@ -1,6 +1,6 @@
-package ranger.event.writing;
+package ranger.bot.events.writing;
 
-import ranger.event.RoleEditor;
+import ranger.bot.events.RoleEditor;
 import ranger.helpers.Commands;
 import ranger.helpers.RoleID;
 import ranger.helpers.Users;

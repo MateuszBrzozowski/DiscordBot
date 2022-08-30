@@ -1,9 +1,5 @@
 package ranger.event;
 
-import ranger.embed.EmbedInfo;
-import ranger.embed.EmbedSettings;
-import ranger.helpers.ComponentId;
-import ranger.helpers.Validation;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -16,9 +12,13 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import ranger.DiscordBot;
 import ranger.Repository;
+import ranger.embed.EmbedInfo;
+import ranger.embed.EmbedSettings;
+import ranger.helpers.ComponentId;
+import ranger.helpers.Validation;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import java.util.List;
 
 public class EventsGenerator {
 
-    //    private JDA jda;
     private boolean isSpecificChannel = false;
     private String userID;
     private String userName;
@@ -38,13 +37,10 @@ public class EventsGenerator {
     private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
     MessageReceivedEvent messageReceived = null;
     private final EventService eventService;
-    private final DiscordBot discordBot;
-
 
     @Autowired
-    public EventsGenerator(MessageReceivedEvent event, EventService eventService, DiscordBot discordBot) {
+    public EventsGenerator(@NotNull MessageReceivedEvent event, EventService eventService) {
         this.eventService = eventService;
-        this.discordBot = discordBot;
         userID = event.getMessage().getAuthor().getId();
         userName = event.getMessage().getAuthor().getName();
         this.messageReceived = event;
@@ -52,7 +48,7 @@ public class EventsGenerator {
     }
 
     private void embedStart() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("WITAJ " + userName.toUpperCase() + " W GENERATORZE EVENTÓW!");
             builder.setColor(Color.YELLOW);
@@ -244,11 +240,7 @@ public class EventsGenerator {
         EventService e = Repository.getEvent();
         String cmd = createCommand();
         String[] cmdTable = cmd.split(" ");
-        if (isSpecificChannel) {
-            e.createNewEventFromSpecificData(cmdTable, userID, messageReceived.getTextChannel());
-        } else {
-            e.createNewEventFromSpecificData(cmdTable, userID, null);
-        }
+        e.createNewEvent(cmdTable, userID);
         embedFinish();
         removeThisGenerator();
     }
@@ -262,7 +254,7 @@ public class EventsGenerator {
     }
 
     private void embedDoYouWantAnyChange(boolean showList) {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             if (showList) embedListExample(privateChannel);
 
             SelectMenu selectMenu = SelectMenu
@@ -315,13 +307,12 @@ public class EventsGenerator {
 
     private String createCommand() {
         String command = "";
-        if (isSpecificChannel) command = "!zapisyhere ";
-        else command = "!zapisy ";
+        command = "!zapisy ";
         return command + "-name " + nameEvent + " -date " + date + " -time " + time + " -o " + description + " -" + perm;
     }
 
     private void embedFinish() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.GREEN);
             builder.setTitle("GENEROWANIE LISTY ZAKOŃCZONE.");
@@ -331,7 +322,7 @@ public class EventsGenerator {
     }
 
     private void embedError() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.setTitle("BŁĄD");
@@ -341,7 +332,7 @@ public class EventsGenerator {
     }
 
     private void embedWhoPingNotCorrect() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Twoja odpowiedź jest niepoprawna", "", false);
@@ -361,7 +352,7 @@ public class EventsGenerator {
     }
 
     private void embedWhoPing() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Do kogo kierowane są zapisy?", "", false);
@@ -376,7 +367,7 @@ public class EventsGenerator {
     }
 
     private void embedGetDescription() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj opis, który umieszczę na liście.", "Maksymalna liczba znaków - 2048", false);
@@ -385,7 +376,7 @@ public class EventsGenerator {
     }
 
     private void embedIsDescriptionNotCorrect() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowa odpowiedź", "", false);
@@ -394,7 +385,7 @@ public class EventsGenerator {
     }
 
     private void embedIsDescription() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "", false);
@@ -407,7 +398,7 @@ public class EventsGenerator {
     }
 
     private void embedTimeNotCorrect() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format czasu eventu lub data i czas jest z przeszłości.", "", false);
@@ -416,7 +407,7 @@ public class EventsGenerator {
     }
 
     private void embedGetTime() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj czas rozpoczęcia twojego eventu", "Format: hh:mm", false);
@@ -425,7 +416,7 @@ public class EventsGenerator {
     }
 
     private void embedDateNotCorrect() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowy format daty eventu lub podałeś czas z przeszłości.", "", false);
@@ -434,7 +425,7 @@ public class EventsGenerator {
     }
 
     private void embedGetDate() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj datę twojego eventu", "Format: dd.MM.yyyy", false);
@@ -443,7 +434,7 @@ public class EventsGenerator {
     }
 
     private void embedGetNameCorrect() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.RED);
             builder.addField("Nieprawidłowa nazwa eventu", "", false);
@@ -452,7 +443,7 @@ public class EventsGenerator {
     }
 
     private void embedGetName() {
-        discordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        Repository.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.YELLOW);
             builder.addField("Podaj nazwę twojego eventu", "Maksymalna liczba znaków - 256", false);

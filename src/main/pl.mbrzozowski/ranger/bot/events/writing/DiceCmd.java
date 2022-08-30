@@ -1,4 +1,4 @@
-package ranger.event.writing;
+package ranger.bot.events.writing;
 
 import ranger.helpers.Commands;
 import ranger.model.DiceGame;

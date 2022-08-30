@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.RoleID;

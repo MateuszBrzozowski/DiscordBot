@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ranger.event.EventService;
 import ranger.questionnaire.Questionnaires;
 import ranger.Repository;
 

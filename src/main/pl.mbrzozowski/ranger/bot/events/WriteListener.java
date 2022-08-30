@@ -1,22 +1,22 @@
-package ranger.event;
+package ranger.bot.events;
 
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import ranger.DiscordBot;
+import org.springframework.stereotype.Service;
+import ranger.bot.events.writing.*;
+import ranger.event.EventService;
 import ranger.event.writing.*;
 
+@Service
 public class WriteListener extends ListenerAdapter {
 
     private final EventService eventService;
-    private final DiscordBot discordBot;
-
     @Autowired
-    public WriteListener(EventService eventService, DiscordBot discordBot) {
+    public WriteListener(EventService eventService) {
         this.eventService = eventService;
-        this.discordBot = discordBot;
     }
 
 
@@ -36,7 +36,7 @@ public class WriteListener extends ListenerAdapter {
         CheckUser checkUser = new CheckUser(event);
         CounterMachine counterMachine = new CounterMachine(event);
         LogChannel logChannel = new LogChannel(event);
-        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, discordBot);
+        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
         ReminderCmd reminderCmd = new ReminderCmd(event);
         QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);

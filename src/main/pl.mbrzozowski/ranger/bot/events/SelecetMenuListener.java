@@ -1,5 +1,6 @@
-package ranger.event;
+package ranger.bot.events;
 
+import ranger.event.EventsGeneratorModel;
 import ranger.helpers.ComponentId;
 import ranger.helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;

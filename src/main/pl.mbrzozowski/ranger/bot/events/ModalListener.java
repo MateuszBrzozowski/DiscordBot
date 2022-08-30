@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import ranger.helpers.ComponentId;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;

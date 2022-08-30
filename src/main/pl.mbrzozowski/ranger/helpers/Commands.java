@@ -17,7 +17,7 @@ public interface Commands {
     String CANCEL_EVENT = PREFIX + "cancelEvent" + SUFFIX;
     String REMOVE_USER_FROM_EVENT = PREFIX + "removeUserFromEvent" + SUFFIX;
     String REMOVE_USER_FROM_EVENTS = PREFIX + "removeUserFromEvent" + SUFFIX;
-    String GENERATOR_HERE = PREFIX + "generatorHere" + SUFFIX;
+//    String GENERATOR_HERE = PREFIX + "generatorHere" + SUFFIX;
     String GENERATOR = PREFIX + "generator" + SUFFIX;
     String DICE = PREFIX + "kostka" + SUFFIX;
     String HELPS = PREFIX + "help" + SUFFIX;

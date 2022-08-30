@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
+import ranger.event.EventService;
 import ranger.recrut.Recruits;
 import ranger.server.service.ServerService;
 

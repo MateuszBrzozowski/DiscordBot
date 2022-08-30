@@ -1,4 +1,4 @@
-package ranger.event;
+package ranger.bot.events;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
