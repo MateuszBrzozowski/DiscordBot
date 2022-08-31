@@ -30,7 +30,7 @@ public class RangerLogger {
 
     private static void Send(String msg) {
         JDA jda = Repository.getJda();
-        jda.getTextChannelById(LOG_CHANNEL_ID).sendMessage(msg).queue();
+//        jda.getTextChannelById(LOG_CHANNEL_ID).sendMessage(msg).queue();
     }
 
     private static String getCurrentDateAndTime() {

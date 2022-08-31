@@ -45,6 +45,7 @@ public class ButtonClickListener extends ListenerAdapter {
 
         if (eventOptional.isPresent()) {
             eventsButtonClick(event, eventOptional.get());
+            isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
             recrut.newPodanie(event);
             isIDCorrect = false;

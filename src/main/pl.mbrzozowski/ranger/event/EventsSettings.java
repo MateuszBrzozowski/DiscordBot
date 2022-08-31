@@ -18,18 +18,11 @@ public class EventsSettings {
 
     private final EventService eventService;
 
-    private boolean possiblyEditing = true;
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy H:mm");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:mm");
+    private boolean isChanged = false;
     private final JDA jda = Repository.getJda();
-    //    private EventService event = Repository.getEvent();
     private final String userName;
     private final String userID;
-    //    private List<String> indexesWithAllEventsID = new ArrayList<>();
-    private int chossedIndexOFEvent;
-    private String date;
-    private String newDate;
-    private String time;
-    private String newTime;
     private Event event;
     private boolean ifEndingEvent = false;
     private boolean sendNotifi = false;
@@ -85,7 +78,7 @@ public class EventsSettings {
                     break;
                 }
                 if (msgInteger > 0 && msgInteger <= eventsList.size()) {
-                    chossedIndexOFEvent = msgInteger - 1;
+                    int chossedIndexOFEvent = msgInteger - 1;
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                     event = eventsList.get(chossedIndexOFEvent);
                     embedWhatToDo();
@@ -103,24 +96,26 @@ public class EventsSettings {
                 }
                 switch (msgInteger) {
                     case 1 -> {
+                        isChanged = true;
                         embedGetTime();
                         stageOfSettings = EventSettingsStatus.SET_TIME;
                     }
                     case 2 -> {
+                        isChanged = true;
                         embedGetDate();
                         stageOfSettings = EventSettingsStatus.SET_DATE;
                     }
                     case 3 -> {
+                        isChanged = true;
                         embedCancelEvent();
                         stageOfSettings = EventSettingsStatus.CANCEL_EVENT;
                     }
                     case 0 -> {
-                        if (checkChanges()) {
+                        if (isChanged) {
                             stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
                             embedSendNotifi();
                         } else {
-                            embedNoChanges();
-                            removeThisEditor();
+                            endingEditor();
                         }
                     }
                     default -> {
@@ -155,7 +150,7 @@ public class EventsSettings {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 if (isDateFormat) {
                     LocalDateTime newDate = LocalDateTime.parse(
-                            msg + " " + event.getDate().getHour() + event.getDate().getMinute(),
+                            msg + " " + event.getDate().getHour() + ":" + event.getDate().getMinute(),
                             dateTimeFormatter);
                     boolean isTimeAfterNow = Validation.eventDateAfterNow(newDate);
                     if (isTimeAfterNow) {
@@ -202,13 +197,8 @@ public class EventsSettings {
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                     embedWhatToDo();
                 } else if (msg.equalsIgnoreCase("N")) {
-                    if (checkChanges()) {
-                        stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
-                        embedSendNotifi();
-                    } else {
-                        embedNoChanges();
-                        removeThisEditor();
-                    }
+                    stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
+                    embedSendNotifi();
                 } else {
                     embedAnswerNotCorrect();
                     embedDoYouWantAnyChange();
@@ -235,9 +225,12 @@ public class EventsSettings {
                 eventService.cancelEvent(event);
             }
         } else {
-            eventService.changeDateAndTime(event, sendNotifi);
+            if (isChanged) {
+                eventService.changeDateAndTime(event, sendNotifi);
+            }
         }
         embedCloseEditor();
+        removeThisEditor();
     }
 
     private void embedNoPossibleEditig() {
@@ -263,23 +256,6 @@ public class EventsSettings {
     private void embedCloseEditor() {
         String d = "Zamykam edytor eventów.";
         embedPatternOneField(Color.RED, "", d);
-    }
-
-    /**
-     * Sprawdza czy zostały wprowadzone zmiany w evencie.
-     *
-     * @return true - jeżeli zostały wprowadzone zmiany w czasie lub dacie lub event ma być anulowany. false - brak zmian
-     */
-    private boolean checkChanges() {
-        return changedTime() || changedDate() || ifEndingEvent;
-    }
-
-    private boolean changedDate() {
-        return !date.equalsIgnoreCase(newDate);
-    }
-
-    private boolean changedTime() {
-        return !time.equalsIgnoreCase(newTime);
     }
 
     private void embedDoYouWantAnyChange() {
@@ -375,6 +351,7 @@ public class EventsSettings {
 
 
     public boolean isPossiblyEditing() {
+        boolean possiblyEditing = true;
         return possiblyEditing;
     }
 }

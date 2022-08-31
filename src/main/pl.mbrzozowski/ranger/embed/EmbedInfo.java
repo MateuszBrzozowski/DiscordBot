@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
+import ranger.event.Event;
 import ranger.event.EventChanges;
 import ranger.event.EventService;
 import ranger.helpers.*;
@@ -390,19 +391,18 @@ public class EmbedInfo extends EmbedCreator {
      * Wysyła do użytkownika o ID userID wiadomość o zmianach w evencie.
      *
      * @param userID     ID użytkownika
-     * @param eventID    ID eventu
      * @param whatChange jaka zmiana zostala wykonana
      * @param dateTime   data i czas
      */
-    public static void sendInfoChanges(String userID, String eventID, EventChanges whatChange, String dateTime) {
+    public static void sendInfoChanges(String userID, Event event, EventChanges whatChange, String dateTime) {
         String description = "";
         if (whatChange.equals(EventChanges.CHANGES)) {
             description = "Zmieniona data lub czas wydarzenia na które się zapisałeś.";
         } else if (whatChange.equals(EventChanges.REMOVE)) {
             description = "Wydarzenie zostaje odwołane.";
         }
-        EventService event = Repository.getEvent();
-        String link = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
+//        EventService event = Repository.getEvent();
+        String link = "[" + event.getName() + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + event.getMsgId() + ")";
         JDA jda = Repository.getJda();
         String finalDescription = description + " Sprawdź szczegóły!";
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {

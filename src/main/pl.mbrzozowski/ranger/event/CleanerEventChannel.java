@@ -1,6 +1,7 @@
 package ranger.event;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -29,20 +30,23 @@ public class CleanerEventChannel implements CleanerChannel {
 
     public void clean() {
         JDA jda = Repository.getJda();
-//        EventService event = Repository.getEvent();
-        List<TextChannel> textChannels = jda.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID).getTextChannels();
-        if (!textChannels.isEmpty()) {
-            for (int i = 0; i < textChannels.size(); i++) {
-                Event event = eventService.isActiveMatchChannelID(textChannels.get(i).getId());
-                if (event != null) {
-                    textChannels.get(i).retrievePinnedMessages().queue(messages -> {
-                        if (isTimeToRemove(messages)) {
-                            String channelID = messages.get(0).getChannel().getId();
-                            deleteChannel(channelID);
-                        }
-                    });
+        Category category = jda.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID);
+        if (category != null) {
+            List<TextChannel> textChannels = category.getTextChannels();
+            if (!textChannels.isEmpty()) {
+                for (TextChannel textChannel : textChannels) {
+                    Event event = eventService.isActiveMatchChannelID(textChannel.getId());
+                    if (event != null) {
+                        textChannel.retrievePinnedMessages().queue(messages -> {
+                            if (isTimeToRemove(messages)) {
+                                String channelID = messages.get(0).getChannel().getId();
+                                deleteChannel(channelID);
+                            }
+                        });
+                    }
                 }
             }
+
         }
     }
 
@@ -55,9 +59,7 @@ public class CleanerEventChannel implements CleanerChannel {
             LocalDateTime dateEvent = LocalDateTime.parse(dateTimeString, dateFormat);
             int DELAY_IN_DAYS = 30;
             dateEvent = dateEvent.plusDays(DELAY_IN_DAYS);
-            if (dateEvent.isBefore(dateNow)) {
-                return true;
-            }
+            return dateEvent.isBefore(dateNow);
         }
         return false;
     }

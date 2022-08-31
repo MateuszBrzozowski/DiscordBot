@@ -1,30 +1,33 @@
 package ranger.event.reminder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 
+@Service
+@Slf4j
 public class Timers {
 
-    private List<MyTimer> timers = new ArrayList<>();
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private final List<MyTimer> timers = new ArrayList<>();
 
     public void add(MyTimer timer) {
         timers.add(timer);
-        logger.info("Zapamiętuje timer");
+        log.info("Zapamiętuje timer");
     }
 
     public void cancel(String eventID) {
-        for (int i = 0; i < timers.size(); i++) {
-            if (timers.get(i).getEventID().equalsIgnoreCase(eventID)) {
-                Timer timer = timers.get(i).getTimer();
+        log.info(String.valueOf(timers.size()));
+        for (MyTimer myTimer : timers) {
+            log.info(eventID + "  -  " + myTimer.getEventID());
+            if (myTimer.getEventID().equalsIgnoreCase(eventID)) {
+                Timer timer = myTimer.getTimer();
                 timer.cancel();
-                timers.remove(i);
-                logger.info("Anuluje timer.");
+                log.info("Anuluje timer.");
             }
         }
+        timers.removeIf(myTimer -> myTimer.getEventID().equalsIgnoreCase(eventID));
     }
 }

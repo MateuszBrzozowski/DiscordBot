@@ -32,13 +32,15 @@ import java.util.*;
 @Slf4j
 public class EventService {
     private final EventRepository eventRepository;
+    private final Timers timers;
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, Timers timers) {
         this.eventRepository = eventRepository;
-        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel(this);
-        cleanerEventChannel.clean();
+//        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel(this);
+//        cleanerEventChannel.clean();
+        this.timers = timers;
     }
 
     public List<Event> findAll() {
@@ -79,14 +81,14 @@ public class EventService {
         }
     }
 
-    private void createList(final TextChannel textChannel, final EventRequest eventRequest) {
+    private void createList(final TextChannel textChannel, final @NotNull EventRequest eventRequest) {
         String msg = "";
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
-            msg = "<@&" + RoleID.RECRUT_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
         } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
+            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!";
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -123,7 +125,7 @@ public class EventService {
                                 .date(dateTime)
                                 .build();
                         save(event);
-                        CreateReminder reminder = new CreateReminder(eventRequest.getDate(), eventRequest.getTime(), message.getId(), this);
+                        CreateReminder reminder = new CreateReminder(event, this, timers);
                         reminder.create();
                     });
         } catch (Exception e) {
@@ -268,6 +270,7 @@ public class EventService {
                     if (player != null) {
                         if (!player.isMainList()) {
                             player.setMainList(true);
+                            buttonInteractionEvent.deferEdit().queue();
                             RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName());
                         } else {
                             ResponseMessage.youAreOnList(buttonInteractionEvent);
@@ -275,6 +278,7 @@ public class EventService {
                     } else {
                         Player newPlayer = new Player(null, userID, userName, true, event);
                         event.getPlayers().add(newPlayer);
+                        buttonInteractionEvent.deferEdit().queue();
                         RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę.", event.getName());
                     }
                     eventRepository.save(event);
@@ -289,6 +293,7 @@ public class EventService {
                                         + event.getName() + "] - Czas do eventu 3h lub mniej.");
                             } else {
                                 player.setMainList(false);
+                                buttonInteractionEvent.deferEdit().queue();
                                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę rezerwową.", event.getName());
                             }
                         } else {
@@ -297,6 +302,7 @@ public class EventService {
                     } else {
                         Player newPlayer = new Player(null, userID, userName, false, event);
                         event.getPlayers().add(newPlayer);
+                        buttonInteractionEvent.deferEdit().queue();
                         RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());
                     }
                     eventRepository.save(event);
@@ -309,11 +315,13 @@ public class EventService {
                             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
                                     + event.getName() + "] - Czas do eventu 3h lub mniej.");
                         } else {
-                            event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
+                            boolean b = event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
+                            buttonInteractionEvent.deferEdit().queue();
                         }
                     } else {
                         ResponseMessage.youAreNotOnList(buttonInteractionEvent);
                     }
+                    eventRepository.save(event);
                 }
             }
         } else {
@@ -441,7 +449,7 @@ public class EventService {
                     , mOld.getImage()
                     , fieldsNew);
             message.editMessageEmbeds(mNew).queue(message1 -> {
-                updateTimer(event.getMsgId());
+                updateTimer(event);
                 if (notifi) {
                     sendInfoChanges(event, EventChanges.CHANGES, dataTime);
                 }
@@ -457,19 +465,17 @@ public class EventService {
                 "Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam informację.",
                 event.getMsgId());
         for (Player player : mainList) {
-            String userID = player.getUserId();
-            EmbedInfo.sendInfoChanges(userID, event.getMsgId(), whatChange, dateTime);
+            EmbedInfo.sendInfoChanges(player.getUserId(), event, whatChange, dateTime);
         }
         for (Player player : reserveList) {
-            String userID = player.getUserId();
-            EmbedInfo.sendInfoChanges(userID, event.getMsgId(), whatChange, dateTime);
+            EmbedInfo.sendInfoChanges(player.getUserId(), event, whatChange, dateTime);
         }
     }
 
-    private void updateTimer(String messageID) {
+    private void updateTimer(Event event) {
         Timers timers = Repository.getTimers();
-        timers.cancel(messageID);
-        CreateReminder reminder = new CreateReminder(messageID, this);
+        timers.cancel(event.getMsgId());
+        CreateReminder reminder = new CreateReminder(event, this, timers);
         reminder.create();
     }
 
