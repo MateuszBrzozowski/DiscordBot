@@ -419,8 +419,20 @@ public class EventService {
             MessageEmbed mOld = embeds.get(0);
             List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
             List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-            String newDate = event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." + event.getDate().getYear();
-            String newTime = event.getDate().getHour() + ":" + event.getDate().getMinute();
+            String month;
+            if (event.getDate().getMonthValue() < 10) {
+                month = "0" + event.getDate().getMonthValue();
+            } else {
+                month = String.valueOf(event.getDate().getMonthValue());
+            }
+            String newDate = event.getDate().getDayOfMonth() + "." + month + "." + event.getDate().getYear();
+            String min;
+            if (event.getDate().getMinute() < 10) {
+                min = "0" + event.getDate().getMinute();
+            } else {
+                min = String.valueOf(event.getDate().getMinute());
+            }
+            String newTime = event.getDate().getHour() + ":" + min;
             String dataTime = newDate + " " + newTime;
 
             textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime).queue();

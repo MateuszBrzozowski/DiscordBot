@@ -18,7 +18,7 @@ public class EventsSettings {
 
     private final EventService eventService;
 
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:mm");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
     private boolean isChanged = false;
     private final JDA jda = Repository.getJda();
     private final String userName;
