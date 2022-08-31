@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
 import ranger.event.ButtonClickType;
+import ranger.event.Event;
 import ranger.event.EventService;
 import ranger.event.EventsGeneratorModel;
 import ranger.helpers.*;
@@ -16,6 +17,8 @@ import ranger.recrut.RecruitOpinions;
 import ranger.recrut.Recruits;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
+
+import java.util.Optional;
 
 @Service
 public class ButtonClickListener extends ListenerAdapter {
@@ -35,12 +38,14 @@ public class ButtonClickListener extends ListenerAdapter {
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
         ServerStats serverStats = Repository.getServerStats();
-        int indexOfMatch = eventService.getIndexActiveEvent(event.getMessage().getId());
+//        int indexOfMatch = eventService.getIndexActiveEvent(event.getMessage().getId());
         boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
 
-        if (indexOfMatch >= 0) {
-            eventsButtonClick(event, indexOfMatch);
+        Optional<Event> eventOptional = eventService.findEventByMsgId(event.getMessage().getId());
+
+        if (eventOptional.isPresent()) {
+            eventsButtonClick(event, eventOptional.get());
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
             recrut.newPodanie(event);
             isIDCorrect = false;
@@ -109,14 +114,13 @@ public class ButtonClickListener extends ListenerAdapter {
         }
     }
 
-    private void eventsButtonClick(@NotNull ButtonInteractionEvent event, int indexOfMatch) {
+    private void eventsButtonClick(@NotNull ButtonInteractionEvent event, @NotNull Event eventOptional) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN + event.getMessage().getId())) {
-            eventService.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN);
+            eventService.buttonClick(event, eventOptional, ButtonClickType.SIGN_IN);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN_RESERVE + event.getMessage().getId())) {
-            eventService.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_IN_RESERVE);
+            eventService.buttonClick(event, eventOptional, ButtonClickType.SIGN_IN_RESERVE);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_OUT + event.getMessage().getId())) {
-            eventService.buttonClick(event, indexOfMatch, ButtonClickType.SIGN_OUT);
+            eventService.buttonClick(event, eventOptional, ButtonClickType.SIGN_OUT);
         }
-        eventService.updateEmbed(indexOfMatch);
     }
 }
