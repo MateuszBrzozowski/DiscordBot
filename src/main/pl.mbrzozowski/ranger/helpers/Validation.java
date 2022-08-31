@@ -1,6 +1,8 @@
 package ranger.helpers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,8 +32,7 @@ public class Validation {
      * @param s Czas w formacie HH:mm lub H:mm
      * @return Zwraca true jeżeli czas jes podany w poprawnej formie, w innym przypadku zwraca false.
      */
-    public static boolean isTimeFormat(String s) {
-//        s = timeCorrect(s);
+    public static boolean isTimeFormat(@NotNull String s) {
         if (s.length() == 5) {
             if (s.substring(2, 3).equalsIgnoreCase(":")) {
                 if (isDecimal(s.substring(0, 1)) && isDecimal(s.substring(1, 2)) && isDecimal(s.substring(3, 4)) && isDecimal(s.substring(4, 5))) {
@@ -46,7 +47,8 @@ public class Validation {
         return false;
     }
 
-    public static String timeCorrect(String timeOld) {
+    @Contract(pure = true)
+    public static @NotNull String timeCorrect(@NotNull String timeOld) {
         if (timeOld.length() == 4) {
             timeOld = "0" + timeOld;
         }
@@ -81,7 +83,7 @@ public class Validation {
         return eventDateTime.isAfter(dateTimeNow);
     }
 
-    public static boolean eventDateAfterNow(LocalDateTime dateTime) {
+    public static boolean eventDateAfterNow(@NotNull LocalDateTime dateTime) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         return dateTime.isAfter(dateTimeNow);
     }
