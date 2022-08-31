@@ -28,9 +28,9 @@ public class Repository {
     private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
 
-    public static EventService getEvent() {
-        return event;
-    }
+//    public static EventService getEvent() {
+//        return event;
+//    }
 
     public static Recruits getRecruits() {
         return recruits;

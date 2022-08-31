@@ -1,14 +1,15 @@
 package ranger.bot.events.writing;
 
-import ranger.embed.EmbedHelp;
-import ranger.helpers.Commands;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.embed.EmbedHelp;
+import ranger.event.EventService;
+import ranger.helpers.Commands;
 
 public class HelpCmd extends Proccess {
 
-    public HelpCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public HelpCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

@@ -1,13 +1,14 @@
 package ranger.bot.events.writing;
 
-import ranger.embed.EmbedInfo;
-import ranger.helpers.CategoryAndChannelID;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.embed.EmbedInfo;
+import ranger.event.EventService;
+import ranger.helpers.CategoryAndChannelID;
 
 public class LogChannel extends Proccess {
 
-    public LogChannel(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public LogChannel(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

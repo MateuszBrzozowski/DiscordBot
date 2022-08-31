@@ -1,6 +1,7 @@
 package ranger.bot.events.writing;
 
 import ranger.embed.EmbedInfo;
+import ranger.event.EventService;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -10,8 +11,8 @@ import ranger.stats.ServerStats;
 
 public class StatsCmd extends Proccess {
 
-    public StatsCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public StatsCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

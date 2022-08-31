@@ -1,11 +1,12 @@
 package ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.event.EventService;
 
 public class CounterMachine extends Proccess {
 
-    public CounterMachine(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public CounterMachine(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

@@ -1,14 +1,15 @@
 package ranger.bot.events.writing;
 
 import ranger.embed.EmbedInfo;
+import ranger.event.EventService;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RecrutCmd extends Proccess {
 
-    public RecrutCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public RecrutCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class EventsSettingsCmd extends Proccess {
     private final EventService eventService;
 
     public EventsSettingsCmd(MessageReceivedEvent messageReceived, EventService eventService) {
-        super(messageReceived);
+        super(eventService, messageReceived);
         this.eventService = eventService;
     }
 

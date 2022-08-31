@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import ranger.Repository;
 import ranger.event.Event;
 import ranger.event.EventChanges;
-import ranger.event.EventService;
 import ranger.helpers.*;
 import ranger.recrut.Recruits;
 import ranger.stats.MapLayer;
@@ -315,47 +314,6 @@ public class EmbedInfo extends EmbedCreator {
         });
     }
 
-    /**
-     * Wysyła do użytkownika o userID powiadomienie że nie może wypisać się 3h przed eventem
-     *
-     * @param userID  ID użytkownika do którego wysyna jest wiadomość
-     * @param eventID ID eventu z którego próbuje wypisać się uzytkownik
-     */
-    public static void youCantSingOut(String userID, String eventID) {
-        JDA jda = Repository.getJda();
-        EventService event = Repository.getEvent();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Nie możesz wypisać się z eventu tuż przed jego rozpoczęciem!");
-            builder.setDescription("Jeżeli nie możesz pojawić się z ważnych przyczyn przekaż informację na kanale eventu dlaczego Cię nie będzie");
-            String linkToEventChannel = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" +
-                    CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
-                    event.getChannelID(eventID) + ")";
-            builder.addField("Link do eventu", linkToEventChannel, false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    /**
-     * Wysyła do użytkownika o userID powiadomienie że nie może wypisać się 3h przed eventem z głównej listy na rezerwową
-     *
-     * @param userID  ID użytkownika do którego wysyna jest wiadomość
-     * @param eventID ID eventu z którego próbuje wypisać się uzytkownik
-     */
-    public static void youCantSignReserve(String userID, String eventID) {
-        JDA jda = Repository.getJda();
-        EventService event = Repository.getEvent();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Nie możesz wypisać się z głownej listy na rezerwową tuż przed rozpoczęciem eventu!");
-            builder.setDescription("Jeżeli istnieje ryzyko, że się spóźnisz powiadom nas na kanale eventu");
-            String linkToEventChannel = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" +
-                    CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
-                    event.getChannelID(eventID) + ")";
-            builder.addField("Link do eventu", linkToEventChannel, false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
 
     /**
      * Wysyła informację że pomyślnie wyłączono przypomnienia dla eventów.

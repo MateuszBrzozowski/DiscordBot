@@ -1,6 +1,7 @@
 package ranger.bot.events.writing;
 
 import ranger.embed.EmbedInfo;
+import ranger.event.EventService;
 import ranger.event.reminder.UsersReminderOFF;
 import ranger.helpers.Commands;
 import ranger.helpers.RangerLogger;
@@ -10,8 +11,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ReminderCmd extends Proccess {
 
-    public ReminderCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public ReminderCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

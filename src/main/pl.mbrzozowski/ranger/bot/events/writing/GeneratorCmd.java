@@ -15,7 +15,7 @@ public class GeneratorCmd extends Proccess {
 
     public GeneratorCmd(MessageReceivedEvent messageReceived,
                         EventService eventService) {
-        super(messageReceived);
+        super(eventService, messageReceived);
         this.eventService = eventService;
     }
 

@@ -1,12 +1,13 @@
 package ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.event.EventService;
 import ranger.helpers.Commands;
 
 public class DeveloperCmd extends Proccess {
 
-    public DeveloperCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public DeveloperCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

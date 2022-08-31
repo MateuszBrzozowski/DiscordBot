@@ -1,13 +1,14 @@
 package ranger.bot.events.writing;
 
-import ranger.helpers.Commands;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.event.EventService;
+import ranger.helpers.Commands;
 import ranger.questionnaire.Questionnaires;
 
 public class QuestionnaireCmd extends Proccess {
 
-    public QuestionnaireCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
+    public QuestionnaireCmd(MessageReceivedEvent messageReceived, EventService eventService) {
+        super(eventService, messageReceived);
     }
 
     @Override

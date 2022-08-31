@@ -31,24 +31,24 @@ public class WriteListener extends ListenerAdapter {
                 event.getAuthor().getId(),
                 event);
 
-        DiceCmd diceCmd = new DiceCmd(event);
-        StatsCmd statsCmd = new StatsCmd(event);
-        CheckUser checkUser = new CheckUser(event);
-        CounterMachine counterMachine = new CounterMachine(event);
-        LogChannel logChannel = new LogChannel(event);
+        DiceCmd diceCmd = new DiceCmd(event, eventService);
+        StatsCmd statsCmd = new StatsCmd(event, eventService);
+        CheckUser checkUser = new CheckUser(event, eventService);
+        CounterMachine counterMachine = new CounterMachine(event, eventService);
+        LogChannel logChannel = new LogChannel(event, eventService);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
-        ReminderCmd reminderCmd = new ReminderCmd(event);
-        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
-        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
-        EmbedSender embedSender = new EmbedSender(event);
+        ReminderCmd reminderCmd = new ReminderCmd(event, eventService);
+        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event, eventService);
+        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event, eventService);
+        EmbedSender embedSender = new EmbedSender(event, eventService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
-        HelpCmd helpCmd = new HelpCmd(event);
-        RecrutCmd recrutCmd = new RecrutCmd(event);
-        DeveloperCmd developerCmd = new DeveloperCmd(event);
-        Roles roles = new Roles(event);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
-        InvalidCmd invalidCmd = new InvalidCmd(event);
-        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
+        HelpCmd helpCmd = new HelpCmd(event, eventService);
+        RecrutCmd recrutCmd = new RecrutCmd(event, eventService);
+        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService);
+        Roles roles = new Roles(event, eventService);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, eventService);
+        InvalidCmd invalidCmd = new InvalidCmd(event, eventService);
+        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event, eventService);
 
         diceCmd.setNextProccess(statsCmd);
         statsCmd.setNextProccess(roles);
