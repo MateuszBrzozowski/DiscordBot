@@ -17,7 +17,9 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(nullable = false)
     private String msgId;
+    @Column(nullable = false)
     private String channelId;
     private LocalDateTime date;
     @OneToMany(mappedBy = "event", orphanRemoval = true)
