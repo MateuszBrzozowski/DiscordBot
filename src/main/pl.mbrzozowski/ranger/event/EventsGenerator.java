@@ -1,5 +1,6 @@
 package ranger.event;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -24,6 +25,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class EventsGenerator {
 
     //    private boolean isSpecificChannel = false;
@@ -117,34 +119,31 @@ public class EventsGenerator {
     public void saveAnswerAndSetNextStage(SelectMenuInteractionEvent event) {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         String userChoose = selectedOptions.get(0).getValue();
-        switch (stageOfGenerator) {
-            case FINISH: {
-                if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_EVENT_NAME)) {
-                    embedGetName();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_NAME;
-                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DATE)) {
-                    embedGetDate();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_DATE;
-                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_TIME)) {
-                    embedGetTime();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_TIME;
-                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DESC)) {
-                    embedGetDescription();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_DESCRIPTION;
-                } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_WHO_PING)) {
-                    embedWhoPing();
-                    stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
-                }
-                disableButtonsAndSelectMenu(event.getMessage());
-                break;
+        if (stageOfGenerator == EventGeneratorStatus.FINISH) {
+            if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_EVENT_NAME)) {
+                embedGetName();
+                stageOfGenerator = EventGeneratorStatus.CHANGE_NAME;
+            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DATE)) {
+                embedGetDate();
+                stageOfGenerator = EventGeneratorStatus.CHANGE_DATE;
+            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_TIME)) {
+                embedGetTime();
+                stageOfGenerator = EventGeneratorStatus.CHANGE_TIME;
+            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DESC)) {
+                embedGetDescription();
+                stageOfGenerator = EventGeneratorStatus.CHANGE_DESCRIPTION;
+            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_WHO_PING)) {
+                embedWhoPing();
+                stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
             }
+            disableButtonsAndSelectMenu(event.getMessage());
         }
     }
 
     void saveAnswerAndSetNextStage(MessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
         switch (stageOfGenerator) {
-            case SET_NAME: {
+            case SET_NAME -> {
                 if (msg.length() < 256 && msg.length() > 0) {
                     eventRequest.setName(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_DATE;
@@ -153,9 +152,8 @@ public class EventsGenerator {
                     embedGetNameCorrect();
                     embedGetName();
                 }
-                break;
             }
-            case SET_DATE: {
+            case SET_DATE -> {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 boolean isDateAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && isDateAfterNow) {
@@ -166,9 +164,8 @@ public class EventsGenerator {
                     embedDateNotCorrect();
                     embedGetDate();
                 }
-                break;
             }
-            case SET_TIME: {
+            case SET_TIME -> {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
@@ -180,9 +177,8 @@ public class EventsGenerator {
                     embedTimeNotCorrect();
                     embedGetTime();
                 }
-                break;
             }
-            case SET_DESCRIPTION: {
+            case SET_DESCRIPTION -> {
                 if (msg.length() < 2048) {
                     eventRequest.setDescription(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
@@ -192,7 +188,7 @@ public class EventsGenerator {
                 }
                 break;
             }
-            case CHANGE_NAME: {
+            case CHANGE_NAME -> {
                 if (msg.length() < 256 && msg.length() > 0) {
                     eventRequest.setName(msg);
                 } else {
@@ -202,7 +198,7 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
-            case CHANGE_DESCRIPTION: {
+            case CHANGE_DESCRIPTION -> {
                 if (msg.length() < 2048 && msg.length() > 0) {
                     eventRequest.setDescription(msg);
                 } else {
@@ -212,7 +208,7 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
-            case CHANGE_DATE: {
+            case CHANGE_DATE -> {
                 boolean isDateFormat = Validation.isDateFormat(msg);
                 boolean timeAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && timeAfterNow) {
@@ -224,7 +220,7 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
-            case CHANGE_TIME: {
+            case CHANGE_TIME -> {
                 msg = Validation.timeCorrect(msg);
                 boolean isTimeFormat = Validation.isTimeFormat(msg);
                 boolean timeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
@@ -237,15 +233,13 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 break;
             }
-            case IF_SET_DESCRIPTION:
-            case SET_PERMISSION:
-            case FINISH:
-            case CHANGE_PERMISSION: {
+            case IF_SET_DESCRIPTION, SET_PERMISSION, FINISH, CHANGE_PERMISSION -> {
                 break;
             }
-            default:
+            default -> {
                 embedError();
                 removeThisGenerator();
+            }
         }
     }
 

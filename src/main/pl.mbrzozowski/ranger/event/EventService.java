@@ -138,7 +138,7 @@ public class EventService {
     }
 
     private LocalDateTime getDateTime(String date, String time) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         String dateTime = date + " " + time;
         try {
             return LocalDateTime.parse(dateTime, dateTimeFormatter);
@@ -315,7 +315,7 @@ public class EventService {
                             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
                                     + event.getName() + "] - Czas do eventu 3h lub mniej.");
                         } else {
-                            boolean b = event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
+                            event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
                             buttonInteractionEvent.deferEdit().queue();
                         }
                     } else {
@@ -329,6 +329,7 @@ public class EventService {
                     + event.getName() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
+            cancelEvent(event);
         }
         updateEmbed(event);
     }

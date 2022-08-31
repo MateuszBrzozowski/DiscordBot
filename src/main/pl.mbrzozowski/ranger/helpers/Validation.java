@@ -1,33 +1,29 @@
 package ranger.helpers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 
+@Slf4j
 public class Validation {
 
-    private static RangerLogger rangerLogger = new RangerLogger();
-    protected static final Logger logger = LoggerFactory.getLogger(Validation.class.getName());
     private static final String datePattern = "dd.MM.yyyy";
 
-    public static boolean isDateFormat(String s) {
-        SimpleDateFormat df = new SimpleDateFormat(datePattern);
-        df.setLenient(false);
+    public static boolean isDateFormat(String source) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         try {
-            Date javaDate = df.parse(s);
-            df.parse(s);
-        } catch (ParseException e) {
-            rangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"", s, datePattern));
+            log.info(source);
+            LocalDateTime date = LocalDateTime.parse(source + " 23:59", dateTimeFormatter);
+            log.info("Przekonwertowano datę");
+            return true;
+        } catch (DateTimeParseException e) {
+            log.info("Nie udało sie przekonwertować daty");
+            RangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"", source, datePattern));
             return false;
         }
-        return true;
     }
 
     /**
@@ -43,9 +39,9 @@ public class Validation {
                     int min = Integer.parseInt(s.substring(3, 5));
                     if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
                         return true;
-                    } else logger.info("Zly format - godzina lub czas wyszły za zakres");
-                } else logger.info("Zly format - to nie jest liczba");
-            } else logger.info("Zly format :");
+                    } else log.info("Zly format - godzina lub czas wyszły za zakres");
+                } else log.info("Zly format - to nie jest liczba");
+            } else log.info("Zly format :");
         }
         return false;
     }
@@ -74,7 +70,7 @@ public class Validation {
      */
     public static boolean eventDateTimeAfterNow(String dateTime) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         LocalDateTime eventDateTime = null;
         try {
             eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
@@ -82,10 +78,7 @@ public class Validation {
             RangerLogger.info("Nieprawidłowa data i czas [" + dateTime + "]");
             return false;
         }
-        if (eventDateTime.isAfter(dateTimeNow))
-            return true;
-
-        return false;
+        return eventDateTime.isAfter(dateTimeNow);
     }
 
     public static boolean eventDateAfterNow(LocalDateTime dateTime) {
