@@ -7,25 +7,31 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import ranger.Repository;
 import ranger.event.EventService;
 import ranger.questionnaire.Questionnaires;
-import ranger.Repository;
 
+@Service
 public class MessageUpdate extends ListenerAdapter {
+
+    private final EventService eventService;
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+    public MessageUpdate(EventService eventService) {
+        this.eventService = eventService;
+    }
+
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-        EventService e = Repository.getEvent();
-        if (e.getIndexActiveEvent(event.getMessageId()) != -1) {
-            e.cancelEvent(event.getMessageId());
+        if (eventService.findEventByMsgId(event.getMessageId()).isPresent()) {
+            eventService.cancelEvent(event.getMessageId());
         }
         Questionnaires q = Repository.getQuestionnaires();
         if (q.getIndex(event.getMessageId()) != -1) {
             q.removeQuestionnaire(event.getMessageId());
         }
-
     }
 
     @Override

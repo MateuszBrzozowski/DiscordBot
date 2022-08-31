@@ -17,11 +17,15 @@ import java.util.Collection;
 public class DiscordBot {
     private final WriteListener writeListener;
     private final ButtonClickListener buttonClickListener;
+    private final ChannelUpdate channelUpdate;
+    private final MessageUpdate messageUpdate;
 
     public DiscordBot(WriteListener writeListener,
-                      ButtonClickListener buttonClickListener) throws LoginException {
+                      ButtonClickListener buttonClickListener, ChannelUpdate channelUpdate, MessageUpdate messageUpdate) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
+        this.channelUpdate = channelUpdate;
+        this.messageUpdate = messageUpdate;
         DiscordBotRun();
     }
 
@@ -34,8 +38,8 @@ public class DiscordBot {
         JDA jda = JDABuilder.create(Constants.TOKEN_RANGER_TESTER, intents)
                 .addEventListeners(this.writeListener)
                 .addEventListeners(this.buttonClickListener)
-                .addEventListeners(new ChannelUpdate())
-                .addEventListeners(new MessageUpdate())
+                .addEventListeners(this.channelUpdate)
+                .addEventListeners(this.messageUpdate)
                 .addEventListeners(new Listener())
                 .addEventListeners(new ModalListener())
                 .addEventListeners(new SelecetMenuListener())

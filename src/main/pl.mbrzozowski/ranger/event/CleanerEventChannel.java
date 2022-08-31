@@ -1,10 +1,5 @@
 package ranger.event;
 
-import ranger.embed.EmbedInfo;
-import ranger.embed.EmbedSettings;
-import ranger.helpers.CategoryAndChannelID;
-import ranger.helpers.RangerLogger;
-import ranger.model.CleanerChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -12,6 +7,11 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ranger.Repository;
+import ranger.embed.EmbedInfo;
+import ranger.embed.EmbedSettings;
+import ranger.helpers.CategoryAndChannelID;
+import ranger.helpers.RangerLogger;
+import ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,16 +21,20 @@ import java.util.List;
 public class CleanerEventChannel implements CleanerChannel {
 
     protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
-    private final int DELAY_IN_DAYS = 30;
+    private final EventService eventService;
+
+    public CleanerEventChannel(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     public void clean() {
         JDA jda = Repository.getJda();
-        EventService event = Repository.getEvent();
+//        EventService event = Repository.getEvent();
         List<TextChannel> textChannels = jda.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID).getTextChannels();
         if (!textChannels.isEmpty()) {
             for (int i = 0; i < textChannels.size(); i++) {
-                int isActive = event.isActiveMatchChannelID(textChannels.get(i).getId());
-                if (isActive == -1) {
+                Event event = eventService.isActiveMatchChannelID(textChannels.get(i).getId());
+                if (event != null) {
                     textChannels.get(i).retrievePinnedMessages().queue(messages -> {
                         if (isTimeToRemove(messages)) {
                             String channelID = messages.get(0).getChannel().getId();
@@ -49,6 +53,7 @@ public class CleanerEventChannel implements CleanerChannel {
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             LocalDateTime dateNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
             LocalDateTime dateEvent = LocalDateTime.parse(dateTimeString, dateFormat);
+            int DELAY_IN_DAYS = 30;
             dateEvent = dateEvent.plusDays(DELAY_IN_DAYS);
             if (dateEvent.isBefore(dateNow)) {
                 return true;

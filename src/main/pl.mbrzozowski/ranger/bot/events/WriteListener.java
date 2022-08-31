@@ -41,7 +41,7 @@ public class WriteListener extends ListenerAdapter {
         QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
         HelpCmd helpCmd = new HelpCmd(event);
         RecrutCmd recrutCmd = new RecrutCmd(event);
         DeveloperCmd developerCmd = new DeveloperCmd(event);

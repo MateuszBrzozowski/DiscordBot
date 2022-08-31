@@ -221,7 +221,7 @@ public class EmbedInfo extends EmbedCreator {
      */
     public static void userIsInClanMember(ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
-                "Jesteś już w naszym klanie dzbanie!")
+                        "Jesteś już w naszym klanie dzbanie!")
                 .setEphemeral(true)
                 .queue();
         RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
@@ -246,7 +246,7 @@ public class EmbedInfo extends EmbedCreator {
      */
     public static void userIsInClan(ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
-                "Masz przypisaną rolę innego klanu na naszym discordzie.")
+                        "Masz przypisaną rolę innego klanu na naszym discordzie.")
                 .setEphemeral(true)
                 .queue();
         RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
@@ -327,7 +327,7 @@ public class EmbedInfo extends EmbedCreator {
             EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
             builder.setTitle("Nie możesz wypisać się z eventu tuż przed jego rozpoczęciem!");
             builder.setDescription("Jeżeli nie możesz pojawić się z ważnych przyczyn przekaż informację na kanale eventu dlaczego Cię nie będzie");
-            String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
+            String linkToEventChannel = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
             builder.addField("Link do eventu", linkToEventChannel, false);
@@ -348,30 +348,12 @@ public class EmbedInfo extends EmbedCreator {
             EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
             builder.setTitle("Nie możesz wypisać się z głownej listy na rezerwową tuż przed rozpoczęciem eventu!");
             builder.setDescription("Jeżeli istnieje ryzyko, że się spóźnisz powiadom nas na kanale eventu");
-            String linkToEventChannel = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" +
+            String linkToEventChannel = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" +
                     event.getChannelID(eventID) + ")";
             builder.addField("Link do eventu", linkToEventChannel, false);
             privateChannel.sendMessageEmbeds(builder.build()).queue();
         });
-    }
-
-
-    /**
-     * Wysyła iformację o statusie aplikacji jeżeli użytkownik do twórca aplikacji.
-     *
-     * @param userID ID użytkownika
-     */
-    public static void sendStatus(String userID) {
-        if (Users.isUserDev(userID)) {
-            JDA jda = Repository.getJda();
-            jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-                EventService events = Repository.getEvent();
-                Recruits recruits = Repository.getRecruits();
-                events.sendInfo(privateChannel);
-                recruits.sendInfo(privateChannel);
-            });
-        }
     }
 
     /**
@@ -420,7 +402,7 @@ public class EmbedInfo extends EmbedCreator {
             description = "Wydarzenie zostaje odwołane.";
         }
         EventService event = Repository.getEvent();
-        String link = "[" + event.getEventNameFromEmbed(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
+        String link = "[" + event.getEventName(eventID) + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelID(eventID) + "/" + eventID + ")";
         JDA jda = Repository.getJda();
         String finalDescription = description + " Sprawdź szczegóły!";
         jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {

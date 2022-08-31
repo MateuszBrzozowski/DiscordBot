@@ -217,15 +217,5 @@
 //        return mainList.size() + reserveList.size();
 //    }
 //
-//    public void sendInfoChanges(EventChanges whatChange, String dateTime) {
-//        RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam informację.", messageID);
-//        for (int i = 0; i < mainList.size(); i++) {
-//            String userID = mainList.get(i).getUserID();
-//            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
-//        }
-//        for (int i = 0; i < reserveList.size(); i++) {
-//            String userID = reserveList.get(i).getUserID();
-//            EmbedInfo.sendInfoChanges(userID, this.messageID, whatChange, dateTime);
-//        }
-//    }
+
 //}

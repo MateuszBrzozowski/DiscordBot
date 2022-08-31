@@ -1,13 +1,16 @@
 package ranger.event;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
@@ -15,7 +18,6 @@ import ranger.embed.EmbedSettings;
 import ranger.event.reminder.CreateReminder;
 import ranger.event.reminder.Timers;
 import ranger.helpers.*;
-import ranger.model.MemberOfServer;
 import ranger.response.ResponseMessage;
 
 import java.awt.*;
@@ -26,11 +28,10 @@ import java.util.List;
 import java.util.*;
 
 @Service
+@Slf4j
 public class EventService {
     private final EventRepository eventRepository;
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
-    //    private List<ranger.event.ActiveEvent> activeEvents = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private HashMap<String, TextChannel> textChannelsUser = new HashMap<>();
 
@@ -38,10 +39,14 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
+    public List<Event> findAll() {
+        return eventRepository.findAll();
+    }
+
     public void initialize() {
 //        getAllDatabase();
 //        checkAllListOfEvents();
-        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel();
+        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel(this);
         cleanerEventChannel.clean();
     }
 
@@ -287,7 +292,7 @@ public class EventService {
                                 .date(dateTime)
                                 .build();
                         save(event);
-                        CreateReminder reminder = new CreateReminder(eventRequest.getDate(), eventRequest.getTime(), message.getId());
+                        CreateReminder reminder = new CreateReminder(eventRequest.getDate(), eventRequest.getTime(), message.getId(), this);
                         reminder.create();
                     });
         } catch (Exception e) {
@@ -523,10 +528,10 @@ public class EventService {
 
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i == 4) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST + "(" + activeEvents.get(indexOfMatch).getMainList().size() + ")", ">>> " + mainList, true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")", ">>> " + mainList, true);
                     fieldsNew.add(fieldNew);
                 } else if (i == 6) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST_RESERVE + "(" + activeEvents.get(indexOfMatch).getReserveList().size() + ")", ">>> " + reserveList, true);
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")", ">>> " + reserveList, true);
                     fieldsNew.add(fieldNew);
                 } else {
                     fieldsNew.add(fieldsOld.get(i));
@@ -534,7 +539,7 @@ public class EventService {
             }
 
             int color;
-            if (activeEvents.get(indexOfMatch).getMainList().size() >= 9) {
+            if (getMainListSize(event) >= 9) {
                 color = Color.GREEN.getRGB();
             } else {
                 color = Color.YELLOW.getRGB();
@@ -558,7 +563,15 @@ public class EventService {
         });
     }
 
-    public String getStringOfMainList(Event event) {
+    private int getMainListSize(@NotNull Event event) {
+        return event.getPlayers().stream().filter(Player::isMainList).toList().size();
+    }
+
+    private int getReserveListSize(@NotNull Event event) {
+        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList().size();
+    }
+
+    private @NotNull String getStringOfMainList(@NotNull Event event) {
         List<Player> players = event.getPlayers().stream().filter(Player::isMainList).toList();
         if (players.size() > 0) {
             StringBuilder result = new StringBuilder();
@@ -571,7 +584,7 @@ public class EventService {
         }
     }
 
-    public String getStringOfReserveList(Event event) {
+    private @NotNull String getStringOfReserveList(@NotNull Event event) {
         List<Player> players = event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
         if (players.size() > 0) {
             StringBuilder result = new StringBuilder();
@@ -594,35 +607,10 @@ public class EventService {
         return result;
     }
 
-    public String getActiveEventsIndexAndName() {
-        String result = "";
-        for (int i = 0; i < activeEvents.size(); i++) {
-            result += i + 1 + " : " + activeEvents.get(i).getName() + "\n";
-        }
-        return result;
-    }
 
-
-    /**
-     * @param messageID ID wiadomości w której jest lista z zapisami na event
-     * @return zwraca index eventu.; Zwraca -1 jeżeli eventu nie ma.
-     */
-    public int getIndexActiveEvent(String messageID) {
-        for (int i = 0; i < activeEvents.size(); i++) {
-            if (messageID.equalsIgnoreCase(activeEvents.get(i).getMessageID())) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public int isActiveMatchChannelID(String channelID) {
-        for (int i = 0; i < activeEvents.size(); i++) {
-            if (channelID.equalsIgnoreCase(activeEvents.get(i).getChannelID())) {
-                return i;
-            }
-        }
-        return -1;
+    public Event isActiveMatchChannelID(String channelID) {
+        Optional<Event> eventOptional = findEventByChannelId(channelID);
+        return eventOptional.orElse(null);
     }
 
     public void buttonClick(ButtonInteractionEvent buttonInteractionEvent, Event event, ButtonClickType buttonClick) {
@@ -687,7 +675,7 @@ public class EventService {
             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk ["
                     + event.getName() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
-            disableButtons(buttonInteractionEvent.getMessageId());
+            disableButtons(event);
         }
         updateEmbed(event);
     }
@@ -725,50 +713,41 @@ public class EventService {
         return false;
     }
 
-    private boolean userOnMainList(int index, String userID) {
-        return activeEvents.get(index).checkMemberOnMainList(userID);
+    public void delete(Event event) {
+        eventRepository.delete(event);
     }
 
-    private boolean userOnReserveList(int index, String userID) {
-        return activeEvents.get(index).checkMemberOnReserveList(userID);
+    public Optional<Event> findEventByChannelId(String channelID) {
+        return eventRepository.findByChannelId(channelID);
     }
 
-    public void deleteChannelByID(String channelID) {
-        while (true) {
-            int inexOfMatch = isActiveMatchChannelID(channelID);
-            if (inexOfMatch == -1) {
-                break;
-            }
-            removeEventDB(activeEvents.get(inexOfMatch).getMessageID());
-            activeEvents.remove(inexOfMatch);
+    public void cancelEvnetWithInfoForPlayers(Event event) {
+        TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
+        assert channel != null;
+        channel.retrieveMessageById(event.getMsgId()).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+            String dateTime = getDateAndTime(fields);
+            sendInfoChanges(event, EventChanges.REMOVE, dateTime);
+            cancelEvent(event);
+        });
+    }
+
+    public void cancelEvent(String msgId) {
+        Optional<Event> optionalEvent = findEventByMsgId(msgId);
+        if (optionalEvent.isPresent()) {
+            Event event = optionalEvent.get();
+            eventRepository.delete(event);
         }
     }
 
-    public void cancelEvnetWithInfoForPlayers(String messageID) {
-        logger.info("Odwołujemy event");
-        int index = getIndexActiveEvent(messageID);
-        if (index >= 0) {
-            Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID()).retrieveMessageById(messageID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-                String dateTime = getDateAndTimeFromEmbed(fields);
-                activeEvents.get(index).sendInfoChanges(EventChanges.REMOVE, dateTime);
-                cancelEvent(messageID);
-            });
-        }
-    }
-
-    public void cancelEvent(String messageID) {
-        int index = getIndexActiveEvent(messageID);
-        RangerLogger.info("Event [" + messageID + "] usunięty z bazy danych.");
-        if (index >= 0) {
-            disableButtons(messageID);
-            removeEventDB(messageID);
-            changeTitleRedCircle(activeEvents.get(index).getChannelID());
-            activeEvents.remove(index);
-            Timers timers = Repository.getTimers();
-            timers.cancel(messageID);
-        }
+    public void cancelEvent(Event event) {
+        RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
+        disableButtons(event);
+        changeTitleRedCircle(event.getChannelId());
+        Timers timers = Repository.getTimers();
+        timers.cancel(event.getMsgId());
+        eventRepository.delete(event);
     }
 
     /**
@@ -784,175 +763,86 @@ public class EventService {
                 .queue();
     }
 
-    public void changeTime(String messageID, String time, String userID, boolean notifi) {
-        if (!Validation.isTimeFormat(time)) return;
-        int index = getIndexActiveEvent(messageID);
-        if (index >= 0) {
-            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
-            textChannel.retrieveMessageById(messageID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                MessageEmbed mOld = embeds.get(0);
-                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String date = fieldsOld.get(0).getValue();
-                String dateTime = date + " " + time;
-                if (!Validation.eventDateTimeAfterNow(dateTime)) {
-                    EmbedInfo.dateTimeIsBeforeNow(userID);
-                    return;
+    public void changeDateAndTime(@NotNull Event event, boolean notifi) {
+        TextChannel textChannel = Repository.getJda().getTextChannelById(event.getChannelId());
+        assert textChannel != null;
+        textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
+            List<MessageEmbed> embeds = message.getEmbeds();
+            MessageEmbed mOld = embeds.get(0);
+            List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
+            List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+            String newDate = event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." + event.getDate().getYear();
+            String newTime = event.getDate().getHour() + ":" + event.getDate().getMinute();
+            String dataTime = newDate + " " + newTime;
+
+            textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime).queue();
+            for (int i = 0; i < fieldsOld.size(); i++) {
+                if (i == 0) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
+                    fieldsNew.add(fieldNew);
+                } else if (i == 2) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
+                    fieldsNew.add(fieldNew);
+                } else {
+                    fieldsNew.add(fieldsOld.get(i));
                 }
-                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
-                for (int i = 0; i < fieldsOld.size(); i++) {
-                    if (i == 2) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", time, true);
-                        fieldsNew.add(fieldNew);
-                    } else {
-                        fieldsNew.add(fieldsOld.get(i));
-                    }
+            }
+            MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
+                    , mOld.getTitle()
+                    , mOld.getDescription()
+                    , mOld.getType()
+                    , mOld.getTimestamp()
+                    , mOld.getColorRaw()
+                    , mOld.getThumbnail()
+                    , mOld.getSiteProvider()
+                    , mOld.getAuthor()
+                    , mOld.getVideoInfo()
+                    , mOld.getFooter()
+                    , mOld.getImage()
+                    , fieldsNew);
+            message.editMessageEmbeds(mNew).queue(message1 -> {
+                updateTimer(event.getMsgId());
+                if (notifi) {
+                    sendInfoChanges(event, EventChanges.CHANGES, dataTime);
                 }
-                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
-                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
-                        , mOld.getTitle()
-                        , mOld.getDescription()
-                        , mOld.getType()
-                        , mOld.getTimestamp()
-                        , mOld.getColorRaw()
-                        , mOld.getThumbnail()
-                        , mOld.getSiteProvider()
-                        , mOld.getAuthor()
-                        , mOld.getVideoInfo()
-                        , mOld.getFooter()
-                        , mOld.getImage()
-                        , fieldsNew);
-                message.editMessageEmbeds(mNew).queue(message1 -> {
-                    updateTimer(messageID);
-                    if (notifi) {
-                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
-                    }
-                });
             });
-        }
+        });
+        eventRepository.save(event);
     }
 
-
-    public void changeDate(String messageID, String date, String userID, boolean notifi) {
-        if (!Validation.isDateFormat(date)) return;
-        int index = getIndexActiveEvent(messageID);
-        if (index >= 0) {
-            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
-            textChannel.retrieveMessageById(messageID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                MessageEmbed mOld = embeds.get(0);
-                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String time = fieldsOld.get(2).getValue();
-                String dateTime = date + " " + time;
-                if (!Validation.eventDateTimeAfterNow(dateTime)) {
-                    EmbedInfo.dateTimeIsBeforeNow(userID);
-                    return;
-                }
-                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + "-" + dateTime).queue();
-                for (int i = 0; i < fieldsOld.size(); i++) {
-                    if (i == 0) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", date, true);
-                        fieldsNew.add(fieldNew);
-                    } else {
-                        fieldsNew.add(fieldsOld.get(i));
-                    }
-                }
-                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
-                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
-                        , mOld.getTitle()
-                        , mOld.getDescription()
-                        , mOld.getType()
-                        , mOld.getTimestamp()
-                        , mOld.getColorRaw()
-                        , mOld.getThumbnail()
-                        , mOld.getSiteProvider()
-                        , mOld.getAuthor()
-                        , mOld.getVideoInfo()
-                        , mOld.getFooter()
-                        , mOld.getImage()
-                        , fieldsNew);
-                message.editMessageEmbeds(mNew).queue(message1 -> {
-                    updateTimer(messageID);
-                    if (notifi) {
-                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
-                    }
-                });
-            });
+    public void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
+        List<Player> mainList = getMainList(event);
+        List<Player> reserveList = getReserveList(event);
+        RangerLogger.info(
+                "Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam informację.",
+                event.getMsgId());
+        for (Player player : mainList) {
+            String userID = player.getUserId();
+            EmbedInfo.sendInfoChanges(userID, event.getMsgId(), whatChange, dateTime);
         }
-    }
-
-
-    public void changeDateAndTime(String eventID, String newDate, String newTime, String userID, boolean notifi) {
-        if (!Validation.isDateFormat(newDate)) return;
-        if (!Validation.isTimeFormat(newTime)) return;
-        int index = getIndexActiveEvent(eventID);
-        if (index >= 0) {
-            TextChannel textChannel = Repository.getJda().getTextChannelById(activeEvents.get(index).getChannelID());
-            textChannel.retrieveMessageById(eventID).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                MessageEmbed mOld = embeds.get(0);
-                List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-                List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-                String dataTime = newDate + " " + newTime;
-                if (!Validation.eventDateTimeAfterNow(dataTime)) {
-                    EmbedInfo.dateTimeIsBeforeNow(userID);
-                    return;
-                }
-                textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + activeEvents.get(index).getName() + dataTime).queue();
-                for (int i = 0; i < fieldsOld.size(); i++) {
-                    if (i == 0) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
-                        fieldsNew.add(fieldNew);
-                    } else if (i == 2) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
-                        fieldsNew.add(fieldNew);
-                    } else {
-                        fieldsNew.add(fieldsOld.get(i));
-                    }
-                }
-                String newDateTime = getDateAndTimeFromEmbed(fieldsNew);
-                MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
-                        , mOld.getTitle()
-                        , mOld.getDescription()
-                        , mOld.getType()
-                        , mOld.getTimestamp()
-                        , mOld.getColorRaw()
-                        , mOld.getThumbnail()
-                        , mOld.getSiteProvider()
-                        , mOld.getAuthor()
-                        , mOld.getVideoInfo()
-                        , mOld.getFooter()
-                        , mOld.getImage()
-                        , fieldsNew);
-                message.editMessageEmbeds(mNew).queue(message1 -> {
-                    updateTimer(eventID);
-                    if (notifi) {
-                        activeEvents.get(index).sendInfoChanges(EventChanges.CHANGES, newDateTime);
-                    }
-                });
-            });
+        for (Player player : reserveList) {
+            String userID = player.getUserId();
+            EmbedInfo.sendInfoChanges(userID, event.getMsgId(), whatChange, dateTime);
         }
     }
 
     private void updateTimer(String messageID) {
         Timers timers = Repository.getTimers();
         timers.cancel(messageID);
-        CreateReminder reminder = new CreateReminder(messageID);
+        CreateReminder reminder = new CreateReminder(messageID, this);
         reminder.create();
     }
 
     /**
      * Wyłącza przyciski w zapisach
-     *
-     * @param messageID ID wiadomości eventu
      */
-    public void disableButtons(String messageID) {
-        int index = getIndexActiveEvent(messageID);
-        if (index >= 0) {
-            disableButtons(messageID, activeEvents.get(index).getChannelID());
-        }
+    public void disableButtons(Event event) {
+        disableButtons(event.getMsgId(), event.getChannelId());
+    }
+
+    public void disableButtons(String messageId) {
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        eventOptional.ifPresent(this::disableButtons);
     }
 
     /**
@@ -961,6 +851,7 @@ public class EventService {
      */
     public void disableButtons(String messageID, String channelID) {
         TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        assert textChannel != null;
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             List<Button> buttons = message.getButtons();
@@ -975,14 +866,13 @@ public class EventService {
     }
 
     public void enableButtons(String messageID) {
-        int index = getIndexActiveEvent(messageID);
-        if (index >= 0) {
-            enableButtons(messageID, activeEvents.get(index).getChannelID());
-        }
+        Optional<Event> eventOptional = findEventByMsgId(messageID);
+        eventOptional.ifPresent(event -> enableButtons(event.getMsgId(), event.getChannelId()));
     }
 
     public void enableButtons(String messageID, String channelID) {
         TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        assert textChannel != null;
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             List<Button> buttons = message.getButtons();
@@ -996,128 +886,55 @@ public class EventService {
         });
     }
 
-    private void removeEventDB(String messageID) {
-        EventDatabase edb = new EventDatabase();
-        edb.removeEvent(messageID);
+    private void removeEventDB(Event event) {
+        eventRepository.delete(event);
     }
 
-    public List<MemberOfServer> getMainList(int indexOfEvent) {
-        return activeEvents.get(indexOfEvent).getMainList();
+    public List<Player> getMainList(Event event) {
+        return event.getPlayers().stream().filter(Player::isMainList).toList();
     }
 
-    public List<MemberOfServer> getReserveList(int indexOfEvent) {
-        return activeEvents.get(indexOfEvent).getReserveList();
+    public List<Player> getReserveList(Event event) {
+        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 
     /**
-     * @param eventID ID wiadomości w której znajdują się zapisy
+     * @param messageId ID wiadomości w której znajdują się zapisy
      * @return Zwraca ID kanalu na którym znajduje sie wiadomosc, w innym przypadku zwraca pustego Stringa
      */
-    public String getChannelID(String eventID) {
-        for (ranger.event.ActiveEvent ae : activeEvents) {
-            if (ae.getMessageID().equalsIgnoreCase(eventID)) {
-                return ae.getChannelID();
-            }
-        }
-        return "";
-    }
-
-    /**
-     * Wyświetla ile jest aktywnych evnetów
-     * oraz wypisuje ID eventu czyli wiadomości w której przechowywana jest lista, ID kanału oraz
-     * dane ile jest zapisanych użytkowników. Również wyświetla wszystkich użytkowników.
-     *
-     * @param privateChannel Kanał użytkownika który chce wyświetlić status aplikacji.
-     */
-    public void sendInfo(PrivateChannel privateChannel) {
-        EmbedBuilder activeEventsBuilder = new EmbedBuilder();
-        activeEventsBuilder.setColor(Color.RED);
-        activeEventsBuilder.setTitle("Eventy");
-        activeEventsBuilder.addField("Aktywnych eventów", String.valueOf(activeEvents.size()), false);
-        privateChannel.sendMessageEmbeds(activeEventsBuilder.build()).queue();
-        for (ranger.event.ActiveEvent ae : activeEvents) {
-            List<MemberOfServer> mainList = ae.getMainList();
-            List<MemberOfServer> reserveList = ae.getReserveList();
-            String channelName = Repository.getJda().getTextChannelById(ae.getChannelID()).getName();
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.WHITE);
-            builder.addField("ID eventu", ae.getMessageID(), false);
-            builder.addField("ID kanału", ae.getChannelID(), false);
-            builder.addField("Nazwa kanału", channelName, false);
-            builder.addField("Ilość zapisanych", String.valueOf(ae.getNumberOfSignIn()), true);
-            builder.addField("Główna lista", String.valueOf(mainList.size()), true);
-            builder.addField("Rezerwowa lista", String.valueOf(reserveList.size()), true);
-            String stringMainList = "";
-            for (MemberOfServer m : mainList) {
-                stringMainList += m.getUserName() + ", ";
-            }
-            builder.addField("Główna lista", stringMainList, false);
-            String stringReserveList = "";
-            for (MemberOfServer m : reserveList) {
-                stringReserveList += m.getUserName() + ", ";
-            }
-            builder.addField("Rezerwowa lista", stringReserveList, false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        }
-    }
-
-    public String getEventNameFromEmbed(String eventID) {
-        int indexActiveEvent = getIndexActiveEvent(eventID);
-        return activeEvents.get(indexActiveEvent).getName();
-    }
-
-    public String getDateAndTimeFromEmbed(String eventID) {
-        int indexActiveEvent = getIndexActiveEvent(eventID);
-        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
-        List<MessageEmbed> embeds = message.getEmbeds();
-        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-        String date = fields.get(0).getValue();
-        String time = fields.get(2).getValue();
-        return date + "r., " + time;
-
-    }
-
-    private String getDateAndTimeFromEmbed(List<MessageEmbed.Field> fields) {
-        String date = fields.get(0).getValue();
-        String time = fields.get(2).getValue();
-        return date + "r., " + time;
-    }
-
-    public List getAllEventID() {
-        List<String> listOfEventsID = new ArrayList<>();
-        for (ActiveEvent activeEvent : activeEvents) {
-            listOfEventsID.add(activeEvent.getMessageID());
-        }
-        return listOfEventsID;
-    }
-
-    public boolean checkEventIDOnIndex(int chossedIndexOFEvent, String eventID) {
-        if (activeEvents.get(chossedIndexOFEvent).getMessageID().equalsIgnoreCase(eventID)) {
-            return true;
+    public String getChannelID(String messageId) {
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        if (eventOptional.isPresent()) {
+            return eventOptional.get().getChannelId();
         } else {
-            return false;
+            return "";
         }
     }
 
-    public String getDateFromEmbed(String eventID) {
-        int indexActiveEvent = getIndexActiveEvent(eventID);
-        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
-        List<MessageEmbed> embeds = message.getEmbeds();
-        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-        String value = fields.get(0).getValue();
-        return value;
+    public String getEventName(String messageId) {
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        if (eventOptional.isPresent()) {
+            return eventOptional.get().getName();
+        } else {
+            return "";
+        }
     }
 
-    public String getTimeFromEmbed(String eventID) {
-        int indexActiveEvent = getIndexActiveEvent(eventID);
-        String channelID = activeEvents.get(indexActiveEvent).getChannelID();
-        Message message = Repository.getJda().getTextChannelById(channelID).retrieveMessageById(eventID).complete();
-        List<MessageEmbed> embeds = message.getEmbeds();
-        List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-        String value = fields.get(2).getValue();
-        return value;
+    public String getDateAndTime(String messageId) {
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        if (eventOptional.isPresent()) {
+            Event event = eventOptional.get();
+            return event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." +
+                    event.getDate().getYear() + "r., " + event.getDate().getHour() + ":" + event.getDate().getMinute();
+        } else {
+            return "--.--.----r., --:--";
+        }
+    }
+
+    private String getDateAndTime(List<MessageEmbed.Field> fields) {
+        String date = fields.get(0).getValue();
+        String time = fields.get(2).getValue();
+        return date + "r., " + time;
     }
 
     //TODO można to jakoiś inaczej zaimplementowac
@@ -1140,8 +957,9 @@ public class EventService {
 //        }
 //    }
 
+
     public boolean isActiveEvents() {
-        return activeEvents.size() > 0;
+        return eventRepository.findAll().size() > 0;
     }
 
     public Optional<Event> findEventByMsgId(String id) {

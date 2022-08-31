@@ -50,7 +50,7 @@ public class Validation {
         return false;
     }
 
-    public static String timeCorrect(String timeOld){
+    public static String timeCorrect(String timeOld) {
         if (timeOld.length() == 4) {
             timeOld = "0" + timeOld;
         }
@@ -75,16 +75,21 @@ public class Validation {
     public static boolean eventDateTimeAfterNow(String dateTime) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
-        LocalDateTime evnetDateTime = null;
+        LocalDateTime eventDateTime = null;
         try {
-            evnetDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
+            eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
         } catch (DateTimeParseException e) {
             RangerLogger.info("Nieprawidłowa data i czas [" + dateTime + "]");
             return false;
         }
-        if (evnetDateTime.isAfter(dateTimeNow))
+        if (eventDateTime.isAfter(dateTimeNow))
             return true;
 
         return false;
+    }
+
+    public static boolean eventDateAfterNow(LocalDateTime dateTime) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+        return dateTime.isAfter(dateTimeNow);
     }
 }

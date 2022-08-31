@@ -38,7 +38,6 @@ public class ButtonClickListener extends ListenerAdapter {
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
         ServerStats serverStats = Repository.getServerStats();
-//        int indexOfMatch = eventService.getIndexActiveEvent(event.getMessage().getId());
         boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
 

@@ -26,23 +26,28 @@ public class CreateReminder {
     private String date = "";
     private String time = "";
     private String eventID = "";
+    private final EventService eventService;
 
     /**
-     * @param date    Data wydarzenia
-     * @param time    Czas wydarzenia
-     * @param eventID ID wiadomości w której jest lista.
+     * @param date         Data wydarzenia
+     * @param time         Czas wydarzenia
+     * @param eventID      ID wiadomości w której jest lista.
+     * @param eventService
      */
-    public CreateReminder(String date, String time, String eventID) {
+    public CreateReminder(String date, String time, String eventID, EventService eventService) {
         this.date = date;
         this.time = time;
         this.eventID = eventID;
+        this.eventService = eventService;
     }
 
     /**
-     * @param eventID ID wiadomości, w której znajduję się lista z zapisami na event.
+     * @param eventID      ID wiadomości, w której znajduję się lista z zapisami na event.
+     * @param eventService
      */
-    public CreateReminder(String eventID) {
+    public CreateReminder(String eventID, EventService eventService) {
         this.eventID = eventID;
+        this.eventService = eventService;
     }
 
     public void create() {
@@ -86,7 +91,7 @@ public class CreateReminder {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
         if (dateTimeNow.isBefore(timerTme)) {
-            timer.schedule(new Reminder(eventID, type), eventDateTime);
+            timer.schedule(new Reminder(eventID, type, eventService), eventDateTime);
             logger.info("Ustawiam timer");
 
             MyTimer myTimer = new MyTimer(eventID, timer);

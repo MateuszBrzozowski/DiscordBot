@@ -8,4 +8,6 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByMsgId(String id);
+
+    Optional<Event> findByChannelId(String channelID);
 }
