@@ -19,13 +19,18 @@ public class DiscordBot {
     private final ButtonClickListener buttonClickListener;
     private final ChannelUpdate channelUpdate;
     private final MessageUpdate messageUpdate;
+    private final Listener listener;
 
     public DiscordBot(WriteListener writeListener,
-                      ButtonClickListener buttonClickListener, ChannelUpdate channelUpdate, MessageUpdate messageUpdate) throws LoginException {
+                      ButtonClickListener buttonClickListener,
+                      ChannelUpdate channelUpdate,
+                      MessageUpdate messageUpdate,
+                      Listener listener) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
         this.channelUpdate = channelUpdate;
         this.messageUpdate = messageUpdate;
+        this.listener = listener;
         DiscordBotRun();
     }
 
@@ -40,7 +45,7 @@ public class DiscordBot {
                 .addEventListeners(this.buttonClickListener)
                 .addEventListeners(this.channelUpdate)
                 .addEventListeners(this.messageUpdate)
-                .addEventListeners(new Listener())
+                .addEventListeners(this.listener)
                 .addEventListeners(new ModalListener())
                 .addEventListeners(new SelecetMenuListener())
                 .build();
@@ -48,6 +53,29 @@ public class DiscordBot {
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
     }
+
+//    @Bean
+//    @Lazy
+//    private @NotNull JDA getJDA() throws LoginException {
+//        Collection<GatewayIntent> intents = new ArrayList<>();
+//        intents.add(GatewayIntent.GUILD_MEMBERS);
+//        intents.add(GatewayIntent.GUILD_MESSAGES);
+//        intents.add(GatewayIntent.DIRECT_MESSAGES);
+//        intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
+//        JDA jda = JDABuilder.create(Constants.TOKEN_RANGER_TESTER, intents)
+//                .addEventListeners(this.writeListener)
+//                .addEventListeners(this.buttonClickListener)
+//                .addEventListeners(this.channelUpdate)
+//                .addEventListeners(this.messageUpdate)
+//                .addEventListeners(new Listener())
+//                .addEventListeners(new ModalListener())
+//                .addEventListeners(new SelecetMenuListener())
+//                .build();
+//        Repository.setJDA(jda);
+//        jda.getPresence().setActivity(Activity.listening("Spotify"));
+//        jda.getPresence().setStatus(OnlineStatus.ONLINE);
+//        return jda;
+//    }
 
 
 }

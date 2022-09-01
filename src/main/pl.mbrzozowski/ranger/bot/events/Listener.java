@@ -1,7 +1,5 @@
 package ranger.bot.events;
 
-import ranger.helpers.CategoryAndChannelID;
-import ranger.helpers.RoleID;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,12 +9,20 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import ranger.Repository;
-import ranger.recrut.Recruits;
+import ranger.helpers.CategoryAndChannelID;
+import ranger.helpers.RoleID;
+import ranger.recruit.RecruitsService;
 
 import java.util.Collection;
 import java.util.EnumSet;
 
 public class Listener extends ListenerAdapter {
+
+    private final RecruitsService recruitsService;
+
+    public Listener(RecruitsService recruitsService) {
+        this.recruitsService = recruitsService;
+    }
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
@@ -25,11 +31,11 @@ public class Listener extends ListenerAdapter {
     }
 
     private void checkIsRecruit(String userID) {
-        Recruits recruits = Repository.getRecruits();
-        boolean userHasRecruitChannel = recruits.userHasRecruitChannel(userID);
+//        RecruitsService recruits = Repository.getRecruits();
+        boolean userHasRecruitChannel = recruitsService.userHasRecruitChannel(userID);
         if (userHasRecruitChannel) {
             Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-            String channelID = recruits.getChannelIDFromRecruitID(userID);
+            String channelID = recruitsService.getChannelIDFromRecruitID(userID);
             Guild guildRangersPL = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
             Member member = guildRangersPL.getMemberById(userID);
             guildRangersPL

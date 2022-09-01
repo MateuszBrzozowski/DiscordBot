@@ -6,20 +6,23 @@ import ranger.helpers.Commands;
 
 public class DeveloperCmd extends Proccess {
 
+    private final EventService eventService;
+
     public DeveloperCmd(MessageReceivedEvent messageReceived, EventService eventService) {
-        super(eventService, messageReceived);
+        super(messageReceived);
+        this.eventService = eventService;
     }
 
     @Override
     public void proccessMessage(Message message) {
         if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
-            getEvents().disableButtons(message.getWords()[1]);
+            eventService.disableButtons(message.getWords()[1]);
         } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.DISABLE_BUTTONS)) {
-            getEvents().disableButtons(message.getWords()[1], message.getWords()[2]);
+            eventService.disableButtons(message.getWords()[1], message.getWords()[2]);
         } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
-            getEvents().enableButtons(message.getWords()[1]);
+            eventService.enableButtons(message.getWords()[1]);
         } else if (message.getWords().length == 3 && message.getWords()[0].equalsIgnoreCase(Commands.ENABLE_BUTTONS)) {
-            getEvents().enableButtons(message.getWords()[1], message.getWords()[2]);
+            eventService.enableButtons(message.getWords()[1], message.getWords()[2]);
         } else if (message.getWords().length == 2 && message.getWords()[0].equalsIgnoreCase(Commands.MSG)) {
             getBotWriter().setChannelID(message.getWords()[1]);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.MSG_CANCEL)) {

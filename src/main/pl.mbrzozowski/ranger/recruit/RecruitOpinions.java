@@ -1,4 +1,4 @@
-package ranger.recrut;
+package ranger.recruit;
 
 import ranger.embed.EmbedSettings;
 import ranger.helpers.CategoryAndChannelID;

@@ -2,15 +2,14 @@ package ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.bot.events.RoleEditor;
-import ranger.event.EventService;
 import ranger.helpers.Commands;
 import ranger.helpers.RoleID;
 import ranger.helpers.Users;
 
 public class Roles extends Proccess {
 
-    public Roles(MessageReceivedEvent messageReceivedEvent, EventService eventService) {
-        super(eventService, messageReceivedEvent);
+    public Roles(MessageReceivedEvent messageReceivedEvent) {
+        super(messageReceivedEvent);
     }
 
     @Override

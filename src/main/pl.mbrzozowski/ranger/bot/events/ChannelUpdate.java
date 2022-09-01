@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.event.Event;
 import ranger.event.EventService;
-import ranger.recrut.Recruits;
+import ranger.recruit.RecruitsService;
 import ranger.server.service.ServerService;
 
 import java.util.Optional;
@@ -18,22 +18,22 @@ import java.util.Optional;
 public class ChannelUpdate extends ListenerAdapter {
 
     private final EventService eventService;
+    private final RecruitsService recruitsService;
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    public ChannelUpdate(EventService eventService) {
+    public ChannelUpdate(EventService eventService, RecruitsService recruitsService) {
         this.eventService = eventService;
+        this.recruitsService = recruitsService;
     }
 
     @Override
     public void onChannelDelete(@NotNull ChannelDeleteEvent event) {
-        Recruits recruits = Repository.getRecruits();
-//        EventService events = Repository.getEvent();
         ServerService serverService = Repository.getServerService();
         String channelID = event.getChannel().getId();
         Optional<Event> eventOptional = eventService.findEventByChannelId(channelID);
-        if (recruits.isRecruitChannel(channelID)) {
-            recruits.deleteChannelByID(channelID);
+        if (recruitsService.isRecruitChannel(channelID)) {
+            recruitsService.deleteChannelByID(channelID);
         } else if (eventOptional.isPresent()) {
             eventService.delete(eventOptional.get());
         } else if (serverService.isChannelOnList(channelID)) {

@@ -1,7 +1,6 @@
 package ranger.bot.events.writing;
 
 import ranger.embed.EmbedInfo;
-import ranger.event.EventService;
 import ranger.helpers.Commands;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,8 +10,8 @@ import ranger.server.whitelist.Whitelist;
 
 public class ServerServiceCmd extends Proccess {
 
-    public ServerServiceCmd(MessageReceivedEvent messageReceived, EventService eventService) {
-        super(eventService, messageReceived);
+    public ServerServiceCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override

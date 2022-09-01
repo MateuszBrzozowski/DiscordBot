@@ -1,4 +1,4 @@
-package ranger.recrut;
+package ranger.recruit;
 
 import ranger.database.DBConnector;
 import ranger.database.DBFactory;

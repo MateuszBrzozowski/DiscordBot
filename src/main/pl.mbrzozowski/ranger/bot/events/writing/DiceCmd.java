@@ -2,14 +2,13 @@ package ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import ranger.event.EventService;
 import ranger.helpers.Commands;
 import ranger.model.DiceGame;
 
 public class DiceCmd extends Proccess {
 
-    public DiceCmd(MessageReceivedEvent messageReceived, EventService eventService) {
-        super(eventService, messageReceived);
+    public DiceCmd(MessageReceivedEvent messageReceived) {
+        super(messageReceived);
     }
 
     @Override

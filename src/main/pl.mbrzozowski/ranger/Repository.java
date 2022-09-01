@@ -1,22 +1,19 @@
 package ranger;
 
+import net.dv8tion.jda.api.JDA;
 import ranger.counter.Counter;
-import ranger.event.EventService;
 import ranger.event.EventsGeneratorModel;
 import ranger.event.EventsSettingsModel;
 import ranger.event.reminder.Timers;
 import ranger.model.BotWriter;
 import ranger.model.DiceGames;
-import net.dv8tion.jda.api.JDA;
 import ranger.questionnaire.Questionnaires;
-import ranger.recrut.Recruits;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
 
 public class Repository {
 
-    private static final EventService event = null;
-    private static final Recruits recruits = new Recruits();
+//    private static final RecruitsService recruits = new RecruitsService(recruitRepository);
     private static final DiceGames diceGames = new DiceGames();
     private static final EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
     private static final EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
@@ -28,13 +25,10 @@ public class Repository {
     private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
 
-//    public static EventService getEvent() {
-//        return event;
-//    }
 
-    public static Recruits getRecruits() {
-        return recruits;
-    }
+//    public static RecruitsService getRecruits() {
+//        return recruits;
+//    }
 
     public static DiceGames getDiceGames() {
         return diceGames;

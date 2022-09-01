@@ -38,9 +38,9 @@ public class EventService {
 
     public EventService(EventRepository eventRepository, Timers timers) {
         this.eventRepository = eventRepository;
+        this.timers = timers;
 //        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel(this);
 //        cleanerEventChannel.clean();
-        this.timers = timers;
     }
 
     public List<Event> findAll() {

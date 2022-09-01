@@ -4,7 +4,7 @@ import ranger.helpers.ComponentId;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import ranger.recrut.RecruitOpinions;
+import ranger.recruit.RecruitOpinions;
 
 public class ModalListener extends ListenerAdapter {
 

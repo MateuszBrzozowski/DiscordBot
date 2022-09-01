@@ -13,8 +13,8 @@ import ranger.event.EventService;
 import ranger.event.EventsGeneratorModel;
 import ranger.helpers.*;
 import ranger.questionnaire.Questionnaires;
-import ranger.recrut.RecruitOpinions;
-import ranger.recrut.Recruits;
+import ranger.recruit.RecruitOpinions;
+import ranger.recruit.RecruitsService;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
 
@@ -24,17 +24,18 @@ import java.util.Optional;
 public class ButtonClickListener extends ListenerAdapter {
 
     private final EventService eventService;
+    private final RecruitsService recruitsService;
 
     @Autowired
-    public ButtonClickListener(EventService events) {
+    public ButtonClickListener(EventService events, RecruitsService recruitsService) {
         this.eventService = events;
+        this.recruitsService = recruitsService;
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
         int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(event.getUser().getId());
-        Recruits recrut = Repository.getRecruits();
         Questionnaires questionnaires = Repository.getQuestionnaires();
         ServerService serverService = Repository.getServerService();
         ServerStats serverStats = Repository.getServerStats();
@@ -47,10 +48,10 @@ public class ButtonClickListener extends ListenerAdapter {
             eventsButtonClick(event, eventOptional.get());
             isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
-            recrut.newPodanie(event);
+            recruitsService.newPodanie(event);
             isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
-            recrut.confirm(event);
+            recruitsService.confirm(event);
             isIDCorrect = false;
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.QUESTIONNAIRE_END + event.getMessage().getId())) {
             questionnaires.end(event.getMessage().getId(), event.getChannel().getId(), event.getUser().getId());
@@ -77,7 +78,8 @@ public class ButtonClickListener extends ListenerAdapter {
             ComponentService.disableButtons(event.getChannel().getId(), event.getMessageId());
             EmbedInfo.confirmRemoveChannel(event.getTextChannel());
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
-            ComponentService.removeChannel(event);
+            ComponentService componentService = new ComponentService(recruitsService);
+            componentService.removeChannel(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
             event.getMessage().delete().queue();
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SEED_ROLE)) {
@@ -90,18 +92,18 @@ public class ButtonClickListener extends ListenerAdapter {
             RecruitOpinions recrutOpinions = new RecruitOpinions();
             recrutOpinions.openForm(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_IN) && isRadaKlanu) {
-            recrut.accepted(event);
+            recruitsService.accepted(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL) && isRadaKlanu) {
-            recrut.closeChannel(event);
+            recruitsService.closeChannel(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE) && isRadaKlanu) {
-            if (!recrut.isResult(event.getTextChannel())) {
+            if (!recruitsService.isResult(event.getTextChannel())) {
                 EmbedInfo.endPositive(event.getUser().getId(), event.getTextChannel());
-                recrut.positiveResult(event.getTextChannel());
+                recruitsService.positiveResult(event.getTextChannel());
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE) && isRadaKlanu) {
-            if (!recrut.isResult(event.getTextChannel())) {
+            if (!recruitsService.isResult(event.getTextChannel())) {
                 EmbedInfo.endNegative(event.getUser().getId(), event.getTextChannel());
-                recrut.negativeResult(event.getTextChannel());
+                recruitsService.negativeResult(event.getTextChannel());
             }
         } else if (indexOfGenerator >= 0) {
             eventsGenerator.saveAnswerAndNextStage(event, indexOfGenerator);

@@ -8,15 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ranger.bot.events.writing.*;
 import ranger.event.EventService;
+import ranger.recruit.RecruitsService;
 
 @Service
 public class WriteListener extends ListenerAdapter {
 
     private final EventService eventService;
+    private final RecruitsService recruitsService;
 
     @Autowired
-    public WriteListener(EventService eventService) {
+    public WriteListener(EventService eventService, RecruitsService recruitsService) {
         this.eventService = eventService;
+        this.recruitsService = recruitsService;
     }
 
 
@@ -31,24 +34,24 @@ public class WriteListener extends ListenerAdapter {
                 event.getAuthor().getId(),
                 event);
 
-        DiceCmd diceCmd = new DiceCmd(event, eventService);
-        StatsCmd statsCmd = new StatsCmd(event, eventService);
-        CheckUser checkUser = new CheckUser(event, eventService);
-        CounterMachine counterMachine = new CounterMachine(event, eventService);
-        LogChannel logChannel = new LogChannel(event, eventService);
+        DiceCmd diceCmd = new DiceCmd(event);
+        StatsCmd statsCmd = new StatsCmd(event);
+        CheckUser checkUser = new CheckUser(event);
+        CounterMachine counterMachine = new CounterMachine(event);
+        LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
-        ReminderCmd reminderCmd = new ReminderCmd(event, eventService);
-        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event, eventService);
-        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event, eventService);
-        EmbedSender embedSender = new EmbedSender(event, eventService);
+        ReminderCmd reminderCmd = new ReminderCmd(event);
+        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
+        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
+        EmbedSender embedSender = new EmbedSender(event);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
-        HelpCmd helpCmd = new HelpCmd(event, eventService);
-        RecrutCmd recrutCmd = new RecrutCmd(event, eventService);
+        HelpCmd helpCmd = new HelpCmd(event);
+        RecruitCmd recrutCmd = new RecruitCmd(event, recruitsService);
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService);
-        Roles roles = new Roles(event, eventService);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, eventService);
-        InvalidCmd invalidCmd = new InvalidCmd(event, eventService);
-        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event, eventService);
+        Roles roles = new Roles(event);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
+        InvalidCmd invalidCmd = new InvalidCmd(event);
+        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
         diceCmd.setNextProccess(statsCmd);
         statsCmd.setNextProccess(roles);

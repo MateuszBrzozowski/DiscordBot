@@ -1,5 +1,6 @@
-package ranger.recrut;
+package ranger.recruit;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -9,8 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
 import ranger.helpers.*;
@@ -24,58 +24,62 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 
-public class Recruits {
+@Service
+@Slf4j
+public class RecruitsService {
 
-    private final List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
+    //    private final List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
+    private final RecruitRepository recruitRepository;
+
+    public RecruitsService(RecruitRepository recruitRepository) {
+        this.recruitRepository = recruitRepository;
+    }
 
     /**
      * @param userName Nazwa użytkownika
      * @param userID   ID użytkownika
      */
-    public void createChannelForNewRecrut(String userName, String userID) {
-        JDA jda = Repository.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        List<Category> categories = guild.getCategories();
-        for (Category cat : categories) {
-            if (cat.getId().equals(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-                guild.createTextChannel("rekrut-" + userName, cat)
-                        .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                        .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-                        .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
-                        .queue(textChannel -> {
-                            EmbedBuilder builder = new EmbedBuilder();
-                            builder.setColor(Color.GREEN);
-                            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                            builder.setDescription("Obowiązkowo uzupełnij formularz oraz przeczytaj manual - pomoże Ci w ogarnięciu gry");
-                            builder.addField("Formularz rekrutacyjny:", "https://forms.gle/fbTQSdxBVq3zU7FW9", false);
-                            builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
-                            builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
-                            textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
+    public void createChannelForNewRecruit(String userName, String userID) {
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild == null) {
+            return;
+        }
+        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RECRUT_ID);
+        guild.createTextChannel("rekrut-" + userName, category)
+                .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
+                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
+                .queue(textChannel -> {
+                    EmbedBuilder builder = new EmbedBuilder();
+                    builder.setColor(Color.GREEN);
+                    builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+                    builder.setDescription("Obowiązkowo uzupełnij formularz oraz przeczytaj manual - pomoże Ci w ogarnięciu gry");
+                    builder.addField("Formularz rekrutacyjny:", "https://forms.gle/fbTQSdxBVq3zU7FW9", false);
+                    builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
+                    builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
+                    textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
                                     "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
                                     "<@&" + RoleID.RADA_KLANU + "> ")
-                                    .setEmbeds(builder.build())
-                                    .queue();
-                            textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
-                                    .setActionRow(
-                                            Button.primary(ComponentId.RECRUIT_IN, " "),
-                                            Button.secondary(ComponentId.RECRUIT_CLOSE_CHANNEL, " "),
-                                            Button.success(ComponentId.RECRUIT_POSITIVE, " "),
-                                            Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
-                                    .queue();
-                            addUserToList(userID, userName, textChannel.getId());
-                        });
-            }
-        }
-        logger.info("Nowe podanie złożone.");
+                            .setEmbeds(builder.build())
+                            .queue();
+                    textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
+                            .setActionRow(
+                                    Button.primary(ComponentId.RECRUIT_IN, " "),
+                                    Button.secondary(ComponentId.RECRUIT_CLOSE_CHANNEL, " "),
+                                    Button.success(ComponentId.RECRUIT_POSITIVE, " "),
+                                    Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
+                            .queue();
+                    addUserToList(userID, userName, textChannel.getId());
+                });
+        log.info("Nowe podanie złożone.");
     }
 
     public void initialize() {
         startUpList();
-        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
-        cleaner.clean();
+//        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
+//        cleaner.clean();
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
@@ -105,8 +109,8 @@ public class Recruits {
     private void confirmMessage(@NotNull ButtonInteractionEvent event) {
         RangerLogger.info("Użytkownik [" + event.getUser().getName() + "] chce złożyć podanie.");
         event.reply("**Potwierdź czy chcesz złożyć podanie?**\n\n" +
-                "Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Poprosimy o wypełnienie krótkiego formularza. " +
-                "Następnie skontaktuję się z Tobą jeden z naszych Drillów.")
+                        "Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie. Poprosimy o wypełnienie krótkiego formularza. " +
+                        "Następnie skontaktuję się z Tobą jeden z naszych Drillów.")
                 .setEphemeral(true)
                 .addActionRow(
                         Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam")
@@ -119,7 +123,7 @@ public class Recruits {
         String userName = Users.getUserNicknameFromID(userID);
         boolean isActiveRecruit = activeRecruits.stream().anyMatch(member -> member.getUserID().equalsIgnoreCase(userID));
         if (!isActiveRecruit) {
-            createChannelForNewRecrut(userName, userID);
+            createChannelForNewRecruit(userName, userID);
             event.deferEdit().queue();
         } else {
             EmbedInfo.userHaveRecrutChannel(event);

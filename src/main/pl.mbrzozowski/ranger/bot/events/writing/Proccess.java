@@ -3,16 +3,14 @@ package ranger.bot.events.writing;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 import ranger.counter.Counter;
-import ranger.event.EventService;
 import ranger.model.BotWriter;
 import ranger.model.DiceGames;
-import ranger.recrut.Recruits;
 
 public abstract class Proccess {
 
 
-    private final Recruits recruits = Repository.getRecruits();
-    private final EventService eventService;
+//    private final RecruitsService recruitsService;
+//    private final EventService eventService;
     private final DiceGames dice = Repository.getDiceGames();
     private final BotWriter botWriter = Repository.getBotWriter();
     private final Counter counter = Repository.getCounter();
@@ -20,8 +18,7 @@ public abstract class Proccess {
     protected MessageReceivedEvent messageReceived;
 
 
-    public Proccess(EventService eventService, MessageReceivedEvent messageReceived) {
-        this.eventService = eventService;
+    public Proccess(MessageReceivedEvent messageReceived) {
         this.messageReceived = messageReceived;
     }
 
@@ -35,13 +32,13 @@ public abstract class Proccess {
         return nextProccess;
     }
 
-    public Recruits getRecruits() {
-        return recruits;
-    }
+//    public RecruitsService getRecruits() {
+//        return recruitsService;
+//    }
 
-    public EventService getEvents() {
-        return eventService;
-    }
+//    public EventService getEvents() {
+//        return eventService;
+//    }
 
     public DiceGames getDice() {
         return dice;

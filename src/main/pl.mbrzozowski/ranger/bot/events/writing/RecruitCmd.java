@@ -1,15 +1,18 @@
 package ranger.bot.events.writing;
 
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.embed.EmbedInfo;
-import ranger.event.EventService;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.recruit.RecruitsService;
 
-public class RecrutCmd extends Proccess {
+public class RecruitCmd extends Proccess {
 
-    public RecrutCmd(MessageReceivedEvent messageReceived, EventService eventService) {
-        super(eventService, messageReceived);
+    private final RecruitsService recruitsService;
+
+    public RecruitCmd(MessageReceivedEvent messageReceived, RecruitsService recruitsService) {
+        super(messageReceived);
+        this.recruitsService = recruitsService;
     }
 
     @Override
@@ -22,22 +25,22 @@ public class RecrutCmd extends Proccess {
                 EmbedInfo.recruiter(messageReceived);
             } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
                 messageReceived.getMessage().delete().submit();
-                if (!getRecruits().isResult(messageReceived.getTextChannel())) {
+                if (!recruitsService.isResult(messageReceived.getTextChannel())) {
                     EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-                    getRecruits().negativeResult(messageReceived.getTextChannel());
+                    recruitsService.negativeResult(messageReceived.getTextChannel());
                 }
             } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
                 messageReceived.getMessage().delete().submit();
-                if (!getRecruits().isResult(messageReceived.getTextChannel())) {
+                if (!recruitsService.isResult(messageReceived.getTextChannel())) {
                     EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-                    getRecruits().positiveResult(messageReceived.getTextChannel());
+                    recruitsService.positiveResult(messageReceived.getTextChannel());
                 }
             } else if (cmd.equalsIgnoreCase(Commands.REOPEN)) {
                 messageReceived.getMessage().delete().submit();
-                getRecruits().reOpenChannel(messageReceived);
+                recruitsService.reOpenChannel(messageReceived);
             } else if (cmd.equalsIgnoreCase(Commands.CLOSE) && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 messageReceived.getMessage().delete().submit();
-                getRecruits().closeChannel(messageReceived);
+                recruitsService.closeChannel(messageReceived);
             } else {
                 getNextProccess().proccessMessage(message);
             }

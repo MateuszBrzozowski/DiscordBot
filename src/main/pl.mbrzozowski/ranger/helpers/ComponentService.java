@@ -8,11 +8,18 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import ranger.Repository;
+import ranger.recruit.RecruitsService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentService {
+
+    private final RecruitsService recruitsService;
+
+    public ComponentService(RecruitsService recruitsService) {
+        this.recruitsService = recruitsService;
+    }
 
     public static void disableButtons(String channelID, String messageID) {
         JDA jda = Repository.getJda();
@@ -30,7 +37,7 @@ public class ComponentService {
         });
     }
 
-    public static void removeChannel(@NotNull ButtonInteractionEvent event) {
+    public void removeChannel(@NotNull ButtonInteractionEvent event) {
         disableButtons(event.getChannel().getId(), event.getMessageId());
         EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
@@ -45,10 +52,10 @@ public class ComponentService {
         thread.start();
     }
 
-    private static void whichCategory(ButtonInteractionEvent event) {
+    private void whichCategory(ButtonInteractionEvent event) {
         String parentCategoryId = event.getTextChannel().getParentCategoryId();
         if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-            Repository.getRecruits().deleteChannelByID(event.getChannel().getId());
+            recruitsService.deleteChannelByID(event.getChannel().getId());
         } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
             Repository.getServerService().removeChannel(event);
         }

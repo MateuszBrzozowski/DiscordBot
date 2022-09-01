@@ -3,14 +3,13 @@ package ranger.bot.events.writing;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
-import ranger.event.EventService;
 import ranger.helpers.Commands;
 import ranger.stats.ServerStats;
 
 public class EmbedSender extends Proccess {
 
-    public EmbedSender(MessageReceivedEvent messageReceivedEvent, EventService eventService) {
-        super(eventService, messageReceivedEvent);
+    public EmbedSender(MessageReceivedEvent messageReceivedEvent) {
+        super(messageReceivedEvent);
     }
 
     @Override
