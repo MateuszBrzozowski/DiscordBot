@@ -77,15 +77,9 @@ public class RecruitsService {
         log.info("Nowe podanie złożone.");
     }
 
-    public void initialize() {
-//        startUpList();
-//        CleanerRecruitChannel cleaner = new CleanerRecruitChannel(activeRecruits);
-//        cleaner.clean();
-    }
-
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
         String userID = event.getUser().getId();
-        if (!userHasRecruitChannel(userID)) {
+        if (isActiveRecruit(userID)) {
             if (!isMaxRecruits()) {
                 if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
                     if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
@@ -130,22 +124,17 @@ public class RecruitsService {
     public void confirm(ButtonInteractionEvent event) {
         String userID = event.getUser().getId();
         String userName = Users.getUserNicknameFromID(userID);
-
-        if (!isActiveRecruit(userID)) {
-            createChannelForNewRecruit(userName, userID);
-            event.deferEdit().queue();
-        } else {
-            ResponseMessage.userHaveRecruitChannel(event);
-        }
+        createChannelForNewRecruit(userName, userID);
+        event.deferEdit().queue();
     }
 
-    private boolean isActiveRecruit(String userId) {
+    public boolean isActiveRecruit(String userId) {
         Optional<Recruit> recruitOptional = findByUserId(userId);
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
-            return recruit.getRecruitmentResult() == null;
+            return recruit.getRecruitmentResult() != null;
         } else {
-            return false;
+            return true;
         }
     }
 
@@ -166,11 +155,6 @@ public class RecruitsService {
                 .build();
         recruitRepository.save(recruit);
     }
-
-    public boolean userHasRecruitChannel(String userID) {
-        return isActiveRecruit(userID);
-    }
-
 
     public void deleteChannelByID(String channelID) {
         Optional<Recruit> recruitOptional = findByChannelId(channelID);
@@ -214,16 +198,6 @@ public class RecruitsService {
     public boolean isRecruitChannel(String channelID) {
         Optional<Recruit> recruitOptional = findByChannelId(channelID);
         return recruitOptional.isPresent();
-    }
-
-    public String getUserIdByChannelID(String channelID) {
-        Optional<Recruit> recruitOptional = findByChannelId(channelID);
-        return recruitOptional.map(Recruit::getUserId).orElse(null);
-    }
-
-    public String getChannelIdByUserId(String userID) {
-        Optional<Recruit> recruitOptional = findByUserId(userID);
-        return recruitOptional.map(Recruit::getChannelId).orElse(null);
     }
 
     public void deleteChannels(List<MemberWithPrivateChannel> listToDelete) {
@@ -387,6 +361,26 @@ public class RecruitsService {
                 manager.putPermissionOverride(member, null, permissions).queue();
             }
             EmbedInfo.closeChannel(userID, textChannel);
+        }
+    }
+
+    public void checkIsRecruit(String userId) {
+        Optional<Recruit> recruitOptional = findByUserId(userId);
+        if (recruitOptional.isPresent()) {
+            Recruit recruit = recruitOptional.get();
+            if (recruit.getRecruitmentResult() == null) {
+                Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+                Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                if (guild != null) {
+                    Member member = guild.getMemberById(recruit.getUserId());
+                    TextChannel channel = guild.getTextChannelById(recruit.getChannelId());
+                    if (member != null && channel != null) {
+                        channel.getManager()
+                                .putPermissionOverride(member, permissions, null)
+                                .queue();
+                    }
+                }
+            }
         }
     }
 }
