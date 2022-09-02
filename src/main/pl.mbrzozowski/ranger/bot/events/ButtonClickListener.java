@@ -15,6 +15,7 @@ import ranger.helpers.*;
 import ranger.questionnaire.Questionnaires;
 import ranger.recruit.RecruitOpinions;
 import ranger.recruit.RecruitsService;
+import ranger.response.ResponseMessage;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
 
@@ -96,14 +97,16 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL) && isRadaKlanu) {
             recruitsService.closeChannel(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE) && isRadaKlanu) {
-            if (!recruitsService.isResult(event.getTextChannel())) {
+            if (recruitsService.positiveResult(event.getTextChannel())) {
                 EmbedInfo.endPositive(event.getUser().getId(), event.getTextChannel());
-                recruitsService.positiveResult(event.getTextChannel());
+            } else {
+                ResponseMessage.operationNotPossible(event);
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE) && isRadaKlanu) {
-            if (!recruitsService.isResult(event.getTextChannel())) {
+            if (recruitsService.negativeResult(event.getTextChannel())) {
                 EmbedInfo.endNegative(event.getUser().getId(), event.getTextChannel());
-                recruitsService.negativeResult(event.getTextChannel());
+            } else {
+                ResponseMessage.operationNotPossible(event);
             }
         } else if (indexOfGenerator >= 0) {
             eventsGenerator.saveAnswerAndNextStage(event, indexOfGenerator);

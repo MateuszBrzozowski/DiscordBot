@@ -36,4 +36,16 @@ public class ResponseMessage {
                 .setEphemeral(true)
                 .queue();
     }
+
+    public static void userHaveRecruitChannel(ButtonInteractionEvent event) {
+        event.reply("**Złożyłeś już podanie do naszego klanu i masz aktywny kanał rekrutacyjny!**")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void operationNotPossible(ButtonInteractionEvent event) {
+        event.reply("**Operacja niemożliwa do zrealizowania.**")
+                .setEphemeral(true)
+                .queue();
+    }
 }

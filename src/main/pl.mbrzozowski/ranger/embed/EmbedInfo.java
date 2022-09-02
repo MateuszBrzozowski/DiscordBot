@@ -209,11 +209,7 @@ public class EmbedInfo extends EmbedCreator {
      *
      * @param event ButtonInteractionEvent
      */
-    public static void userHaveRecrutChannel(ButtonInteractionEvent event) {
-        event.reply("**Złożyłeś już podanie do naszego klanu. Sprawdź kanały ponieżej**")
-                .setEphemeral(true)
-                .queue();
-    }
+
 
     /**
      * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.

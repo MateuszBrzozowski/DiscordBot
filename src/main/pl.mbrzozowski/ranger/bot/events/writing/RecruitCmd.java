@@ -25,19 +25,12 @@ public class RecruitCmd extends Proccess {
                 EmbedInfo.recruiter(messageReceived);
             } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
                 messageReceived.getMessage().delete().submit();
-                if (!recruitsService.isResult(messageReceived.getTextChannel())) {
-                    EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-                    recruitsService.negativeResult(messageReceived.getTextChannel());
-                }
+                recruitsService.negativeResult(messageReceived.getTextChannel());
+                EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
             } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
                 messageReceived.getMessage().delete().submit();
-                if (!recruitsService.isResult(messageReceived.getTextChannel())) {
-                    EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
-                    recruitsService.positiveResult(messageReceived.getTextChannel());
-                }
-            } else if (cmd.equalsIgnoreCase(Commands.REOPEN)) {
-                messageReceived.getMessage().delete().submit();
-                recruitsService.reOpenChannel(messageReceived);
+                recruitsService.positiveResult(messageReceived.getTextChannel());
+                EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
             } else if (cmd.equalsIgnoreCase(Commands.CLOSE) && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 messageReceived.getMessage().delete().submit();
                 recruitsService.closeChannel(messageReceived);

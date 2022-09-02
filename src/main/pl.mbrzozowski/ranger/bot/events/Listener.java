@@ -35,7 +35,7 @@ public class Listener extends ListenerAdapter {
         boolean userHasRecruitChannel = recruitsService.userHasRecruitChannel(userID);
         if (userHasRecruitChannel) {
             Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-            String channelID = recruitsService.getChannelIDFromRecruitID(userID);
+            String channelID = recruitsService.getChannelIdByUserId(userID);
             Guild guildRangersPL = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
             Member member = guildRangersPL.getMemberById(userID);
             guildRangersPL
