@@ -1,5 +1,6 @@
 package ranger.embed;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -10,8 +11,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ranger.Repository;
 import ranger.event.Event;
 import ranger.event.EventChanges;
@@ -21,9 +20,9 @@ import ranger.stats.MapLayer;
 import java.awt.*;
 import java.util.List;
 
+@Slf4j
 public class EmbedInfo extends EmbedCreator {
 
-    protected static final Logger logger = LoggerFactory.getLogger(EmbedInfo.class.getName());
 
     public static void recruiter(MessageReceivedEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
@@ -154,54 +153,32 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    /**
-     * Pinguje rekruta który jest przypisany do kanału rekrutacji (textChannel) i wysyła negatywną informację.
-     *
-     * @param userID  ID uzytkownika który wystawia wynik.
-     * @param channel Kanał na którym ocena jest wystawiana.
-     */
-    public static void endNegative(String userID, TextChannel channel) {
-        throw new Error("Method to modify");
-//        RecruitsService recruits = null;
-//        String recruitID = recruits.getRecruitIDFromChannelID(channel.getId());
-//        if (recruits.isRecruitChannel(channel.getId())) {
-//            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-//            builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
-//            builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
-//            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-//            builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-//            channel.sendMessage("<@" + recruitID + ">").setEmbeds(builder.build()).queue();
-//            String oldName = channel.getName();
-//            channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
-//
-//            JDA jda = Repository.getJda();
-//            jda.openPrivateChannelById(recruitID).queue(privateChannel -> {
-//                EmbedBuilder builderPrivate = builder;
-//                builderPrivate.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
-//                privateChannel.sendMessageEmbeds(builderPrivate.build()).queue();
-//            });
-//        }
+    public static void endNegative(String drillId, String recruitId, TextChannel channel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+        builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
+        builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
+        channel.sendMessage("<@" + recruitId + ">").setEmbeds(builder.build()).queue();
+        String oldName = channel.getName();
+        channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
+
+        JDA jda = Repository.getJda();
+        jda.openPrivateChannelById(recruitId).queue(privateChannel -> {
+            builder.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
+        });
     }
 
-    /**
-     * Pinguje rekruta który jest przypisany do kanału rekrutacji (textChannel) i wysyła pozytywną informację.
-     *
-     * @param userID  ID uzytkownika który wystawia wynik.
-     * @param channel Kanał na którym ocena jest wystawiana.
-     */
-    public static void endPositive(String userID, TextChannel channel) {
-        throw new Error("Method to modify");
-//        RecruitsService recruits = Repository.getRecruits();
-//        if (recruits.isRecruitChannel(channel.getId())) {
-//            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-//            builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
-//            builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
-//            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-//            builder.setFooter("Podpis: " + Users.getUserNicknameFromID(userID));
-//            channel.sendMessage("Gratulacje <@" + recruits.getRecruitIDFromChannelID(channel.getId()) + ">").setEmbeds(builder.build()).queue();
-//            String oldName = channel.getName();
-//            channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
-//        }
+    public static void endPositive(String drillId, String recruitId, TextChannel channel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+        builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
+        builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
+        channel.sendMessage("Gratulacje <@" + recruitId + ">").setEmbeds(builder.build()).queue();
+        String oldName = channel.getName();
+        channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
     }
 
     /**
@@ -367,7 +344,7 @@ public class EmbedInfo extends EmbedCreator {
             builder.setDescription(finalDescription);
             builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
             privateChannel.sendMessageEmbeds(builder.build()).queue();
-            logger.info("USER: {} -  wysłałem powiadomienie", userID);
+            log.info("USER: {} -  wysłałem powiadomienie", userID);
         });
     }
 

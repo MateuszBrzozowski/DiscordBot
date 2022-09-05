@@ -28,7 +28,6 @@ import java.util.Optional;
 @Slf4j
 public class RecruitsService {
 
-    //    private final List<MemberWithPrivateChannel> activeRecruits = new ArrayList<>();
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RecruitRepository recruitRepository;
@@ -61,8 +60,8 @@ public class RecruitsService {
                     builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                     builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                     textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
-                                    "<@&" + RoleID.RADA_KLANU + "> ")
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
+                                    "<@&" + "RoleID.RADA_KLANU" + "> ")
                             .setEmbeds(builder.build())
                             .queue();
                     textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
@@ -79,7 +78,7 @@ public class RecruitsService {
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
         String userID = event.getUser().getId();
-        if (isActiveRecruit(userID)) {
+        if (hasNotRecruitChannel(userID)) {
             if (!isMaxRecruits()) {
                 if (!Users.hasUserRoleAnotherClan(event.getUser().getId())) {
                     if (!Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID)) {
@@ -121,22 +120,20 @@ public class RecruitsService {
                 .queue();
     }
 
-    public void confirm(ButtonInteractionEvent event) {
-        String userID = event.getUser().getId();
-        String userName = Users.getUserNicknameFromID(userID);
-        createChannelForNewRecruit(userName, userID);
-        event.deferEdit().queue();
-    }
-
-    public boolean isActiveRecruit(String userId) {
-        Optional<Recruit> recruitOptional = findByUserId(userId);
-        if (recruitOptional.isPresent()) {
-            Recruit recruit = recruitOptional.get();
-            return recruit.getRecruitmentResult() != null;
-        } else {
-            return true;
+    public void confirm(@NotNull ButtonInteractionEvent event) {
+        if (hasNotRecruitChannel(event.getUser().getId())) {
+            String userID = event.getUser().getId();
+            String userName = Users.getUserNicknameFromID(userID);
+            createChannelForNewRecruit(userName, userID);
+            event.deferEdit().queue();
         }
     }
+
+    private boolean hasNotRecruitChannel(String userId) {
+        Optional<Recruit> recruitOptional = recruitRepository.findByUserIdAndNullChannelID(userId);
+        return recruitOptional.isEmpty();
+    }
+
 
     private Optional<Recruit> findByUserId(String userId) {
         return recruitRepository.findByUserId(userId);
@@ -153,6 +150,7 @@ public class RecruitsService {
                 .channelId(channelID)
                 .toApply(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime())
                 .build();
+        log.info(recruit.toString());
         recruitRepository.save(recruit);
     }
 
@@ -162,12 +160,9 @@ public class RecruitsService {
             Recruit recruit = recruitOptional.get();
             if (recruit.getRecruitmentResult() == null) {
                 recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
-            }
-            if (recruit.getStartRecruitment() == null) {
-                recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
-            }
-            if (recruit.getEndRecruitment() == null) {
-                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+                if (recruit.getEndRecruitment() == null) {
+                    recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+                }
             }
             removeRoleFromUserID(recruit.getUserId());
             recruitRepository.save(recruit);
@@ -216,59 +211,60 @@ public class RecruitsService {
 //        }
     }
 
-    public boolean positiveResult(TextChannel channel) {
+    public boolean positiveResult(String drillId, TextChannel channel) {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
             if (recruit.getEndRecruitment() == null &&
                     recruit.getRecruitmentResult() == null) {
                 Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-                if (guild == null) {
-                    return false;
+                if (guild != null) {
+                    removeSmallRInTag(recruit.getUserId(), guild);
+                    Role roleClanMember = Repository.getJda().getRoleById(RoleID.CLAN_MEMBER_ID);
+                    Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
+                    boolean hasRoleClanMember = Users.hasUserRole(recruit.getUserId(), RoleID.CLAN_MEMBER_ID);
+                    boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
+                    if (!hasRoleClanMember && roleClanMember != null) {
+                        guild.addRoleToMember(UserSnowflake.fromId(recruit.getUserId()), roleClanMember).submit();
+                    }
+                    if (hasRoleRecruit && roleRecruit != null) {
+                        guild.removeRoleFromMember(UserSnowflake.fromId(recruit.getUserId()), roleRecruit).submit();
+                    }
+                    recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+                    recruit.setRecruitmentResult(RecruitmentResult.POSITIVE);
+                    recruitRepository.save(recruit);
+                    EmbedInfo.endPositive(drillId, recruit.getUserId(), channel);
+                    return true;
                 }
-                removeSmallRInTag(recruit.getUserId(), guild);
-                Role roleClanMember = Repository.getJda().getRoleById(RoleID.CLAN_MEMBER_ID);
-                Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
-                boolean hasRoleClanMember = Users.hasUserRole(recruit.getUserId(), RoleID.CLAN_MEMBER_ID);
-                boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
-                if (!hasRoleClanMember && roleClanMember != null) {
-                    guild.addRoleToMember(UserSnowflake.fromId(recruit.getUserId()), roleClanMember).submit();
-                }
-                if (hasRoleRecruit && roleRecruit != null) {
-                    guild.removeRoleFromMember(UserSnowflake.fromId(recruit.getUserId()), roleRecruit).submit();
-                }
-                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
-                recruit.setRecruitmentResult(RecruitmentResult.POSITIVE);
-                recruitRepository.save(recruit);
-                return true;
             }
         }
         return false;
     }
 
     /**
+     * @param drillId
      * @param channel which happened event
      * @return true if result save correctly, else return false
      */
-    public boolean negativeResult(TextChannel channel) {
+    public boolean negativeResult(String drillId, TextChannel channel) {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
             if (recruit.getEndRecruitment() == null && recruit.getRecruitmentResult() == null) {
                 Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-                if (guild == null) {
-                    return false;
+                if (guild != null) {
+                    removeTagFromNick(recruit.getUserId(), guild);
+                    Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
+                    boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
+                    if (hasRoleRecruit && roleRecruit != null) {
+                        guild.removeRoleFromMember(UserSnowflake.fromId(recruit.getUserId()), roleRecruit).submit();
+                    }
+                    recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+                    recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
+                    recruitRepository.save(recruit);
+                    EmbedInfo.endNegative(drillId, recruit.getUserId(), channel);
+                    return true;
                 }
-                removeTagFromNick(recruit.getUserId(), guild);
-                Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
-                boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
-                if (hasRoleRecruit && roleRecruit != null) {
-                    guild.removeRoleFromMember(UserSnowflake.fromId(recruit.getUserId()), roleRecruit).submit();
-                }
-                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
-                recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
-                recruitRepository.save(recruit);
-                return true;
             }
         }
         return false;
@@ -312,18 +308,20 @@ public class RecruitsService {
         else return nickname.endsWith("<RangersPL>");
     }
 
-    public void accepted(ButtonInteractionEvent event) {
+    public boolean accepted(ButtonInteractionEvent event) {
         Optional<Recruit> recruitOptional = findByChannelId(event.getTextChannel().getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
-            if (recruit.getStartRecruitment() == null) {
+            if (recruit.getStartRecruitment() == null && recruit.getRecruitmentResult() == null) {
                 EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
                 addRoleRecruit(recruit.getUserId());
-                changeRecruitNickname(event.getGuild(), event.getTextChannel().getId());
+                changeRecruitNickname(event.getGuild(), recruit.getUserId());
                 recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
                 recruitRepository.save(recruit);
+                return true;
             }
         }
+        return false;
     }
 
     private void addRoleRecruit(String userId) {
@@ -346,21 +344,20 @@ public class RecruitsService {
 
     private void closeChannel(TextChannel textChannel, String userID) {
         Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        if (guild == null) {
-            return;
-        }
-        Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
-        if (recruitOptional.isPresent()) {
-            Member member = guild.getMemberById(recruitOptional.get().getUserId());
-            TextChannelManager manager = textChannel.getManager();
-            Role clanMemberRole = guild.getRoleById(RoleID.CLAN_MEMBER_ID);
-            if (clanMemberRole != null && member != null) {
-                manager.putPermissionOverride(clanMemberRole, null, permViewChannel).queue();
+        if (guild != null) {
+            Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
+            if (recruitOptional.isPresent()) {
+                Member member = guild.getMemberById(recruitOptional.get().getUserId());
+                TextChannelManager manager = textChannel.getManager();
+                Role clanMemberRole = guild.getRoleById(RoleID.CLAN_MEMBER_ID);
+                if (clanMemberRole != null && member != null) {
+                    manager.putPermissionOverride(clanMemberRole, null, permViewChannel).queue();
+                }
+                if (member != null) {
+                    manager.putPermissionOverride(member, null, permissions).queue();
+                }
+                EmbedInfo.closeChannel(userID, textChannel);
             }
-            if (member != null) {
-                manager.putPermissionOverride(member, null, permissions).queue();
-            }
-            EmbedInfo.closeChannel(userID, textChannel);
         }
     }
 

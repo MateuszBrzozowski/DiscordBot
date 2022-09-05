@@ -25,12 +25,10 @@ public class RecruitCmd extends Proccess {
                 EmbedInfo.recruiter(messageReceived);
             } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
                 messageReceived.getMessage().delete().submit();
-                recruitsService.negativeResult(messageReceived.getTextChannel());
-                EmbedInfo.endNegative(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+                recruitsService.negativeResult(message.getUserID(), messageReceived.getTextChannel());
             } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
                 messageReceived.getMessage().delete().submit();
-                recruitsService.positiveResult(messageReceived.getTextChannel());
-                EmbedInfo.endPositive(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+                recruitsService.positiveResult(message.getUserID(), messageReceived.getTextChannel());
             } else if (cmd.equalsIgnoreCase(Commands.CLOSE) && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 messageReceived.getMessage().delete().submit();
                 recruitsService.closeChannel(messageReceived);

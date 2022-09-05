@@ -41,7 +41,6 @@ public class WriteListener extends ListenerAdapter {
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
         ReminderCmd reminderCmd = new ReminderCmd(event);
-        QuestionnaireCmd questionnaire = new QuestionnaireCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
@@ -59,8 +58,7 @@ public class WriteListener extends ListenerAdapter {
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(counterMachine);
         counterMachine.setNextProccess(generatorCmd);
-        generatorCmd.setNextProccess(questionnaire);
-        questionnaire.setNextProccess(reminderCmd);
+        generatorCmd.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(serverServiceCmd);
         serverServiceCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);

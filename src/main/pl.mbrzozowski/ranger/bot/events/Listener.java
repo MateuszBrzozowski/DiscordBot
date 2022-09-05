@@ -6,11 +6,13 @@ import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.RoleID;
 import ranger.recruit.RecruitsService;
 
+@Service
 public class Listener extends ListenerAdapter {
 
     private final RecruitsService recruitsService;

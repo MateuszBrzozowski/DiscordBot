@@ -20,7 +20,6 @@ public class Recruit {
     private String name;
     @Column(nullable = false, updatable = false)
     private String userId;
-    @Column(nullable = false)
     private String channelId;
     private LocalDateTime toApply;
     private LocalDateTime startRecruitment;

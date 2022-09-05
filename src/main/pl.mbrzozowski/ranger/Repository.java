@@ -7,28 +7,20 @@ import ranger.event.EventsSettingsModel;
 import ranger.event.reminder.Timers;
 import ranger.model.BotWriter;
 import ranger.model.DiceGames;
-import ranger.questionnaire.Questionnaires;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
 
 public class Repository {
 
-//    private static final RecruitsService recruits = new RecruitsService(recruitRepository);
     private static final DiceGames diceGames = new DiceGames();
     private static final EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
     private static final EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
     private static final Timers timers = new Timers();
-    private static final Questionnaires questionnaires = new Questionnaires();
     private static final BotWriter botWriter = new BotWriter();
     private static final Counter counter = new Counter();
     private static final ServerService serverService = new ServerService();
     private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
-
-
-//    public static RecruitsService getRecruits() {
-//        return recruits;
-//    }
 
     public static DiceGames getDiceGames() {
         return diceGames;
@@ -56,10 +48,6 @@ public class Repository {
 
     public static BotWriter getBotWriter() {
         return botWriter;
-    }
-
-    public static Questionnaires getQuestionnaires() {
-        return questionnaires;
     }
 
     public static Counter getCounter() {
