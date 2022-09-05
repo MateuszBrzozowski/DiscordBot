@@ -1,89 +1,48 @@
-//package ranger.recruit;
-//
-//import net.dv8tion.jda.api.JDA;
-//import net.dv8tion.jda.api.entities.Message;
-//import net.dv8tion.jda.api.entities.MessageEmbed;
-//import ranger.Repository;
-//import ranger.embed.EmbedSettings;
-//import ranger.model.CleanerChannel;
-//import ranger.model.MemberWithPrivateChannel;
-//
-//import java.time.OffsetDateTime;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//public class CleanerRecruitChannel implements CleanerChannel {
-//
-//    private final RecruitsService recruitsService;
-//    private final List<MemberWithPrivateChannel> activeRecruits;
-//    private final List<MemberWithPrivateChannel> recruitsToDelete = new ArrayList<>();
-//    private final int DELAY_IN_DAYS = 5;
-//
-//    public CleanerRecruitChannel(RecruitsService recruitsService, List<MemberWithPrivateChannel> activeRecruits) {
-//        this.recruitsService = recruitsService;
-//        this.activeRecruits = activeRecruits;
-//    }
-//
-//    public void clean() {
-//        if (!activeRecruits.isEmpty()) {
-//            JDA jda = Repository.getJda();
-//            for (int i = 0; i < activeRecruits.size(); i++) {
-//                String channelID = activeRecruits.get(i).getChannelID();
-//                List<Message> complete = jda.getTextChannelById(channelID).getHistory().retrievePast(100).complete();
-//                if (isTimeToRemove(complete)) {
-//                    recruitsToDelete.add(activeRecruits.get(i));
-//                }
-//            }
-//        }
-//        Repository.getRecruits().deleteChannels(recruitsToDelete);
-//    }
-//
-//    private boolean isTimeToRemove(List<Message> messages) {
-//        int indexMessage = searchResultMessage(messages);
-//        if (indexMessage != -1) {
-//            OffsetDateTime timeCreated = messages.get(indexMessage).getTimeCreated();
-//            OffsetDateTime timeNow = OffsetDateTime.now();
-//            timeCreated = timeCreated.plusDays(DELAY_IN_DAYS);
-//            if (timeCreated.isBefore(timeNow)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    private int searchResultMessage(List<Message> messages) {
-//        for (int i = 0; i < messages.size(); i++) {
-//            List<MessageEmbed> embeds = messages.get(i).getEmbeds();
-//            if (checkEmbeds(embeds)) {
-//                return i;
-//            }
-//        }
-//        return -1;
-//    }
-//
-//    /**
-//     * @param embeds -sprawdzane embeds
-//     * @return true jeśli wiadomść zawiera wynik rekrutacji, w innym przyadku false
-//     */
-//    public static boolean checkEmbeds(List<MessageEmbed> embeds) {
-//        if (!embeds.isEmpty()) {
-//            return isEmbedTitle(embeds.get(0));
-//        }
-//        return false;
-//    }
-//
-//    /**
-//     * @param embed sprawdzany embed
-//     * @return true jeśli Embed to wynik rekrutacji, w innym przypadku false
-//     */
-//    private static boolean isEmbedTitle(MessageEmbed embed) {
-//        String title = embed.getTitle();
-//        if (title != null && title.length() >= EmbedSettings.RESULT.length()) {
-//            title = title.substring(0, EmbedSettings.RESULT.length());
-//            if (title.equalsIgnoreCase(EmbedSettings.RESULT)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//}
+package ranger.recruit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ranger.model.CleanerChannel;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static java.time.LocalDate.now;
+
+@Service
+public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
+
+    private final RecruitsService recruitsService;
+    private static final int DELAY_IN_DAYS = 5;
+
+    @Autowired
+    public CleanerRecruitChannel(RecruitsService recruitsService) {
+        this.recruitsService = recruitsService;
+        Timer timer = new Timer();
+        Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
+        date.setHours(23);
+        date.setMinutes(59);
+        timer.scheduleAtFixedRate(this, date, 24 * 60 * 60 * 1000);
+    }
+
+    @Override
+    public void clean() {
+        List<Recruit> recruits = recruitsService.findAllWithChannel();
+        recruits = recruits
+                .stream()
+                .filter(recruit -> recruit.getRecruitmentResult() != null && recruit.getEndRecruitment() != null)
+                .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS)))
+                .toList();
+        for (Recruit recruit : recruits) {
+            recruitsService.deleteChannel(recruit);
+        }
+    }
+
+    @Override
+    public void run() {
+        clean();
+    }
+}

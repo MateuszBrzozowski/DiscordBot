@@ -1,6 +1,5 @@
 package ranger.helpers;
 
-import ranger.embed.EmbedInfo;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -8,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import ranger.Repository;
+import ranger.embed.EmbedInfo;
 import ranger.recruit.RecruitsService;
 
 import java.util.ArrayList;
@@ -54,10 +54,12 @@ public class ComponentService {
 
     private void whichCategory(ButtonInteractionEvent event) {
         String parentCategoryId = event.getTextChannel().getParentCategoryId();
-        if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-            recruitsService.deleteChannelByID(event.getChannel().getId());
-        } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
-            Repository.getServerService().removeChannel(event);
+        if (parentCategoryId != null) {
+            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
+                recruitsService.deleteChannelByID(event.getChannel().getId());
+            } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
+                Repository.getServerService().removeChannel(event);
+            }
         }
     }
 }

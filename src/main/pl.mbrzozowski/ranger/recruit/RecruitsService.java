@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
 import ranger.helpers.*;
-import ranger.model.MemberWithPrivateChannel;
 import ranger.response.ResponseMessage;
 
 import java.awt.*;
@@ -143,6 +142,10 @@ public class RecruitsService {
         return recruitRepository.findByChannelId(channelId);
     }
 
+    public List<Recruit> findAllWithChannel() {
+        return recruitRepository.findAllWithChannelId();
+    }
+
     private void add(String userId, String userName, String channelID) {
         Recruit recruit = Recruit.builder()
                 .userId(userId)
@@ -160,12 +163,13 @@ public class RecruitsService {
             Recruit recruit = recruitOptional.get();
             if (recruit.getRecruitmentResult() == null) {
                 recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
-                if (recruit.getEndRecruitment() == null) {
-                    recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
-                }
             }
-            removeRoleFromUserID(recruit.getUserId());
+            if (recruit.getEndRecruitment() == null) {
+                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+            }
+            recruit.setChannelId(null);
             recruitRepository.save(recruit);
+            removeRoleFromUserID(recruit.getUserId());
         }
     }
 
@@ -184,31 +188,21 @@ public class RecruitsService {
         }
     }
 
-    public void closeChannel(MessageReceivedEvent event) {
-        TextChannel textChannel = event.getTextChannel();
-        String userID = event.getAuthor().getId();
-        closeChannel(textChannel, userID);
-    }
-
     public boolean isRecruitChannel(String channelID) {
         Optional<Recruit> recruitOptional = findByChannelId(channelID);
         return recruitOptional.isPresent();
     }
 
-    public void deleteChannels(List<MemberWithPrivateChannel> listToDelete) {
-        throw new Error("Method not implement");
-//
-//        JDA jda = Repository.getJda();
-//        RecruitDatabase rdb = new RecruitDatabase();
-//        for (int i = 0; i < listToDelete.size(); i++) {
-//            int indexOfRecrut = getIndexOfRecruit(listToDelete.get(i).getChannelID());
-//            String userName = listToDelete.get(i).getUserName();
-//            activeRecruits.remove(indexOfRecrut);
-//            rdb.removeUser(listToDelete.get(i).getChannelID());
-//            logger.info("Pozostało aktywnych rekrutacji: {}", activeRecruits.size());
-//            jda.getTextChannelById(listToDelete.get(i).getChannelID()).delete().reason("Rekrutacja zakończona, upłynął czas wyświetlania informacji").queue();
-//            RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + userName + "]");
-//        }
+    public void deleteChannel(@NotNull Recruit recruit) {
+        if (recruit.getChannelId() != null) {
+            TextChannel textChannel = Repository.getJda().getTextChannelById(recruit.getChannelId());
+            if (textChannel != null) {
+                textChannel.delete().reason("Rekrutacja zakończona.").queue();
+                RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + recruit.getName() + "]");
+                recruit.setChannelId(null);
+                recruitRepository.save(recruit);
+            }
+        }
     }
 
     public boolean positiveResult(String drillId, TextChannel channel) {
@@ -241,11 +235,6 @@ public class RecruitsService {
         return false;
     }
 
-    /**
-     * @param drillId
-     * @param channel which happened event
-     * @return true if result save correctly, else return false
-     */
     public boolean negativeResult(String drillId, TextChannel channel) {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
@@ -336,7 +325,13 @@ public class RecruitsService {
         }
     }
 
-    public void closeChannel(ButtonInteractionEvent event) {
+    public void closeChannel(@NotNull MessageReceivedEvent event) {
+        TextChannel textChannel = event.getTextChannel();
+        String userID = event.getAuthor().getId();
+        closeChannel(textChannel, userID);
+    }
+
+    public void closeChannel(@NotNull ButtonInteractionEvent event) {
         TextChannel textChannel = event.getTextChannel();
         String userID = event.getUser().getId();
         closeChannel(textChannel, userID);
