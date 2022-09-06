@@ -220,7 +220,7 @@ public class EventsSettings {
     private void endingEditor() {
         if (ifEndingEvent) {
             if (sendNotifi) {
-                eventService.cancelEvnetWithInfoForPlayers(event);
+                eventService.cancelEventWithInfoForPlayers(event);
             } else {
                 eventService.cancelEvent(event);
             }

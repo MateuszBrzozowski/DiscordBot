@@ -39,8 +39,6 @@ public class EventService {
     public EventService(EventRepository eventRepository, Timers timers) {
         this.eventRepository = eventRepository;
         this.timers = timers;
-//        CleanerEventChannel cleanerEventChannel = new CleanerEventChannel(this);
-//        cleanerEventChannel.clean();
     }
 
     public List<Event> findAll() {
@@ -137,7 +135,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    private LocalDateTime getDateTime(String date, String time) {
+    private @Nullable LocalDateTime getDateTime(String date, String time) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         String dateTime = date + " " + time;
         try {
@@ -149,7 +147,7 @@ public class EventService {
     }
 
 
-    public boolean checkRequest(EventRequest eventRequest) {
+    public boolean checkRequest(@NotNull EventRequest eventRequest) {
         if (StringUtils.isBlank(eventRequest.getName())) {
             return false;
         }
@@ -159,7 +157,7 @@ public class EventService {
         return !StringUtils.isBlank(eventRequest.getTime());
     }
 
-    public void updateEmbed(Event event) {
+    public void updateEmbed(@NotNull Event event) {
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
         TextChannel channel = Repository.getJda().getTextChannelById(channelID);
@@ -254,11 +252,6 @@ public class EventService {
         return result;
     }
 
-
-    public Event isActiveMatchChannelID(String channelID) {
-        Optional<Event> eventOptional = findEventByChannelId(channelID);
-        return eventOptional.orElse(null);
-    }
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, ButtonClickType buttonClick) {
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
@@ -372,27 +365,20 @@ public class EventService {
         return eventRepository.findByChannelId(channelID);
     }
 
-    public void cancelEvnetWithInfoForPlayers(Event event) {
+    public void cancelEventWithInfoForPlayers(@NotNull Event event) {
         TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
-        assert channel != null;
-        channel.retrieveMessageById(event.getMsgId()).queue(message -> {
-            List<MessageEmbed> embeds = message.getEmbeds();
-            List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-            String dateTime = getDateAndTime(fields);
-            sendInfoChanges(event, EventChanges.REMOVE, dateTime);
-            cancelEvent(event);
-        });
-    }
-
-    public void cancelEvent(String msgId) {
-        Optional<Event> optionalEvent = findEventByMsgId(msgId);
-        if (optionalEvent.isPresent()) {
-            Event event = optionalEvent.get();
-            eventRepository.delete(event);
+        if (channel != null) {
+            channel.retrieveMessageById(event.getMsgId()).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
+                String dateTime = getDateAndTime(fields);
+                sendInfoChanges(event, EventChanges.REMOVE, dateTime);
+                cancelEvent(event);
+            });
         }
     }
 
-    public void cancelEvent(Event event) {
+    public void cancelEvent(@NotNull Event event) {
         RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
         disableButtons(event);
         changeTitleRedCircle(event);
@@ -401,7 +387,7 @@ public class EventService {
         eventRepository.delete(event);
     }
 
-    public void changeTitleRedCircle(Event event) {
+    public void changeTitleRedCircle(@NotNull Event event) {
         TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             String buffor = channel.getName();
@@ -485,7 +471,7 @@ public class EventService {
         }
     }
 
-    private void updateTimer(Event event) {
+    private void updateTimer(@NotNull Event event) {
         Timers timers = Repository.getTimers();
         timers.cancel(event.getMsgId());
         CreateReminder reminder = new CreateReminder(event, this, timers);
@@ -495,7 +481,7 @@ public class EventService {
     /**
      * Wyłącza przyciski w zapisach
      */
-    public void disableButtons(Event event) {
+    public void disableButtons(@NotNull Event event) {
         disableButtons(event.getMsgId(), event.getChannelId());
     }
 
@@ -545,61 +531,19 @@ public class EventService {
         });
     }
 
-    public List<Player> getMainList(Event event) {
+    public List<Player> getMainList(@NotNull Event event) {
         return event.getPlayers().stream().filter(Player::isMainList).toList();
     }
 
-    public List<Player> getReserveList(Event event) {
+    public List<Player> getReserveList(@NotNull Event event) {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 
-    /**
-     * @param messageId ID wiadomości w której znajdują się zapisy
-     * @return Zwraca ID kanalu na którym znajduje sie wiadomosc, w innym przypadku zwraca pustego Stringa
-     */
-    public String getChannelID(String messageId) {
-        Optional<Event> eventOptional = findEventByMsgId(messageId);
-        if (eventOptional.isPresent()) {
-            return eventOptional.get().getChannelId();
-        } else {
-            return "";
-        }
-    }
-
-    public String getEventName(String messageId) {
-        Optional<Event> eventOptional = findEventByMsgId(messageId);
-        if (eventOptional.isPresent()) {
-            return eventOptional.get().getName();
-        } else {
-            return "";
-        }
-    }
-
-    private String getDateAndTime(List<MessageEmbed.Field> fields) {
+    private @NotNull String getDateAndTime(@NotNull List<MessageEmbed.Field> fields) {
         String date = fields.get(0).getValue();
         String time = fields.get(2).getValue();
         return date + "r., " + time;
     }
-
-    //TODO można to jakoiś inaczej zaimplementowac
-//    public void removeUserFromEvent(String userID, String eventID) {
-//        int index = getIndexActiveEvent(eventID);
-//        if (index >= 0) {
-//            activeEvents.get(index).removeFromEventManually(userID);
-//            updateEmbed(index);
-//        } else {
-//            RangerLogger.info("Nie ma takiego eventu [" + eventID + "]");
-//        }
-//    }
-//
-//    public void removeUserFromAllEvents(String userID) {
-//        for (int i = 0; i < activeEvents.size(); i++) {
-//            boolean remove = activeEvents.get(i).removeFromEventManually(userID);
-//            if (remove) {
-//                updateEmbed(i);
-//            }
-//        }
-//    }
 
 
     public boolean isActiveEvents() {
@@ -608,5 +552,13 @@ public class EventService {
 
     public Optional<Event> findEventByMsgId(String id) {
         return eventRepository.findByMsgId(id);
+    }
+
+    public void deleteByMsgId(String messageId) {
+        eventRepository.deleteByMsgId(messageId);
+    }
+
+    public void deleteByChannelId(String channelID) {
+        eventRepository.deleteByChannelId(channelID);
     }
 }

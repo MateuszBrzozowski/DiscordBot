@@ -21,10 +21,7 @@ public class MessageUpdate extends ListenerAdapter {
 
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-        if (eventService.findEventByMsgId(event.getMessageId()).isPresent()) {
-            eventService.cancelEvent(event.getMessageId());
-        }
-
+        eventService.deleteByMsgId(event.getMessageId());
     }
 
 }
