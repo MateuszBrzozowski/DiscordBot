@@ -401,22 +401,6 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     /**
-     * Wysyła do użytkownika prywatną wiadomość, że nie może utworzyć nowego ticketu
-     *
-     * @param userID ID użytkownika do którego wysyłana jest prywatna wiadomość
-     */
-    public static void cantCreateServerServiceChannel(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Nie możesz utowrzyć kanału.\nYou can't create a ticket.");
-            builder.setDescription("Prawdopodobnie masz już aktywny bilet. Jeśli go nie widzisz, skontaktuj się bezpośrednio z Adminem serwera.\n\n" +
-                    "Probably you have active ticket. If you can't see channel, please contact directly with Server Admin.");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
      * @param channel Kanał na którym wysyłana jest wiadomość

@@ -37,15 +37,27 @@ public class ResponseMessage {
                 .queue();
     }
 
-    public static void userHaveRecruitChannel(ButtonInteractionEvent event) {
+    public static void userHaveRecruitChannel(@NotNull ButtonInteractionEvent event) {
         event.reply("**Złożyłeś już podanie do naszego klanu i masz aktywny kanał rekrutacyjny!**")
                 .setEphemeral(true)
                 .queue();
     }
 
-    public static void operationNotPossible(ButtonInteractionEvent event) {
+    public static void operationNotPossible(@NotNull ButtonInteractionEvent event) {
         event.reply("**Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)
                 .queue();
+    }
+
+    public static void cantCreateServerServiceChannel(@NotNull ButtonInteractionEvent event) {
+        event.reply("""
+                        Nie możesz utowrzyć kanału.
+                        You can't create a ticket.
+
+                        Prawdopodobnie masz już aktywny bilet. Jeśli go nie widzisz, skontaktuj się bezpośrednio z Adminem serwera.
+                        Probably you have active ticket. If you can't see channel, please contact directly with Server Admin.""")
+                .setEphemeral(true)
+                .queue();
+
     }
 }

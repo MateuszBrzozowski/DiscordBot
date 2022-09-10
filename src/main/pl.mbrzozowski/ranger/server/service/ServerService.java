@@ -1,6 +1,5 @@
 package ranger.server.service;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,31 +18,29 @@ import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.ComponentService;
 import ranger.helpers.RoleID;
 import ranger.model.MemberWithPrivateChannel;
+import ranger.response.ResponseMessage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ServerService {
 
+    private final ClientRepository clientRepository;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-    private final List<MemberWithPrivateChannel> reports = new ArrayList<>();
+    //    private final List<MemberWithPrivateChannel> reports = new ArrayList<>();
 
-    public void initialize() {
-        pullUsersFromDatabase();
+    public ServerService(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
-        String userID = event.getUser().getId();
-        String userName = event.getUser().getName();
-        if (!isUserOnList(userID)) {
-            createChannel(userID, userName, buttonType);
+        if (!userHasReport(event.getUser().getId())) {
+            createChannel(event, buttonType);
         } else {
-            EmbedInfo.cantCreateServerServiceChannel(userID);
+            ResponseMessage.cantCreateServerServiceChannel(event);
         }
     }
 
@@ -145,62 +142,51 @@ public class ServerService {
         return null;
     }
 
-    private void createChannel(String userID, String userName, ButtonClickType buttonType) {
-        JDA jda = Repository.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_SERVER);
-        String channelName = channelNamePrefix(buttonType) + userName;
-        guild.createTextChannel(channelName, category)
-                .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-                .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
-                .addRolePermissionOverride(Long.parseLong(RoleID.MODERATOR), permissions, null)
-                .queue(channel -> {
-                    sendEmbedStartChannel(channel, buttonType);
-                    addUserToList(userID, userName, channel.getId(), buttonType);
-                });
+    private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
+        String userID = event.getUser().getId();
+        String userName = event.getUser().getName();
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild != null) {
+            Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_SERVER);
+            String channelName = channelNamePrefix(buttonType) + userName;
+            if (category != null) {
+                guild.createTextChannel(channelName, category)
+                        .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                        .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.MODERATOR), permissions, null)
+                        .queue(channel -> {
+                            sendEmbedStartChannel(channel, buttonType);
+                            addUser(userID, userName, channel.getId());
+                        });
+            }
+        }
     }
 
-    private void sendEmbedStartChannel(TextChannel channel, ButtonClickType buttonType) {
+    private void sendEmbedStartChannel(TextChannel channel, @NotNull ButtonClickType buttonType) {
         switch (buttonType) {
-            case REPORT:
-                EmbedInfo.sendEmbedReport(channel);
-                break;
-            case UNBAN:
-                EmbedInfo.sendEmbedUnban(channel);
-                break;
-            case CONTACT:
-                EmbedInfo.sendEmbedContact(channel);
-                break;
+            case REPORT -> EmbedInfo.sendEmbedReport(channel);
+            case UNBAN -> EmbedInfo.sendEmbedUnban(channel);
+            case CONTACT -> EmbedInfo.sendEmbedContact(channel);
         }
     }
 
     private String channelNamePrefix(ButtonClickType buttonType) {
-        switch (buttonType) {
-            case REPORT:
-                return EmbedSettings.BOOK_RED + "┋report-";
-            case UNBAN:
-                return EmbedSettings.BOOK_BLUE + "┋unban-";
-            case CONTACT:
-                return EmbedSettings.BOOK_GREEN + "┋contact-";
-            default:
-                return "";
-        }
+        return switch (buttonType) {
+            case REPORT -> EmbedSettings.BOOK_RED + "┋report-";
+            case UNBAN -> EmbedSettings.BOOK_BLUE + "┋unban-";
+            case CONTACT -> EmbedSettings.BOOK_GREEN + "┋contact-";
+            default -> "";
+        };
     }
 
-    private void addUserToList(String userID, String userName, String channelID, ButtonClickType buttonType) {
-        MemberWithPrivateChannel member = new MemberWithPrivateChannel(userID, userName, channelID);
-        reports.add(member);
-        ServerServiceDatabase ssdb = new ServerServiceDatabase();
-        ssdb.addNewUser(userID, channelID, userName);
+    private void addUser(String userId, String userName, String channelId) {
+        Client client = new Client(null, userId, channelId, userName);
+        clientRepository.save(client);
     }
 
-    private boolean isUserOnList(String userID) {
-        for (MemberWithPrivateChannel m : reports) {
-            if (m.getUserID().equalsIgnoreCase(userID)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean userHasReport(String userID) {
+        Optional<Client> client = clientRepository.findByUserId(userID);
+        return client.isPresent();
     }
 }
