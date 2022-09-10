@@ -382,7 +382,6 @@ public class EventService {
         RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
         disableButtons(event);
         changeTitleRedCircle(event);
-        Timers timers = Repository.getTimers();
         timers.cancel(event.getMsgId());
         eventRepository.delete(event);
     }
@@ -472,7 +471,6 @@ public class EventService {
     }
 
     private void updateTimer(@NotNull Event event) {
-        Timers timers = Repository.getTimers();
         timers.cancel(event.getMsgId());
         CreateReminder reminder = new CreateReminder(event, this, timers);
         reminder.create();

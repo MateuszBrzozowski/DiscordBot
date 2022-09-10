@@ -3,14 +3,12 @@ package ranger;
 import net.dv8tion.jda.api.JDA;
 import ranger.event.EventsGeneratorModel;
 import ranger.event.EventsSettingsModel;
-import ranger.event.reminder.Timers;
 import ranger.stats.ServerStats;
 
 public class Repository {
 
     private static final EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
     private static final EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
-    private static final Timers timers = new Timers();
     private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
 
@@ -29,10 +27,6 @@ public class Repository {
 
     static void setJDA(JDA j) {
         jda = j;
-    }
-
-    public static Timers getTimers() {
-        return timers;
     }
 
     public static ServerStats getServerStats() {
