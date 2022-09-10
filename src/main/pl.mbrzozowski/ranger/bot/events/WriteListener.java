@@ -12,6 +12,7 @@ import ranger.event.EventService;
 import ranger.model.BotWriter;
 import ranger.recruit.RecruitsService;
 import ranger.server.service.ServerService;
+import ranger.stats.ServerStats;
 
 @Service
 public class WriteListener extends ListenerAdapter {
@@ -21,18 +22,21 @@ public class WriteListener extends ListenerAdapter {
     private final DiceGames diceGames;
     private final BotWriter botWriter;
     private final ServerService serverService;
+    private final ServerStats serverStats;
 
     @Autowired
     public WriteListener(EventService eventService,
                          RecruitsService recruitsService,
                          DiceGames diceGames,
                          BotWriter botWriter,
-                         ServerService serverService) {
+                         ServerService serverService,
+                         ServerStats serverStats) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
         this.botWriter = botWriter;
         this.serverService = serverService;
+        this.serverStats = serverStats;
     }
 
 
@@ -48,7 +52,7 @@ public class WriteListener extends ListenerAdapter {
                 event);
 
         DiceCmd diceCmd = new DiceCmd(event, diceGames);
-        StatsCmd statsCmd = new StatsCmd(event);
+        StatsCmd statsCmd = new StatsCmd(event, serverStats);
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);

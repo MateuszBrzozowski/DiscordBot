@@ -14,8 +14,8 @@ import java.util.List;
 public class StatsDatabase {
 
     private final String DISCORD_USERS = "discrduser";
-    private Factory factory = new DBFactory();
-    private DBConnector connector = factory.createDB(DBType.STATS);
+    private final Factory factory = new DBFactory();
+    private final DBConnector connector = factory.createDB(DBType.STATS);
 
     public void addConnectPlayer(Player player) {
         String query = "INSERT INTO " + DISCORD_USERS + " (`userID`,`steamID`) " +

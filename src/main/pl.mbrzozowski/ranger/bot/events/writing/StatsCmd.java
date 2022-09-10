@@ -1,22 +1,22 @@
 package ranger.bot.events.writing;
 
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import ranger.embed.EmbedInfo;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import ranger.Repository;
-import ranger.stats.MapsStats;
 import ranger.stats.ServerStats;
 
 public class StatsCmd extends Proccess {
 
-    public StatsCmd(MessageReceivedEvent messageReceived) {
+    private final ServerStats serverStats;
+
+    public StatsCmd(MessageReceivedEvent messageReceived, ServerStats serverStats) {
         super(messageReceived);
+        this.serverStats = serverStats;
     }
 
     @Override
     public void proccessMessage(Message message) {
-        ServerStats serverStats = Repository.getServerStats();
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS)) {
             if (messageReceived.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
                 if (serverStats.isUserConnected(messageReceived.getAuthor().getId())) {
@@ -37,13 +37,6 @@ public class StatsCmd extends Proccess {
                 }
             } else {
                 EmbedInfo.youCanLinkedYourProfileOnChannel(messageReceived.getTextChannel());
-            }
-        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.STATS_LAST_TEN_MAPS)) {
-            if (messageReceived.getTextChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_ADMIN_CZAT)) {
-                if (message.isClanMember()) {
-                    MapsStats.showLastTenMaps(messageReceived);
-                    messageReceived.getMessage().delete().submit();
-                }
             }
         } else {
             getNextProccess().proccessMessage(message);

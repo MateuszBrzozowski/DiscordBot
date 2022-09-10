@@ -16,7 +16,6 @@ import ranger.recruit.RecruitOpinions;
 import ranger.recruit.RecruitsService;
 import ranger.response.ResponseMessage;
 import ranger.server.service.ServerService;
-import ranger.stats.ServerStats;
 
 @Service
 public class ButtonClickListener extends ListenerAdapter {
@@ -36,7 +35,6 @@ public class ButtonClickListener extends ListenerAdapter {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
         EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
         int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(interactionEvent.getUser().getId());
-        ServerStats serverStats = Repository.getServerStats();
         boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
 
@@ -76,8 +74,6 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SEED_ROLE)) {
             RoleEditor roleEditor = new RoleEditor();
             roleEditor.addRemoveRole(interactionEvent.getUser().getId(), RoleID.SEED_ID);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REFRESH_MAP_STATS)) {
-            serverStats.refreshMapStats();
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM)) {
             isIDCorrect = false;
             RecruitOpinions recrutOpinions = new RecruitOpinions();

@@ -1,11 +1,12 @@
 package ranger.stats;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 import ranger.embed.EmbedInfo;
 import ranger.embed.EmbedSettings;
 import ranger.helpers.Users;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -14,26 +15,25 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ServerStats {
 
-    private List<Player> connectedPlayers = new ArrayList<>();
-    private MapsStats mapStats = new MapsStats();
+    private final List<Player> connectedPlayers = new ArrayList<>();
 
-    public void initialize() {
+    public ServerStats() {
         pullConnectedUsers();
-        mapStats.initialize();
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
         PlayerStats playerStats = pullStatsFromDatabase(connectedPlayers.get(getIndex(userID)));
-        if (isPlayerData(playerStats)) {
+        if (hasPlayerData(playerStats)) {
             sendEmbedWithStats(userID, channel, playerStats);
         } else {
             EmbedInfo.noDataToShow(channel);
         }
     }
 
-    private boolean isPlayerData(PlayerStats playerStats) {
+    private boolean hasPlayerData(@NotNull PlayerStats playerStats) {
         return playerStats.getKills() != 0 || playerStats.getDeaths() != 0 || playerStats.getWounds() != 0;
     }
 
@@ -46,7 +46,7 @@ public class ServerStats {
         return false;
     }
 
-    public boolean connectUserToSteam(String userID, String steamID) {
+    public boolean connectUserToSteam(String userID, @NotNull String steamID) {
         if (steamID.length() == 17) {
             StatsDatabase database = new StatsDatabase();
             Player player = new Player(userID, steamID);
@@ -62,7 +62,7 @@ public class ServerStats {
         }
     }
 
-    private void sendEmbedWithStats(String userID, TextChannel channel, PlayerStats playerStats) {
+    private void sendEmbedWithStats(String userID, @NotNull TextChannel channel, @NotNull PlayerStats playerStats) {
         DecimalFormat df = new DecimalFormat("0.00");
 
         EmbedBuilder builder = new EmbedBuilder();
@@ -89,7 +89,7 @@ public class ServerStats {
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    private PlayerStats pullStatsFromDatabase(Player player) {
+    private @NotNull PlayerStats pullStatsFromDatabase(Player player) {
         StatsDatabase database = new StatsDatabase();
         PlayerStats playerStats = new PlayerStats(player);
         playerStats.setProfileName(database.pullProfileName(player.getSteamID()));
@@ -148,14 +148,5 @@ public class ServerStats {
                 }
             }
         }
-    }
-
-
-    public void sendMapsStats(MessageReceivedEvent messageReceived) {
-        mapStats.sendMapsStats(messageReceived);
-    }
-
-    public void refreshMapStats() {
-        mapStats.refreshMapStats();
     }
 }
