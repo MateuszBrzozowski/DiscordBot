@@ -43,7 +43,6 @@ public class WriteListener extends ListenerAdapter {
         DiceCmd diceCmd = new DiceCmd(event, diceGames);
         StatsCmd statsCmd = new StatsCmd(event);
         CheckUser checkUser = new CheckUser(event);
-        CounterMachine counterMachine = new CounterMachine(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
         ReminderCmd reminderCmd = new ReminderCmd(event);
@@ -62,8 +61,7 @@ public class WriteListener extends ListenerAdapter {
         statsCmd.setNextProccess(roles);
         roles.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
-        checkUser.setNextProccess(counterMachine);
-        counterMachine.setNextProccess(generatorCmd);
+        checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(serverServiceCmd);
         serverServiceCmd.setNextProccess(helpCmd);
