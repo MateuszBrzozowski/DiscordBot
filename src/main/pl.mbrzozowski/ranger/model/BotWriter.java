@@ -1,10 +1,12 @@
 package ranger.model;
 
-import ranger.helpers.CategoryAndChannelID;
-import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.springframework.stereotype.Service;
 import ranger.Repository;
+import ranger.helpers.CategoryAndChannelID;
 
+@Service
 public class BotWriter {
 
     private boolean isActive = false;
@@ -12,9 +14,13 @@ public class BotWriter {
 
     public void sendMsg(String msg) {
         isActive = false;
-        JDA jda = Repository.getJda();
-        TextChannel textChannel = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID).getTextChannelById(channelID);
-        textChannel.sendMessage(msg).queue();
+        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild != null) {
+            TextChannel textChannel = guild.getTextChannelById(channelID);
+            if (textChannel != null) {
+                textChannel.sendMessage(msg).queue();
+            }
+        }
     }
 
     public boolean isActive() {

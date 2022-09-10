@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ranger.bot.events.writing.*;
 import ranger.dice.DiceGames;
 import ranger.event.EventService;
+import ranger.model.BotWriter;
 import ranger.recruit.RecruitsService;
 
 @Service
@@ -17,12 +18,14 @@ public class WriteListener extends ListenerAdapter {
     private final EventService eventService;
     private final RecruitsService recruitsService;
     private final DiceGames diceGames;
+    private final BotWriter botWriter;
 
     @Autowired
-    public WriteListener(EventService eventService, RecruitsService recruitsService, DiceGames diceGames) {
+    public WriteListener(EventService eventService, RecruitsService recruitsService, DiceGames diceGames, BotWriter botWriter) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
+        this.botWriter = botWriter;
     }
 
 
@@ -49,7 +52,7 @@ public class WriteListener extends ListenerAdapter {
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
         HelpCmd helpCmd = new HelpCmd(event);
         RecruitCmd recrutCmd = new RecruitCmd(event, recruitsService);
-        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService);
+        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
         Roles roles = new Roles(event);
         ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
         InvalidCmd invalidCmd = new InvalidCmd(event);
