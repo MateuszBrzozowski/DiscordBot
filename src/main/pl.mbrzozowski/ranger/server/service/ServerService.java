@@ -1,12 +1,5 @@
 package ranger.server.service;
 
-import ranger.embed.EmbedInfo;
-import ranger.embed.EmbedSettings;
-import ranger.event.ButtonClickType;
-import ranger.helpers.CategoryAndChannelID;
-import ranger.helpers.ComponentService;
-import ranger.helpers.RoleID;
-import ranger.model.MemberWithPrivateChannel;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -17,7 +10,15 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 import ranger.Repository;
+import ranger.embed.EmbedInfo;
+import ranger.embed.EmbedSettings;
+import ranger.event.ButtonClickType;
+import ranger.helpers.CategoryAndChannelID;
+import ranger.helpers.ComponentService;
+import ranger.helpers.RoleID;
+import ranger.model.MemberWithPrivateChannel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,10 +27,11 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 
+@Service
 public class ServerService {
 
-    private Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-    private List<MemberWithPrivateChannel> reports = new ArrayList<>();
+    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+    private final List<MemberWithPrivateChannel> reports = new ArrayList<>();
 
     public void initialize() {
         pullUsersFromDatabase();

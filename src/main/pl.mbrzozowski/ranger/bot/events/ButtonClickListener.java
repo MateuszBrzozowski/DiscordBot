@@ -23,18 +23,19 @@ public class ButtonClickListener extends ListenerAdapter {
 
     private final EventService eventService;
     private final RecruitsService recruitsService;
+    private final ServerService serverService;
 
     @Autowired
-    public ButtonClickListener(EventService events, RecruitsService recruitsService) {
+    public ButtonClickListener(EventService events, RecruitsService recruitsService, ServerService serverService) {
         this.eventService = events;
         this.recruitsService = recruitsService;
+        this.serverService = serverService;
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
         EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
         int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(interactionEvent.getUser().getId());
-        ServerService serverService = Repository.getServerService();
         ServerStats serverStats = Repository.getServerStats();
         boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
@@ -68,7 +69,7 @@ public class ButtonClickListener extends ListenerAdapter {
             ComponentService.disableButtons(interactionEvent.getChannel().getId(), interactionEvent.getMessageId());
             EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
-            ComponentService componentService = new ComponentService(recruitsService);
+            ComponentService componentService = new ComponentService(recruitsService, serverService);
             componentService.removeChannel(interactionEvent);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
             interactionEvent.getMessage().delete().queue();

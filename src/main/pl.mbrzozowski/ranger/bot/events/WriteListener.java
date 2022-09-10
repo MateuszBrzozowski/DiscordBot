@@ -11,6 +11,7 @@ import ranger.dice.DiceGames;
 import ranger.event.EventService;
 import ranger.model.BotWriter;
 import ranger.recruit.RecruitsService;
+import ranger.server.service.ServerService;
 
 @Service
 public class WriteListener extends ListenerAdapter {
@@ -19,13 +20,19 @@ public class WriteListener extends ListenerAdapter {
     private final RecruitsService recruitsService;
     private final DiceGames diceGames;
     private final BotWriter botWriter;
+    private final ServerService serverService;
 
     @Autowired
-    public WriteListener(EventService eventService, RecruitsService recruitsService, DiceGames diceGames, BotWriter botWriter) {
+    public WriteListener(EventService eventService,
+                         RecruitsService recruitsService,
+                         DiceGames diceGames,
+                         BotWriter botWriter,
+                         ServerService serverService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
         this.botWriter = botWriter;
+        this.serverService = serverService;
     }
 
 
@@ -53,7 +60,7 @@ public class WriteListener extends ListenerAdapter {
         RecruitCmd recrutCmd = new RecruitCmd(event, recruitsService);
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
         Roles roles = new Roles(event);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, serverService);
         InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 

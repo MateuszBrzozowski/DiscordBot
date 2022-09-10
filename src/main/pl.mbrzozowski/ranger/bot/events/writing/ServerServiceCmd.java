@@ -1,23 +1,24 @@
 package ranger.bot.events.writing;
 
-import ranger.embed.EmbedInfo;
-import ranger.helpers.Commands;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import ranger.Repository;
+import ranger.embed.EmbedInfo;
+import ranger.helpers.Commands;
 import ranger.server.service.ServerService;
 import ranger.server.whitelist.Whitelist;
 
 public class ServerServiceCmd extends Proccess {
 
-    public ServerServiceCmd(MessageReceivedEvent messageReceived) {
+    private final ServerService serverService;
+
+    public ServerServiceCmd(MessageReceivedEvent messageReceived, ServerService serverService) {
         super(messageReceived);
+        this.serverService = serverService;
     }
 
     @Override
     public void proccessMessage(Message message) {
         String channelID = messageReceived.getChannel().getId();
-        ServerService serverService = Repository.getServerService();
         boolean isChannelSS = serverService.isChannelOnList(channelID);
         if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && message.isAdmin()) {
             messageReceived.getMessage().delete().submit();
