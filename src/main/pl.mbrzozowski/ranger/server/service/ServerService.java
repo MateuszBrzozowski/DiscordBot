@@ -76,7 +76,7 @@ public class ServerService {
     }
 
     public void removeChannel(@NotNull ButtonInteractionEvent event) {
-        clientRepository.deleteByChannelId(event.getChannel().getId());
+        deleteByChannelId(event.getChannel().getId());
     }
 
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {

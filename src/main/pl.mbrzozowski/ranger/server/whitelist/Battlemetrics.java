@@ -1,6 +1,7 @@
 package ranger.server.whitelist;
 
 
+import org.jetbrains.annotations.Nullable;
 import ranger.helpers.RangerLogger;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -65,7 +66,7 @@ public class Battlemetrics {
     }
 
 
-    private String getSteamID(String id) throws IOException {
+    private @Nullable String getSteamID(String id) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request requestSteamID = new Request.Builder()
                 .url("https://api.battlemetrics.com/players/" + id + "?include=identifier&fields[identifier]=type%2Cidentifier")

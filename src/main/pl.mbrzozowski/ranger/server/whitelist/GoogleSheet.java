@@ -21,9 +21,9 @@ public class GoogleSheet {
 
     protected static final Logger logger = LoggerFactory.getLogger(GoogleSheet.class.getName());
     private static Sheets sheetsService;
-    private static String APPLICATION_NAME = "rangers-polska-whitelist";
+    private static final String APPLICATION_NAME = "rangers-polska-whitelist";
     private final List<Player> players;
-    private List<List<Object>> playersDataToSheet = new ArrayList<>();
+    private final List<List<Object>> playersDataToSheet = new ArrayList<>();
 
     public GoogleSheet(List<Player> players) {
         this.players = players;

@@ -10,7 +10,6 @@ import ranger.embed.EmbedInfo;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
 import ranger.server.service.ServerService;
-import ranger.server.whitelist.Whitelist;
 
 public class ServerServiceCmd extends Proccess {
 
@@ -30,10 +29,11 @@ public class ServerServiceCmd extends Proccess {
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
             serverService.closeChannel(messageReceived);
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.UPDATE_WL) && message.isAdmin() && messageReceived.isFromType(ChannelType.PRIVATE)) {
-            new Thread(() -> {
-                Whitelist whitelist = new Whitelist();
-                whitelist.whitelistUpdate();
-            }).start();
+            messageReceived.getMessage().reply("Usługa wyłączona").queue();
+//            new Thread(() -> {
+//                Whitelist whitelist = new Whitelist();
+//                whitelist.whitelistUpdate();
+//            }).start();
         } else {
             getNextProccess().proccessMessage(message);
         }
