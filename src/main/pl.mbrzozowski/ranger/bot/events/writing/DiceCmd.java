@@ -2,13 +2,17 @@ package ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ranger.dice.DiceGames;
 import ranger.helpers.Commands;
-import ranger.model.DiceGame;
+import ranger.dice.DiceGame;
 
 public class DiceCmd extends Proccess {
 
-    public DiceCmd(MessageReceivedEvent messageReceived) {
+    private final DiceGames diceGames;
+
+    public DiceCmd(MessageReceivedEvent messageReceived, DiceGames diceGames) {
         super(messageReceived);
+        this.diceGames = diceGames;
     }
 
     @Override
@@ -21,12 +25,12 @@ public class DiceCmd extends Proccess {
                     diceGame.playSolo(messageReceived);
                 } else if (message.getWords().length > 1) {
                     DiceGame diceGame = new DiceGame(message.getWords(), messageReceived);
-                    getDice().addGame(diceGame);
+                    diceGames.addGame(diceGame);
                 }
             } else if (!messageReceived.getAuthor().isBot()) {
-                if (getDice().isActiveGameOnChannelID(messageReceived.getChannel().getId())) {
+                if (diceGames.isActiveGameOnChannelID(messageReceived.getChannel().getId())) {
                     messageReceived.getMessage().delete().submit();
-                    getDice().play(messageReceived);
+                    diceGames.play(messageReceived);
                 } else {
                     getNextProccess().proccessMessage(message);
                 }

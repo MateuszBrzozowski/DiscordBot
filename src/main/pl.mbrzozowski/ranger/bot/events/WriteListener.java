@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ranger.bot.events.writing.*;
+import ranger.dice.DiceGames;
 import ranger.event.EventService;
 import ranger.recruit.RecruitsService;
 
@@ -15,11 +16,13 @@ public class WriteListener extends ListenerAdapter {
 
     private final EventService eventService;
     private final RecruitsService recruitsService;
+    private final DiceGames diceGames;
 
     @Autowired
-    public WriteListener(EventService eventService, RecruitsService recruitsService) {
+    public WriteListener(EventService eventService, RecruitsService recruitsService, DiceGames diceGames) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
+        this.diceGames = diceGames;
     }
 
 
@@ -34,7 +37,7 @@ public class WriteListener extends ListenerAdapter {
                 event.getAuthor().getId(),
                 event);
 
-        DiceCmd diceCmd = new DiceCmd(event);
+        DiceCmd diceCmd = new DiceCmd(event, diceGames);
         StatsCmd statsCmd = new StatsCmd(event);
         CheckUser checkUser = new CheckUser(event);
         CounterMachine counterMachine = new CounterMachine(event);

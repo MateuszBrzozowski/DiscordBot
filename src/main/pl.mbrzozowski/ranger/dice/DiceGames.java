@@ -1,10 +1,13 @@
-package ranger.model;
+package ranger.dice;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class DiceGames {
     private List<DiceGame> diceGames = new ArrayList<>();
 
@@ -19,7 +22,7 @@ public class DiceGames {
         return false;
     }
 
-    public void play(MessageReceivedEvent event) {
+    public void play(@NotNull MessageReceivedEvent event) {
         int index = getIndexOfGame(event.getChannel().getId());
         diceGames.get(index).play(event);
         diceGames.remove(index);

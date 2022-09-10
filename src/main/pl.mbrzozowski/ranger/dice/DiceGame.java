@@ -1,4 +1,4 @@
-package ranger.model;
+package ranger.dice;
 
 import ranger.embed.EmbedSettings;
 import ranger.helpers.Users;

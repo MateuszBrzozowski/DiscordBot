@@ -6,13 +6,11 @@ import ranger.event.EventsGeneratorModel;
 import ranger.event.EventsSettingsModel;
 import ranger.event.reminder.Timers;
 import ranger.model.BotWriter;
-import ranger.model.DiceGames;
 import ranger.server.service.ServerService;
 import ranger.stats.ServerStats;
 
 public class Repository {
 
-    private static final DiceGames diceGames = new DiceGames();
     private static final EventsGeneratorModel eventsGeneratorModel = new EventsGeneratorModel();
     private static final EventsSettingsModel eventsSettingsModel = new EventsSettingsModel();
     private static final Timers timers = new Timers();
@@ -22,9 +20,6 @@ public class Repository {
     private static final ServerStats serverStats = new ServerStats();
     private static JDA jda;
 
-    public static DiceGames getDiceGames() {
-        return diceGames;
-    }
 
     public static EventsGeneratorModel getEventsGeneratorModel() {
         return eventsGeneratorModel;
