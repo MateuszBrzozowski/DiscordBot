@@ -1,8 +1,13 @@
 package ranger.bot.events.writing;
 
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
+import ranger.Repository;
 import ranger.embed.EmbedInfo;
+import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.Commands;
 import ranger.server.service.ServerService;
 import ranger.server.whitelist.Whitelist;
@@ -17,14 +22,12 @@ public class ServerServiceCmd extends Proccess {
     }
 
     @Override
-    public void proccessMessage(Message message) {
+    public void proccessMessage(@NotNull Message message) {
         String channelID = messageReceived.getChannel().getId();
-        boolean isChannelSS = serverService.isChannelOnList(channelID);
         if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && message.isAdmin()) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.serverService(messageReceived.getChannel());
-        } else if (isChannelSS && message.getWords()[0].equalsIgnoreCase(Commands.CLOSE)) {
-            messageReceived.getMessage().delete().submit();
+        } else if (message.getWords()[0].equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
             serverService.closeChannel(messageReceived);
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.UPDATE_WL) && message.isAdmin() && messageReceived.isFromType(ChannelType.PRIVATE)) {
             new Thread(() -> {
@@ -34,5 +37,16 @@ public class ServerServiceCmd extends Proccess {
         } else {
             getNextProccess().proccessMessage(message);
         }
+    }
+
+    private boolean isServerCategory(String channelID) {
+        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        if (textChannel != null) {
+            Category parentCategory = textChannel.getParentCategory();
+            if (parentCategory != null) {
+                return parentCategory.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER);
+            }
+        }
+        return false;
     }
 }

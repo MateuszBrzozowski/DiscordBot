@@ -9,4 +9,8 @@ import java.util.Optional;
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findByUserId(String userID);
+
+    void deleteByChannelId(String channelID);
+
+    Optional<Client> findByChannelId(String channelID);
 }

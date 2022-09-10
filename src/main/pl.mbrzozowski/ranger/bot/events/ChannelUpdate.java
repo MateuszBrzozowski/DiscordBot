@@ -26,9 +26,7 @@ public class ChannelUpdate extends ListenerAdapter {
         String channelID = event.getChannel().getId();
         recruitsService.deleteChannelByID(channelID);
         eventService.deleteByChannelId(channelID);
-        if (serverService.isChannelOnList(channelID)) {
-            serverService.removeUserFromList(channelID);
-        }
+        serverService.deleteByChannelId(channelID);
     }
 
 }

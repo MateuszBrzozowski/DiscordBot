@@ -420,7 +420,7 @@ public class EmbedInfo extends EmbedCreator {
                 "4. Add evidence. Screenshot or video link (e.g. Youtube).", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
-                .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
+                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
     }
 
@@ -440,7 +440,7 @@ public class EmbedInfo extends EmbedCreator {
                 "2. Server name.", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
-                .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
+                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
     }
 
@@ -458,7 +458,7 @@ public class EmbedInfo extends EmbedCreator {
                 "screenshots, servername the issue occured on and related steamId64", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
-                .setActionRow(Button.primary("close", "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
+                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
     }
 

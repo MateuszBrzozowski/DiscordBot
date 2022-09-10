@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ranger.Repository;
@@ -17,19 +16,17 @@ import ranger.event.ButtonClickType;
 import ranger.helpers.CategoryAndChannelID;
 import ranger.helpers.ComponentService;
 import ranger.helpers.RoleID;
-import ranger.model.MemberWithPrivateChannel;
 import ranger.response.ResponseMessage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Optional;
 
 @Service
 public class ServerService {
 
     private final ClientRepository clientRepository;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-    //    private final List<MemberWithPrivateChannel> reports = new ArrayList<>();
 
     public ServerService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
@@ -44,102 +41,42 @@ public class ServerService {
         }
     }
 
-    public boolean isChannelOnList(String channelID) {
-        for (MemberWithPrivateChannel l : reports) {
-            if (l.getChannelID().equalsIgnoreCase(channelID)) {
-                return true;
+    public void closeChannel(@NotNull MessageReceivedEvent event) {
+        Optional<Client> clientOptional = findByChannelId(event.getChannel().getId());
+        if (clientOptional.isPresent()) {
+            event.getMessage().delete().submit();
+            Member member = event.getGuild().getMemberById(clientOptional.get().getUserId());
+            if (member != null) {
+                event
+                        .getTextChannel()
+                        .getManager()
+                        .putPermissionOverride(member, null, permissions)
+                        .queue();
             }
+            EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
         }
-        return false;
-    }
-
-    public void closeChannel(MessageReceivedEvent event) {
-        TextChannelManager manager = event.getTextChannel().getManager();
-        String channelID = event.getChannel().getId();
-        String userID = getUserID(channelID);
-        Member member = event.getGuild().getMemberById(userID);
-        if (member != null) {
-            manager.putPermissionOverride(member, null, permissions);
-            manager.queue();
-        }
-        EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
         ComponentService.disableButtons(event.getChannel().getId(), event.getMessageId());
-        TextChannelManager manager = event.getTextChannel().getManager();
-        String channelID = event.getTextChannel().getId();
-        String userID = getUserID(channelID);
-        Member member = event.getGuild().getMemberById(userID);
-        if (member != null) {
-            manager.putPermissionOverride(member, null, permissions);
-            manager.queue();
+        Optional<Client> clientOptional = clientRepository.findByChannelId(event.getChannel().getId());
+        if (clientOptional.isPresent()) {
+            Guild guild = event.getGuild();
+            if (guild != null) {
+                Member member = guild.getMemberById(clientOptional.get().getUserId());
+                if (member != null) {
+                    event.getTextChannel()
+                            .getManager()
+                            .putPermissionOverride(member, null, permissions)
+                            .queue();
+                }
+                EmbedInfo.closeChannel(event.getUser().getId(), event.getTextChannel());
+            }
         }
-        EmbedInfo.closeChannel(event.getUser().getId(), event.getTextChannel());
     }
 
     public void removeChannel(@NotNull ButtonInteractionEvent event) {
-        removeUserFromList(event.getChannel().getId());
-    }
-
-    public void removeUserFromList(String channelID) {
-        for (int i = 0; i < reports.size(); i++) {
-            if (reports.get(i).getChannelID().equalsIgnoreCase(channelID)) {
-                reports.remove(i);
-                ServerServiceDatabase ssdb = new ServerServiceDatabase();
-                ssdb.removeRecord(channelID);
-            }
-        }
-    }
-
-    private void pullUsersFromDatabase() {
-        ServerServiceDatabase ssdb = new ServerServiceDatabase();
-        ResultSet resultSet = ssdb.pullAllUsers();
-        this.reports.clear();
-
-        List<MemberWithPrivateChannel> memberServerServicesToDeleete = new ArrayList<>();
-        List<TextChannel> allTextChannels = Repository.getJda().getTextChannels();
-
-        if (resultSet != null) {
-            while (true) {
-                try {
-                    if (!resultSet.next()) {
-                        break;
-                    } else {
-                        String userID = resultSet.getString("userID");
-                        String userName = resultSet.getString("userName");
-                        String channelID = resultSet.getString("channelID");
-                        MemberWithPrivateChannel m = new MemberWithPrivateChannel(userID, userName, channelID);
-                        boolean isActive = false;
-                        for (TextChannel tc : allTextChannels) {
-                            if (tc.getId().equalsIgnoreCase(channelID)) {
-                                isActive = true;
-                                break;
-                            }
-                        }
-                        if (isActive) {
-                            reports.add(m);
-                        } else {
-                            memberServerServicesToDeleete.add(m);
-                        }
-                    }
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-        }
-        for (MemberWithPrivateChannel m : memberServerServicesToDeleete) {
-            ssdb.removeRecord(m.getChannelID());
-        }
-    }
-
-    private String getUserID(String channelID) {
-        for (MemberWithPrivateChannel r : reports) {
-            if (r.getChannelID().equalsIgnoreCase(channelID)) {
-                return r.getUserID();
-            }
-        }
-        return null;
+        clientRepository.deleteByChannelId(event.getChannel().getId());
     }
 
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
@@ -188,5 +125,13 @@ public class ServerService {
     private boolean userHasReport(String userID) {
         Optional<Client> client = clientRepository.findByUserId(userID);
         return client.isPresent();
+    }
+
+    public void deleteByChannelId(String channelID) {
+        clientRepository.deleteByChannelId(channelID);
+    }
+
+    public Optional<Client> findByChannelId(String channelID) {
+        return clientRepository.findByChannelId(channelID);
     }
 }

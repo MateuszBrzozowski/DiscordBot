@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import ranger.Repository;
 import ranger.embed.EmbedInfo;
 import ranger.recruit.RecruitsService;
@@ -19,6 +20,7 @@ public class ComponentService {
     private final RecruitsService recruitsService;
     private final ServerService serverService;
 
+    @Autowired
     public ComponentService(RecruitsService recruitsService, ServerService serverService) {
         this.recruitsService = recruitsService;
         this.serverService = serverService;
@@ -62,7 +64,7 @@ public class ComponentService {
         thread.start();
     }
 
-    private void whichCategory(ButtonInteractionEvent event) {
+    private void whichCategory(@NotNull ButtonInteractionEvent event) {
         String parentCategoryId = event.getTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
             if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
