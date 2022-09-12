@@ -19,6 +19,7 @@ import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;

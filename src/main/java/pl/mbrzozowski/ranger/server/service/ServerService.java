@@ -16,6 +16,7 @@ import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentService;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
+import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.util.Collection;

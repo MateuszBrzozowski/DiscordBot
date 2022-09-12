@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;
