@@ -6,4 +6,5 @@ import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
 
 @Repository
 public interface UsersReminderRepository extends JpaRepository<UsersReminder, Long> {
+    void deleteByUserId(String userID);
 }

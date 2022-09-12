@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
 import pl.mbrzozowski.ranger.dice.DiceGames;
 import pl.mbrzozowski.ranger.event.EventService;
+import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
@@ -23,6 +24,7 @@ public class WriteListener extends ListenerAdapter {
     private final BotWriter botWriter;
     private final ServerService serverService;
     private final ServerStats serverStats;
+    private final UsersReminderService usersReminderService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -30,13 +32,15 @@ public class WriteListener extends ListenerAdapter {
                          DiceGames diceGames,
                          BotWriter botWriter,
                          ServerService serverService,
-                         ServerStats serverStats) {
+                         ServerStats serverStats,
+                         UsersReminderService usersReminderService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
         this.botWriter = botWriter;
         this.serverService = serverService;
         this.serverStats = serverStats;
+        this.usersReminderService = usersReminderService;
     }
 
 
@@ -56,7 +60,7 @@ public class WriteListener extends ListenerAdapter {
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
-        ReminderCmd reminderCmd = new ReminderCmd(event);
+        ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);

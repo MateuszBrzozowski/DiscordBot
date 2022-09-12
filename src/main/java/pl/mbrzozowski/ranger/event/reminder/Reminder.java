@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.event.reminder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.Event;
@@ -22,15 +23,16 @@ public class Reminder extends TimerTask {
     private final String eventID;
     private final TypeOfReminder typeOfReminder;
     private final EventService eventService;
+    private final UsersReminderService usersReminderService;
 
-
-    /**
-     * @param eventID - ID eventu, id wiadmości w której jest lista z zapisami.
-     */
-    public Reminder(String eventID, TypeOfReminder type, EventService eventService) {
+    public Reminder(String eventID,
+                    TypeOfReminder type,
+                    EventService eventService,
+                    UsersReminderService usersReminderService) {
         this.eventID = eventID;
         this.typeOfReminder = type;
         this.eventService = eventService;
+        this.usersReminderService = usersReminderService;
     }
 
     @Override
@@ -38,28 +40,34 @@ public class Reminder extends TimerTask {
         Optional<Event> eventOptional = eventService.findEventByMsgId(eventID);
         if (eventOptional.isPresent()) {
             Event event = eventOptional.get();
-            UsersReminderService reminderOFF = new UsersReminderService();
             List<Player> mainList = eventService.getMainList(event);
             List<Player> reserveList = eventService.getReserveList(event);
+            List<UsersReminder> usersReminderList = usersReminderService.findAll();
             RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" +
                     reserveList.size() + "] - Wysyłam przypomnienia.", eventID);
             String linkToEvent = "[" + event.getName() + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + eventID + ")";
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             String dateTimeEvent = event.getDate().format(dateFormat);
-            for (Player value : mainList) {
-                String userID = value.getUserId();
-                if (!reminderOFF.userHasOff(userID)) {
-                    sendMessage(userID, linkToEvent, dateTimeEvent);
+            for (Player player : mainList) {
+                if (userHasOn(usersReminderList, player.getUserId())) {
+                    sendMessage(player.getUserId(), linkToEvent, dateTimeEvent);
                 }
             }
             for (Player player : reserveList) {
-                String userID = player.getUserId();
-                if (!reminderOFF.userHasOff(userID)) {
-                    sendMessage(userID, linkToEvent, dateTimeEvent);
+                if (userHasOn(usersReminderList, player.getUserId())) {
+                    sendMessage(player.getUserId(), linkToEvent, dateTimeEvent);
                 }
             }
         }
+    }
+
+    private boolean userHasOn(@NotNull List<UsersReminder> list, String userId) {
+        int size = list.stream()
+                .filter(usersReminder -> usersReminder.getUserId().equalsIgnoreCase(userId))
+                .toList()
+                .size();
+        return size == 0;
     }
 
     private void sendMessage(String userID, String linkToEvent, String dateTimeEvent) {

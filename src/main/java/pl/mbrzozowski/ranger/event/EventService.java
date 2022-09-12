@@ -18,6 +18,7 @@ import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
+import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -32,14 +33,17 @@ import java.util.*;
 @Service
 @Slf4j
 public class EventService {
+
     private final EventRepository eventRepository;
     private final Timers timers;
+    private final UsersReminderService usersReminderService;
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
 
-    public EventService(EventRepository eventRepository, Timers timers) {
+    public EventService(EventRepository eventRepository, Timers timers, UsersReminderService usersReminderService) {
         this.eventRepository = eventRepository;
         this.timers = timers;
+        this.usersReminderService = usersReminderService;
     }
 
     public List<pl.mbrzozowski.ranger.event.Event> findAll() {
@@ -124,7 +128,7 @@ public class EventService {
                                 .date(dateTime)
                                 .build();
                         save(event);
-                        CreateReminder reminder = new CreateReminder(event, this, timers);
+                        CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
                         reminder.create();
                     });
         } catch (Exception e) {
@@ -473,7 +477,7 @@ public class EventService {
 
     private void updateTimer(@NotNull pl.mbrzozowski.ranger.event.Event event) {
         timers.cancel(event.getMsgId());
-        CreateReminder reminder = new CreateReminder(event, this, timers);
+        CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
     }
 
@@ -530,11 +534,11 @@ public class EventService {
         });
     }
 
-    public List<Player> getMainList(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public List<Player> getMainList(@NotNull Event event) {
         return event.getPlayers().stream().filter(Player::isMainList).toList();
     }
 
-    public List<Player> getReserveList(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public List<Player> getReserveList(@NotNull Event event) {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 

@@ -17,13 +17,18 @@ public class CreateReminder {
     private final String eventID;
     private final EventService eventService;
     private final Timers timers;
+    private final UsersReminderService usersReminderService;
 
 
-    public CreateReminder(@NotNull Event event, EventService eventService, Timers timers) {
+    public CreateReminder(@NotNull Event event,
+                          EventService eventService,
+                          Timers timers,
+                          UsersReminderService usersReminderService) {
         this.eventDateTime = event.getDate().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime();
         this.eventID = event.getMsgId();
         this.eventService = eventService;
         this.timers = timers;
+        this.usersReminderService = usersReminderService;
     }
 
     public void create() {
@@ -43,12 +48,12 @@ public class CreateReminder {
         }
     }
 
-    private void setReminderWithExactTime(LocalDateTime timerTme, TypeOfReminder type) {
+    private void setReminderWithExactTime(@NotNull LocalDateTime timerTme, TypeOfReminder type) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
         Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
         if (dateTimeNow.isBefore(timerTme)) {
             Timer timer = new Timer();
-            timer.schedule(new Reminder(eventID, type, eventService), eventDateTime);
+            timer.schedule(new Reminder(eventID, type, eventService, usersReminderService), eventDateTime);
             MyTimer myTimer = new MyTimer(eventID, timer);
             timers.add(myTimer);
         }
