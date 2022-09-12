@@ -3,8 +3,6 @@ package pl.mbrzozowski.ranger.event.reminder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.Event;
@@ -21,7 +19,6 @@ import java.util.TimerTask;
 
 public class Reminder extends TimerTask {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private final String eventID;
     private final TypeOfReminder typeOfReminder;
     private final EventService eventService;
@@ -38,11 +35,10 @@ public class Reminder extends TimerTask {
 
     @Override
     public void run() {
-//        EventService event = Repository.getEvent();
-        Optional<pl.mbrzozowski.ranger.event.Event> eventOptional = eventService.findEventByMsgId(eventID);
+        Optional<Event> eventOptional = eventService.findEventByMsgId(eventID);
         if (eventOptional.isPresent()) {
             Event event = eventOptional.get();
-            UsersReminderOFF reminderOFF = new UsersReminderOFF();
+            UsersReminderService reminderOFF = new UsersReminderService();
             List<Player> mainList = eventService.getMainList(event);
             List<Player> reserveList = eventService.getReserveList(event);
             RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" +

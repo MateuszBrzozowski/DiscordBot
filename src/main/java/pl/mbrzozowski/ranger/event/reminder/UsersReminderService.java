@@ -12,14 +12,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersReminderOFF {
+public class UsersReminderService {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     private Factory factory = new DBFactory();
     private DBConnector connector = factory.createDB(DBType.RANGER);
     private List<String> usersOff = new ArrayList<>();
 
-    public UsersReminderOFF() {
+    public UsersReminderService() {
         ResultSet allUsers = getAllUsers();
 
         if (allUsers != null) {

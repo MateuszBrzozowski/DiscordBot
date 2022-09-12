@@ -15,6 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.Player;
+import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
 import pl.mbrzozowski.ranger.recruit.Recruit;
 import pl.mbrzozowski.ranger.server.service.Client;
 
@@ -52,7 +53,12 @@ public class MainDataSourceConfiguration {
         properties.put("hibernate.hbm2ddl.auto", "update");
         return builder
                 .dataSource(mainDataSource())
-                .packages(Event.class, Player.class, Recruit.class, Client.class)
+                .packages(
+                        Event.class,
+                        Player.class,
+                        Recruit.class,
+                        Client.class,
+                        UsersReminder.class)
                 .properties(properties)
                 .build();
     }
