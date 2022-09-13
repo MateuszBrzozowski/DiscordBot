@@ -31,7 +31,7 @@ public class StatsCmd extends Proccess {
             if (messageReceived.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
                 if (serverStats.connectUserToSteam(messageReceived.getAuthor().getId(), message.getWords()[1])) {
                     EmbedInfo.connectSuccessfully(messageReceived.getTextChannel());
-                    serverStats.viewStatsForUser(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+//                    serverStats.viewStatsForUser(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
                 } else {
                     EmbedInfo.connectUnSuccessfully(messageReceived.getTextChannel());
                 }

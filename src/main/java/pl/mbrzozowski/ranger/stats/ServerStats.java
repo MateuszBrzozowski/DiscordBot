@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
+import pl.mbrzozowski.ranger.stats.model.DiscordUser;
+import pl.mbrzozowski.ranger.stats.service.*;
 
 import java.awt.*;
 import java.sql.ResultSet;
@@ -18,10 +20,24 @@ import java.util.List;
 @Service
 public class ServerStats {
 
+    private final DeathsService deathsService;
+    private final DiscordUserService discordUserService;
+    private final RevivesService revivesService;
+    private final SteamUsersService steamUsersService;
+    private final WoundsService woundsService;
     private final List<Player> connectedPlayers = new ArrayList<>();
 
-    public ServerStats() {
-        pullConnectedUsers();
+    public ServerStats(DeathsService deathsService,
+                       DiscordUserService discordUserService,
+                       RevivesService revivesService,
+                       SteamUsersService steamUsersService,
+                       WoundsService woundsService) {
+        this.deathsService = deathsService;
+        this.discordUserService = discordUserService;
+        this.revivesService = revivesService;
+        this.steamUsersService = steamUsersService;
+        this.woundsService = woundsService;
+//        pullConnectedUsers();
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
@@ -48,14 +64,8 @@ public class ServerStats {
 
     public boolean connectUserToSteam(String userID, @NotNull String steamID) {
         if (steamID.length() == 17) {
-            StatsDatabase database = new StatsDatabase();
-            Player player = new Player(userID, steamID);
-            if (isUserConnected(userID)) {
-                database.removeConnectPlayer(player);
-                removeConnectPlayer(userID);
-            }
-            connectedPlayers.add(player);
-            database.addConnectPlayer(player);
+            DiscordUser discordUser = new DiscordUser(userID, steamID);
+            discordUserService.save(discordUser);
             return true;
         } else {
             return false;
