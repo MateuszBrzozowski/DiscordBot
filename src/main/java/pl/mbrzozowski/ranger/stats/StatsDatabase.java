@@ -1,10 +1,10 @@
 package pl.mbrzozowski.ranger.stats;
 
+import pl.mbrzozowski.ranger.database.DBConnector;
 import pl.mbrzozowski.ranger.database.DBFactory;
 import pl.mbrzozowski.ranger.database.DBType;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
-import pl.mbrzozowski.ranger.database.DBConnector;
 import pl.mbrzozowski.ranger.database.Factory;
+import pl.mbrzozowski.ranger.helpers.RangerLogger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +16,10 @@ public class StatsDatabase {
     private final String DISCORD_USERS = "discrduser";
     private final Factory factory = new DBFactory();
     private final DBConnector connector = factory.createDB(DBType.STATS);
+    private static final String DB_STEAM_USERS = "dblog_steamusers";
+    private static final String DB_DEATHS = "dblog_deaths";
+    private static final String DB_WOUNDS = "dblog_wounds";
+    private static final String DB_REVIVES = "dblog_revives";
 
     public void addConnectPlayer(Player player) {
         String query = "INSERT INTO " + DISCORD_USERS + " (`userID`,`steamID`) " +
@@ -42,7 +46,7 @@ public class StatsDatabase {
     public String pullProfileName(String steamID) {
         ResultSet resultSet = null;
         String profileName = null;
-        String query = "SELECT lastName FROM `dblog_steamusers` WHERE steamID=\"" + steamID + "\"";
+        String query = "SELECT lastName FROM `" + DB_STEAM_USERS + "` WHERE steamID=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -63,7 +67,7 @@ public class StatsDatabase {
     public int pullKills(String steamID) {
         ResultSet resultSet = null;
         int kills = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_deaths` WHERE attacker=\"" + steamID + "\"";
+        String query = "SELECT COUNT(*) FROM `" + DB_DEATHS + "` WHERE attacker=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -84,7 +88,7 @@ public class StatsDatabase {
     public int pullDeaths(String steamID) {
         ResultSet resultSet = null;
         int deaths = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_deaths` WHERE victim=\"" + steamID + "\"";
+        String query = "SELECT COUNT(*) FROM `" + DB_DEATHS + "` WHERE victim=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -105,7 +109,7 @@ public class StatsDatabase {
     public int pullWounds(String steamID) {
         ResultSet resultSet = null;
         int wounds = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\"";
+        String query = "SELECT COUNT(*) FROM `" + DB_WOUNDS + "` WHERE attacker=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -126,7 +130,7 @@ public class StatsDatabase {
     public int pullRevives(String steamID) {
         ResultSet resultSet = null;
         int revives = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_revives` WHERE reviver=\"" + steamID + "\"";
+        String query = "SELECT COUNT(*) FROM `" + DB_REVIVES + "` WHERE reviver=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -147,7 +151,7 @@ public class StatsDatabase {
     public int pullRevivesYou(String steamID) {
         ResultSet resultSet = null;
         int revives = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_revives` WHERE victim=\"" + steamID + "\"";
+        String query = "SELECT COUNT(*) FROM `" + DB_REVIVES + "` WHERE victim=\"" + steamID + "\"";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -168,7 +172,7 @@ public class StatsDatabase {
     public int pullTeamkills(String steamID) {
         ResultSet resultSet = null;
         int teamkills = 0;
-        String query = "SELECT COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\" AND teamkill=1";
+        String query = "SELECT COUNT(*) FROM `" + DB_WOUNDS + "` WHERE attacker=\"" + steamID + "\" AND teamkill=1";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
             while (true) {
@@ -189,7 +193,7 @@ public class StatsDatabase {
     public ArrayList<Gun> pullGuns(String steamID) {
         ResultSet resultSet = null;
         ArrayList<Gun> guns = new ArrayList<>();
-        String query = "SELECT weapon, COUNT(*) FROM `dblog_wounds` WHERE attacker=\"" + steamID + "\"" +
+        String query = "SELECT weapon, COUNT(*) FROM `" + DB_WOUNDS + "` WHERE attacker=\"" + steamID + "\"" +
                 "GROUP BY `weapon` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
@@ -215,7 +219,7 @@ public class StatsDatabase {
     public ArrayList<PlayerCount> pullMostKills(String steamID) {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
-        String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_deaths` WHERE attacker=\"" + steamID + "\"" +
+        String query = "SELECT victimName, victim, COUNT(*) FROM `" + DB_DEATHS + "` WHERE attacker=\"" + steamID + "\"" +
                 "AND attacker!=victim GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
@@ -243,7 +247,7 @@ public class StatsDatabase {
     public ArrayList<PlayerCount> pullMostKilledBy(String steamID) {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
-        String query = "SELECT attackerName, attacker, COUNT(*) FROM `dblog_deaths` WHERE victim=\"" + steamID + "\"" +
+        String query = "SELECT attackerName, attacker, COUNT(*) FROM `" + DB_DEATHS + "` WHERE victim=\"" + steamID + "\"" +
                 "AND attacker!=victim GROUP BY `attacker` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
@@ -271,7 +275,7 @@ public class StatsDatabase {
     public ArrayList<PlayerCount> pullMostRevives(String steamID) {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
-        String query = "SELECT victimName, victim, COUNT(*) FROM `dblog_revives` WHERE reviver=\"" + steamID + "\"" +
+        String query = "SELECT victimName, victim, COUNT(*) FROM `" + DB_REVIVES + "` WHERE reviver=\"" + steamID + "\"" +
                 "AND reviver!=victim GROUP BY `victim` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
@@ -299,7 +303,7 @@ public class StatsDatabase {
     public ArrayList<PlayerCount> pullMostRevivedBy(String steamID) {
         ResultSet resultSet = null;
         ArrayList<PlayerCount> players = new ArrayList<>();
-        String query = "SELECT reviverName, reviver, COUNT(*) FROM `dblog_revives` WHERE victim=\"" + steamID + "\"" +
+        String query = "SELECT reviverName, reviver, COUNT(*) FROM `" + DB_REVIVES + "` WHERE victim=\"" + steamID + "\"" +
                 "AND reviver!=victim GROUP BY `reviver` ORDER BY `COUNT(*)` DESC";
         resultSet = connector.executeSelect(query);
         if (resultSet != null) {
