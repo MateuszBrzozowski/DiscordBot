@@ -25,20 +25,14 @@ public class EmbedCreator {
      * @return Enbed builder with color and Thumbnail
      */
     public static EmbedBuilder getEmbedBuilder(EmbedInfo.EmbedStyle style) {
-        switch (style) {
-            case DEFAULT_HELP:
-                return getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT, true);
-            case WARNING:
-                return getEmbedBuilder(Color.RED, ThumbnailType.WARNING);
-            case INF_GREEN:
-                return getEmbedBuilder(Color.GREEN);
-            case INF_RED:
-                return getEmbedBuilder(Color.RED);
-            case QUESTION:
-                return getEmbedBuilder(Color.YELLOW);
-            default:
-                return getEmbedBuilder(Color.YELLOW, EmbedInfo.ThumbnailType.DEFAULT);
-        }
+        return switch (style) {
+            case DEFAULT_HELP -> getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT, true);
+            case WARNING -> getEmbedBuilder(Color.RED, ThumbnailType.WARNING);
+            case INF_GREEN -> getEmbedBuilder(Color.GREEN);
+            case INF_RED -> getEmbedBuilder(Color.RED);
+            case QUESTION -> getEmbedBuilder(Color.YELLOW);
+            default -> getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT);
+        };
     }
 
     public static EmbedBuilder getEmbedBuilder(Color color) {
@@ -59,15 +53,9 @@ public class EmbedCreator {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(color);
         switch (thumbnailType) {
-            case DEFAULT:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL);
-                break;
-            case WARNING:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
-                break;
-            case DICE:
-                builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
-                break;
+            case DEFAULT -> builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            case WARNING -> builder.setThumbnail(EmbedSettings.THUMBNAIL_WARNING);
+            case DICE -> builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
         }
         return builder;
     }
