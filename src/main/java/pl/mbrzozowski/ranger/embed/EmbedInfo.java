@@ -15,10 +15,8 @@ import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
 import pl.mbrzozowski.ranger.helpers.*;
-import pl.mbrzozowski.ranger.stats.MapLayer;
 
 import java.awt.*;
-import java.util.List;
 
 @Slf4j
 public class EmbedInfo extends EmbedCreator {
@@ -521,17 +519,6 @@ public class EmbedInfo extends EmbedCreator {
         messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
                 .queue();
-    }
-
-    public static void showLastTenMaps(List<MapLayer> mapLayers, MessageReceivedEvent event) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
-        builder.setTitle("Ostatnie 10 map (min. 5 graczy)");
-        String mapsString = "";
-        for (int i = 0; i < mapLayers.size(); i++) {
-            mapsString += i + 1 + ". **" + mapLayers.get(i).getName() + "** - " + mapLayers.get(i).getLayerName() + "\n";
-        }
-        builder.setDescription(mapsString);
-        event.getTextChannel().sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void recruitAccepted(String userName, TextChannel textChannel) {
