@@ -7,8 +7,6 @@ public interface ComponentId {
     //ButtonClick
     String NEW_RECRUT = "newRecrut" + SUFFIX;
     String NEW_RECRUT_CONFIRM = "recrutY" + SUFFIX;
-    String NEW_RECRUT_DISCARD = "recrutN" + SUFFIX;
-    String QUESTIONNAIRE_END = "end_" + SUFFIX;
     String SERVER_SERVICE_REPORT = "Report" + SUFFIX;
     String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
     String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;
@@ -20,7 +18,6 @@ public interface ComponentId {
     String EVENTS_SIGN_IN_RESERVE = "reserve_" + SUFFIX;
     String EVENTS_SIGN_OUT = "out_" + SUFFIX;
     String OPEN_FORM = "openForm" + SUFFIX;
-    String REFRESH_MAP_STATS = "refreshMap" + SUFFIX;
     String CLOSE = "close" + SUFFIX;
     String CLOSE_YES = "closeYes" + SUFFIX;
     String CLOSE_NO = "closeNo" + SUFFIX;

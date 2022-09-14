@@ -2,7 +2,11 @@ package pl.mbrzozowski.ranger.helpers;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.Repository;
 
 import java.util.List;
@@ -13,28 +17,26 @@ public class Users {
      * @param userID ID użytkownika dla którego chcemy pobrać nick
      * @return Zwraca nick z konkretnego discorda lub ogólny nick użytkownika.
      */
-    public static String getUserNicknameFromID(String userID) {
+    public static @Nullable String getUserNicknameFromID(String userID) {
         JDA jda = Repository.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                String name = guild.getMemberById(userID).getNickname();
-                if (name == null) {
-                    name = jda.getUserById(userID).getName();
+                Member memberById = guild.getMemberById(userID);
+                String nickname = null;
+                if (memberById != null) {
+                    nickname = memberById.getNickname();
                 }
-                return name;
+                if (nickname == null) {
+                    User userById = jda.getUserById(userID);
+                    if (userById != null) {
+                        userById.getName();
+                    }
+                }
+                return nickname;
             }
         }
         return null;
-    }
-
-    /**
-     * @param userID ID użytkownika dla którego chcemy pobrać nick
-     * @return Zwraca nick ogólny użytkownika
-     */
-    public static String getUserName(String userID) {
-        JDA jda = Repository.getJda();
-        return jda.getUserById(userID).getName();
     }
 
     /**
@@ -47,10 +49,13 @@ public class Users {
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                List<Role> userRoles = guild.getMemberById(userID).getRoles();
-                for (Role role : userRoles) {
-                    if (role.getId().equalsIgnoreCase(roleID)) {
-                        return true;
+                Member memberById = guild.getMemberById(userID);
+                if (memberById != null) {
+                    List<Role> userRoles = memberById.getRoles();
+                    for (Role role : userRoles) {
+                        if (role.getId().equalsIgnoreCase(roleID)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -74,10 +79,7 @@ public class Users {
      * @param userID ID użytkownika którego sprawdzamy czy jest twórcą bota
      * @return Zwraca true jeżeli użytkownik to twórca bota, W innym przypadku zwraca false.
      */
-    public static boolean isUserDev(String userID) {
-        if (userID.equalsIgnoreCase(RoleID.DEV_ID)){
-            return true;
-        }
-        return false;
+    public static boolean isUserDev(@NotNull String userID) {
+        return userID.equalsIgnoreCase(RoleID.DEV_ID);
     }
 }

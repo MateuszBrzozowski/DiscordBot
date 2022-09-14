@@ -17,12 +17,9 @@ public class Validation {
     public static boolean isDateFormat(String source) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         try {
-            log.info(source);
             LocalDateTime date = LocalDateTime.parse(source + " 23:59", dateTimeFormatter);
-            log.info("Przekonwertowano datę");
             return true;
         } catch (DateTimeParseException e) {
-            log.info("Nie udało sie przekonwertować daty");
             RangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"", source, datePattern));
             return false;
         }

@@ -233,24 +233,12 @@ public class EventsSettings {
         removeThisEditor();
     }
 
-    private void embedNoPossibleEditig() {
-        String t = "Zmiany niemożliwe do wprowadzenia.";
-        String d = "Zamykam edytor eventów";
-        embedPatternOneField(Color.RED, t, d);
-    }
-
     private void removeThisEditor() {
         EventsSettingsModel model = Repository.getEventsSettingsModel();
         int index = model.userHaveActiveSettingsPanel(userID);
         if (index >= 0) {
             model.removeSettingsPanel(index);
         }
-    }
-
-    private void embedNoChanges() {
-        String t = "Nie wprowadzono żadnych zmian.";
-        String d = "Zamykam edytor eventów.";
-        embedPatternOneField(Color.RED, t, d);
     }
 
     private void embedCloseEditor() {
@@ -304,11 +292,6 @@ public class EventsSettings {
         embedPatternOneField(Color.RED, title, description);
     }
 
-    private void embedWhatMsgSend() {
-        String title = "Podaj wiadomośći jaką chcesz wysłać do wszystkich zapisanych użytkowników.";
-        embedPatternOneField(Color.YELLOW, title, "");
-    }
-
     private void embedGetDate() {
         String title = "Podaj nową datę dla eventu.";
         String description = "Format: DD.MM.YYYY";
@@ -351,7 +334,6 @@ public class EventsSettings {
 
 
     public boolean isPossiblyEditing() {
-        boolean possiblyEditing = true;
-        return possiblyEditing;
+        return true;
     }
 }
