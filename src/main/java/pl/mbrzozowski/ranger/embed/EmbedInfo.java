@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -29,69 +30,6 @@ public class EmbedInfo extends EmbedCreator {
                 "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością. \n", false);
         builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
         event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
-    }
-
-    /**
-     * Wysyła informację do użytkownika o userID, że jest już zapisany na liście eventu.
-     *
-     * @param userID ID użytkownika
-     */
-    public static void cantSignIn(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Jesteś już na liście");
-            builder.setDescription("Jesteś już na głównej liście w meczu na który próbowałeś się zapisać.");
-            builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    /**
-     * Wysyła informację do użytkownika o userID, że jest już zapisany na liście rezerwowej eventu.
-     *
-     * @param userID ID użytkownika
-     */
-    public static void cantSignInReserve(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Jesteś już na liście rezerwowej");
-            builder.setDescription("Jesteś już na rezerwowej liście w meczu na który próbowałeś się zapisać.");
-            builder.addField("", "Jeżeli nie widzisz siebie na liście, nie możesz się zapisać bo otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    /**
-     * Wysyła informację do użytkownika o userID, że jest nie jest zapisany na event więc nie może się wypisać.
-     *
-     * @param userID ID użytkownika
-     */
-    public static void cantSignOut(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Nie możesz wypisać się z tego meczu.");
-            builder.setDescription("Nie możesz wypisać się z meczu na który się nie zapisałeś!");
-            builder.addField("", "Jeżeli jednak jesteś na liście a nadal otrzymujesz tą wiadomość. Napisz do administracji.", false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    /**
-     * Wysyła informację do użytkownika że podał date i czas z przeszłości.
-     *
-     * @param userID ID użytkownika do którego wysyłana jest informacja
-     */
-    public static void dateTimeIsBeforeNow(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-            builder.setTitle("Podałeś nielogiczną datę i czas. Event w przeszłości?");
-            builder.setDescription("Podaj prawidłową datę i czas.");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
     }
 
     /**
@@ -125,19 +63,6 @@ public class EmbedInfo extends EmbedCreator {
                 .setActionRow(Button.success(ComponentId.REMOVE_YES, "Tak"),
                         Button.danger(ComponentId.REMOVE_NO, "Nie"))
                 .queue();
-    }
-
-    /**
-     * Wyświetla informację, że kanał podany w parametrze został otwarty.
-     *
-     * @param userID  ID użytkownika który zamyka kanał
-     * @param channel Kanał który został otwarty.
-     */
-    public static void openChannel(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-        builder.setTitle("Kanał otwarty");
-        builder.setDescription("Kanał otwarty przez " + Users.getUserNicknameFromID(userID) + ".");
-        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     /**
@@ -178,13 +103,6 @@ public class EmbedInfo extends EmbedCreator {
         String oldName = channel.getName();
         channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
     }
-
-    /**
-     * Wysyła do użytkownika o ID userID informację że ma już złożone podanie i nie może mieć więcej niż jednego.
-     *
-     * @param event ButtonInteractionEvent
-     */
-
 
     /**
      * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.
@@ -230,12 +148,14 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego jest wysyłana informacja.
      */
     public static void userHaveActiveEventGenerator(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-            builder.setTitle("MIAŁEŚ AKTYWNY GENERATOR");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+                builder.setTitle("MIAŁEŚ AKTYWNY GENERATOR");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     /**
@@ -244,12 +164,14 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego jest wysyłana informacja.
      */
     public static void createNewGenerator(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-            builder.setTitle("OTWIERAM NOWY GENERATOR");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                builder.setTitle("OTWIERAM NOWY GENERATOR");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     /**
@@ -260,32 +182,18 @@ public class EmbedInfo extends EmbedCreator {
     public static void noWriteOnLoggerChannel(@NotNull MessageReceivedEvent event) {
         if (!event.getAuthor().isBot()) {
             event.getMessage().delete().submit();
-            JDA jda = Repository.getJda();
-            jda.getUserById(event.getAuthor().getId()).openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-                builder.setTitle("Zachowajmy porządek!");
-                builder.setDescription("Panie administratorze! Zachowajmy czystość na kanale do loggowania. Proszę nie wtrącać się w moje wypociny.");
-                builder.setFooter(getFooter());
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
+            User userById = Repository.getJda().getUserById(event.getAuthor().getId());
+            if (userById != null) {
+                userById.openPrivateChannel().queue(privateChannel -> {
+                    EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
+                    builder.setTitle("Zachowajmy porządek!");
+                    builder.setDescription("Panie administratorze! Zachowajmy czystość na kanale do loggowania. Proszę nie wtrącać się w moje wypociny.");
+                    builder.setFooter(getFooter());
+                    privateChannel.sendMessageEmbeds(builder.build()).queue();
+                });
+            }
         }
     }
-
-
-    /**
-     * Wysyła do użytkownika o userID informację że event już się wydarzył.
-     *
-     * @param userID ID użytkownika do którego wysyłana jest wiadomość
-     */
-    public static void eventIsBefore(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-            builder.setTitle("Event już się wydarzył. Nie możesz się zapisać.");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
 
     /**
      * Wysyła informację że pomyślnie wyłączono przypomnienia dla eventów.
@@ -293,13 +201,15 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika
      */
     public static void reminderOff(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-            builder.setTitle("Przypomnienia wyłączone.");
-            builder.setDescription("Aby włączyć ponownie przypomnienia użyj komendy **!reminder On**");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                builder.setTitle("Przypomnienia wyłączone.");
+                builder.setDescription("Aby włączyć ponownie przypomnienia użyj komendy **!reminder On**");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     /**
@@ -308,13 +218,15 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika
      */
     public static void reminderOn(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-            builder.setTitle("Przypomnienia włączone.");
-            builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                builder.setTitle("Przypomnienia włączone.");
+                builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     /**
@@ -331,19 +243,20 @@ public class EmbedInfo extends EmbedCreator {
         } else if (whatChange.equals(EventChanges.REMOVE)) {
             description = "Wydarzenie zostaje odwołane.";
         }
-//        EventService event = Repository.getEvent();
         String link = "[" + event.getName() + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + event.getMsgId() + ")";
-        JDA jda = Repository.getJda();
+        User userById = Repository.getJda().getUserById(userID);
         String finalDescription = description + " Sprawdź szczegóły!";
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setTitle("**UWAGA:** Zmiany w wydarzeniu.");
-            builder.setDescription(finalDescription);
-            builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-            log.info("USER: {} -  wysłałem powiadomienie", userID);
-        });
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+                builder.setThumbnail(EmbedSettings.THUMBNAIL);
+                builder.setTitle("**UWAGA:** Zmiany w wydarzeniu.");
+                builder.setDescription(finalDescription);
+                builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+                log.info("USER: {} -  wysłałem powiadomienie", userID);
+            });
+        }
     }
 
     /**
@@ -352,23 +265,27 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego wysyłana jest informacja
      */
     public static void cancelEventGenerator(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-            builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     public static void cancelEventEditing(String userID) {
-        JDA jda = Repository.getJda();
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.GREEN);
-            builder.setTitle("Edytor zamknięty");
-            builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+        User userById = Repository.getJda().getUserById(userID);
+        if (userById != null) {
+            userById.openPrivateChannel().queue(privateChannel -> {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(Color.GREEN);
+                builder.setTitle("Edytor zamknięty");
+                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
+                privateChannel.sendMessageEmbeds(builder.build()).queue();
+            });
+        }
     }
 
     public static void seedersRoleJoining(TextChannel channel) {
@@ -406,16 +323,20 @@ public class EmbedInfo extends EmbedCreator {
     public static void sendEmbedReport(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
         builder.setTitle("Report player");
-        builder.addField("", "Zgłoś gracza według poniższego formularza.\n\n" +
-                "1. Podaj nick.\n" +
-                "2. Opisz sytuację i podaj powód dlaczego zgłaszasz gracza.\n" +
-                "3. Podaj nazwę serwera.\n" +
-                "4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).", false);
-        builder.addField("--------------------", "Report player according to the form below.\n\n" +
-                "1. Player nick.\n" +
-                "2. Describe of bad behaviour.\n" +
-                "3. Server name.\n" +
-                "4. Add evidence. Screenshot or video link (e.g. Youtube).", false);
+        builder.addField("", """
+                Zgłoś gracza według poniższego formularza.
+
+                1. Podaj nick.
+                2. Opisz sytuację i podaj powód dlaczego zgłaszasz gracza.
+                3. Podaj nazwę serwera.
+                4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).""", false);
+        builder.addField("--------------------", """
+                Report player according to the form below.
+
+                1. Player nick.
+                2. Describe of bad behaviour.
+                3. Server name.
+                4. Add evidence. Screenshot or video link (e.g. Youtube).""", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
@@ -430,12 +351,14 @@ public class EmbedInfo extends EmbedCreator {
     public static void sendEmbedUnban(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLUE, ThumbnailType.DEFAULT);
         builder.setTitle("Unban player");
-        builder.addField("", "Napisz tutaj jeżeli chcesz odowłać swój ban.\n" +
-                "1. Podaj swój nick i/lub steamid.\n" +
-                "2. Podaj nazwę serwera.", false);
-        builder.addField("--------------------", "Write here if you want to revoke your ban.\n" +
-                "1. Provide your ingame nick and/or steamid.\n" +
-                "2. Server name.", false);
+        builder.addField("", """
+                Napisz tutaj jeżeli chcesz odowłać swój ban.
+                1. Podaj swój nick i/lub steamid.
+                2. Podaj nazwę serwera.""", false);
+        builder.addField("--------------------", """
+                Write here if you want to revoke your ban.
+                1. Provide your ingame nick and/or steamid.
+                2. Server name.""", false);
         channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
@@ -463,9 +386,13 @@ public class EmbedInfo extends EmbedCreator {
     public static void notConnectedAccount(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLACK, ThumbnailType.DEFAULT);
         builder.setTitle("Your discord account isn't linked to your Steam profile.");
-        builder.setDescription("If you want to link your discord account to your steam account use the command **!profile <steam64ID>**\n\n" +
-                "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
-                "e.g. \n*!profile 76561197990543288*");
+        builder.setDescription("""
+                If you want to link your discord account to your steam account use the command **!profile <steam64ID>**
+
+                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
+
+                e.g.\s
+                *!profile 76561197990543288*""");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
@@ -480,8 +407,11 @@ public class EmbedInfo extends EmbedCreator {
     public static void connectUnSuccessfully(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Steam64ID is not valid");
-        builder.setDescription("Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
-                "e.g. \n*!profile 76561197990543288*");
+        builder.setDescription("""
+                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
+
+                e.g.\s
+                *!profile 76561197990543288*""");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
@@ -494,9 +424,13 @@ public class EmbedInfo extends EmbedCreator {
     public static void noDataToShow(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
         builder.setTitle("No data to show.");
-        builder.setDescription("If you played on our server and there is no data, please check your Steam64ID and update it by command !profile.\n\n" +
-                "Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/\n\n" +
-                "e.g. \n*!profile 76561197990543288*");
+        builder.setDescription("""
+                If you played on our server and there is no data, please check your Steam64ID and update it by command !profile.
+
+                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
+
+                e.g.\s
+                *!profile 76561197990543288*""");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
