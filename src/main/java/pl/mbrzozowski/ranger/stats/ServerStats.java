@@ -1,23 +1,25 @@
 package pl.mbrzozowski.ranger.stats;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.Users;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
-import pl.mbrzozowski.ranger.stats.model.DiscordUser;
+import pl.mbrzozowski.ranger.stats.model.*;
 import pl.mbrzozowski.ranger.stats.service.*;
 
 import java.awt.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Slf4j
 public class ServerStats {
 
     private final DeathsService deathsService;
@@ -25,7 +27,6 @@ public class ServerStats {
     private final RevivesService revivesService;
     private final SteamUsersService steamUsersService;
     private final WoundsService woundsService;
-    private final List<Player> connectedPlayers = new ArrayList<>();
 
     public ServerStats(DeathsService deathsService,
                        DiscordUserService discordUserService,
@@ -37,13 +38,16 @@ public class ServerStats {
         this.revivesService = revivesService;
         this.steamUsersService = steamUsersService;
         this.woundsService = woundsService;
-//        pullConnectedUsers();
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
-        PlayerStats playerStats = pullStatsFromDatabase(connectedPlayers.get(getIndex(userID)));
-        if (hasPlayerData(playerStats)) {
-            sendEmbedWithStats(userID, channel, playerStats);
+        PlayerStats playerStats = pullStatsFromDB(userID);
+        if (playerStats != null) {
+            if (hasPlayerData(playerStats)) {
+                sendEmbedWithStats(userID, channel, playerStats);
+            } else {
+                EmbedInfo.noDataToShow(channel);
+            }
         } else {
             EmbedInfo.noDataToShow(channel);
         }
@@ -54,16 +58,12 @@ public class ServerStats {
     }
 
     public boolean isUserConnected(String userID) {
-        for (Player p : connectedPlayers) {
-            if (p.getUserDiscordID().equalsIgnoreCase(userID)) {
-                return true;
-            }
-        }
-        return false;
+        Optional<DiscordUser> discordUser = discordUserService.findByUserId(userID);
+        return discordUser.isPresent();
     }
 
-    public boolean connectUserToSteam(String userID, @NotNull String steamID) {
-        if (steamID.length() == 17) {
+    public boolean connectUserToSteam(String userID, String steamID) {
+        if (steamID != null && steamID.length() == 17 && userID != null) {
             DiscordUser discordUser = new DiscordUser(userID, steamID);
             discordUserService.save(discordUser);
             return true;
@@ -99,64 +99,219 @@ public class ServerStats {
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    private @NotNull PlayerStats pullStatsFromDatabase(Player player) {
-        StatsDatabase database = new StatsDatabase();
-        PlayerStats playerStats = new PlayerStats(player);
-        playerStats.setProfileName(database.pullProfileName(player.getSteamID()));
-        playerStats.setKills(database.pullKills(player.getSteamID()))
-                .setDeaths(database.pullDeaths(player.getSteamID()))
-                .setWounds(database.pullWounds(player.getSteamID()))
-                .setRevives(database.pullRevives(player.getSteamID()))
-                .setRevivesYou(database.pullRevivesYou(player.getSteamID()))
-                .setTeamkills(database.pullTeamkills(player.getSteamID()))
-                .setWeapon(database.pullGuns(player.getSteamID()))
-                .setMostKills(database.pullMostKills(player.getSteamID()))
-                .setMostKilledBy(database.pullMostKilledBy(player.getSteamID()))
-                .setMostRevives(database.pullMostRevives(player.getSteamID()))
-                .setMostRevivedBy(database.pullMostRevivedBy(player.getSteamID()))
-                .setKd()
-                .setEffectiveness();
-        return playerStats;
-    }
+    private @Nullable PlayerStats pullStatsFromDB(String userId) {
+        Optional<DiscordUser> userOptional = discordUserService.findByUserId(userId);
+        if (userOptional.isPresent()) {
+            DiscordUser discordUser = userOptional.get();
+            PlayerStats playerStats = new PlayerStats();
+            playerStats.setSteamID(discordUser.getSteamID());
+            playerStats.setUserDiscordID(discordUser.getUserID());
 
-    private int getIndex(String userID) {
-        for (int i = 0; i < connectedPlayers.size(); i++) {
-            if (connectedPlayers.get(i).getUserDiscordID().equalsIgnoreCase(userID)) {
-                return i;
+            Optional<SteamUsers> steamUsersOptional = steamUsersService.findBySteamId(discordUser.getSteamID());
+            if (steamUsersOptional.isPresent()) {
+                playerStats.setProfileName(steamUsersOptional.get().getLastName());
+            } else {
+                return null;
             }
+            List<Deaths> deathsList = deathsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+            List<Revives> revivesList = revivesService.findByReviverOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+            List<Wounds> woundsList = woundsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+
+            playerStats.setKills(getKills(deathsList, discordUser.getSteamID()))
+                    .setDeaths(getDeaths(deathsList, discordUser.getSteamID()))
+                    .setWounds(getWounds(woundsList, discordUser.getSteamID()))
+                    .setRevives(getRevives(revivesList, discordUser.getSteamID()))
+                    .setRevivesYou(getRevivesYou(revivesList, discordUser.getSteamID()))
+                    .setTeamkills(getTeamKills(woundsList, discordUser.getSteamID()))
+                    .setWeapon(getWeapons(woundsList, discordUser.getSteamID()))
+                    .setMostKills(getMostKills(deathsList, discordUser.getSteamID()))
+                    .setMostKilledBy(getMostKilledBy(deathsList, discordUser.getSteamID()))
+                    .setMostRevives(getMostRevives(revivesList, discordUser.getSteamID()))
+                    .setMostRevivedBy(getMOstRevivedBy(revivesList, discordUser.getSteamID()))
+                    .setKd()
+                    .setEffectiveness();
+            return playerStats;
+        } else {
+            return null;
         }
-        return -1;
     }
 
-    private void removeConnectPlayer(String userID) {
-        for (int i = 0; i < connectedPlayers.size(); i++) {
-            if (connectedPlayers.get(i).getUserDiscordID().equalsIgnoreCase(userID)) {
-                connectedPlayers.remove(i);
-                return;
-            }
-        }
-    }
-
-    private void pullConnectedUsers() {
-        StatsDatabase database = new StatsDatabase();
-        ResultSet resultSet = database.pullAllConnectedUsers();
-        connectedPlayers.clear();
-
-        if (resultSet != null) {
-            while (true) {
-                try {
-                    if (!resultSet.next()) {
-                        break;
-                    } else {
-                        String userID = resultSet.getString("userID");
-                        String steamID = resultSet.getString("steamID");
-                        Player player = new Player(userID, steamID);
-                        connectedPlayers.add(player);
-                    }
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+    private ArrayList<PlayerCount> getMOstRevivedBy(@NotNull List<Revives> revivesList, String steamID) {
+        ArrayList<PlayerCount> playerCounts = new ArrayList<>();
+        List<Revives> revivesByVictim = revivesList.stream()
+                .filter(revives -> revives.getVictim() != null)
+                .filter(revives -> revives.getVictim().equalsIgnoreCase(steamID))
+                .toList();
+        for (Revives revives : revivesByVictim) {
+            String reviverName = revives.getReviverName();
+            if (reviverName != null) {
+                if (playerIsNotExist(playerCounts, reviverName)) {
+                    playerCounts.add(new PlayerCount(reviverName));
                 }
             }
         }
+        playerCounts.sort((o1, o2) -> o2.getCount() - o1.getCount());
+        return playerCounts;
+    }
+
+    private ArrayList<PlayerCount> getMostRevives(@NotNull List<Revives> revivesList, String steamID) {
+        ArrayList<PlayerCount> playerCounts = new ArrayList<>();
+        List<Revives> revivesByReviver = revivesList.stream()
+                .filter(revives -> revives.getReviver() != null)
+                .filter(revives -> revives.getReviver().equalsIgnoreCase(steamID))
+                .toList();
+        for (Revives revives : revivesByReviver) {
+            String victimName = revives.getVictimName();
+            if (victimName != null) {
+                if (playerIsNotExist(playerCounts, victimName)) {
+                    playerCounts.add(new PlayerCount(victimName));
+                }
+            }
+        }
+        playerCounts.sort((o1, o2) -> o2.getCount() - o1.getCount());
+        return playerCounts;
+    }
+
+    private ArrayList<PlayerCount> getMostKilledBy(@NotNull List<Deaths> deathsList, String steamID) {
+        ArrayList<PlayerCount> playerCounts = new ArrayList<>();
+        List<Deaths> deathsByVictim = deathsList.stream()
+                .filter(deaths -> deaths.getVictim() != null)
+                .filter(deaths -> deaths.getVictim().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getAttacker() != null) {
+                        return !deaths.getAttacker().equalsIgnoreCase(deaths.getVictim());
+                    }
+                    return true;
+                })
+                .toList();
+        for (Deaths deaths : deathsByVictim) {
+            String attackerName = deaths.getAttackerName();
+            if (attackerName != null) {
+                if (playerIsNotExist(playerCounts, attackerName)) {
+                    playerCounts.add(new PlayerCount(attackerName));
+                }
+            }
+        }
+        playerCounts.sort((o1, o2) -> o2.getCount() - o1.getCount());
+        return playerCounts;
+    }
+
+    private ArrayList<PlayerCount> getMostKills(@NotNull List<Deaths> deathsList, String steamID) {
+        ArrayList<PlayerCount> playerCounts = new ArrayList<>();
+        List<Deaths> deathsByAttacker = deathsList.stream()
+                .filter(deaths -> deaths.getAttacker() != null)
+                .filter(deaths -> deaths.getAttacker().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getVictim() != null) {
+                        return !deaths.getVictim().equalsIgnoreCase(deaths.getAttacker());
+                    }
+                    return true;
+                })
+                .toList();
+        for (Deaths deaths : deathsByAttacker) {
+            String victimName = deaths.getVictimName();
+            if (victimName != null) {
+                if (playerIsNotExist(playerCounts, victimName)) {
+                    playerCounts.add(new PlayerCount(victimName));
+                }
+            }
+        }
+        playerCounts.sort((o1, o2) -> o2.getCount() - o1.getCount());
+        return playerCounts;
+    }
+
+    private boolean playerIsNotExist(@NotNull ArrayList<PlayerCount> playerCounts, String playerName) {
+        for (PlayerCount playerCount : playerCounts) {
+            if (playerCount.getPlayerName().equalsIgnoreCase(playerName)) {
+                playerCount.addCount();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private @NotNull ArrayList<Gun> getWeapons(@NotNull List<Wounds> woundsList, String steamID) {
+        ArrayList<Gun> guns = new ArrayList<>();
+        List<Wounds> woundsListByAttacker = woundsList.stream()
+                .filter(wounds -> wounds.getAttacker() != null)
+                .filter(wounds -> wounds.getAttacker().equalsIgnoreCase(steamID))
+                .toList();
+        for (Wounds wounds : woundsListByAttacker) {
+            String weapon = wounds.getWeapon();
+            if (weapon != null) {
+                if (!gunIsExist(guns, weapon)) {
+                    Gun newGun = new Gun(weapon, 1);
+                    guns.add(newGun);
+                }
+            }
+        }
+        guns.sort((o1, o2) -> o2.getCount() - o1.getCount());
+        return guns;
+    }
+
+    private boolean gunIsExist(@NotNull ArrayList<Gun> guns, String weapon) {
+        for (Gun gun : guns) {
+            if (gun.getName().equalsIgnoreCase(weapon)) {
+                gun.setCount(gun.getCount() + 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int getTeamKills(@NotNull List<Wounds> woundsList, String steamID) {
+        return woundsList.stream()
+                .filter(wounds -> wounds.getAttacker() != null)
+                .filter(wounds -> wounds.getAttacker().equalsIgnoreCase(steamID))
+                .filter(wounds -> wounds.getTeamkill() != null)
+                .filter(Wounds::getTeamkill)
+                .toList().size();
+    }
+
+    private int getRevivesYou(@NotNull List<Revives> revivesList, String steamID) {
+        return revivesList.stream()
+                .filter(revives -> revives.getVictim() != null)
+                .filter(revives -> revives.getVictim().equalsIgnoreCase(steamID))
+                .toList().size();
+    }
+
+    private int getRevives(@NotNull List<Revives> revivesList, String steamID) {
+        return revivesList.stream()
+                .filter(revives -> revives.getReviver() != null)
+                .filter(revives -> revives.getReviver().equalsIgnoreCase(steamID))
+                .toList().size();
+    }
+
+    private int getWounds(@NotNull List<Wounds> woundsList, String steamID) {
+        return woundsList.stream()
+                .filter(wounds -> wounds.getAttacker() != null)
+                .filter(wounds -> wounds.getAttacker().equalsIgnoreCase(steamID))
+                .toList().size();
+    }
+
+    private int getDeaths(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
+        return deathsList.stream()
+                .filter(deaths -> deaths.getVictim() != null)
+                .filter(deaths -> deaths.getVictim().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getAttacker() != null) {
+                        return !deaths.getVictim().equalsIgnoreCase(deaths.getAttacker());
+                    }
+                    return true;
+                })
+                .toList().size();
+    }
+
+    private int getKills(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
+        return deathsList.stream()
+                .filter(deaths -> deaths.getAttacker() != null)
+                .filter(deaths -> deaths.getAttacker().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getVictim() != null) {
+                        return !deaths.getAttacker().equalsIgnoreCase(deaths.getVictim());
+                    }
+                    return true;
+                })
+                .toList().size();
     }
 }

@@ -1,9 +1,13 @@
 package pl.mbrzozowski.ranger.stats;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
-public class PlayerStats extends Player {
+public class PlayerStats {
 
+    private String steamID;
+    private String userDiscordID;
     private String profileName;
     private float kd = 0;
     private int kills = 0;
@@ -19,8 +23,20 @@ public class PlayerStats extends Player {
     private String mostRevives = "-";
     private String mostRevivedBy = "-";
 
-    public PlayerStats(Player player) {
-        super(player.getUserDiscordID(), player.getSteamID());
+    public String getSteamID() {
+        return steamID;
+    }
+
+    public void setSteamID(String steamID) {
+        this.steamID = steamID;
+    }
+
+    public String getUserDiscordID() {
+        return userDiscordID;
+    }
+
+    public void setUserDiscordID(String userDiscordID) {
+        this.userDiscordID = userDiscordID;
     }
 
     public PlayerStats setProfileName(String profileName) {
@@ -65,15 +81,16 @@ public class PlayerStats extends Player {
         return this;
     }
 
-    public PlayerStats setWeapon(ArrayList<Gun> guns) {
+    public PlayerStats setWeapon(@NotNull ArrayList<Gun> guns) {
         if (guns.size() > 0) {
             for (int i = 0; i < 3; i++) {
-                setWeapon(guns.get(i).getName(), i);
+                if (guns.size() > i) {
+                    setWeapon(guns.get(i), i);
+                }
             }
         } else {
             this.weapon = "-";
         }
-
         return this;
     }
 
@@ -166,11 +183,11 @@ public class PlayerStats extends Player {
         }
     }
 
-    private void setWeapon(String gun, int index) {
+    private void setWeapon(Gun gun, int index) {
         if (index == 0) {
-            this.weapon = "**" + (index + 1) + "." + gun + "**\n";
+            this.weapon = "**" + (index + 1) + "." + gun.getName() + "(" + gun.getCount() + ")**\n";
         } else {
-            this.weapon += (index + 1) + "." + gun + "\n";
+            this.weapon += (index + 1) + "." + gun.getName() + "(" + gun.getCount() + ")\n";
         }
 
     }

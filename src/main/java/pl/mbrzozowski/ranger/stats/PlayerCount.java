@@ -1,12 +1,13 @@
 package pl.mbrzozowski.ranger.stats;
 
-public class PlayerCount extends Player {
+public class PlayerCount {
 
-    private String playerName;
+    private final String playerName;
     private int count;
 
-    public PlayerCount(String userDiscordID, String steamID) {
-        super(userDiscordID, steamID);
+    public PlayerCount(String playerName) {
+        this.playerName = playerName;
+        this.count = 1;
     }
 
     public String getPlayerName() {
@@ -17,11 +18,7 @@ public class PlayerCount extends Player {
         return count;
     }
 
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
+    public void addCount() {
+        count += 1;
     }
 }

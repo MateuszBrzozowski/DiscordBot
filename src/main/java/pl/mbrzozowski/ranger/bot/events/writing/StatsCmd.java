@@ -1,11 +1,13 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
+@Slf4j
 public class StatsCmd extends Proccess {
 
     private final ServerStats serverStats;
@@ -31,7 +33,7 @@ public class StatsCmd extends Proccess {
             if (messageReceived.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
                 if (serverStats.connectUserToSteam(messageReceived.getAuthor().getId(), message.getWords()[1])) {
                     EmbedInfo.connectSuccessfully(messageReceived.getTextChannel());
-//                    serverStats.viewStatsForUser(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
+                    serverStats.viewStatsForUser(messageReceived.getAuthor().getId(), messageReceived.getTextChannel());
                 } else {
                     EmbedInfo.connectUnSuccessfully(messageReceived.getTextChannel());
                 }

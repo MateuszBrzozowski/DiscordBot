@@ -231,10 +231,10 @@ public class StatsDatabase {
                         String victim = resultSet.getString("victim");
                         String victimName = resultSet.getString("victimName");
                         int count = resultSet.getInt("COUNT(*)");
-                        PlayerCount player = new PlayerCount("", victim);
-                        player.setPlayerName(victimName);
-                        player.setCount(count);
-                        players.add(player);
+//                        PlayerCount player = new PlayerCount("", victim);
+//                        player.setPlayerName(victimName);
+//                        player.setCount(count);
+//                        players.add(player);
                     }
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
@@ -259,10 +259,10 @@ public class StatsDatabase {
                         String attacker = resultSet.getString("attacker");
                         String attackerName = resultSet.getString("attackerName");
                         int count = resultSet.getInt("COUNT(*)");
-                        PlayerCount player = new PlayerCount("", attacker);
-                        player.setPlayerName(attackerName);
-                        player.setCount(count);
-                        players.add(player);
+//                        PlayerCount player = new PlayerCount("", attacker);
+//                        player.setPlayerName(attackerName);
+//                        player.setCount(count);
+//                        players.add(player);
                     }
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
@@ -287,10 +287,10 @@ public class StatsDatabase {
                         String victim = resultSet.getString("victim");
                         String victimName = resultSet.getString("victimName");
                         int count = resultSet.getInt("COUNT(*)");
-                        PlayerCount player = new PlayerCount("", victim);
-                        player.setPlayerName(victimName);
-                        player.setCount(count);
-                        players.add(player);
+//                        PlayerCount player = new PlayerCount("", victim);
+//                        player.setPlayerName(victimName);
+//                        player.setCount(count);
+//                        players.add(player);
                     }
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
@@ -315,10 +315,10 @@ public class StatsDatabase {
                         String reviver = resultSet.getString("reviver");
                         String reviverName = resultSet.getString("reviverName");
                         int count = resultSet.getInt("COUNT(*)");
-                        PlayerCount player = new PlayerCount("", reviver);
-                        player.setPlayerName(reviverName);
-                        player.setCount(count);
-                        players.add(player);
+//                        PlayerCount player = new PlayerCount("", reviver);
+//                        player.setPlayerName(reviverName);
+//                        player.setCount(count);
+//                        players.add(player);
                     }
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
