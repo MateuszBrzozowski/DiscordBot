@@ -3,13 +3,15 @@ package pl.mbrzozowski.ranger.event;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventsGeneratorModel {
+@Service
+public class EventsGeneratorService {
 
-    private List<EventsGenerator> eventsGenerators = new ArrayList<>();
+    private final List<EventsGenerator> eventsGenerators = new ArrayList<>();
 
     public void addEventsGenerator(EventsGenerator eGM) {
         eventsGenerators.add(eGM);

@@ -46,7 +46,7 @@ public class EventService {
         this.usersReminderService = usersReminderService;
     }
 
-    public List<pl.mbrzozowski.ranger.event.Event> findAll() {
+    public List<Event> findAll() {
         return eventRepository.findAll();
     }
 
@@ -121,7 +121,7 @@ public class EventService {
                                 Button.danger(ComponentId.EVENTS_SIGN_OUT + msgID, "Wypisz")).queue();
                         message.pin().queue();
                         LocalDateTime dateTime = getDateTime(eventRequest.getDate(), eventRequest.getTime());
-                        pl.mbrzozowski.ranger.event.Event event = pl.mbrzozowski.ranger.event.Event.builder()
+                        Event event = Event.builder()
                                 .name(eventRequest.getName())
                                 .msgId(message.getId())
                                 .channelId(textChannel.getId())
@@ -136,7 +136,7 @@ public class EventService {
         }
     }
 
-    private void save(pl.mbrzozowski.ranger.event.Event event) {
+    private void save(Event event) {
         eventRepository.save(event);
     }
 
@@ -162,7 +162,7 @@ public class EventService {
         return !StringUtils.isBlank(eventRequest.getTime());
     }
 
-    public void updateEmbed(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public void updateEmbed(@NotNull Event event) {
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
         TextChannel channel = Repository.getJda().getTextChannelById(channelID);
@@ -213,15 +213,15 @@ public class EventService {
         }
     }
 
-    private int getMainListSize(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    private int getMainListSize(@NotNull Event event) {
         return event.getPlayers().stream().filter(Player::isMainList).toList().size();
     }
 
-    private int getReserveListSize(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    private int getReserveListSize(@NotNull Event event) {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList().size();
     }
 
-    private @NotNull String getStringOfMainList(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    private @NotNull String getStringOfMainList(@NotNull Event event) {
         List<Player> players = event.getPlayers().stream().filter(Player::isMainList).toList();
         if (players.size() > 0) {
             StringBuilder result = new StringBuilder();
@@ -234,7 +234,7 @@ public class EventService {
         }
     }
 
-    private @NotNull String getStringOfReserveList(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    private @NotNull String getStringOfReserveList(@NotNull Event event) {
         List<Player> players = event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
         if (players.size() > 0) {
             StringBuilder result = new StringBuilder();
@@ -258,7 +258,7 @@ public class EventService {
     }
 
 
-    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull pl.mbrzozowski.ranger.event.Event event, ButtonClickType buttonClick) {
+    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, ButtonClickType buttonClick) {
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
         String userID = buttonInteractionEvent.getUser().getId();
         if (eventIsAfter(event.getDate())) {
@@ -362,15 +362,11 @@ public class EventService {
         return dateNow.isAfter(eventTime);
     }
 
-    public void delete(pl.mbrzozowski.ranger.event.Event event) {
+    public void delete(Event event) {
         eventRepository.delete(event);
     }
 
-    public Optional<pl.mbrzozowski.ranger.event.Event> findEventByChannelId(String channelID) {
-        return eventRepository.findByChannelId(channelID);
-    }
-
-    public void cancelEventWithInfoForPlayers(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public void cancelEventWithInfoForPlayers(@NotNull Event event) {
         TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             channel.retrieveMessageById(event.getMsgId()).queue(message -> {
@@ -383,7 +379,7 @@ public class EventService {
         }
     }
 
-    public void cancelEvent(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public void cancelEvent(@NotNull Event event) {
         RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
         disableButtons(event);
         changeTitleRedCircle(event);
@@ -391,7 +387,7 @@ public class EventService {
         eventRepository.delete(event);
     }
 
-    public void changeTitleRedCircle(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public void changeTitleRedCircle(@NotNull Event event) {
         TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             String buffor = channel.getName();
@@ -402,7 +398,7 @@ public class EventService {
         }
     }
 
-    public void changeDateAndTime(@NotNull pl.mbrzozowski.ranger.event.Event event, boolean notifi) {
+    public void changeDateAndTime(@NotNull Event event, boolean notifi) {
         TextChannel textChannel = Repository.getJda().getTextChannelById(event.getChannelId());
         assert textChannel != null;
         textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
@@ -461,7 +457,7 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public void sendInfoChanges(pl.mbrzozowski.ranger.event.Event event, EventChanges whatChange, String dateTime) {
+    public void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
         List<Player> mainList = getMainList(event);
         List<Player> reserveList = getReserveList(event);
         RangerLogger.info(
@@ -475,7 +471,7 @@ public class EventService {
         }
     }
 
-    private void updateTimer(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    private void updateTimer(@NotNull Event event) {
         timers.cancel(event.getMsgId());
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
@@ -484,12 +480,12 @@ public class EventService {
     /**
      * Wyłącza przyciski w zapisach
      */
-    public void disableButtons(@NotNull pl.mbrzozowski.ranger.event.Event event) {
+    public void disableButtons(@NotNull Event event) {
         disableButtons(event.getMsgId(), event.getChannelId());
     }
 
     public void disableButtons(String messageId) {
-        Optional<pl.mbrzozowski.ranger.event.Event> eventOptional = findEventByMsgId(messageId);
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
         eventOptional.ifPresent(this::disableButtons);
     }
 
@@ -514,7 +510,7 @@ public class EventService {
     }
 
     public void enableButtons(String messageID) {
-        Optional<pl.mbrzozowski.ranger.event.Event> eventOptional = findEventByMsgId(messageID);
+        Optional<Event> eventOptional = findEventByMsgId(messageID);
         eventOptional.ifPresent(event -> enableButtons(event.getMsgId(), event.getChannelId()));
     }
 

@@ -1,23 +1,31 @@
 package pl.mbrzozowski.ranger.bot.events;
 
-import pl.mbrzozowski.ranger.Repository;
-import pl.mbrzozowski.ranger.event.EventsGeneratorModel;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.RoleID;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RoleID;
 
 import java.util.List;
 
-public class SelecetMenuListener extends ListenerAdapter {
+@Service
+public class SelectMenuListener extends ListenerAdapter {
+
+    private final EventsGeneratorService eventsGeneratorService;
+
+    @Autowired
+    public SelectMenuListener(EventsGeneratorService eventsGeneratorService) {
+        this.eventsGeneratorService = eventsGeneratorService;
+    }
 
     @Override
     public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
-        EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
-        int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(event.getUser().getId());
+        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         if (isRoles) {
@@ -51,7 +59,7 @@ public class SelecetMenuListener extends ListenerAdapter {
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
             event.getInteraction().deferEdit().queue();
-            eventsGenerator.saveAnswerAndNextStage(event, indexOfGenerator);
+            eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);
         }
     }
 }

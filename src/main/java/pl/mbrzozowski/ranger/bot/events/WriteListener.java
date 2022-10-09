@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
 import pl.mbrzozowski.ranger.dice.DiceGames;
 import pl.mbrzozowski.ranger.event.EventService;
+import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -25,6 +26,7 @@ public class WriteListener extends ListenerAdapter {
     private final ServerService serverService;
     private final ServerStats serverStats;
     private final UsersReminderService usersReminderService;
+    private final EventsGeneratorService eventsGeneratorService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -33,7 +35,8 @@ public class WriteListener extends ListenerAdapter {
                          BotWriter botWriter,
                          ServerService serverService,
                          ServerStats serverStats,
-                         UsersReminderService usersReminderService) {
+                         UsersReminderService usersReminderService,
+                         EventsGeneratorService eventsGeneratorService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
@@ -41,6 +44,7 @@ public class WriteListener extends ListenerAdapter {
         this.serverService = serverService;
         this.serverStats = serverStats;
         this.usersReminderService = usersReminderService;
+        this.eventsGeneratorService = eventsGeneratorService;
     }
 
 
@@ -59,7 +63,7 @@ public class WriteListener extends ListenerAdapter {
         StatsCmd statsCmd = new StatsCmd(event, serverStats);
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
-        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService);
+        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);

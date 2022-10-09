@@ -5,12 +5,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
-import pl.mbrzozowski.ranger.event.EventsGeneratorModel;
+import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -23,18 +22,22 @@ public class ButtonClickListener extends ListenerAdapter {
     private final EventService eventService;
     private final RecruitsService recruitsService;
     private final ServerService serverService;
+    private final EventsGeneratorService eventsGeneratorService;
 
     @Autowired
-    public ButtonClickListener(EventService events, RecruitsService recruitsService, ServerService serverService) {
+    public ButtonClickListener(EventService events,
+                               RecruitsService recruitsService,
+                               ServerService serverService,
+                               EventsGeneratorService eventsGeneratorService) {
         this.eventService = events;
         this.recruitsService = recruitsService;
         this.serverService = serverService;
+        this.eventsGeneratorService = eventsGeneratorService;
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
-        EventsGeneratorModel eventsGenerator = Repository.getEventsGeneratorModel();
-        int indexOfGenerator = eventsGenerator.userHaveActiveGenerator(interactionEvent.getUser().getId());
+        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(interactionEvent.getUser().getId());
         boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
 
@@ -96,7 +99,7 @@ public class ButtonClickListener extends ListenerAdapter {
                 isIDCorrect = false;
             }
         } else if (indexOfGenerator >= 0) {
-            eventsGenerator.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
+            eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
         } else if (eventService.findEventByMsgId(interactionEvent.getMessage().getId()).isPresent()) {
             eventsButtonClick(interactionEvent, eventService.findEventByMsgId(interactionEvent.getMessage().getId()).get());
             isIDCorrect = false;

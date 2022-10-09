@@ -15,11 +15,11 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Validation;
-import pl.mbrzozowski.ranger.Repository;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,10 +31,14 @@ public class EventsGenerator {
     private final EventRequest eventRequest = new EventRequest();
     private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
     private final EventService eventService;
+    private final EventsGeneratorService eventsGeneratorService;
 
     @Autowired
-    public EventsGenerator(@NotNull MessageReceivedEvent event, EventService eventService) {
+    public EventsGenerator(@NotNull MessageReceivedEvent event,
+                           EventService eventService,
+                           EventsGeneratorService eventsGeneratorService) {
         this.eventService = eventService;
+        this.eventsGeneratorService = eventsGeneratorService;
         eventRequest.setAuthorId(event.getMessage().getAuthor().getId());
         eventRequest.setAuthorName(event.getMessage().getAuthor().getName());
         embedStart();
@@ -237,10 +241,9 @@ public class EventsGenerator {
     }
 
     private void removeThisGenerator() {
-        EventsGeneratorModel model = Repository.getEventsGeneratorModel();
-        int index = model.userHaveActiveGenerator(eventRequest.getAuthorId());
+        int index = eventsGeneratorService.userHaveActiveGenerator(eventRequest.getAuthorId());
         if (index >= 0) {
-            model.removeGenerator(index);
+            eventsGeneratorService.removeGenerator(index);
         }
     }
 
