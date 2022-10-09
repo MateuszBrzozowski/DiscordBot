@@ -10,6 +10,7 @@ import pl.mbrzozowski.ranger.bot.events.writing.*;
 import pl.mbrzozowski.ranger.dice.DiceGames;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -27,6 +28,7 @@ public class WriteListener extends ListenerAdapter {
     private final ServerStats serverStats;
     private final UsersReminderService usersReminderService;
     private final EventsGeneratorService eventsGeneratorService;
+    private final EventsSettingsService eventsSettingsService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -36,7 +38,8 @@ public class WriteListener extends ListenerAdapter {
                          ServerService serverService,
                          ServerStats serverStats,
                          UsersReminderService usersReminderService,
-                         EventsGeneratorService eventsGeneratorService) {
+                         EventsGeneratorService eventsGeneratorService,
+                         EventsSettingsService eventsSettingsService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
@@ -45,6 +48,7 @@ public class WriteListener extends ListenerAdapter {
         this.serverStats = serverStats;
         this.usersReminderService = usersReminderService;
         this.eventsGeneratorService = eventsGeneratorService;
+        this.eventsSettingsService = eventsSettingsService;
     }
 
 
@@ -67,7 +71,7 @@ public class WriteListener extends ListenerAdapter {
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
         HelpCmd helpCmd = new HelpCmd(event);
         RecruitCmd recrutCmd = new RecruitCmd(event, recruitsService);
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);

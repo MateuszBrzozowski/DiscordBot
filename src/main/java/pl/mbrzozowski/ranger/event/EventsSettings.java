@@ -27,13 +27,17 @@ public class EventsSettings {
     private boolean ifEndingEvent = false;
     private boolean sendNotifi = false;
     private List<Event> eventsList = new ArrayList<>();
+    private final EventsSettingsService eventsSettingsService;
 
     private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
 
-    public EventsSettings(EventService eventService, MessageReceivedEvent privateEvent) {
+    public EventsSettings(EventService eventService,
+                          MessageReceivedEvent privateEvent,
+                          EventsSettingsService eventsSettingsService) {
         this.eventService = eventService;
         this.userID = privateEvent.getAuthor().getId();
         this.userName = privateEvent.getMessage().getAuthor().getName();
+        this.eventsSettingsService = eventsSettingsService;
         embedStart();
     }
 
@@ -234,10 +238,9 @@ public class EventsSettings {
     }
 
     private void removeThisEditor() {
-        EventsSettingsModel model = Repository.getEventsSettingsModel();
-        int index = model.userHaveActiveSettingsPanel(userID);
+        int index = eventsSettingsService.userHaveActiveSettingsPanel(userID);
         if (index >= 0) {
-            model.removeSettingsPanel(index);
+            eventsSettingsService.removeSettingsPanel(index);
         }
     }
 

@@ -1,11 +1,13 @@
 package pl.mbrzozowski.ranger.event;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventsSettingsModel {
+@Service
+public class EventsSettingsService {
 
     private List<EventsSettings> eventsSettings = new ArrayList<>();
 
