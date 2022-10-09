@@ -1,7 +1,7 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import net.dv8tion.jda.api.JDA;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,7 +29,7 @@ public class RangerLogger {
     }
 
     private static void Send(String msg) {
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
 //        jda.getTextChannelById(LOG_CHANNEL_ID).sendMessage(msg).queue();
     }
 

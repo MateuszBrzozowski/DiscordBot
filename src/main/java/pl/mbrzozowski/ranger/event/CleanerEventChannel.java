@@ -3,8 +3,8 @@ package pl.mbrzozowski.ranger.event;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
-import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
@@ -53,7 +53,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
     }
 
     private void deleteChannel(Event event) {
-        TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
+        TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
             RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie - [" + event.getName() + "]");

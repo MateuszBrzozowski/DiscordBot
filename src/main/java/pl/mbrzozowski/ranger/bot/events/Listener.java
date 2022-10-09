@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -28,7 +28,7 @@ public class Listener extends ListenerAdapter {
     }
 
     private void addRole(String userID) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Role role = guild.getRoleById(RoleID.SQUAD);
             if (role != null) {

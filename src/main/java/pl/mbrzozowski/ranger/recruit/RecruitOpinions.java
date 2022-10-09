@@ -1,10 +1,5 @@
 package pl.mbrzozowski.ranger.recruit;
 
-import pl.mbrzozowski.ranger.embed.EmbedSettings;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
-import pl.mbrzozowski.ranger.helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -15,7 +10,12 @@ import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.embed.EmbedSettings;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RangerLogger;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
 
@@ -42,7 +42,7 @@ public class RecruitOpinions {
         String opinion = event.getValue(ComponentId.RECRUIT_OPINION_TEXT).getAsString();
         String userNameWhoSendingOpinion = Users.getUserNicknameFromID(event.getUser().getId());
         event.deferEdit().queue();
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
         TextChannel textChannel = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_RECRUITS_OPINIONS);
         sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
     }

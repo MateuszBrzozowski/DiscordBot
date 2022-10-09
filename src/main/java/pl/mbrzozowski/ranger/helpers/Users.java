@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class Users {
      * @return Zwraca nick z konkretnego discorda lub ogólny nick użytkownika.
      */
     public static @Nullable String getUserNicknameFromID(String userID) {
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
@@ -45,7 +45,7 @@ public class Users {
      * @return Zwraca true jeśli użytkownik o ID userID ma role o ID roleID. W innym przypadku zwraca false.
      */
     public static boolean hasUserRole(String userID, String roleID) {
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
         List<Guild> guilds = jda.getGuilds();
         for (Guild guild : guilds) {
             if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {

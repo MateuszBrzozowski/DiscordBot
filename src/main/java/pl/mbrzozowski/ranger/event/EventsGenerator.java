@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
@@ -434,7 +434,7 @@ public class EventsGenerator {
     }
 
     private @NotNull User getUserById(String userId) {
-        User user = Repository.getJda().getUserById(userId);
+        User user = DiscordBot.getJda().getUserById(userId);
         if (user != null) {
             return user;
         } else {

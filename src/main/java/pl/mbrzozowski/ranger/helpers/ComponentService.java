@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
@@ -27,7 +27,7 @@ public class ComponentService {
     }
 
     public static void disableButtons(String channelID, String messageID) {
-        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelID);
         if (textChannel != null) {
             textChannel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();

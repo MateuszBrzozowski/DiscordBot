@@ -1,7 +1,7 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 
 public class InvalidCmd extends Proccess {
 
@@ -11,7 +11,7 @@ public class InvalidCmd extends Proccess {
 
     @Override
     public void proccessMessage(Message message) {
-        Repository.getJda().getUserById(message.getUserID()).openPrivateChannel().queue(privateChannel -> {
+        DiscordBot.getJda().getUserById(message.getUserID()).openPrivateChannel().queue(privateChannel -> {
             privateChannel.sendMessage("Niestety, nie rozumiem Ciebie. \n" +
                     "**!generator** - otwiera generator eventów.\n" +
                     "**!events** - edytowanie aktywnych eventów.\n" +

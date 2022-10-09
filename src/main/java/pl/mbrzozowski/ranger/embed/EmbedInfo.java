@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
 import pl.mbrzozowski.ranger.helpers.*;
@@ -86,7 +86,7 @@ public class EmbedInfo extends EmbedCreator {
         String oldName = channel.getName();
         channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
 
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
         jda.openPrivateChannelById(recruitId).queue(privateChannel -> {
             builder.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
             privateChannel.sendMessageEmbeds(builder.build()).queue();
@@ -148,7 +148,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego jest wysyłana informacja.
      */
     public static void userHaveActiveEventGenerator(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
@@ -164,7 +164,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego jest wysyłana informacja.
      */
     public static void createNewGenerator(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
@@ -182,7 +182,7 @@ public class EmbedInfo extends EmbedCreator {
     public static void noWriteOnLoggerChannel(@NotNull MessageReceivedEvent event) {
         if (!event.getAuthor().isBot()) {
             event.getMessage().delete().submit();
-            User userById = Repository.getJda().getUserById(event.getAuthor().getId());
+            User userById = DiscordBot.getJda().getUserById(event.getAuthor().getId());
             if (userById != null) {
                 userById.openPrivateChannel().queue(privateChannel -> {
                     EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
@@ -201,7 +201,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika
      */
     public static void reminderOff(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
@@ -218,7 +218,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika
      */
     public static void reminderOn(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
@@ -244,7 +244,7 @@ public class EmbedInfo extends EmbedCreator {
             description = "Wydarzenie zostaje odwołane.";
         }
         String link = "[" + event.getName() + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + event.getMsgId() + ")";
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         String finalDescription = description + " Sprawdź szczegóły!";
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
@@ -265,7 +265,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID ID użytkownika do którego wysyłana jest informacja
      */
     public static void cancelEventGenerator(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
@@ -276,7 +276,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void cancelEventEditing(String userID) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
                 EmbedBuilder builder = new EmbedBuilder();

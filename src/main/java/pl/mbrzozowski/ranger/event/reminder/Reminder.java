@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
@@ -71,7 +71,7 @@ public class Reminder extends TimerTask {
     }
 
     private void sendMessage(String userID, String linkToEvent, String dateTimeEvent) {
-        JDA jda = Repository.getJda();
+        JDA jda = DiscordBot.getJda();
         User user = jda.getUserById(userID);
         assert user != null;
         user.openPrivateChannel().queue(privateChannel -> {

@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.Validation;
 
@@ -20,7 +20,7 @@ public class EventsSettings {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
     private boolean isChanged = false;
-    private final JDA jda = Repository.getJda();
+    private final JDA jda = DiscordBot.getJda();
     private final String userName;
     private final String userID;
     private Event event;

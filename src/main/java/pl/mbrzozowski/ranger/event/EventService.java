@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
@@ -63,7 +63,7 @@ public class EventService {
     }
 
     private void createEventChannel(final EventRequest eventRequest) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild == null) {
             return;
         }
@@ -165,7 +165,7 @@ public class EventService {
     public void updateEmbed(@NotNull Event event) {
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
-        TextChannel channel = Repository.getJda().getTextChannelById(channelID);
+        TextChannel channel = DiscordBot.getJda().getTextChannelById(channelID);
         if (channel != null) {
             channel.retrieveMessageById(messageID).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
@@ -367,7 +367,7 @@ public class EventService {
     }
 
     public void cancelEventWithInfoForPlayers(@NotNull Event event) {
-        TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
+        TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             channel.retrieveMessageById(event.getMsgId()).queue(message -> {
                 List<MessageEmbed> embeds = message.getEmbeds();
@@ -388,7 +388,7 @@ public class EventService {
     }
 
     public void changeTitleRedCircle(@NotNull Event event) {
-        TextChannel channel = Repository.getJda().getTextChannelById(event.getChannelId());
+        TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             String buffor = channel.getName();
             buffor = buffor.replace(EmbedSettings.GREEN_CIRCLE, EmbedSettings.RED_CIRCLE);
@@ -399,7 +399,7 @@ public class EventService {
     }
 
     public void changeDateAndTime(@NotNull Event event, boolean notifi) {
-        TextChannel textChannel = Repository.getJda().getTextChannelById(event.getChannelId());
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         assert textChannel != null;
         textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
@@ -494,7 +494,7 @@ public class EventService {
      * @param channelID ID kanału na którym znajduję sie event
      */
     public void disableButtons(String messageID, String channelID) {
-        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelID);
         assert textChannel != null;
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
@@ -515,7 +515,7 @@ public class EventService {
     }
 
     public void enableButtons(String messageID, String channelID) {
-        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelID);
         assert textChannel != null;
         textChannel.retrieveMessageById(messageID).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();

@@ -3,7 +3,7 @@ package pl.mbrzozowski.ranger.embed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
@@ -31,7 +31,7 @@ public class EmbedHelp extends EmbedCreator {
     }
 
     public static void help(String userID, String[] message) {
-        User userById = Repository.getJda().getUserById(userID);
+        User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             privateChannel = userById.openPrivateChannel().complete();
             boolean admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);

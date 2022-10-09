@@ -16,12 +16,14 @@ import java.util.Collection;
 
 @Component
 public class DiscordBot {
+
     private final WriteListener writeListener;
     private final ButtonClickListener buttonClickListener;
     private final ChannelUpdate channelUpdate;
     private final MessageUpdate messageUpdate;
     private final Listener listener;
     private final SelectMenuListener selectMenuListener;
+    private static JDA jda;
 
     @Autowired
     public DiscordBot(WriteListener writeListener,
@@ -54,12 +56,17 @@ public class DiscordBot {
                 .addEventListeners(new ModalListener())
                 .addEventListeners(this.selectMenuListener)
                 .build();
-        Repository.setJDA(jda);
+//        Repository.setJDA(jda);
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
+        DiscordBot.jda = jda;
     }
 
-//    @Bean
+    public static JDA getJda() {
+        return jda;
+    }
+
+    //    @Bean
 //    @Lazy
 //    private @NotNull JDA getJDA() throws LoginException {
 //        Collection<GatewayIntent> intents = new ArrayList<>();

@@ -4,14 +4,14 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.Users;
-import pl.mbrzozowski.ranger.Repository;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 public class RoleEditor {
 
-    JDA jda = Repository.getJda();
+    JDA jda = DiscordBot.getJda();
 
     public void addRemoveRole(String userID, String roleString) {
         Role role = jda.getRoleById(roleString);

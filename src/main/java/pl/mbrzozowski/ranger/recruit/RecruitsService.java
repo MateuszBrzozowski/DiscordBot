@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
@@ -42,7 +42,7 @@ public class RecruitsService {
      * @param userID   ID użytkownika
      */
     public void createChannelForNewRecruit(String userName, String userID) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild == null) {
             return;
         }
@@ -95,7 +95,7 @@ public class RecruitsService {
     }
 
     private int howManyChannelsInCategory() {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RECRUT_ID);
             if (category != null) {
@@ -175,7 +175,7 @@ public class RecruitsService {
     }
 
     public void removeRoleFromUserID(String userID) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             guild.retrieveMemberById(userID).queue(member -> {
                 List<Role> roles = member.getRoles();
@@ -196,7 +196,7 @@ public class RecruitsService {
 
     public void deleteChannel(@NotNull Recruit recruit) {
         if (recruit.getChannelId() != null) {
-            TextChannel textChannel = Repository.getJda().getTextChannelById(recruit.getChannelId());
+            TextChannel textChannel = DiscordBot.getJda().getTextChannelById(recruit.getChannelId());
             if (textChannel != null) {
                 textChannel.delete().reason("Rekrutacja zakończona.").queue();
                 RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + recruit.getName() + "]");
@@ -212,11 +212,11 @@ public class RecruitsService {
             Recruit recruit = recruitOptional.get();
             if (recruit.getEndRecruitment() == null &&
                     recruit.getRecruitmentResult() == null) {
-                Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
                 if (guild != null) {
                     removeSmallRInTag(recruit.getUserId(), guild);
-                    Role roleClanMember = Repository.getJda().getRoleById(RoleID.CLAN_MEMBER_ID);
-                    Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
+                    Role roleClanMember = DiscordBot.getJda().getRoleById(RoleID.CLAN_MEMBER_ID);
+                    Role roleRecruit = DiscordBot.getJda().getRoleById(RoleID.RECRUT_ID);
                     boolean hasRoleClanMember = Users.hasUserRole(recruit.getUserId(), RoleID.CLAN_MEMBER_ID);
                     boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
                     if (!hasRoleClanMember && roleClanMember != null) {
@@ -241,10 +241,10 @@ public class RecruitsService {
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
             if (recruit.getEndRecruitment() == null && recruit.getRecruitmentResult() == null) {
-                Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
                 if (guild != null) {
                     removeTagFromNick(recruit.getUserId(), guild);
-                    Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
+                    Role roleRecruit = DiscordBot.getJda().getRoleById(RoleID.RECRUT_ID);
                     boolean hasRoleRecruit = Users.hasUserRole(recruit.getUserId(), RoleID.RECRUT_ID);
                     if (hasRoleRecruit && roleRecruit != null) {
                         guild.removeRoleFromMember(UserSnowflake.fromId(recruit.getUserId()), roleRecruit).submit();
@@ -315,8 +315,8 @@ public class RecruitsService {
     }
 
     private void addRoleRecruit(String userId) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        Role roleRecruit = Repository.getJda().getRoleById(RoleID.RECRUT_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Role roleRecruit = DiscordBot.getJda().getRoleById(RoleID.RECRUT_ID);
         boolean hasRoleRecruit = Users.hasUserRole(userId, RoleID.RECRUT_ID);
         if (!hasRoleRecruit && guild != null) {
             Member member = guild.getMemberById(userId);
@@ -339,7 +339,7 @@ public class RecruitsService {
     }
 
     private void closeChannel(TextChannel textChannel, String userID) {
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
             if (recruitOptional.isPresent()) {
@@ -363,7 +363,7 @@ public class RecruitsService {
             Recruit recruit = recruitOptional.get();
             if (recruit.getRecruitmentResult() == null) {
                 Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-                Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
                 if (guild != null) {
                     Member member = guild.getMemberById(recruit.getUserId());
                     TextChannel channel = guild.getTextChannelById(recruit.getChannelId());

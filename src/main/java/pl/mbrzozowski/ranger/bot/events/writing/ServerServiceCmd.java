@@ -5,11 +5,11 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.server.service.ServerService;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
 
 public class ServerServiceCmd extends Proccess {
 
@@ -40,7 +40,7 @@ public class ServerServiceCmd extends Proccess {
     }
 
     private boolean isServerCategory(String channelID) {
-        TextChannel textChannel = Repository.getJda().getTextChannelById(channelID);
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelID);
         if (textChannel != null) {
             Category parentCategory = textChannel.getParentCategory();
             if (parentCategory != null) {

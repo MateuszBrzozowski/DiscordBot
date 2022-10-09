@@ -9,13 +9,13 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.Repository;
+import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentService;
 import pl.mbrzozowski.ranger.helpers.RoleID;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
@@ -83,7 +83,7 @@ public class ServerService {
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
         String userName = event.getUser().getName();
-        Guild guild = Repository.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_SERVER);
             String channelName = channelNamePrefix(buttonType) + userName;
