@@ -223,11 +223,7 @@ public class EventsSettings {
 
     private void endingEditor() {
         if (ifEndingEvent) {
-            if (sendNotifi) {
-                eventService.cancelEventWithInfoForPlayers(event);
-            } else {
-                eventService.cancelEvent(event);
-            }
+            eventService.cancelEvent(event, sendNotifi);
         } else {
             if (isChanged) {
                 eventService.changeDateAndTime(event, sendNotifi);

@@ -34,9 +34,7 @@ public class CreateReminder {
     }
 
     public void create() {
-        if (eventDateTime != null) {
-            setReminder();
-        }
+        setReminder();
     }
 
     private void setReminder() {

@@ -28,6 +28,7 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.*;
 
@@ -48,7 +49,18 @@ public class EventService {
         this.eventRepository = eventRepository;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
+        clearEventDB();
         setReminders();
+    }
+
+    private void clearEventDB() {
+        List<Event> eventList = findAll();
+        for (Event event : eventList) {
+            TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
+            if (textChannel == null) {
+                delete(event);
+            }
+        }
     }
 
     private void setReminders() {
@@ -58,8 +70,10 @@ public class EventService {
                 .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : events) {
-            CreateReminder createReminder = new CreateReminder(event, this, timers, usersReminderService);
-            createReminder.create();
+            if (event.getIsActive()) {
+                CreateReminder createReminder = new CreateReminder(event, this, timers, usersReminderService);
+                createReminder.create();
+            }
         }
     }
 
@@ -84,17 +98,20 @@ public class EventService {
         if (guild == null) {
             return;
         }
+        String channelName = EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
+                "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
+        if (channelName.length() >= 99) {
+            channelName = channelName.substring(0, 99);
+        }
         Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID);
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
-            guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
-                            "-" + eventRequest.getDate() + "-" + eventRequest.getTime(), category)
+            guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
         } else {
-            guild.createTextChannel(EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
-                            "-" + eventRequest.getDate() + "-" + eventRequest.getTime(), category)
+            guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
@@ -125,32 +142,29 @@ public class EventService {
         builder.addBlankField(true);
         builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + Users.getUserNicknameFromID(eventRequest.getAuthorId()));
-        try {
-            textChannel.sendMessage(msg).setEmbeds(builder.build()).setActionRow(
-                            Button.primary(ComponentId.EVENTS_SIGN_IN, "Zapisz"),
-                            Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE, "Rezerwa"),
-                            Button.danger(ComponentId.EVENTS_SIGN_OUT, "Wypisz"))
-                    .queue(message -> {
-                        MessageEmbed mOld = message.getEmbeds().get(0);
-                        String msgID = message.getId();
-                        message.editMessageEmbeds(mOld).setActionRow(Button.primary(ComponentId.EVENTS_SIGN_IN + msgID, "Zapisz"),
-                                Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgID, "Rezerwa"),
-                                Button.danger(ComponentId.EVENTS_SIGN_OUT + msgID, "Wypisz")).queue();
-                        message.pin().queue();
-                        LocalDateTime dateTime = getDateTime(eventRequest.getDate(), eventRequest.getTime());
-                        Event event = Event.builder()
-                                .name(eventRequest.getName())
-                                .msgId(message.getId())
-                                .channelId(textChannel.getId())
-                                .date(dateTime)
-                                .build();
-                        save(event);
-                        CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
-                        reminder.create();
-                    });
-        } catch (Exception e) {
-            RangerLogger.info("Błąd podczas budowania listy z zapisami.");
-        }
+        textChannel.sendMessage(msg).setEmbeds(builder.build()).setActionRow(
+                        Button.primary(ComponentId.EVENTS_SIGN_IN, "Zapisz"),
+                        Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE, "Rezerwa"),
+                        Button.danger(ComponentId.EVENTS_SIGN_OUT, "Wypisz"))
+                .queue(message -> {
+                    MessageEmbed mOld = message.getEmbeds().get(0);
+                    String msgID = message.getId();
+                    message.editMessageEmbeds(mOld).setActionRow(Button.primary(ComponentId.EVENTS_SIGN_IN + msgID, "Zapisz"),
+                            Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgID, "Rezerwa"),
+                            Button.danger(ComponentId.EVENTS_SIGN_OUT + msgID, "Wypisz")).queue();
+                    message.pin().queue();
+                    LocalDateTime dateTime = getDateTime(eventRequest.getDate(), eventRequest.getTime());
+                    Event event = Event.builder()
+                            .name(eventRequest.getName())
+                            .msgId(message.getId())
+                            .channelId(textChannel.getId())
+                            .isActive(true)
+                            .date(dateTime)
+                            .build();
+                    save(event);
+                    CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
+                    reminder.create();
+                });
     }
 
     private void save(Event event) {
@@ -344,7 +358,7 @@ public class EventService {
                     + event.getName() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
-            cancelEvent(event);
+            changeTitleRedCircle(event);
         }
         updateEmbed(event);
     }
@@ -383,25 +397,16 @@ public class EventService {
         eventRepository.delete(event);
     }
 
-    public void cancelEventWithInfoForPlayers(@NotNull Event event) {
-        TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
-        if (channel != null) {
-            channel.retrieveMessageById(event.getMsgId()).queue(message -> {
-                List<MessageEmbed> embeds = message.getEmbeds();
-                List<MessageEmbed.Field> fields = embeds.get(0).getFields();
-                String dateTime = getDateAndTime(fields);
-                sendInfoChanges(event, EventChanges.REMOVE, dateTime);
-                cancelEvent(event);
-            });
-        }
-    }
-
-    public void cancelEvent(@NotNull Event event) {
-        RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
+    public void cancelEvent(Event event, boolean sendNotifi) {
         disableButtons(event);
         changeTitleRedCircle(event);
+        event.setIsActive(false);
         timers.cancelByMsgId(event.getMsgId());
-        eventRepository.delete(event);
+        save(event);
+        if (sendNotifi) {
+            String dateTime = event.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+            sendInfoChanges(event, EventChanges.REMOVE, dateTime);
+        }
     }
 
     public void changeTitleRedCircle(@NotNull Event event) {
@@ -512,18 +517,19 @@ public class EventService {
      */
     public void disableButtons(String messageID, String channelID) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelID);
-        assert textChannel != null;
-        textChannel.retrieveMessageById(messageID).queue(message -> {
-            List<MessageEmbed> embeds = message.getEmbeds();
-            List<Button> buttons = message.getButtons();
-            List<Button> buttonsNew = new ArrayList<>();
-            for (Button b : buttons) {
-                b = b.asDisabled();
-                buttonsNew.add(b);
-            }
-            MessageEmbed messageEmbed = embeds.get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
-        });
+        if (textChannel != null) {
+            textChannel.retrieveMessageById(messageID).queue(message -> {
+                List<MessageEmbed> embeds = message.getEmbeds();
+                List<Button> buttons = message.getButtons();
+                List<Button> buttonsNew = new ArrayList<>();
+                for (Button b : buttons) {
+                    b = b.asDisabled();
+                    buttonsNew.add(b);
+                }
+                MessageEmbed messageEmbed = embeds.get(0);
+                message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
+            });
+        }
     }
 
     public void enableButtons(String messageID) {

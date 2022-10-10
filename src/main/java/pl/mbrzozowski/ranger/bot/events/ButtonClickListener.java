@@ -16,6 +16,8 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
+import java.util.Optional;
+
 @Service
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -100,10 +102,13 @@ public class ButtonClickListener extends ListenerAdapter {
             }
         } else if (indexOfGenerator >= 0) {
             eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
-        } else if (eventService.findEventByMsgId(interactionEvent.getMessage().getId()).isPresent()) {
-            eventsButtonClick(interactionEvent, eventService.findEventByMsgId(interactionEvent.getMessage().getId()).get());
-            isIDCorrect = false;
         } else {
+            isIDCorrect = false;
+        }
+
+        Optional<Event> eventOptional = eventService.findEventByMsgId(interactionEvent.getMessage().getId());
+        if (eventOptional.isPresent()) {
+            eventsButtonClick(interactionEvent, eventOptional.get());
             isIDCorrect = false;
         }
 
