@@ -56,7 +56,6 @@ public class DiscordBot {
                 .addEventListeners(new ModalListener())
                 .addEventListeners(this.selectMenuListener)
                 .build();
-//        Repository.setJDA(jda);
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);
         DiscordBot.jda = jda;

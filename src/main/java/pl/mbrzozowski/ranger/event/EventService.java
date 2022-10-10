@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
@@ -40,10 +41,26 @@ public class EventService {
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
 
-    public EventService(EventRepository eventRepository, Timers timers, UsersReminderService usersReminderService) {
+    @Autowired
+    public EventService(EventRepository eventRepository,
+                        Timers timers,
+                        UsersReminderService usersReminderService) {
         this.eventRepository = eventRepository;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
+        setReminders();
+    }
+
+    private void setReminders() {
+        List<Event> eventList = findAll();
+        List<Event> events = eventList
+                .stream()
+                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
+                .toList();
+        for (Event event : events) {
+            CreateReminder createReminder = new CreateReminder(event, this, timers, usersReminderService);
+            createReminder.create();
+        }
     }
 
     public List<Event> findAll() {
@@ -383,7 +400,7 @@ public class EventService {
         RangerLogger.info("Event [" + event.getName() + "] usunięty z bazy danych.");
         disableButtons(event);
         changeTitleRedCircle(event);
-        timers.cancel(event.getMsgId());
+        timers.cancelByMsgId(event.getMsgId());
         eventRepository.delete(event);
     }
 
@@ -472,7 +489,7 @@ public class EventService {
     }
 
     private void updateTimer(@NotNull Event event) {
-        timers.cancel(event.getMsgId());
+        timers.cancelByMsgId(event.getMsgId());
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
     }
@@ -554,10 +571,12 @@ public class EventService {
     }
 
     public void deleteByMsgId(String messageId) {
+        timers.cancelByMsgId(messageId);
         eventRepository.deleteByMsgId(messageId);
     }
 
     public void deleteByChannelId(String channelID) {
+        timers.cancelByChannelId(channelID);
         eventRepository.deleteByChannelId(channelID);
     }
 }

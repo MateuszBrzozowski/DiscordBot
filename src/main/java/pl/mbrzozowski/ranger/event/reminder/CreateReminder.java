@@ -14,7 +14,8 @@ import java.util.Timer;
 public class CreateReminder {
 
     private final LocalDateTime eventDateTime;
-    private final String eventID;
+    private final String msgId;
+    private final String channelId;
     private final EventService eventService;
     private final Timers timers;
     private final UsersReminderService usersReminderService;
@@ -25,7 +26,8 @@ public class CreateReminder {
                           Timers timers,
                           UsersReminderService usersReminderService) {
         this.eventDateTime = event.getDate().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime();
-        this.eventID = event.getMsgId();
+        this.msgId = event.getMsgId();
+        this.channelId = event.getChannelId();
         this.eventService = eventService;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
@@ -53,8 +55,8 @@ public class CreateReminder {
         Date eventDateTime = Date.from(timerTme.atZone(ZoneId.of("Europe/Paris")).toInstant());
         if (dateTimeNow.isBefore(timerTme)) {
             Timer timer = new Timer();
-            timer.schedule(new Reminder(eventID, type, eventService, usersReminderService), eventDateTime);
-            MyTimer myTimer = new MyTimer(eventID, timer);
+            timer.schedule(new Reminder(msgId, type, eventService, usersReminderService), eventDateTime);
+            MyTimer myTimer = new MyTimer(msgId, channelId, timer);
             timers.add(myTimer);
         }
     }
