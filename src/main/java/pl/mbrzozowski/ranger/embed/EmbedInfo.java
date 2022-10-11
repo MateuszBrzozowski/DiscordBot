@@ -104,18 +104,6 @@ public class EmbedInfo extends EmbedCreator {
         channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
     }
 
-    /**
-     * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.
-     *
-     * @param event ButtonInteractionEvent
-     */
-    public static void userIsInClanMember(ButtonInteractionEvent event) {
-        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
-                        "Jesteś już w naszym klanie dzbanie!")
-                .setEphemeral(true)
-                .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
-    }
 
     /**
      * Wysyła do użytkownika wiadomość że rekrutacja została tymczasowo zamknięta

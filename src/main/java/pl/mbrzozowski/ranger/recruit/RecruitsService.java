@@ -93,7 +93,7 @@ public class RecruitsService {
             return;
         }
         if (Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID)) {
-            EmbedInfo.userIsInClanMember(event);
+            ResponseMessage.userIsInClanMember(event);
             return;
         }
         confirmMessage(event);
