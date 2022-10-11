@@ -17,6 +17,7 @@ import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
 import pl.mbrzozowski.ranger.recruit.Recruit;
+import pl.mbrzozowski.ranger.recruit.RecruitBlackList;
 import pl.mbrzozowski.ranger.server.service.Client;
 
 import javax.sql.DataSource;
@@ -57,6 +58,7 @@ public class MainDataSourceConfiguration {
                         Event.class,
                         Player.class,
                         Recruit.class,
+                        RecruitBlackList.class,
                         Client.class,
                         UsersReminder.class)
                 .properties(properties)

@@ -2,6 +2,8 @@ package pl.mbrzozowski.ranger.response;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.helpers.RangerLogger;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 public class ResponseMessage {
 
@@ -58,6 +60,19 @@ public class ResponseMessage {
                         Probably you have active ticket. If you can't see channel, please contact directly with Server Admin.""")
                 .setEphemeral(true)
                 .queue();
+    }
 
+    public static void maxRecruits(@NotNull ButtonInteractionEvent event) {
+        event.reply("**REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
+                .setEphemeral(true)
+                .queue();
+        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
+    }
+
+    public static void userBlackList(@NotNull ButtonInteractionEvent event) {
+        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
+                .setEphemeral(true)
+                .queue();
+        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest na czarnej liście.");
     }
 }

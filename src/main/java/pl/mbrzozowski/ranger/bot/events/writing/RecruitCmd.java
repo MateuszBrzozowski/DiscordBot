@@ -1,9 +1,9 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 
 public class RecruitCmd extends Proccess {
@@ -29,7 +29,9 @@ public class RecruitCmd extends Proccess {
             } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
                 messageReceived.getMessage().delete().submit();
                 recruitsService.positiveResult(message.getUserID(), messageReceived.getTextChannel());
-            } else if (cmd.equalsIgnoreCase(Commands.CLOSE) && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
+            } else if (cmd.equalsIgnoreCase(Commands.CLOSE)
+                    && parentCategoryId != null
+                    && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 messageReceived.getMessage().delete().submit();
                 recruitsService.closeChannel(messageReceived);
             } else {

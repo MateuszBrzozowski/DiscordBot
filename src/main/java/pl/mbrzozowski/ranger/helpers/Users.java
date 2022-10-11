@@ -64,18 +64,6 @@ public class Users {
     }
 
     /**
-     * @param userID ID użytkownika którego sprawdzamy
-     * @return Zwraca true jeżeli użytkownik ma rolę innego klanu. W innym przypadku zwraca false.
-     */
-    public static boolean hasUserRoleAnotherClan(String userID) {
-        String[] clans = {RoleID.RN_ID, RoleID.HSR_ID, RoleID.PEC_ID, RoleID.PC_ID};
-        for (String clanID : clans) {
-            if (hasUserRole(userID, clanID)) return true;
-        }
-        return false;
-    }
-
-    /**
      * @param userID ID użytkownika którego sprawdzamy czy jest twórcą bota
      * @return Zwraca true jeżeli użytkownik to twórca bota, W innym przypadku zwraca false.
      */

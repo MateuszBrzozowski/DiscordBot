@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
@@ -21,7 +22,7 @@ public class Recruit {
     private String name;
     @Column(nullable = false, updatable = false)
     private String userId;
-    @Nullable
+    @NotNull
     private String channelId;
     @Column(nullable = false)
     private LocalDateTime toApply;
