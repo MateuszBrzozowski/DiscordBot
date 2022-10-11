@@ -70,7 +70,7 @@ public class EventService {
                 .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : events) {
-            if (event.getIsActive()) {
+            if (event.isActive()) {
                 CreateReminder createReminder = new CreateReminder(event, this, timers, usersReminderService);
                 createReminder.create();
             }
@@ -400,7 +400,7 @@ public class EventService {
     public void cancelEvent(Event event, boolean sendNotifi) {
         disableButtons(event);
         changeTitleRedCircle(event);
-        event.setIsActive(false);
+        event.setActive(false);
         timers.cancelByMsgId(event.getMsgId());
         save(event);
         if (sendNotifi) {

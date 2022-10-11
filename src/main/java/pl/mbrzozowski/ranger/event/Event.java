@@ -23,7 +23,7 @@ public class Event {
     private String msgId;
     @Column(nullable = false)
     private String channelId;
-    private Boolean isActive;
+    private boolean isActive;
     private LocalDateTime date;
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Player> players;
