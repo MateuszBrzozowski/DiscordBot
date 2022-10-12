@@ -247,8 +247,8 @@ public class RecruitsService {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
-            if (recruit.getEndRecruitment() == null &&
-                    recruit.getRecruitmentResult() == null) {
+            if (recruit.getEndRecruitment() == null
+                    && recruit.getRecruitmentResult() == null) {
                 Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
                 if (guild != null) {
                     removeSmallRInTag(recruit.getUserId(), guild);

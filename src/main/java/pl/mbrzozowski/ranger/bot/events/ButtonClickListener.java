@@ -63,7 +63,7 @@ public class ButtonClickListener extends ListenerAdapter {
             interactionEvent.getMessage().delete().queue();
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE)) {
             String parentCategoryId = interactionEvent.getTextChannel().getParentCategoryId();
-            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
+            if (parentCategoryId != null && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
                 if (!isRadaKlanu) {
                     interactionEvent.deferEdit().queue();
                     return;

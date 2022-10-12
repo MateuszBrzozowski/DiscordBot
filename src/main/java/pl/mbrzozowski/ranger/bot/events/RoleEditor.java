@@ -1,6 +1,5 @@
 package pl.mbrzozowski.ranger.bot.events;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -11,11 +10,11 @@ import pl.mbrzozowski.ranger.helpers.Users;
 
 public class RoleEditor {
 
-    JDA jda = DiscordBot.getJda();
+//    JDA jda = DiscordBot.getJda();
 
     public void addRemoveRole(String userID, String roleString) {
-        Role role = jda.getRoleById(roleString);
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Role role = DiscordBot.getJda().getRoleById(roleString);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (role != null) {
             boolean hasRole = Users.hasUserRole(userID, role.getId());
             if (!hasRole) {
@@ -35,7 +34,7 @@ public class RoleEditor {
      * @param addRole true - jesli rola jest dodawana, false - jeśli rola jest usuwana
      */
     private void sendConfirmation(Role role, String userID, boolean addRole) {
-        jda.getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+        DiscordBot.getJda().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
             String msg = "**Rangers Polska**: " + role.getName() + ": ";
             if (addRole) {
                 msg += "Gave you the role!";

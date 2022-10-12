@@ -8,6 +8,7 @@ import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -28,6 +29,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
         date.setHours(23);
         date.setMinutes(59);
+        date.setSeconds(59);
         timer.scheduleAtFixedRate(this, date, 24 * 60 * 60 * 1000);
     }
 
@@ -35,13 +37,15 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
     public void clean() {
         List<Event> eventList = eventService.findAll()
                 .stream()
-                .filter(event -> event.getDate().isBefore(LocalDateTime.now()))
+                .filter(event -> event.getDate().isBefore(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : eventList) {
             if (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS))) {
                 eventService.delete(event);
                 deleteChannel(event);
             } else {
+                eventService.disableButtons(event);
+                eventService.setActive(event, false);
                 eventService.changeTitleRedCircle(event);
             }
         }

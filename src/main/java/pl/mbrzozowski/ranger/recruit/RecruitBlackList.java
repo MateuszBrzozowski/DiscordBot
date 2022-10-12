@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Entity(name = "recruit_black_list")
 public class RecruitBlackList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

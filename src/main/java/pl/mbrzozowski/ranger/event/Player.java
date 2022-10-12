@@ -23,4 +23,15 @@ public class Player {
     private boolean mainList;
     @ManyToOne
     private Event event;
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
+                ", mainList=" + mainList +
+                ", event=" + event.getName() +
+                '}';
+    }
 }

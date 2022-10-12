@@ -28,7 +28,6 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.*;
 
@@ -49,7 +48,7 @@ public class EventService {
         this.eventRepository = eventRepository;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
-        clearEventDB();
+//        clearEventDB();
         setReminders();
     }
 
@@ -323,7 +322,7 @@ public class EventService {
                             } else {
                                 player.setMainList(false);
                                 buttonInteractionEvent.deferEdit().queue();
-                                RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę rezerwową.", event.getName());
+                                RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());
                             }
                         } else {
                             ResponseMessage.youAreOnList(buttonInteractionEvent);
@@ -404,7 +403,7 @@ public class EventService {
         timers.cancelByMsgId(event.getMsgId());
         save(event);
         if (sendNotifi) {
-            String dateTime = event.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+            String dateTime = "<t:" + event.getDate().atZone(ZoneId.of("Europe/Paris")).toEpochSecond() + ":F>";
             sendInfoChanges(event, EventChanges.REMOVE, dateTime);
         }
     }
@@ -581,8 +580,13 @@ public class EventService {
         eventRepository.deleteByMsgId(messageId);
     }
 
-    public void deleteByChannelId(String channelID) {
-        timers.cancelByChannelId(channelID);
-        eventRepository.deleteByChannelId(channelID);
+    public void deleteByChannelId(String channelId) {
+        timers.cancelByChannelId(channelId);
+        eventRepository.deleteByChannelId(channelId);
+    }
+
+    public void setActive(Event event, boolean isActive) {
+        event.setActive(isActive);
+        eventRepository.save(event);
     }
 }
