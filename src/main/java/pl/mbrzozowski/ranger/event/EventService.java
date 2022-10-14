@@ -48,18 +48,7 @@ public class EventService {
         this.eventRepository = eventRepository;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
-//        clearEventDB();
         setReminders();
-    }
-
-    private void clearEventDB() {
-        List<Event> eventList = findAll();
-        for (Event event : eventList) {
-            TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
-            if (textChannel == null) {
-                delete(event);
-            }
-        }
     }
 
     private void setReminders() {
@@ -471,7 +460,8 @@ public class EventService {
             message.editMessageEmbeds(mNew).queue(message1 -> {
                 updateTimer(event);
                 if (notifi) {
-                    sendInfoChanges(event, EventChanges.CHANGES, dataTime);
+                    String dateTime = "<t:" + event.getDate().atZone(ZoneId.of("Europe/Paris")).toEpochSecond() + ":F>";
+                    sendInfoChanges(event, EventChanges.CHANGES, dateTime);
                 }
             });
         });

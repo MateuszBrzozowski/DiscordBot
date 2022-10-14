@@ -33,7 +33,7 @@ public class EventsSettingsCmd extends Proccess {
                 EventsSettings eventsSettings = new EventsSettings(eventService, messageReceived, eventsSettingsService);
                 eventsSettingsService.addEventsSettings(eventsSettings);
             } else {
-                EmbedInfo.noActiveEvents(messageReceived.getTextChannel());
+                EmbedInfo.noActiveEvents(messageReceived.getChannel());
             }
         } else if (indexOfSettings >= 0) {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL) || !eventsSettingsService.isPossibleEditing(indexOfSettings)) {

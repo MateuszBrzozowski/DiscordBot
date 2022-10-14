@@ -428,7 +428,7 @@ public class EmbedInfo extends EmbedCreator {
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void noActiveEvents(TextChannel textChannel) {
+    public static void noActiveEvents(MessageChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Brak aktywnych eventów");
         textChannel.sendMessageEmbeds(builder.build()).queue();
