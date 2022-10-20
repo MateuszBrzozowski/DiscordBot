@@ -93,18 +93,18 @@ public class ServerService {
                         .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.MODERATOR), permissions, null)
                         .queue(channel -> {
-                            sendEmbedStartChannel(channel, buttonType);
+                            sendEmbedStartChannel(userID, channel, buttonType);
                             addUser(userID, userName, channel.getId());
                         });
             }
         }
     }
 
-    private void sendEmbedStartChannel(TextChannel channel, @NotNull ButtonClickType buttonType) {
+    private void sendEmbedStartChannel(String userID, TextChannel channel, @NotNull ButtonClickType buttonType) {
         switch (buttonType) {
-            case REPORT -> EmbedInfo.sendEmbedReport(channel);
-            case UNBAN -> EmbedInfo.sendEmbedUnban(channel);
-            case CONTACT -> EmbedInfo.sendEmbedContact(channel);
+            case REPORT -> EmbedInfo.sendEmbedReport(userID, channel);
+            case UNBAN -> EmbedInfo.sendEmbedUnban(userID, channel);
+            case CONTACT -> EmbedInfo.sendEmbedContact(userID, channel);
         }
     }
 

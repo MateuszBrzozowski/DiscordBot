@@ -315,9 +315,10 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
+     * @param userID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedReport(TextChannel channel) {
+    public static void sendEmbedReport(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
         builder.setTitle("Report player");
         builder.addField("", """
@@ -334,7 +335,7 @@ public class EmbedInfo extends EmbedCreator {
                 2. Describe of bad behaviour.
                 3. Server name.
                 4. Add evidence. Screenshot or video link (e.g. Youtube).""", false);
-        channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
+        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
@@ -343,9 +344,10 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
+     * @param userID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedUnban(TextChannel channel) {
+    public static void sendEmbedUnban(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLUE, ThumbnailType.DEFAULT);
         builder.setTitle("Unban player");
         builder.addField("", """
@@ -356,7 +358,7 @@ public class EmbedInfo extends EmbedCreator {
                 Write here if you want to revoke your ban.
                 1. Provide your ingame nick and/or steamid.
                 2. Server name.""", false);
-        channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
+        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
@@ -365,16 +367,17 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
+     * @param userID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedContact(TextChannel channel) {
+    public static void sendEmbedContact(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.GREEN, ThumbnailType.DEFAULT);
         builder.setTitle("Contact with Admin");
         builder.addField("", "Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. " +
                 "Twój nick w grze lub/i steamId64.", false);
         builder.addField("--------------------", "Please describe your problem with more details, " +
                 "screenshots, servername the issue occured on and related steamId64", false);
-        channel.sendMessage("<@&" + RoleID.SERVER_ADMIN + ">")
+        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());

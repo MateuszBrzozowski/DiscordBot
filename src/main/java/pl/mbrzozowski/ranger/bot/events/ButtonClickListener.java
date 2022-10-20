@@ -98,6 +98,7 @@ public class ButtonClickListener extends ListenerAdapter {
 
     private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
+            interactionEvent.deferEdit().queue();
             EmbedInfo.confirmCloseChannel(interactionEvent.getTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
             interactionEvent.getMessage().delete().queue();
@@ -123,7 +124,7 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
             removeChannelDB(interactionEvent, isRadaKlanu);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
-            interactionEvent.getMessage().delete().queue();
+            interactionEvent.deferEdit().queue();
         } else {
             eventsButtons(interactionEvent);
         }
@@ -136,7 +137,7 @@ public class ButtonClickListener extends ListenerAdapter {
             eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_IN_RESERVE);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_OUT + interactionEvent.getMessage().getId())) {
             eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_OUT);
-        }else {
+        } else {
             openForm(interactionEvent);
         }
     }
