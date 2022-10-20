@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.mbrzozowski.ranger.bot.events.*;
+import pl.mbrzozowski.ranger.bot.events.writing.SlashCommandListener;
 import pl.mbrzozowski.ranger.helpers.Constants;
 
 import javax.security.auth.login.LoginException;
@@ -23,6 +24,7 @@ public class DiscordBot {
     private final MessageUpdate messageUpdate;
     private final Listener listener;
     private final SelectMenuListener selectMenuListener;
+    private final SlashCommandListener slashCommandListener;
     private static JDA jda;
 
     @Autowired
@@ -31,13 +33,15 @@ public class DiscordBot {
                       ChannelUpdate channelUpdate,
                       MessageUpdate messageUpdate,
                       Listener listener,
-                      SelectMenuListener selectMenuListener) throws LoginException {
+                      SelectMenuListener selectMenuListener,
+                      SlashCommandListener slashCommandListener) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
         this.channelUpdate = channelUpdate;
         this.messageUpdate = messageUpdate;
         this.listener = listener;
         this.selectMenuListener = selectMenuListener;
+        this.slashCommandListener = slashCommandListener;
         DiscordBotRun();
     }
 
@@ -55,6 +59,7 @@ public class DiscordBot {
                 .addEventListeners(this.listener)
                 .addEventListeners(new ModalListener())
                 .addEventListeners(this.selectMenuListener)
+                .addEventListeners(this.slashCommandListener)
                 .build();
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);

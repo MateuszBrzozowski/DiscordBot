@@ -383,19 +383,20 @@ public class RecruitsService {
 
     public void checkIsRecruit(String userId) {
         Optional<Recruit> recruitOptional = findByUserId(userId);
-        if (recruitOptional.isPresent()) {
-            Recruit recruit = recruitOptional.get();
-            if (recruit.getRecruitmentResult() == null) {
-                Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-                if (guild != null) {
-                    Member member = guild.getMemberById(recruit.getUserId());
-                    TextChannel channel = guild.getTextChannelById(recruit.getChannelId());
-                    if (member != null && channel != null) {
-                        channel.getManager()
-                                .putPermissionOverride(member, permissions, null)
-                                .queue();
-                    }
+        if (recruitOptional.isEmpty()) {
+            return;
+        }
+        Recruit recruit = recruitOptional.get();
+        if (!recruit.getIsCloseChannel()) {
+            Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+            Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            if (guild != null) {
+                Member member = guild.getMemberById(recruit.getUserId());
+                TextChannel channel = guild.getTextChannelById(recruit.getChannelId());
+                if (member != null && channel != null) {
+                    channel.getManager()
+                            .putPermissionOverride(member, permissions, null)
+                            .queue();
                 }
             }
         }
