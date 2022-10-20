@@ -43,8 +43,8 @@ public class ComponentService {
         }
     }
 
-    public void removeChannel(@NotNull ButtonInteractionEvent event) {
-        disableButtons(event.getChannel().getId(), event.getMessageId());
+    public static void removeChannel(@NotNull ButtonInteractionEvent event) {
+        event.getMessage().delete().queue();
         EmbedInfo.removedChannel(event.getTextChannel());
         Thread thread = new Thread(() -> {
             try {
@@ -60,18 +60,8 @@ public class ComponentService {
                 }
             }
         });
-        whichCategory(event);
         thread.start();
     }
 
-    private void whichCategory(@NotNull ButtonInteractionEvent event) {
-        String parentCategoryId = event.getTextChannel().getParentCategoryId();
-        if (parentCategoryId != null) {
-            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-                recruitsService.deleteChannelByID(event.getChannel().getId());
-            } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
-                serverService.removeChannel(event);
-            }
-        }
-    }
+
 }

@@ -38,21 +38,30 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  ID użytkownika który zamyka kanał
      * @param channel Kanał który został zamknięty.
      */
-    public static void closeChannel(String userID, MessageChannel channel) {
+    public static void closeRecruitChannel(String userID, MessageChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.danger(ComponentId.REMOVE, "Usuń kanał"))
+                .setActionRow(Button.danger(ComponentId.REMOVE_RECRUIT_CHANNEL, "Usuń kanał"))
                 .queue();
     }
 
-    public static void confirmCloseChannel(TextChannel channel) {
+    public static void closeServerServiceChannel(String userID, MessageChannel channel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        builder.setTitle("Kanał zamknięty");
+        builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
+        channel.sendMessageEmbeds(builder.build())
+                .setActionRow(Button.danger(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL, "Usuń kanał"))
+                .queue();
+    }
+
+    public static void confirmCloseChannel(@NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.QUESTION);
         builder.setTitle("Do you want close the ticket?");
         channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.success("closeYes", "Yes"),
-                        Button.danger("closeNo", "No"))
+                .setActionRow(Button.success(ComponentId.CLOSE_YES, "Yes"),
+                        Button.danger(ComponentId.CLOSE_NO, "No"))
                 .queue();
     }
 
@@ -72,7 +81,7 @@ public class EmbedInfo extends EmbedCreator {
      */
     public static void removedChannel(TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
-        builder.setTitle("Kanał usunięty.");
+        builder.setTitle("Kanał wkrótce zostanie usunięty.");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 

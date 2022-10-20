@@ -10,7 +10,8 @@ public interface ComponentId {
     String SERVER_SERVICE_REPORT = "Report" + SUFFIX;
     String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
     String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;
-    String REMOVE = "removeChannel" + SUFFIX;
+    String REMOVE_RECRUIT_CHANNEL = "removeRecruitChannel" + SUFFIX;
+    String REMOVE_SERVER_SERVICE_CHANNEL = "removeServerServiceChannel" + SUFFIX;
     String REMOVE_YES = "removeChannelYes" + SUFFIX;
     String REMOVE_NO = "removeChannelNo" + SUFFIX;
     String SEED_ROLE = "seedrole" + SUFFIX;

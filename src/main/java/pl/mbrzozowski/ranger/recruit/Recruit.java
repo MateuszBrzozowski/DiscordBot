@@ -34,4 +34,5 @@ public class Recruit {
     @Enumerated(EnumType.STRING)
     @Nullable
     private RecruitmentResult recruitmentResult;
+    private Boolean isCloseChannel = false;
 }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
-import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.helpers.*;
@@ -15,8 +14,6 @@ import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.server.service.ServerService;
-
-import java.util.Optional;
 
 @Service
 public class ButtonClickListener extends ListenerAdapter {
@@ -39,91 +36,139 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
-        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(interactionEvent.getUser().getId());
-        boolean isIDCorrect = true;
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
+        newRecruit(interactionEvent, isRadaKlanu);
+    }
 
+    private void newRecruit(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
             recruitsService.newPodanie(interactionEvent);
-            isIDCorrect = false;
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
             recruitsService.confirm(interactionEvent);
-            isIDCorrect = false;
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {
+        } else {
+            recruitChannelReaction(interactionEvent, isRadaKlanu);
+        }
+    }
+
+    private void recruitChannelReaction(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_IN)) {
+            if (isRadaKlanu) {
+                recruitsService.accepted(interactionEvent);
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL)) {
+            if (isRadaKlanu) {
+                recruitsService.closeChannel(interactionEvent);
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
+            if (isRadaKlanu) {
+                if (!recruitsService.positiveResult(interactionEvent)) {
+                    ResponseMessage.operationNotPossible(interactionEvent);
+                }
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
+            if (isRadaKlanu) {
+                if (!recruitsService.negativeResult(interactionEvent)) {
+                    ResponseMessage.operationNotPossible(interactionEvent);
+                }
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
+        } else {
+            serverServiceReport(interactionEvent, isRadaKlanu);
+        }
+    }
+
+    private void serverServiceReport(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {
             serverService.buttonClick(interactionEvent, ButtonClickType.REPORT);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_UNBAN)) {
             serverService.buttonClick(interactionEvent, ButtonClickType.UNBAN);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_CONTACT)) {
             serverService.buttonClick(interactionEvent, ButtonClickType.CONTACT);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
-            EmbedInfo.confirmCloseChannel(interactionEvent.getTextChannel());
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
-            serverService.closeChannel(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
-            interactionEvent.getMessage().delete().queue();
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE)) {
-            String parentCategoryId = interactionEvent.getTextChannel().getParentCategoryId();
-            if (parentCategoryId != null && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-                if (!isRadaKlanu) {
-                    interactionEvent.deferEdit().queue();
-                    return;
-                }
-            }
-            ComponentService.disableButtons(interactionEvent.getChannel().getId(), interactionEvent.getMessageId());
-            EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
-            ComponentService componentService = new ComponentService(recruitsService, serverService);
-            componentService.removeChannel(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
-            interactionEvent.getMessage().delete().queue();
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SEED_ROLE)) {
-            RoleEditor roleEditor = new RoleEditor();
-            roleEditor.addRemoveRole(interactionEvent.getUser().getId(), RoleID.SEED_ID);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM)) {
-            isIDCorrect = false;
-            RecruitOpinions recrutOpinions = new RecruitOpinions();
-            recrutOpinions.openForm(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_IN) && isRadaKlanu) {
-            if (!recruitsService.accepted(interactionEvent)) {
-                ResponseMessage.operationNotPossible(interactionEvent);
-                isIDCorrect = false;
-            }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL) && isRadaKlanu) {
-            recruitsService.closeChannel(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE) && isRadaKlanu) {
-            if (!recruitsService.positiveResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel())) {
-                ResponseMessage.operationNotPossible(interactionEvent);
-                isIDCorrect = false;
-            }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE) && isRadaKlanu) {
-            if (!recruitsService.negativeResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel())) {
-                ResponseMessage.operationNotPossible(interactionEvent);
-                isIDCorrect = false;
-            }
-        } else if (indexOfGenerator >= 0) {
-            eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
         } else {
-            isIDCorrect = false;
-        }
-
-        Optional<Event> eventOptional = eventService.findEventByMsgId(interactionEvent.getMessage().getId());
-        if (eventOptional.isPresent()) {
-            eventsButtonClick(interactionEvent, eventOptional.get());
-            isIDCorrect = false;
-        }
-
-        if (isIDCorrect || (!isIDCorrect && !isRadaKlanu)) {
-            interactionEvent.deferEdit().queue();
+            serverServiceCloseChannel(interactionEvent, isRadaKlanu);
         }
     }
 
-    private void eventsButtonClick(@NotNull ButtonInteractionEvent interactionEvent, @NotNull Event event) {
+    private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
+            EmbedInfo.confirmCloseChannel(interactionEvent.getTextChannel());
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
+            interactionEvent.getMessage().delete().queue();
+            serverService.closeChannel(interactionEvent);
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
+            interactionEvent.getMessage().delete().queue();
+        } else {
+            removeChannelsButtons(interactionEvent, isRadaKlanu);
+        }
+    }
+
+    private void removeChannelsButtons(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
+            if (isRadaKlanu) {
+                interactionEvent.getMessage().delete().queue();
+                EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
+            interactionEvent.getMessage().delete().queue();
+            EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
+            removeChannelDB(interactionEvent, isRadaKlanu);
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
+            interactionEvent.getMessage().delete().queue();
+        } else {
+            eventsButtons(interactionEvent);
+        }
+    }
+
+    private void eventsButtons(@NotNull ButtonInteractionEvent interactionEvent) {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, event, ButtonClickType.SIGN_IN);
+            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_IN);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN_RESERVE + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, event, ButtonClickType.SIGN_IN_RESERVE);
+            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_IN_RESERVE);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_OUT + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, event, ButtonClickType.SIGN_OUT);
+            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_OUT);
+        }else {
+            openForm(interactionEvent);
+        }
+    }
+
+    private void openForm(@NotNull ButtonInteractionEvent interactionEvent) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM)) {
+            RecruitOpinions recruitOpinions = new RecruitOpinions();
+            recruitOpinions.openForm(interactionEvent);
+        } else {
+            eventsGenerator(interactionEvent);
+        }
+    }
+
+    private void eventsGenerator(@NotNull ButtonInteractionEvent interactionEvent) {
+        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(interactionEvent.getUser().getId());
+        if (indexOfGenerator >= 0) {
+            eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
+        }
+    }
+
+    private void removeChannelDB(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
+        String parentCategoryId = interactionEvent.getTextChannel().getParentCategoryId();
+        if (parentCategoryId != null) {
+            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isRadaKlanu) {
+                recruitsService.deleteChannelByID(interactionEvent.getChannel().getId());
+                ComponentService.removeChannel(interactionEvent);
+            } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
+                serverService.removeChannel(interactionEvent);
+                ComponentService.removeChannel(interactionEvent);
+            } else {
+                ResponseMessage.noPermission(interactionEvent);
+            }
         }
     }
 }

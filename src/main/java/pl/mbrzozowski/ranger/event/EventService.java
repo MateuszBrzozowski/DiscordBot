@@ -277,7 +277,13 @@ public class EventService {
     }
 
 
-    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, ButtonClickType buttonClick) {
+    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
+        Optional<Event> eventOptional = findEventByMsgId(buttonInteractionEvent.getMessage().getId());
+        if (eventOptional.isEmpty()) {
+            ResponseMessage.operationNotPossible(buttonInteractionEvent);
+            return;
+        }
+        Event event = eventOptional.get();
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
         String userID = buttonInteractionEvent.getUser().getId();
         if (eventIsAfter(event.getDate())) {

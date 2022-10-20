@@ -81,11 +81,23 @@ public class ResponseMessage {
      *
      * @param event ButtonInteractionEvent
      */
-    public static void userIsInClanMember(ButtonInteractionEvent event) {
+    public static void userIsInClanMember(@NotNull ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
                         "Jesteś już w naszym klanie dzbanie!")
                 .setEphemeral(true)
                 .queue();
         RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
+    }
+
+    public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {
+        event.reply("**Rekrut został już przyjęty**")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void noPermission(@NotNull ButtonInteractionEvent event) {
+        event.reply("Brak uprawnień!")
+                .setEphemeral(true)
+                .queue();
     }
 }

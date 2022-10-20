@@ -18,15 +18,15 @@ public class EventsGeneratorService {
     }
 
     public int userHaveActiveGenerator(String authorID) {
-        if (!eventsGenerators.isEmpty()) {
-            for (int i = 0; i < eventsGenerators.size(); i++) {
-                if (eventsGenerators.get(i).getUserID().equalsIgnoreCase(authorID)) {
-                    return i;
-                }
+        if (eventsGenerators.isEmpty()) {
+            return -1;
+        }
+        for (int i = 0; i < eventsGenerators.size(); i++) {
+            if (eventsGenerators.get(i).getUserID().equalsIgnoreCase(authorID)) {
+                return i;
             }
         }
         return -1;
-
     }
 
     public void saveAnswerAndNextStage(MessageReceivedEvent event, int indexOfGenerator) {

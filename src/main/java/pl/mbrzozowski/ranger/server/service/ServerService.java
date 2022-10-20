@@ -14,7 +14,6 @@ import pl.mbrzozowski.ranger.embed.EmbedInfo;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentService;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -37,6 +36,7 @@ public class ServerService {
     public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         if (!userHasReport(event.getUser().getId())) {
             createChannel(event, buttonType);
+            event.deferEdit().queue();
         } else {
             ResponseMessage.cantCreateServerServiceChannel(event);
         }
@@ -54,12 +54,11 @@ public class ServerService {
                         .putPermissionOverride(member, null, permissions)
                         .queue();
             }
-            EmbedInfo.closeChannel(event.getAuthor().getId(), event.getChannel());
+            EmbedInfo.closeServerServiceChannel(event.getAuthor().getId(), event.getChannel());
         }
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
-        ComponentService.disableButtons(event.getChannel().getId(), event.getMessageId());
         Optional<Client> clientOptional = clientRepository.findByChannelId(event.getChannel().getId());
         if (clientOptional.isPresent()) {
             Guild guild = event.getGuild();
@@ -71,7 +70,7 @@ public class ServerService {
                             .putPermissionOverride(member, null, permissions)
                             .queue();
                 }
-                EmbedInfo.closeChannel(event.getUser().getId(), event.getTextChannel());
+                EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getTextChannel());
             }
         }
     }
