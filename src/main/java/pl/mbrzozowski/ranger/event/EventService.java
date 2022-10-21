@@ -566,13 +566,6 @@ public class EventService {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 
-    private @NotNull String getDateAndTime(@NotNull List<MessageEmbed.Field> fields) {
-        String date = fields.get(0).getValue();
-        String time = fields.get(2).getValue();
-        return date + "r., " + time;
-    }
-
-
     public boolean isActiveEvents() {
         return eventRepository.findAll().size() > 0;
     }
