@@ -241,8 +241,9 @@ public class EventService {
     }
 
     private @NotNull String getStringOfMainList(@NotNull Event event) {
-        List<Player> players = event.getPlayers().stream().filter(Player::isMainList).toList();
+        List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(Player::isMainList).toList());
         if (players.size() > 0) {
+            players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
                 result.append(getUserNameWithoutRangers(Users.getUserNicknameFromID(player.getUserId()))).append("\n");
@@ -254,8 +255,9 @@ public class EventService {
     }
 
     private @NotNull String getStringOfReserveList(@NotNull Event event) {
-        List<Player> players = event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
+        List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(player -> !player.isMainList()).toList());
         if (players.size() > 0) {
+            players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
                 result.append(getUserNameWithoutRangers(Users.getUserNicknameFromID(player.getUserId()))).append("\n");
@@ -293,13 +295,14 @@ public class EventService {
                     if (player != null) {
                         if (!player.isMainList()) {
                             player.setMainList(true);
+                            player.setTimestamp(LocalDateTime.now());
                             buttonInteractionEvent.deferEdit().queue();
                             RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName());
                         } else {
                             ResponseMessage.youAreOnList(buttonInteractionEvent);
                         }
                     } else {
-                        Player newPlayer = new Player(null, userID, userName, true, event);
+                        Player newPlayer = new Player(null, userID, userName, true, event, LocalDateTime.now());
                         event.getPlayers().add(newPlayer);
                         buttonInteractionEvent.deferEdit().queue();
                         RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę.", event.getName());
@@ -312,10 +315,11 @@ public class EventService {
                         if (player.isMainList()) {
                             if (threeHoursToEvent(event.getDate())) {
                                 ResponseMessage.youCantSignReserve(buttonInteractionEvent);
-                                RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głownej listy na rezerwową ["
+                                RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głównej listy na rezerwową ["
                                         + event.getName() + "] - Czas do eventu 3h lub mniej.");
                             } else {
                                 player.setMainList(false);
+                                player.setTimestamp(LocalDateTime.now());
                                 buttonInteractionEvent.deferEdit().queue();
                                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());
                             }
@@ -323,7 +327,7 @@ public class EventService {
                             ResponseMessage.youAreOnList(buttonInteractionEvent);
                         }
                     } else {
-                        Player newPlayer = new Player(null, userID, userName, false, event);
+                        Player newPlayer = new Player(null, userID, userName, false, event, LocalDateTime.now());
                         event.getPlayers().add(newPlayer);
                         buttonInteractionEvent.deferEdit().queue();
                         RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());

@@ -53,7 +53,7 @@ public class RecruitsService {
         guild.createTextChannel("rekrut-" + userName, category)
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-//                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
+                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                 .queue(textChannel -> {
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setColor(Color.GREEN);

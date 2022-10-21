@@ -154,6 +154,7 @@ public class ButtonClickListener extends ListenerAdapter {
     private void eventsGenerator(@NotNull ButtonInteractionEvent interactionEvent) {
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(interactionEvent.getUser().getId());
         if (indexOfGenerator >= 0) {
+            interactionEvent.deferEdit().queue();
             eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
         }
     }
