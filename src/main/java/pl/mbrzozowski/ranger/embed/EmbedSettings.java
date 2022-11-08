@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.embed;
 
 public interface EmbedSettings {
 
-    String THUMBNAIL = "https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png";
+    String THUMBNAIL = "https://forum.rangerspolska.pl/styles/Hexagon/theme/images/logo.png";
     String THUMBNAIL_WARNING = "https://cdn.icon-icons.com/icons2/1499/PNG/512/emblemimportant_103451.png";
     String THUMBNAIL_DICE = "https://www.iconsdb.com/icons/download/white/dice-64.png";
 
