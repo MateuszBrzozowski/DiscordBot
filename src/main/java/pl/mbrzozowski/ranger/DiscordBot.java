@@ -69,29 +69,4 @@ public class DiscordBot {
     public static JDA getJda() {
         return jda;
     }
-
-    //    @Bean
-//    @Lazy
-//    private @NotNull JDA getJDA() throws LoginException {
-//        Collection<GatewayIntent> intents = new ArrayList<>();
-//        intents.add(GatewayIntent.GUILD_MEMBERS);
-//        intents.add(GatewayIntent.GUILD_MESSAGES);
-//        intents.add(GatewayIntent.DIRECT_MESSAGES);
-//        intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
-//        JDA jda = JDABuilder.create(Constants.TOKEN_RANGER_TESTER, intents)
-//                .addEventListeners(this.writeListener)
-//                .addEventListeners(this.buttonClickListener)
-//                .addEventListeners(this.channelUpdate)
-//                .addEventListeners(this.messageUpdate)
-//                .addEventListeners(new Listener())
-//                .addEventListeners(new ModalListener())
-//                .addEventListeners(new SelecetMenuListener())
-//                .build();
-//        Repository.setJDA(jda);
-//        jda.getPresence().setActivity(Activity.listening("Spotify"));
-//        jda.getPresence().setStatus(OnlineStatus.ONLINE);
-//        return jda;
-//    }
-
-
-}
+    }

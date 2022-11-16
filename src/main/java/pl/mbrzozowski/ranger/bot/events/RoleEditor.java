@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 @Slf4j
@@ -24,11 +23,11 @@ public class RoleEditor {
             if (!hasRole) {
                 guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, true);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Przypisał rolę **" + role.getName() + "**");
+                log.info(Users.getUserNicknameFromID(userID) + " - gave him role " + role.getName());
             } else {
                 guild.removeRoleFromMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, false);
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " - Usunął rolę **" + role.getName() + "**");
+                log.info(Users.getUserNicknameFromID(userID) + " - take away the role " + role.getName());
             }
         }
     }

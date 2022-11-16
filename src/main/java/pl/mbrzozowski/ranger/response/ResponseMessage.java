@@ -63,17 +63,17 @@ public class ResponseMessage {
     }
 
     public static void maxRecruits(@NotNull ButtonInteractionEvent event) {
-        event.reply("**REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
+        event.reply("**REKRUTACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
                 .setEphemeral(true)
                 .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
+        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
     }
 
     public static void userBlackList(@NotNull ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
                 .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest na czarnej liście.");
+        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest na czarnej liście.");
     }
 
     /**
@@ -86,7 +86,7 @@ public class ResponseMessage {
                         "Jesteś już w naszym klanie dzbanie!")
                 .setEphemeral(true)
                 .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
+        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
     }
 
     public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {

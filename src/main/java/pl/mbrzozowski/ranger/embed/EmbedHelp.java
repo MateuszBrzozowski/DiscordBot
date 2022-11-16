@@ -1,13 +1,14 @@
 package pl.mbrzozowski.ranger.embed;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
+@Slf4j
 public class EmbedHelp extends EmbedCreator {
 
     private static PrivateChannel privateChannel;
@@ -37,31 +38,25 @@ public class EmbedHelp extends EmbedCreator {
             boolean admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
             if (!admin) admin = Users.isUserDev(userID);
 
-            RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(userID) + "] poprosił o pomoc. ");
+            log.info("User [" + Users.getUserNicknameFromID(userID) + "] open help. ");
 
             if (message.length == 1) {
                 mainHelp();
                 if (Users.isUserDev(userID)) helpDevCommand();
-                RangerLogger.info("Wyświetlona pomoc główna");
             } else if (message.length == 2) {
                 if (message[1].equalsIgnoreCase(REKRUT)) {
                     if (admin) {
                         helpRecrut();
-                        RangerLogger.info("Wyświetlona pomoc rekruci");
                     }
                 } else if (message[1].equalsIgnoreCase(GENERATOR)) {
                     helpGenerator();
-                    RangerLogger.info("Wyświetlona pomoc generator");
                 } else if (message[1].equalsIgnoreCase(REMINDER)) {
                     helpReminder();
-                    RangerLogger.info("Wyświetlona pomoc reminder");
                 } else if (message[1].equalsIgnoreCase(GAME)) {
                     helpGame();
-                    RangerLogger.info("Wyświetlona pomoc game");
                 } else if (message[1].equalsIgnoreCase(EVENT_SETTINGS)) {
                     if (admin) {
                         helpEventsSettings();
-                        RangerLogger.info("Wyświetlona pomoc zarządzania eventami.");
                     }
                 }
             }

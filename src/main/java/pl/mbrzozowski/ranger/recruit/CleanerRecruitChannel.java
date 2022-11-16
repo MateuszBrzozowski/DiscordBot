@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.recruit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
@@ -12,6 +13,7 @@ import java.util.TimerTask;
 
 import static java.time.LocalDate.now;
 
+@Slf4j
 @Service
 public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
 
@@ -30,6 +32,7 @@ public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
 
     @Override
     public void clean() {
+        log.info("Recruit channel cleaning");
         List<Recruit> recruits = recruitsService.findAllWithChannel();
         recruits = recruits
                 .stream()

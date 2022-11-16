@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -15,7 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
-import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
 
@@ -111,32 +113,6 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessage("Gratulacje <@" + recruitId + ">").setEmbeds(builder.build()).queue();
         String oldName = channel.getName();
         channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
-    }
-
-
-    /**
-     * Wysyła do użytkownika wiadomość że rekrutacja została tymczasowo zamknięta
-     *
-     * @param event ButtonInteractionEvent
-     */
-    public static void maxRecrutis(ButtonInteractionEvent event) {
-        event.reply("**REKRTUACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
-                .setEphemeral(true)
-                .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
-    }
-
-    /**
-     * Wysyła do użytkownika o ID userID informację że jest już w innym klanie nie może złożyć podania na rekrutację.
-     *
-     * @param event ButtonInteractionEvent
-     */
-    public static void userIsInClan(ButtonInteractionEvent event) {
-        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
-                        "Masz przypisaną rolę innego klanu na naszym discordzie.")
-                .setEphemeral(true)
-                .queue();
-        RangerLogger.info("Użytkonik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Ma przypisaną rolę innego klanu.");
     }
 
     /**

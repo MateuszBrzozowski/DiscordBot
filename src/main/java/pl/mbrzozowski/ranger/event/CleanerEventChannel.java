@@ -1,10 +1,10 @@
 package pl.mbrzozowski.ranger.event;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
@@ -16,6 +16,7 @@ import java.util.TimerTask;
 
 import static java.time.LocalDate.now;
 
+@Slf4j
 @Service
 public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
@@ -35,6 +36,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
     @Override
     public void clean() {
+        log.info("Event cleaning channels");
         List<Event> eventList = eventService.findAll()
                 .stream()
                 .filter(event -> event.getDate().isBefore(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
@@ -60,7 +62,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
         TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
-            RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie - [" + event.getName() + "]");
+            log.info("Past event - Deleted channel - [" + event.getName() + "]");
         }
     }
 }

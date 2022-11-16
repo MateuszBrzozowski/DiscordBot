@@ -30,7 +30,6 @@ public class ServerService {
 
     public ServerService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
-
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {

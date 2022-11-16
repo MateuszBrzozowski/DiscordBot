@@ -41,6 +41,7 @@ public class ServerStats {
     }
 
     public void viewStatsForUser(String userID, TextChannel channel) {
+        log.info("UserId: " + userID + " - stats");
         PlayerStats playerStats = pullStatsFromDB(userID);
         if (playerStats != null) {
             if (hasPlayerData(playerStats)) {
@@ -74,7 +75,6 @@ public class ServerStats {
 
     private void sendEmbedWithStats(String userID, @NotNull TextChannel channel, @NotNull PlayerStats playerStats) {
         DecimalFormat df = new DecimalFormat("0.00");
-
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLACK);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);

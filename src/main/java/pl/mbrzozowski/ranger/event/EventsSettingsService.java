@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public class EventsSettingsService {
 
-    private List<EventsSettings> eventsSettings = new ArrayList<>();
+    private final List<EventsSettings> eventsSettings = new ArrayList<>();
 
     public void addEventsSettings(EventsSettings es) {
         eventsSettings.add(es);

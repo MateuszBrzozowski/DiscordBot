@@ -20,7 +20,6 @@ public class Validation {
             LocalDateTime date = LocalDateTime.parse(source + " 23:59", dateTimeFormatter);
             return true;
         } catch (DateTimeParseException e) {
-            RangerLogger.info(String.format("Nieprawidłowa data %s. Format daty: \"%s\"", source, datePattern));
             return false;
         }
     }
@@ -37,9 +36,9 @@ public class Validation {
                     int min = Integer.parseInt(s.substring(3, 5));
                     if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
                         return true;
-                    } else log.info("Zly format - godzina lub czas wyszły za zakres");
-                } else log.info("Zly format - to nie jest liczba");
-            } else log.info("Zly format :");
+                    } else log.error("Time is not valid - Out of bounds");
+                } else log.error("Time is not valid - No Decimal");
+            } else log.error("Time is not valid :");
         }
         return false;
     }
@@ -74,7 +73,7 @@ public class Validation {
         try {
             eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
         } catch (DateTimeParseException e) {
-            RangerLogger.info("Nieprawidłowa data i czas [" + dateTime + "]");
+            log.error("Date time is not valid [" + dateTime + "]");
             return false;
         }
         return eventDateTime.isAfter(dateTimeNow);

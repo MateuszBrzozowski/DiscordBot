@@ -71,20 +71,21 @@ public class EventService {
 
     public void createNewEvent(final @NotNull EventRequest eventRequest) {
         String userName = Users.getUserNicknameFromID(eventRequest.getAuthorId());
-        RangerLogger.info(userName + " - tworzy nowy event.");
+        log.info(userName + " - creating new event.");
         if (checkRequest(eventRequest)) {
             if (Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
                 createEventChannel(eventRequest);
             }
         } else {
-            RangerLogger.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+            log.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
         }
     }
 
     private void createEventChannel(final EventRequest eventRequest) {
+        log.info("Creating new channel");
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild == null) {
-            return;
+            throw new NullPointerException("Guild by RangersPL is null");
         }
         String channelName = EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
                 "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
@@ -107,13 +108,14 @@ public class EventService {
     }
 
     private void createList(final TextChannel textChannel, final @NotNull EventRequest eventRequest) {
+        log.info("Creating list");
         String msg = "";
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
-            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> <@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
+            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!";
         } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
-            msg = "<@&" + "RoleID.RECRUT_ID" + "> Zapisy!";
+            msg = "<@&" + RoleID.RECRUT_ID + "> Zapisy!";
         } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
-            msg = "<@&" + "RoleID.CLAN_MEMBER_ID" + "> Zapisy!";
+            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -182,6 +184,7 @@ public class EventService {
     }
 
     public void updateEmbed(@NotNull Event event) {
+        log.info("Event " + event.getName() + " updating embed");
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
         TextChannel channel = DiscordBot.getJda().getTextChannelById(channelID);
@@ -280,6 +283,7 @@ public class EventService {
 
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
+        log.info("Event button click - " + buttonInteractionEvent.getUser().getName());
         Optional<Event> eventOptional = findEventByMsgId(buttonInteractionEvent.getMessage().getId());
         if (eventOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(buttonInteractionEvent);
@@ -305,6 +309,7 @@ public class EventService {
     }
 
     private void signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
+        log.info(userName + " sign in");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
             if (!player.isMainList()) {
@@ -325,6 +330,7 @@ public class EventService {
     }
 
     private void signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
+        log.info(userName + " sign in reserve");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
             if (player.isMainList()) {
@@ -351,6 +357,7 @@ public class EventService {
     }
 
     private void signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userID) {
+        log.info(userID + " sign out");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
             if (threeHoursToEvent(event.getDate())) {
@@ -402,6 +409,7 @@ public class EventService {
     }
 
     public void cancelEvent(Event event, boolean sendNotifi) {
+        log.info(event.getName() + " cancel event");
         disableButtons(event);
         changeTitleRedCircle(event);
         event.setActive(false);
@@ -487,9 +495,7 @@ public class EventService {
     public void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
         List<Player> mainList = getMainList(event);
         List<Player> reserveList = getReserveList(event);
-        RangerLogger.info(
-                "Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" + reserveList.size() + "] - Wysyłam informację.",
-                event.getMsgId());
+        log.info("Run reminder: Main list - [" + mainList.size() + "], Reserve - [" + reserveList.size() + "]");
         for (Player player : mainList) {
             EmbedInfo.sendInfoChanges(player.getUserId(), event, whatChange, dateTime);
         }
@@ -575,11 +581,13 @@ public class EventService {
     }
 
     public void deleteByMsgId(String messageId) {
+        log.info("Event deleting by msg id");
         timers.cancelByMsgId(messageId);
         eventRepository.deleteByMsgId(messageId);
     }
 
     public void deleteByChannelId(String channelId) {
+        log.info("Event deleting by channel id");
         timers.cancelByChannelId(channelId);
         eventRepository.deleteByChannelId(channelId);
     }

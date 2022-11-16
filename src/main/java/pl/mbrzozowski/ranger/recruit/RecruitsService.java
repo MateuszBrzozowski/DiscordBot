@@ -12,7 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedInfo;
-import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -47,7 +50,7 @@ public class RecruitsService {
     public void createChannelForNewRecruit(String userName, String userID) {
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild == null) {
-            return;
+            throw new NullPointerException("Guild by RangersPL id is null");
         }
         Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RECRUT_ID);
         guild.createTextChannel("rekrut-" + userName, category)
@@ -63,8 +66,8 @@ public class RecruitsService {
                     builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                     builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                     textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
-                                    "<@&" + "RoleID.RADA_KLANU" + "> ")
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
+                                    "<@&" + RoleID.RADA_KLANU + "> ")
                             .setEmbeds(builder.build())
                             .queue();
                     textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
@@ -79,6 +82,7 @@ public class RecruitsService {
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
+        log.info("New recruit application - " + event.getUser().getId());
         String userID = event.getUser().getId();
         if (hasRecruitChannel(userID)) {
             ResponseMessage.userHaveRecruitChannel(event);
@@ -121,7 +125,6 @@ public class RecruitsService {
     }
 
     private void confirmMessage(@NotNull ButtonInteractionEvent event) {
-        RangerLogger.info("Użytkownik [" + event.getUser().getName() + "] chce złożyć podanie.");
         event.reply("""
                         **Potwierdź czy chcesz złożyć podanie?**
 
@@ -136,6 +139,7 @@ public class RecruitsService {
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
+        log.info("Recruit confirm - " + event.getUser().getId());
         if (!hasRecruitChannel(event.getUser().getId())) {
             String userID = event.getUser().getId();
             String userName = Users.getUserNicknameFromID(userID);
@@ -165,6 +169,7 @@ public class RecruitsService {
     }
 
     private void add(String userId, String userName, String channelID) {
+        log.info("Recruit adding to db.");
         Recruit recruit = Recruit.builder()
                 .userId(userId)
                 .name(userName)
@@ -226,11 +231,12 @@ public class RecruitsService {
         if (textChannel != null) {
             textChannel.delete().reason("Rekrutacja zakończona.").queue();
             recruitRepository.delete(recruit);
-            RangerLogger.info("Upłynął czas utrzymywania kanału - Usunięto pomyślnie kanał rekruta - [" + recruit.getName() + "]");
+            log.info(textChannel.getId() + " - channel deleted");
         }
     }
 
     public void accepted(@NotNull ButtonInteractionEvent event) {
+        log.info("Recruit accepted - " + event.getUser().getId());
         Optional<Recruit> recruitOptional = findByChannelId(event.getTextChannel().getId());
         if (recruitOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(event);
@@ -250,6 +256,7 @@ public class RecruitsService {
     }
 
     public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
+        log.info("Recruit positive result - " + interactionEvent.getUser().getId());
         boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
@@ -280,6 +287,7 @@ public class RecruitsService {
     }
 
     public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
+        log.info("Recruit negative result - " + interactionEvent.getUser().getId());
         boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
@@ -347,12 +355,14 @@ public class RecruitsService {
 
 
     public void closeChannel(@NotNull MessageReceivedEvent event) {
+        log.info("Recruit close channel by " + event.getAuthor().getName());
         TextChannel textChannel = event.getTextChannel();
         String userID = event.getAuthor().getId();
         closeChannel(textChannel, userID);
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
+        log.info("Recruit close channel by " + event.getUser().getName());
         TextChannel textChannel = event.getTextChannel();
         String userID = event.getUser().getId();
         closeChannel(textChannel, userID);

@@ -1,12 +1,15 @@
 package pl.mbrzozowski.ranger.helpers;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.TextChannel;
 import pl.mbrzozowski.ranger.DiscordBot;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 public class RangerLogger {
 
     private final static String LOG_CHANNEL_ID = "860096729457098762";
@@ -30,7 +33,12 @@ public class RangerLogger {
 
     private static void Send(String msg) {
         JDA jda = DiscordBot.getJda();
-//        jda.getTextChannelById(LOG_CHANNEL_ID).sendMessage(msg).queue();
+        TextChannel textChannel = jda.getTextChannelById(LOG_CHANNEL_ID);
+        if (textChannel == null) {
+            log.error("Text Channel(" + LOG_CHANNEL_ID + ") is null");
+            return;
+        }
+        textChannel.sendMessage(msg).queue();
     }
 
     private static String getCurrentDateAndTime() {

@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.recruit;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -14,11 +15,11 @@ import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.embed.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
 
+@Slf4j
 public class RecruitOpinions {
 
 
@@ -48,6 +49,7 @@ public class RecruitOpinions {
     }
 
     private void sendOpinionToChannel(TextChannel textChannel, String userNameWhoSendingOpinion, String recruitName, String opinion) {
+        log.info("Send recruit opinion");
         EmbedBuilder builder = new EmbedBuilder();
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setColor(Color.YELLOW);
@@ -57,7 +59,7 @@ public class RecruitOpinions {
             builder.addField("", opinion, false);
             textChannel.sendMessageEmbeds(builder.build()).queue();
         } catch (IllegalArgumentException e) {
-            RangerLogger.info("Rekrut opinia - IllegalArgumentException " + e.getMessage());
+            log.info("Rekrut opinion - IllegalArgumentException " + e.getMessage());
         }
 
 
