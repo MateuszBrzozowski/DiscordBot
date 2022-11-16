@@ -1,10 +1,10 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
-import pl.mbrzozowski.ranger.helpers.RoleID;
-import pl.mbrzozowski.ranger.helpers.Users;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 public class Message {
 
@@ -13,6 +13,7 @@ public class Message {
     private final boolean admin;
     private final boolean clanMember;
     private final boolean isPrivate;
+    private final boolean isTextChannel;
     private final String userID;
 
     public Message(String[] words, String contentDisplay, String userID, @NotNull MessageReceivedEvent event) {
@@ -23,6 +24,7 @@ public class Message {
         this.clanMember = Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID);
         this.userID = userID;
         this.isPrivate = event.isFromType(ChannelType.PRIVATE);
+        this.isTextChannel = event.isFromType(ChannelType.TEXT);
     }
 
     public String[] getWords() {
@@ -47,5 +49,9 @@ public class Message {
 
     public boolean isPrivate() {
         return isPrivate;
+    }
+
+    public boolean isTextChannel() {
+        return isTextChannel;
     }
 }

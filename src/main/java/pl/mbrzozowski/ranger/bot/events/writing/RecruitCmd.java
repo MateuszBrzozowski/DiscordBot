@@ -18,7 +18,7 @@ public class RecruitCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         String cmd = message.getWords()[0];
-        if (!message.isPrivate()) {
+        if (message.isTextChannel()) {
             String parentCategoryId = messageReceived.getTextChannel().getParentCategoryId();
             if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
                 messageReceived.getMessage().delete().submit();
