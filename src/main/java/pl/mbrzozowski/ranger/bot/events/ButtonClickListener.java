@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
+@Slf4j
 @Service
 public class ButtonClickListener extends ListenerAdapter {
 
@@ -36,6 +38,7 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
+        log.info("[EVENT] - Button interaction event");
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
         newRecruit(interactionEvent, isRadaKlanu);
     }

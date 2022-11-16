@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.bot.events;
 
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
+@Slf4j
 @Service
 public class WriteListener extends ListenerAdapter {
 
@@ -62,6 +64,7 @@ public class WriteListener extends ListenerAdapter {
                 contentDisplay,
                 event.getAuthor().getId(),
                 event);
+        log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
 
         DiceCmd diceCmd = new DiceCmd(event, diceGames);
         StatsCmd statsCmd = new StatsCmd(event, serverStats);

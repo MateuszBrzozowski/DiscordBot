@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -12,6 +13,7 @@ import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 
+@Slf4j
 @Service
 public class Listener extends ListenerAdapter {
 
@@ -23,6 +25,7 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
+        log.info("[EVENT] - Guild member join event");
         addRole(event.getUser().getId());
         recruitsService.checkIsRecruit(event.getUser().getId());
     }

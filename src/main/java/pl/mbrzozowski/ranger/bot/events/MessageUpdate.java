@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 
+@Slf4j
 @Service
 public class MessageUpdate extends ListenerAdapter {
 
@@ -21,6 +23,7 @@ public class MessageUpdate extends ListenerAdapter {
 
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
+        log.info("[EVENT] - Message delete event");
         eventService.deleteByMsgId(event.getMessageId());
     }
 

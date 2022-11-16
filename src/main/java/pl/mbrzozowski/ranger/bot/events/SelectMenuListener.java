@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -13,6 +14,7 @@ import pl.mbrzozowski.ranger.helpers.RoleID;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class SelectMenuListener extends ListenerAdapter {
 
@@ -28,6 +30,7 @@ public class SelectMenuListener extends ListenerAdapter {
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
+        log.info(event.getUser().getName() + " menu interaction event");
         if (isRoles) {
             List<ActionRow> actionRows = event.getMessage().getActionRows();
             event.getInteraction().deferEdit().queue();
