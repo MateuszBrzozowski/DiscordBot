@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
 
 import java.util.List;
@@ -17,26 +16,26 @@ public class Users {
      * @param userID ID użytkownika dla którego chcemy pobrać nick
      * @return Zwraca nick z konkretnego discorda lub ogólny nick użytkownika.
      */
-    public static @Nullable String getUserNicknameFromID(String userID) {
+    public static @NotNull String getUserNicknameFromID(String userID) {
         JDA jda = DiscordBot.getJda();
-        List<Guild> guilds = jda.getGuilds();
-        for (Guild guild : guilds) {
-            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                Member memberById = guild.getMemberById(userID);
-                String nickname = null;
-                if (memberById != null) {
-                    nickname = memberById.getNickname();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild == null) {
+            throw new NullPointerException("Guild by RangersPL id is null");
+        }
+        Member member = guild.getMemberById(userID);
+        if (member != null) {
+            String nickname = member.getNickname();
+            if (nickname == null) {
+                User user = jda.getUserById(userID);
+                if (user == null) {
+                    throw new NullPointerException("User by id is null");
                 }
-                if (nickname == null) {
-                    User userById = jda.getUserById(userID);
-                    if (userById != null) {
-                        userById.getName();
-                    }
-                }
+                return user.getName();
+            } else {
                 return nickname;
             }
         }
-        return null;
+        throw new NullPointerException("Member by id is null");
     }
 
     /**

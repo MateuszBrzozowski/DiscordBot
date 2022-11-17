@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
@@ -348,6 +349,9 @@ public class RecruitsService {
     }
 
     protected boolean isNicknameRNGSuffix(String nickname) {
+        if (StringUtils.isBlank(nickname)) {
+            return true;
+        }
         nickname = nickname.replace(" ", "");
         if (nickname.endsWith("<rRangersPL>")) return true;
         else return nickname.endsWith("<RangersPL>");
