@@ -40,17 +40,17 @@ public class ServerStats {
         this.woundsService = woundsService;
     }
 
-    public void viewStatsForUser(String userID, TextChannel channel) {
-        log.info("UserId: " + userID + " - stats");
-        PlayerStats playerStats = pullStatsFromDB(userID);
+    public void viewStatsForUser(String userId, TextChannel channel) {
+        log.info("UserId: " + userId + " - stats");
+        PlayerStats playerStats = pullStatsFromDB(userId);
         if (playerStats != null) {
             if (hasPlayerData(playerStats)) {
-                sendEmbedWithStats(userID, channel, playerStats);
+                sendEmbedWithStats(userId, channel, playerStats);
             } else {
-                EmbedInfo.noDataToShow(channel);
+                EmbedInfo.noDataToShow(userId, channel);
             }
         } else {
-            EmbedInfo.noDataToShow(channel);
+            EmbedInfo.noDataToShow(userId, channel);
         }
     }
 
@@ -96,7 +96,7 @@ public class ServerStats {
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
     private @Nullable PlayerStats pullStatsFromDB(String userId) {

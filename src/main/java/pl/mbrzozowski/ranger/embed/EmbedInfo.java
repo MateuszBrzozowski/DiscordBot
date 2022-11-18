@@ -359,7 +359,7 @@ public class EmbedInfo extends EmbedCreator {
                 .queue(message -> message.pin().queue());
     }
 
-    public static void notConnectedAccount(TextChannel channel) {
+    public static void notConnectedAccount(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLACK, ThumbnailType.DEFAULT);
         builder.setTitle("Your discord account isn't linked to your Steam profile.");
         builder.setDescription("""
@@ -369,18 +369,25 @@ public class EmbedInfo extends EmbedCreator {
 
                 e.g.\s
                 *!profile 76561197990543288*""");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
-    public static void connectSuccessfully(TextChannel channel) {
+    public static void cannotConnectStatsDB(String userID, TextChannel channel) {
+        EmbedBuilder builder = getEmbedBuilder(Color.RED, ThumbnailType.DEFAULT);
+        builder.setTitle("Can not connect to Stats database");
+        builder.setDescription("Please try again later.");
+        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
+    }
+
+    public static void connectSuccessfully(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
         builder.setTitle("Successfully");
         builder.setDescription("Your discord account is linked to your Steam profile.\n" +
                 "You can use command **!stats** to view your statistic from our server.");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
-    public static void connectUnSuccessfully(TextChannel channel) {
+    public static void connectUnSuccessfully(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Steam64ID is not valid");
         builder.setDescription("""
@@ -388,7 +395,7 @@ public class EmbedInfo extends EmbedCreator {
 
                 e.g.\s
                 *!profile 76561197990543288*""");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
     public static void youCanCheckStatsOnChannel(TextChannel channel) {
@@ -397,7 +404,7 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void noDataToShow(TextChannel channel) {
+    public static void noDataToShow(String userId, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
         builder.setTitle("No data to show.");
         builder.setDescription("""
@@ -407,7 +414,7 @@ public class EmbedInfo extends EmbedCreator {
 
                 e.g.\s
                 *!profile 76561197990543288*""");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        channel.sendMessage("<@" + userId + ">").setEmbeds(builder.build()).queue();
     }
 
     public static void youCanLinkedYourProfileOnChannel(TextChannel textChannel) {
