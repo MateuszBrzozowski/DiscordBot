@@ -366,6 +366,7 @@ public class EventService {
                         + event.getName() + "] - Czas do eventu 3h lub mniej.");
             } else {
                 event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " wypisał się z eventu", event.getName());
                 buttonInteractionEvent.deferEdit().queue();
             }
         } else {
