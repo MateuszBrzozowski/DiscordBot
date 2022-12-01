@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,4 +22,7 @@ public class Client {
     private String channelId;
     @Column(length = 1000)
     private String userName;
+    private Boolean isClose = false;
+    @Nullable
+    private LocalDateTime closeTimestamp;
 }

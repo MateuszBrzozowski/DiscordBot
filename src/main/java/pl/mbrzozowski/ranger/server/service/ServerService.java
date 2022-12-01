@@ -10,14 +10,16 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
-import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -54,6 +56,7 @@ public class ServerService {
                         .queue();
             }
             EmbedInfo.closeServerServiceChannel(event.getAuthor().getId(), event.getChannel());
+            clientCloseChannelSave(clientOptional.get());
         }
     }
 
@@ -70,8 +73,15 @@ public class ServerService {
                             .queue();
                 }
                 EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getTextChannel());
+                clientCloseChannelSave(clientOptional.get());
             }
         }
+    }
+
+    private void clientCloseChannelSave(@NotNull Client client) {
+        client.setIsClose(true);
+        client.setCloseTimestamp(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+        clientRepository.save(client);
     }
 
     public void removeChannel(@NotNull ButtonInteractionEvent event) {
@@ -117,7 +127,12 @@ public class ServerService {
     }
 
     private void addUser(String userId, String userName, String channelId) {
-        Client client = new Client(null, userId, channelId, userName);
+        Client client = Client.builder()
+                .userId(userId)
+                .channelId(channelId)
+                .userName(userName)
+                .isClose(false)
+                .build();
         clientRepository.save(client);
     }
 
