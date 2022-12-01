@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.embed;
+package pl.mbrzozowski.ranger.response;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;

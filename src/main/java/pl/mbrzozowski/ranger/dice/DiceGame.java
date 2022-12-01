@@ -1,6 +1,6 @@
 package pl.mbrzozowski.ranger.dice;
 
-import pl.mbrzozowski.ranger.embed.EmbedSettings;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.Users;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

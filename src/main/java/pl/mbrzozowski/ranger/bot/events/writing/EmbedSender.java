@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import pl.mbrzozowski.ranger.helpers.Commands;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 
 public class EmbedSender extends Proccess {
 
@@ -20,7 +20,7 @@ public class EmbedSender extends Proccess {
             EmbedInfo.sendRoles(messageReceived);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RECRUT_OPINIONS)) {
             messageReceived.getMessage().delete().submit();
-            EmbedInfo.recrutOpinionsFormOpening(messageReceived);
+            EmbedInfo.recruitOpinionsFormOpening(messageReceived);
         } else {
             getNextProccess().proccessMessage(message);
         }

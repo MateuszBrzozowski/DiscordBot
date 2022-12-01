@@ -16,8 +16,8 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
-import pl.mbrzozowski.ranger.embed.EmbedSettings;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Validation;
 

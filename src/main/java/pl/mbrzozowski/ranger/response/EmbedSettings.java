@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.embed;
+package pl.mbrzozowski.ranger.response;
 
 public interface EmbedSettings {
 

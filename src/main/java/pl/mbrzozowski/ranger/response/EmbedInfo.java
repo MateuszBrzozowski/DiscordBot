@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.embed;
+package pl.mbrzozowski.ranger.response;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -41,7 +41,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param channel Kanał który został zamknięty.
      */
     public static void closeRecruitChannel(String userID, MessageChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         channel.sendMessageEmbeds(builder.build())
@@ -50,7 +50,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void closeServerServiceChannel(String userID, MessageChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
         channel.sendMessageEmbeds(builder.build())
@@ -82,7 +82,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param channel Kanał który został usunięty.b
      */
     public static void removedChannel(TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał wkrótce zostanie usunięty.");
         channel.sendMessageEmbeds(builder.build()).queue();
     }
@@ -105,7 +105,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void endPositive(String drillId, String recruitId, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
         builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
@@ -140,7 +140,7 @@ public class EmbedInfo extends EmbedCreator {
         User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
                 builder.setTitle("OTWIERAM NOWY GENERATOR");
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
             });
@@ -177,7 +177,7 @@ public class EmbedInfo extends EmbedCreator {
         User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
                 builder.setTitle("Przypomnienia wyłączone.");
                 builder.setDescription("Aby włączyć ponownie przypomnienia użyj komendy **!reminder On**");
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
@@ -194,7 +194,7 @@ public class EmbedInfo extends EmbedCreator {
         User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
                 builder.setTitle("Przypomnienia włączone.");
                 builder.setFooter("Więcej informacji i ustawień powiadomień pod komendą !help Reminder");
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
@@ -241,7 +241,7 @@ public class EmbedInfo extends EmbedCreator {
         User userById = DiscordBot.getJda().getUserById(userID);
         if (userById != null) {
             userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
                 builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
             });
@@ -262,7 +262,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void seedersRoleJoining(TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("SQUAD SERVER SEEDER");
         builder.addField("", "Jeśli chcesz pomóc nam w rozkręcaniu naszego serwera. Możesz przypisać sobię rolę klikając w poniższy przycisk by otrzymywać ping.", false);
         builder.addField("", "If you would like to help us seed our server you can add role below to receive a ping.", false);
@@ -373,14 +373,14 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void cannotConnectStatsDB(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.RED, ThumbnailType.DEFAULT);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Can not connect to Stats database");
         builder.setDescription("Please try again later.");
         channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
     public static void connectSuccessfully(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_GREEN);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Successfully");
         builder.setDescription("Your discord account is linked to your Steam profile.\n" +
                 "You can use command **!stats** to view your statistic from our server.");
@@ -429,8 +429,8 @@ public class EmbedInfo extends EmbedCreator {
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void recrutOpinionsFormOpening(MessageReceivedEvent messageReceived) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+    public static void recruitOpinionsFormOpening(MessageReceivedEvent messageReceived) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Rekrut opinie");
         builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.", "", false);
         messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
@@ -439,7 +439,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void recruitAccepted(String userName, TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setDescription("Rozpoczęto rekrutację");
         builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
@@ -447,7 +447,7 @@ public class EmbedInfo extends EmbedCreator {
 
     public static void sendRoles(MessageReceivedEvent messageReceived) {
         SelectMenu roles = RoleID.getRoleToSelectMenu();
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Discord role");
         builder.setDescription("Add/Remove a role by selecting it from the list below.");
         messageReceived.getTextChannel()

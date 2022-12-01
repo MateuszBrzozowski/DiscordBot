@@ -3,7 +3,7 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.transaction.CannotCreateTransactionException;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.stats.ServerStats;

@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.embed.EmbedSettings;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.Validation;
 
 import java.awt.*;

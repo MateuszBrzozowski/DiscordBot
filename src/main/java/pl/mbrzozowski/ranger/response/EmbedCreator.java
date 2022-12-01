@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.embed;
+package pl.mbrzozowski.ranger.response;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -28,7 +28,7 @@ public class EmbedCreator {
         return switch (style) {
             case DEFAULT_HELP -> getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT, true);
             case WARNING -> getEmbedBuilder(Color.RED, ThumbnailType.WARNING);
-            case INF_GREEN -> getEmbedBuilder(Color.GREEN);
+            case INF_CONFIRM -> getEmbedBuilder(Color.GREEN);
             case INF_RED -> getEmbedBuilder(Color.RED);
             case QUESTION -> getEmbedBuilder(Color.YELLOW);
             default -> getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT);
@@ -75,7 +75,7 @@ public class EmbedCreator {
         DEFAULT_HELP,
         WARNING,
         QUESTION,
-        INF_GREEN,
+        INF_CONFIRM,
         INF_RED,
     }
 }

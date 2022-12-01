@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.helpers.Users;
-import pl.mbrzozowski.ranger.embed.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import net.dv8tion.jda.api.entities.ChannelType;
