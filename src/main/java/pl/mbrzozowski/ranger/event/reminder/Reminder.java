@@ -43,8 +43,8 @@ public class Reminder extends TimerTask {
             List<Player> mainList = eventService.getMainList(event);
             List<Player> reserveList = eventService.getReserveList(event);
             List<UsersReminder> usersReminderList = usersReminderService.findAll();
-            RangerLogger.info("Zapisanych na glównej liście: [" + mainList.size() + "], Rezerwa: [" +
-                    reserveList.size() + "] - Wysyłam przypomnienia.", eventID);
+            RangerLogger.info("Zapisanych na głównej liście: [" + mainList.size() + "], Rezerwa: [" +
+                    reserveList.size() + "] - Wysyłam przypomnienia.", event.getName());
             String linkToEvent = "[" + event.getName() + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + eventID + ")";
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
