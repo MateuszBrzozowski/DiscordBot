@@ -15,13 +15,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
-import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;
@@ -249,7 +249,9 @@ public class EventService {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
-                result.append(getUserNameWithoutRangers(Users.getUserNicknameFromID(player.getUserId()))).append("\n");
+                String nickname = Users.getUserNicknameFromID(player.getUserId());
+                nickname = prepareNicknameToEventList(nickname);
+                result.append(nickname).append("\n");
             }
             return result.toString();
         } else {
@@ -263,7 +265,9 @@ public class EventService {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
-                result.append(getUserNameWithoutRangers(Users.getUserNicknameFromID(player.getUserId()))).append("\n");
+                String nickname = Users.getUserNicknameFromID(player.getUserId());
+                nickname = prepareNicknameToEventList(nickname);
+                result.append(nickname).append("\n");
             }
             return result.toString();
         } else {
@@ -271,16 +275,11 @@ public class EventService {
         }
     }
 
-    public String getUserNameWithoutRangers(String userNickname) {
-        String result = userNickname;
-        if (result.matches("(.*)<rRangersPL>(.*)")) {
-            result = result.replace("<rRangersPL>", "");
-        } else if (result.matches("(.*)<RangersPL>(.*)")) {
-            result = result.replace("<RangersPL>", "");
-        }
-        return result;
+    private String prepareNicknameToEventList(String source) {
+        source = StringModify.removeClanTag(source);
+        source = StringModify.removeDiscordMarkdowns(source);
+        return source;
     }
-
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
         log.info("Event button click - " + buttonInteractionEvent.getUser().getName());
