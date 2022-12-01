@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -147,5 +148,9 @@ public class ServerService {
 
     public Optional<Client> findByChannelId(String channelID) {
         return clientRepository.findByChannelId(channelID);
+    }
+
+    public List<Client> findAll() {
+        return clientRepository.findAll();
     }
 }
