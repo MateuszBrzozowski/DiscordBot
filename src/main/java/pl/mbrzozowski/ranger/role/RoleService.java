@@ -74,10 +74,6 @@ public class RoleService {
         roleRepository.save(role);
     }
 
-    private void deleteByDiscordRoleId(String discordRoleId) {
-        roleRepository.deleteByDiscordId(discordRoleId);
-    }
-
     private void deleteById(Long id) {
         roleRepository.deleteById(id);
     }

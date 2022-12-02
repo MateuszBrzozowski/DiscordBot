@@ -1,9 +1,14 @@
 package pl.mbrzozowski.ranger.response;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.helpers.Users;
+
+import java.awt.*;
 
 public class ResponseMessage {
 
@@ -98,6 +103,60 @@ public class ResponseMessage {
     public static void noPermission(@NotNull ButtonInteractionEvent event) {
         event.reply("Brak uprawnień!")
                 .setEphemeral(true)
+                .queue();
+    }
+
+    public static void youCanCheckStatsOnChannel(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void youCanLinkedYourProfileOnChannel(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Use command /profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void notConnectedAccount(SlashCommandInteractionEvent event) {
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.BLACK);
+        builder.setTitle("Your discord account isn't linked to your Steam profile.");
+        builder.setDescription("""
+                Link your discord account to your steam profile if you want view stats from our server via command **/profile**.
+
+                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
+
+                e.g.\s
+                */profile 76561197990543288*""");
+
+        event.reply("").setEmbeds(builder.build()).setEphemeral(false).queue();
+    }
+
+    public static void cannotConnectStatsDB(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Can not connect to Stats database.\n" +
+                "Please try again later.").setEphemeral(false).queue();
+    }
+
+    public static void connectSuccessfully(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("**Successfully**\n" +
+                        "Your discord account is linked to your Steam profile.\n" +
+                        "Now, You can use command **/stats**")
+                .setEphemeral(false)
+                .queue();
+    }
+
+    public static void connectUnSuccessfully(@NotNull SlashCommandInteractionEvent event) {
+        EmbedBuilder builder = new EmbedBuilder().setColor(Color.RED);
+        builder.setTitle("Steam64ID is not valid");
+        builder.setDescription("""
+                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
+
+                e.g.\s
+                */profile 76561197990543288*""");
+
+        event.reply("")
+                .setEmbeds(builder.build())
+                .setEphemeral(false)
                 .queue();
     }
 }

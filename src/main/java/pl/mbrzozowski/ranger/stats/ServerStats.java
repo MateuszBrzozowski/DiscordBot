@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.stats;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -40,12 +41,12 @@ public class ServerStats {
         this.woundsService = woundsService;
     }
 
-    public void viewStatsForUser(String userId, TextChannel channel) {
+    public void viewStatsForUser(SlashCommandInteractionEvent event, String userId, TextChannel channel) {
         log.info("UserId: " + userId + " - stats");
         PlayerStats playerStats = pullStatsFromDB(userId);
         if (playerStats != null) {
             if (hasPlayerData(playerStats)) {
-                sendEmbedWithStats(userId, channel, playerStats);
+                sendEmbedWithStats(event, userId, channel, playerStats);
             } else {
                 EmbedInfo.noDataToShow(userId, channel);
             }
@@ -73,7 +74,7 @@ public class ServerStats {
         }
     }
 
-    private void sendEmbedWithStats(String userID, @NotNull TextChannel channel, @NotNull PlayerStats playerStats) {
+    private void sendEmbedWithStats(SlashCommandInteractionEvent event, String userID, @NotNull TextChannel channel, @NotNull PlayerStats playerStats) {
         DecimalFormat df = new DecimalFormat("0.00");
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLACK);
@@ -96,7 +97,7 @@ public class ServerStats {
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
-        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        event.reply("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
     private @Nullable PlayerStats pullStatsFromDB(String userId) {

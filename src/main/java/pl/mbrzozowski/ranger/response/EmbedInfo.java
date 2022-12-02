@@ -360,34 +360,6 @@ public class EmbedInfo extends EmbedCreator {
                 .queue(message -> message.pin().queue());
     }
 
-    public static void notConnectedAccount(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLACK, ThumbnailType.DEFAULT);
-        builder.setTitle("Your discord account isn't linked to your Steam profile.");
-        builder.setDescription("""
-                If you want to link your discord account to your steam account use the command **!profile <steam64ID>**
-
-                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
-
-                e.g.\s
-                *!profile 76561197990543288*""");
-        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
-    }
-
-    public static void cannotConnectStatsDB(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-        builder.setTitle("Can not connect to Stats database");
-        builder.setDescription("Please try again later.");
-        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
-    }
-
-    public static void connectSuccessfully(String userID, TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-        builder.setTitle("Successfully");
-        builder.setDescription("Your discord account is linked to your Steam profile.\n" +
-                "You can use command **!stats** to view your statistic from our server.");
-        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
-    }
-
     public static void connectUnSuccessfully(String userID, TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Steam64ID is not valid");
@@ -397,12 +369,6 @@ public class EmbedInfo extends EmbedCreator {
                 e.g.\s
                 *!profile 76561197990543288*""");
         channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
-    }
-
-    public static void youCanCheckStatsOnChannel(TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
-        builder.setDescription("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
-        channel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void noDataToShow(String userId, TextChannel channel) {
@@ -416,12 +382,6 @@ public class EmbedInfo extends EmbedCreator {
                 e.g.\s
                 *!profile 76561197990543288*""");
         channel.sendMessage("<@" + userId + ">").setEmbeds(builder.build()).queue();
-    }
-
-    public static void youCanLinkedYourProfileOnChannel(TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
-        builder.setDescription("Use command !profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">");
-        textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void noActiveEvents(MessageChannel textChannel) {

@@ -25,10 +25,4 @@ public class Role {
         this.discordId = discordId;
         this.name = name;
     }
-
-    public Role(String discordId, String name, String description) {
-        this.discordId = discordId;
-        this.name = name;
-        this.description = description;
-    }
 }

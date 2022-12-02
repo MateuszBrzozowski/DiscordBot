@@ -1,29 +1,38 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.CannotCreateTransactionException;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
+import pl.mbrzozowski.ranger.stats.ServerStats;
 
 import java.util.ArrayList;
 
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
+@Slf4j
 @Service
 public class SlashCommandListener extends ListenerAdapter {
 
     private final RoleService roleService;
+    private final ServerStats serverStats;
 
-    public SlashCommandListener(RoleService roleService) {
+    public SlashCommandListener(RoleService roleService,
+                                ServerStats serverStats) {
         this.roleService = roleService;
+        this.serverStats = serverStats;
     }
 
     @Override
@@ -56,10 +65,46 @@ public class SlashCommandListener extends ListenerAdapter {
             } else {
                 event.reply("Nie udało się usunąć roli.").setEphemeral(true).queue();
             }
+        } else if (name.equalsIgnoreCase(STEAM_PROFILE)) {
+            if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                try {
+                    OptionMapping steam64id = event.getOption("steam64id");
+                    if (steam64id == null) {
+                        return;
+                    }
+                    if (serverStats.connectUserToSteam(event.getUser().getId(), steam64id.getAsString())) {
+                        ResponseMessage.connectSuccessfully(event);
+                        serverStats.viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
+                    } else {
+                        ResponseMessage.connectUnSuccessfully(event);
+                    }
+                } catch (CannotCreateTransactionException exception) {
+                    log.error("Cannot create transaction exception. " + exception.getMessage());
+                    ResponseMessage.cannotConnectStatsDB(event);
+                }
+            } else {
+                ResponseMessage.youCanLinkedYourProfileOnChannel(event);
+
+            }
+        } else if (name.equalsIgnoreCase(STATS)) {
+            if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
+                try {
+                    if (serverStats.isUserConnected(event.getUser().getId())) {
+                        serverStats.viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
+                    } else {
+                        ResponseMessage.notConnectedAccount(event);
+                    }
+                } catch (CannotCreateTransactionException exception) {
+                    log.error("Cannot create transaction exception. " + exception.getMessage());
+                    ResponseMessage.cannotConnectStatsDB(event);
+                }
+            } else {
+                ResponseMessage.youCanCheckStatsOnChannel(event);
+            }
         }
     }
 
-    private void writeCommandData(ArrayList<CommandData> commandData) {
+    private void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(ADD_ROLE_TO_RANGER,
                         "Dodaje nową rolę do Ranger bota dzięki czemu użytkownicy serwera będą mogli sobie ją sami przypisać.")
                 .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID dodawanej roli", true)
@@ -71,8 +116,8 @@ public class SlashCommandListener extends ListenerAdapter {
                 .addOption(OptionType.STRING, "id", "Discord ID usuwanej roli", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
         commandData.add(Commands.slash(STEAM_PROFILE,
-                        "Linked your discord account to your steam profile")
+                        "Link your discord account to your steam profile if you want view stats from our server.")
                 .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
-        commandData.add(Commands.slash(STATS, "To view your stats"));
+        commandData.add(Commands.slash(STATS, "To view your stats from our server"));
     }
 }
