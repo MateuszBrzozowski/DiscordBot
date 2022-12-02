@@ -71,7 +71,7 @@ public class WriteListener extends ListenerAdapter {
         log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
 
         DiceCmd diceCmd = new DiceCmd(event, diceGames);
-        StatsCmd statsCmd = new StatsCmd(event, serverStats);
+//        StatsCmd statsCmd = new StatsCmd(event, serverStats);
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
@@ -86,8 +86,7 @@ public class WriteListener extends ListenerAdapter {
         InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
-        diceCmd.setNextProccess(statsCmd);
-        statsCmd.setNextProccess(logChannel);
+        diceCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(reminderCmd);
