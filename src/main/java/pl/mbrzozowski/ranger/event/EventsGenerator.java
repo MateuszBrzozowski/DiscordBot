@@ -4,22 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
-import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Validation;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -113,7 +114,7 @@ public class EventsGenerator {
         }
     }
 
-    public void saveAnswerAndSetNextStage(SelectMenuInteractionEvent event) {
+    public void saveAnswerAndSetNextStage(StringSelectInteractionEvent event) {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         String userChoose = selectedOptions.get(0).getValue();
         if (stageOfGenerator == EventGeneratorStatus.FINISH) {
@@ -252,7 +253,9 @@ public class EventsGenerator {
         user.openPrivateChannel().queue(privateChannel -> {
             if (showList) embedListExample(privateChannel);
 
-            SelectMenu selectMenu = SelectMenu
+
+
+            SelectMenu selectMenu = StringSelectMenu
                     .create(ComponentId.GENERATOR_FINISH_SELECT_MENU)
                     .setRequiredRange(1, 1)
                     .setPlaceholder("Czy chcesz wprowadzić jakieś zmiany?")
@@ -266,11 +269,12 @@ public class EventsGenerator {
             builder.setColor(Color.GREEN);
             builder.setTitle("Generwoanie listy zakończone.");
             privateChannel.sendMessageEmbeds(builder.build())
-                    .setActionRows(
+                    .setComponents(
                             ActionRow.of(selectMenu),
                             ActionRow.of(Button.primary(ComponentId.GENERATOR_SHOW, "Pokaż listę"),
                                     Button.success(ComponentId.GENERATOR_END, "Zakończ"),
-                                    Button.danger(ComponentId.GENERATOR_CANCEL, "Anuluj")))
+                                    Button.danger(ComponentId.GENERATOR_CANCEL, "Anuluj"))
+                    )
                     .queue();
         });
     }

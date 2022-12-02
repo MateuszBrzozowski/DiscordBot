@@ -3,10 +3,10 @@ package pl.mbrzozowski.ranger.response;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -433,7 +433,9 @@ public class EmbedInfo extends EmbedCreator {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Rekrut opinie");
         builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.", "", false);
-        messageReceived.getTextChannel().sendMessageEmbeds(builder.build())
+        messageReceived
+                .getChannel()
+                .sendMessageEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
                 .queue();
     }
@@ -450,7 +452,8 @@ public class EmbedInfo extends EmbedCreator {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Discord role");
         builder.setDescription("Add/Remove a role by selecting it from the list below.");
-        messageReceived.getTextChannel()
+        messageReceived
+                .getChannel()
                 .sendMessageEmbeds(builder.build())
                 .setActionRow(roles)
                 .queue();

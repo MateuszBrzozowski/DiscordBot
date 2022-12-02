@@ -2,13 +2,13 @@ package pl.mbrzozowski.ranger.stats;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
-import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.stats.model.*;
 import pl.mbrzozowski.ranger.stats.service.*;
 

@@ -2,10 +2,10 @@ package pl.mbrzozowski.ranger.server.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +53,8 @@ public class ServerService {
             Member member = event.getGuild().getMemberById(clientOptional.get().getUserId());
             if (member != null) {
                 event
-                        .getTextChannel()
+                        .getChannel()
+                        .asTextChannel()
                         .getManager()
                         .putPermissionOverride(member, null, permissions)
                         .queue();
@@ -70,12 +71,14 @@ public class ServerService {
             if (guild != null) {
                 Member member = guild.getMemberById(clientOptional.get().getUserId());
                 if (member != null) {
-                    event.getTextChannel()
+                    event
+                            .getChannel()
+                            .asTextChannel()
                             .getManager()
                             .putPermissionOverride(member, null, permissions)
                             .queue();
                 }
-                EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getTextChannel());
+                EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getChannel());
                 clientCloseChannelSave(clientOptional.get());
             }
         }

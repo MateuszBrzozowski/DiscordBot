@@ -3,7 +3,11 @@ package pl.mbrzozowski.ranger.recruit;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -12,13 +16,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;
@@ -238,7 +242,7 @@ public class RecruitsService {
 
     public void accepted(@NotNull ButtonInteractionEvent event) {
         log.info("Recruit accepted - " + event.getUser().getId());
-        Optional<Recruit> recruitOptional = findByChannelId(event.getTextChannel().getId());
+        Optional<Recruit> recruitOptional = findByChannelId(event.getChannel().getId());
         if (recruitOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(event);
             return;
@@ -250,7 +254,7 @@ public class RecruitsService {
         }
         addRoleRecruit(recruit.getUserId());
         addRecruitTag(event.getGuild(), recruit.getUserId());
-        EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getTextChannel());
+        EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
         recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruitRepository.save(recruit);
         event.deferEdit().queue();
@@ -258,7 +262,7 @@ public class RecruitsService {
 
     public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
         log.info("Recruit positive result - " + interactionEvent.getUser().getId());
-        boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel());
+        boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
         }
@@ -289,7 +293,7 @@ public class RecruitsService {
 
     public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
         log.info("Recruit negative result - " + interactionEvent.getUser().getId());
-        boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getTextChannel());
+        boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
         }
@@ -360,14 +364,14 @@ public class RecruitsService {
 
     public void closeChannel(@NotNull MessageReceivedEvent event) {
         log.info("Recruit close channel by " + event.getAuthor().getName());
-        TextChannel textChannel = event.getTextChannel();
+        TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getAuthor().getId();
         closeChannel(textChannel, userID);
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
         log.info("Recruit close channel by " + event.getUser().getName());
-        TextChannel textChannel = event.getTextChannel();
+        TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
         closeChannel(textChannel, userID);
         event.deferEdit().queue();

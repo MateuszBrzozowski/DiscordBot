@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 public interface RoleID {
 
@@ -9,14 +10,9 @@ public interface RoleID {
     String CLAN_MEMBER_ID = "311978154291888141";
     String RECRUT_ID = "410808008331886592";
     String DRILL_INSTRUCTOR_ID = "534737692911468554";
-    String HSR_ID = "695036426156376195";
-    String PC_ID = "748799503624306688";
-    String PEC_ID = "748800075806932993";
-    String RN_ID = "748800245575712910";
     String VIRTUAL_REALITY = "884377874575007764";
     String SERVER_ADMIN = "740894839305928764";
     String MODERATOR = "311978200739741696";
-    String SEED_ID = "960892010452103178";
 
     String SQUAD = "976110879223451688";
     String CS = "976111919737995356";
@@ -28,9 +24,9 @@ public interface RoleID {
     String ARMA = "976113019862016090";
 
     static SelectMenu getRoleToSelectMenu() {
-        return SelectMenu.create(ComponentId.ROLES)
+        return StringSelectMenu.create(ComponentId.ROLES)
                 .setPlaceholder("Choose a role")
-                .setRequiredRange(1,1)
+                .setRequiredRange(1, 1)
                 .addOption("VR", VIRTUAL_REALITY)
                 .addOption("Squad", SQUAD)
                 .addOption("CS", CS)

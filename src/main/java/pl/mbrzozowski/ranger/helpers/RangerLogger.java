@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import pl.mbrzozowski.ranger.DiscordBot;
 
 import java.time.LocalDateTime;

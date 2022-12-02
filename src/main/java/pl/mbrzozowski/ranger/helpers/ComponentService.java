@@ -2,14 +2,14 @@ package pl.mbrzozowski.ranger.helpers;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class ComponentService {
 
     public static void removeChannel(@NotNull ButtonInteractionEvent event) {
         event.getMessage().delete().queue();
-        EmbedInfo.removedChannel(event.getTextChannel());
+        EmbedInfo.removedChannel(event.getChannel().asTextChannel());
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);

@@ -1,7 +1,7 @@
 package pl.mbrzozowski.ranger.event;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class EventsGeneratorService {
         eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(buttonAnswer);
     }
 
-    public void saveAnswerAndNextStage(SelectMenuInteractionEvent event, int indexOfGenerator) {
+    public void saveAnswerAndNextStage(StringSelectInteractionEvent event, int indexOfGenerator) {
         eventsGenerators.get(indexOfGenerator).saveAnswerAndSetNextStage(event);
     }
 

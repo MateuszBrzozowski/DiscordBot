@@ -6,13 +6,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
@@ -102,7 +102,7 @@ public class ButtonClickListener extends ListenerAdapter {
     private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
             interactionEvent.deferEdit().queue();
-            EmbedInfo.confirmCloseChannel(interactionEvent.getTextChannel());
+            EmbedInfo.confirmCloseChannel(interactionEvent.getChannel().asTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
             interactionEvent.getMessage().delete().queue();
             serverService.closeChannel(interactionEvent);
@@ -117,13 +117,13 @@ public class ButtonClickListener extends ListenerAdapter {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
             if (isRadaKlanu) {
                 interactionEvent.getMessage().delete().queue();
-                EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
+                EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
             } else {
                 ResponseMessage.noPermission(interactionEvent);
             }
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
             interactionEvent.getMessage().delete().queue();
-            EmbedInfo.confirmRemoveChannel(interactionEvent.getTextChannel());
+            EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
             removeChannelDB(interactionEvent, isRadaKlanu);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
@@ -163,7 +163,7 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void removeChannelDB(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        String parentCategoryId = interactionEvent.getTextChannel().getParentCategoryId();
+        String parentCategoryId = interactionEvent.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
             if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isRadaKlanu) {
                 recruitsService.deleteChannelByID(interactionEvent.getChannel().getId());

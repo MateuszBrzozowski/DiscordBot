@@ -14,7 +14,7 @@ public class EmbedSender extends Proccess {
     public void proccessMessage(Message message) {
         if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.SQUAD_SEEDERS_INFO)) {
             messageReceived.getMessage().delete().submit();
-            EmbedInfo.seedersRoleJoining(messageReceived.getTextChannel());
+            EmbedInfo.seedersRoleJoining(messageReceived.getChannel().asTextChannel());
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.ROLES)) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.sendRoles(messageReceived);
