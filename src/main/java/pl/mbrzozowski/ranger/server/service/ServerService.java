@@ -153,6 +153,7 @@ public class ServerService {
             textChannel.delete().reason("Uplynął termin utrzymywania kanalu").queue();
             log.info("Deleted server service channel by id " + channelId);
         }
+        deleteByChannelId(channelId);
     }
 
     public void deleteByChannelId(String channelID) {

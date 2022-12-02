@@ -45,7 +45,6 @@ public class CleanerServerServiceChannel extends TimerTask implements CleanerCha
                 .toList();
         for (Client client : clients) {
             serverService.deleteChannelById(client.getChannelId());
-            serverService.deleteByChannelId(client.getChannelId());
         }
     }
 }
