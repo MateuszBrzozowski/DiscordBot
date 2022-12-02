@@ -432,14 +432,21 @@ public class EventService {
         }
     }
 
-    public void changeDateAndTime(@NotNull Event event, boolean notifi) {
+    public void updateEmbed(@NotNull Event event,
+                            boolean isChangedDateTime,
+                            boolean isChangedName,
+                            boolean isChangedDescription,
+                            String description,
+                            boolean notifi) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
-        assert textChannel != null;
+        if (textChannel == null) {
+            return;
+        }
         textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
             List<MessageEmbed> embeds = message.getEmbeds();
             MessageEmbed mOld = embeds.get(0);
             List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-            List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+            List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
             String month;
             if (event.getDate().getMonthValue() < 10) {
                 month = "0" + event.getDate().getMonthValue();
@@ -456,21 +463,35 @@ public class EventService {
             String newTime = event.getDate().getHour() + ":" + min;
             String dataTime = newDate + " " + newTime;
 
-            textChannel.getManager().setName(EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime).queue();
-            for (int i = 0; i < fieldsOld.size(); i++) {
-                if (i == 0) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
-                    fieldsNew.add(fieldNew);
-                } else if (i == 2) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
-                    fieldsNew.add(fieldNew);
-                } else {
-                    fieldsNew.add(fieldsOld.get(i));
+            if (isChangedDateTime || isChangedName) {
+                updateChannelName(event, textChannel, dataTime);
+            }
+
+            if (isChangedDateTime) {
+                fieldsNew.clear();
+                for (int i = 0; i < fieldsOld.size(); i++) {
+                    if (i == 0) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
+                        fieldsNew.add(fieldNew);
+                    } else if (i == 2) {
+                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
+                        fieldsNew.add(fieldNew);
+                    } else {
+                        fieldsNew.add(fieldsOld.get(i));
+                    }
                 }
             }
+            String newTitle = mOld.getTitle();
+            if (isChangedName) {
+                newTitle = event.getName();
+            }
+            String newDescription = mOld.getDescription();
+            if (isChangedDescription) {
+                newDescription = description;
+            }
             MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
-                    , mOld.getTitle()
-                    , mOld.getDescription()
+                    , newTitle
+                    , newDescription
                     , mOld.getType()
                     , mOld.getTimestamp()
                     , mOld.getColorRaw()
@@ -489,7 +510,14 @@ public class EventService {
                 }
             });
         });
-        eventRepository.save(event);
+        save(event);
+    }
+
+    private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel, String dataTime) {
+        textChannel
+                .getManager()
+                .setName(EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime)
+                .queue();
     }
 
     public void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
