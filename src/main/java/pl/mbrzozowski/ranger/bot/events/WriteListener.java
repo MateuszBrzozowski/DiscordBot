@@ -71,7 +71,6 @@ public class WriteListener extends ListenerAdapter {
         log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
 
         DiceCmd diceCmd = new DiceCmd(event, diceGames);
-//        StatsCmd statsCmd = new StatsCmd(event, serverStats);
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
