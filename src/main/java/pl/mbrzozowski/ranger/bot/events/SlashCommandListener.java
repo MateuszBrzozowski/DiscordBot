@@ -47,7 +47,14 @@ public class SlashCommandListener extends ListenerAdapter {
             if (isAdded) {
                 event.reply("Dodano rolę. Usuń starą listę i dodaj nową poleceniem !roles").setEphemeral(true).queue();
             } else {
-                event.reply("Nie udało się dodać roli. Usuń starą listę i dodaj nową poleceniem !roles").setEphemeral(true).queue();
+                event.reply("Nie udało się dodać roli.").setEphemeral(true).queue();
+            }
+        } else if (name.equalsIgnoreCase(REMOVE_ROLE_FROM_RANGER)) {
+            boolean isRemoved = roleService.removeRole(event.getOption(DISCORD_ROLE_OPTION_NAME_ID));
+            if (isRemoved) {
+                event.reply("Usunięto rolę. Usuń starą listę i dodaj nową poleceniem !roles").setEphemeral(true).queue();
+            } else {
+                event.reply("Nie udało się usunąć roli.").setEphemeral(true).queue();
             }
         }
     }

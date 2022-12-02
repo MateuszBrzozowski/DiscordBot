@@ -13,6 +13,7 @@ import pl.mbrzozowski.ranger.repository.main.RoleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,6 +36,19 @@ public class RoleService {
         }
         save(role);
         return true;
+    }
+
+    public boolean removeRole(OptionMapping id) {
+        if (id == null) {
+            return false;
+        }
+        Optional<Role> roleOptional = findByDiscordRoleId(id.getAsString());
+        if (roleOptional.isPresent()) {
+            Role role = roleOptional.get();
+            deleteById(role.getId());
+            return true;
+        }
+        return false;
     }
 
     public SelectMenu getRoleToSelectMenu() {
@@ -61,6 +75,14 @@ public class RoleService {
 
     private void deleteByDiscordRoleId(String discordRoleId) {
         roleRepository.deleteByDiscordId(discordRoleId);
+    }
+
+    private void deleteById(Long id) {
+        roleRepository.deleteById(id);
+    }
+
+    private Optional<Role> findByDiscordRoleId(String discordRoleId) {
+        return roleRepository.findByDiscordId(discordRoleId);
     }
 
     @NotNull
