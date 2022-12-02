@@ -57,7 +57,8 @@ public class RoleService {
         if (roleList.size() > 0) {
             for (Role role : roleList) {
                 SelectOption option = SelectOption.of(role.getName(), role.getDiscordId());
-                options.add(option);
+                SelectOption selectOption = option.withDescription(role.getDescription());
+                options.add(selectOption);
             }
         } else {
             options.add(SelectOption.of("NO ROLES", "NO ROLES"));
