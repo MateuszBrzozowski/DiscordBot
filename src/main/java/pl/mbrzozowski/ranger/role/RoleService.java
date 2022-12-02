@@ -1,9 +1,20 @@
 package pl.mbrzozowski.ranger.role;
 
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.repository.main.RoleRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Service
 public class RoleService {
 
@@ -14,5 +25,46 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
+    public boolean addRole(OptionMapping id, OptionMapping name, OptionMapping description) {
+        if (id == null || name == null) {
+            return false;
+        }
+        Role role = new Role(id.getAsString(), name.getAsString());
+        if (description != null) {
+            role.setDescription(description.getAsString());
+        }
+        save(role);
+        return true;
+    }
 
+    public SelectMenu getRoleToSelectMenu() {
+        List<SelectOption> options = new ArrayList<>();
+        List<Role> roleList = findAll();
+        if (roleList.size() > 0) {
+            for (Role role : roleList) {
+                SelectOption option = SelectOption.of(role.getName(), role.getDiscordId());
+                options.add(option);
+            }
+        } else {
+            options.add(SelectOption.of("NO ROLES", "NO ROLES"));
+        }
+        return StringSelectMenu.create(ComponentId.ROLES)
+                .setPlaceholder("Choose a role")
+                .setRequiredRange(1, 1)
+                .addOptions(options)
+                .build();
+    }
+
+    private void save(Role role) {
+        roleRepository.save(role);
+    }
+
+    private void deleteByDiscordRoleId(String discordRoleId) {
+        roleRepository.deleteByDiscordId(discordRoleId);
+    }
+
+    @NotNull
+    public List<Role> findAll() {
+        return roleRepository.findAll();
+    }
 }

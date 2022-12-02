@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.mbrzozowski.ranger.bot.events.*;
-import pl.mbrzozowski.ranger.bot.events.writing.SlashCommandListener;
 import pl.mbrzozowski.ranger.helpers.Constants;
 
 import javax.security.auth.login.LoginException;
@@ -51,6 +50,7 @@ public class DiscordBot {
         intents.add(GatewayIntent.GUILD_MESSAGES);
         intents.add(GatewayIntent.DIRECT_MESSAGES);
         intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
+        intents.add(GatewayIntent.MESSAGE_CONTENT);
         JDA jda = JDABuilder.create(Constants.TOKEN_RANGER_TESTER, intents)
                 .addEventListeners(this.writeListener)
                 .addEventListeners(this.buttonClickListener)
@@ -69,4 +69,4 @@ public class DiscordBot {
     public static JDA getJda() {
         return jda;
     }
-    }
+}

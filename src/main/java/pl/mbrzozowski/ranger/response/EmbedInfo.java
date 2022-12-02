@@ -18,6 +18,7 @@ import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.role.RoleService;
 
 import java.awt.*;
 
@@ -447,8 +448,8 @@ public class EmbedInfo extends EmbedCreator {
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void sendRoles(MessageReceivedEvent messageReceived) {
-        SelectMenu roles = RoleID.getRoleToSelectMenu();
+    public static void sendRoles(MessageReceivedEvent messageReceived, RoleService roleService) {
+        SelectMenu roles = roleService.getRoleToSelectMenu();
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Discord role");
         builder.setDescription("Add/Remove a role by selecting it from the list below.");

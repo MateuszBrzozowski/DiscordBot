@@ -3,11 +3,15 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.role.RoleService;
 
 public class EmbedSender extends Proccess {
 
-    public EmbedSender(MessageReceivedEvent messageReceivedEvent) {
+    private final RoleService roleService;
+
+    public EmbedSender(MessageReceivedEvent messageReceivedEvent, RoleService roleService) {
         super(messageReceivedEvent);
+        this.roleService = roleService;
     }
 
     @Override
@@ -17,7 +21,7 @@ public class EmbedSender extends Proccess {
             EmbedInfo.seedersRoleJoining(messageReceived.getChannel().asTextChannel());
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.ROLES)) {
             messageReceived.getMessage().delete().submit();
-            EmbedInfo.sendRoles(messageReceived);
+            EmbedInfo.sendRoles(messageReceived, roleService);
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RECRUT_OPINIONS)) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.recruitOpinionsFormOpening(messageReceived);

@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.role.Role;
+import pl.mbrzozowski.ranger.role.RoleService;
 
 import java.util.List;
 
@@ -19,10 +20,13 @@ import java.util.List;
 public class SelectMenuListener extends ListenerAdapter {
 
     private final EventsGeneratorService eventsGeneratorService;
+    private final RoleService roleService;
 
     @Autowired
-    public SelectMenuListener(EventsGeneratorService eventsGeneratorService) {
+    public SelectMenuListener(EventsGeneratorService eventsGeneratorService,
+                              RoleService roleService) {
         this.eventsGeneratorService = eventsGeneratorService;
+        this.roleService = roleService;
     }
 
     @Override
@@ -41,24 +45,12 @@ public class SelectMenuListener extends ListenerAdapter {
             String roleID = selectedOptions.get(0).getValue();
             RoleEditor roleEditor = new RoleEditor();
 
-            if (roleID.equalsIgnoreCase(RoleID.TARKOV)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.TARKOV);
-            } else if (roleID.equalsIgnoreCase(RoleID.VIRTUAL_REALITY)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.VIRTUAL_REALITY);
-            } else if (roleID.equalsIgnoreCase(RoleID.SQUAD)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.SQUAD);
-            } else if (roleID.equalsIgnoreCase(RoleID.CS)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.CS);
-            } else if (roleID.equalsIgnoreCase(RoleID.WAR_THUNDER)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.WAR_THUNDER);
-            } else if (roleID.equalsIgnoreCase(RoleID.MINECRAFT)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.MINECRAFT);
-            } else if (roleID.equalsIgnoreCase(RoleID.RAINBOW_SIX)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.RAINBOW_SIX);
-            } else if (roleID.equalsIgnoreCase(RoleID.WARGAME)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.WARGAME);
-            } else if (roleID.equalsIgnoreCase(RoleID.ARMA)) {
-                roleEditor.addRemoveRole(event.getUser().getId(), RoleID.ARMA);
+            List<Role> roleList = roleService.findAll();
+
+            for (Role role : roleList) {
+                if (roleID.equalsIgnoreCase(role.getDiscordId())) {
+                    roleEditor.addRemoveRole(event.getUser().getId(), role.getDiscordId());
+                }
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
             event.getInteraction().deferEdit().queue();

@@ -15,6 +15,7 @@ import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
+import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
@@ -31,6 +32,7 @@ public class WriteListener extends ListenerAdapter {
     private final UsersReminderService usersReminderService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
+    private final RoleService roleService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -41,7 +43,8 @@ public class WriteListener extends ListenerAdapter {
                          ServerStats serverStats,
                          UsersReminderService usersReminderService,
                          EventsGeneratorService eventsGeneratorService,
-                         EventsSettingsService eventsSettingsService) {
+                         EventsSettingsService eventsSettingsService,
+                         RoleService roleService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.diceGames = diceGames;
@@ -51,6 +54,7 @@ public class WriteListener extends ListenerAdapter {
         this.usersReminderService = usersReminderService;
         this.eventsGeneratorService = eventsGeneratorService;
         this.eventsSettingsService = eventsSettingsService;
+        this.roleService = roleService;
     }
 
 
@@ -73,19 +77,17 @@ public class WriteListener extends ListenerAdapter {
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
-        EmbedSender embedSender = new EmbedSender(event);
+        EmbedSender embedSender = new EmbedSender(event, roleService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
         HelpCmd helpCmd = new HelpCmd(event);
-        RecruitCmd recrutCmd = new RecruitCmd(event, recruitsService);
+        RecruitCmd recruitCmd = new RecruitCmd(event, recruitsService);
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
-        Roles roles = new Roles(event);
         ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, serverService);
         InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
         diceCmd.setNextProccess(statsCmd);
-        statsCmd.setNextProccess(roles);
-        roles.setNextProccess(logChannel);
+        statsCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(reminderCmd);
@@ -93,8 +95,8 @@ public class WriteListener extends ListenerAdapter {
         serverServiceCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
         checkUserAdmin.setNextProccess(embedSender);
-        embedSender.setNextProccess(recrutCmd);
-        recrutCmd.setNextProccess(checkIsPrivateChannel);
+        embedSender.setNextProccess(recruitCmd);
+        recruitCmd.setNextProccess(checkIsPrivateChannel);
         checkIsPrivateChannel.setNextProccess(eventsSettingsCmd);
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
