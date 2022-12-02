@@ -44,6 +44,7 @@ public class CleanerServerServiceChannel extends TimerTask implements CleanerCha
                 .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS)))
                 .toList();
         for (Client client : clients) {
+            serverService.deleteChannelById(client.getChannelId());
             serverService.deleteByChannelId(client.getChannelId());
         }
     }

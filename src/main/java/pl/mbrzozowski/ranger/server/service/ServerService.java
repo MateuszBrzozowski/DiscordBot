@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
@@ -25,6 +26,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ServerService {
 
@@ -140,6 +142,14 @@ public class ServerService {
     private boolean userHasReport(String userID) {
         Optional<Client> client = clientRepository.findByUserId(userID);
         return client.isPresent();
+    }
+
+    public void deleteChannelById(String channelId) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
+        if (textChannel != null) {
+            textChannel.delete().reason("Uplynął termin utrzymywania kanalu").queue();
+            log.info("Deleted server service channel by id " + channelId);
+        }
     }
 
     public void deleteByChannelId(String channelID) {
