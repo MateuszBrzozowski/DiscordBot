@@ -402,7 +402,7 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void recruitAccepted(String userName, TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.QUESTION);
         builder.setDescription("Rozpoczęto rekrutację");
         builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
