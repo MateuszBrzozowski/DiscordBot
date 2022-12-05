@@ -23,6 +23,7 @@ import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;
@@ -71,8 +72,8 @@ public class RecruitsService {
                     builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
                     builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
                     textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
-                                    "<@&" + RoleID.RADA_KLANU + "> ")
+                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + "RoleID.DRILL_INSTRUCTOR_ID" + "> oraz innych członków klanu.\n" +
+                                    "<@&" + "RoleID.RADA_KLANU" + "> ")
                             .setEmbeds(builder.build())
                             .queue();
                     textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
@@ -254,6 +255,7 @@ public class RecruitsService {
         }
         addRoleRecruit(recruit.getUserId());
         addRecruitTag(event.getGuild(), recruit.getUserId());
+        setYellowCircleInChannelName(event.getChannel().asTextChannel());
         EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
         recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruitRepository.save(recruit);
@@ -283,6 +285,7 @@ public class RecruitsService {
                     recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
                     recruit.setRecruitmentResult(RecruitmentResult.POSITIVE);
                     recruitRepository.save(recruit);
+                    setGreenCircleInChannelName(channel);
                     EmbedInfo.endPositive(drillId, recruit.getUserId(), channel);
                     return true;
                 }
@@ -312,12 +315,45 @@ public class RecruitsService {
                     recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
                     recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
                     recruitRepository.save(recruit);
+                    setRedCircleInChannelName(channel);
                     EmbedInfo.endNegative(drillId, recruit.getUserId(), channel);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private void setRedCircleInChannelName(@NotNull TextChannel channel) {
+        String oldName = channel.getName();
+        oldName = removeAnyPrefixCircle(oldName);
+        channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
+    }
+
+    private void setGreenCircleInChannelName(@NotNull TextChannel channel) {
+        String oldName = channel.getName();
+        oldName = removeAnyPrefixCircle(oldName);
+        channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
+    }
+
+    private void setYellowCircleInChannelName(@NotNull TextChannel channel) {
+        String oldName = channel.getName();
+        oldName = removeAnyPrefixCircle(oldName);
+        channel.getManager().setName(EmbedSettings.YELLOW_CIRCLE + oldName).queue();
+    }
+
+    @NotNull
+    private String removeAnyPrefixCircle(@NotNull String oldName) {
+        if (oldName.contains(EmbedSettings.YELLOW_CIRCLE)) {
+            oldName = oldName.replaceAll(EmbedSettings.YELLOW_CIRCLE, "");
+        }
+        if (oldName.contains(EmbedSettings.RED_CIRCLE)) {
+            oldName = oldName.replaceAll(EmbedSettings.RED_CIRCLE, "");
+        }
+        if (oldName.contains(EmbedSettings.GREEN_CIRCLE)) {
+            oldName = oldName.replaceAll(EmbedSettings.GREEN_CIRCLE, "");
+        }
+        return oldName;
     }
 
     private void removeSmallRInTag(@NotNull String userId, @NotNull Guild guild) {
@@ -374,6 +410,7 @@ public class RecruitsService {
         TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
         closeChannel(textChannel, userID);
+        setRedCircleInChannelName(textChannel);
         event.deferEdit().queue();
     }
 

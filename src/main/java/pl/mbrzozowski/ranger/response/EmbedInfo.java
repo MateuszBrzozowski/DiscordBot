@@ -95,8 +95,6 @@ public class EmbedInfo extends EmbedCreator {
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
         channel.sendMessage("<@" + recruitId + ">").setEmbeds(builder.build()).queue();
-        String oldName = channel.getName();
-        channel.getManager().setName(EmbedSettings.RED_CIRCLE + oldName).queue();
 
         JDA jda = DiscordBot.getJda();
         jda.openPrivateChannelById(recruitId).queue(privateChannel -> {
@@ -112,8 +110,6 @@ public class EmbedInfo extends EmbedCreator {
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
         channel.sendMessage("Gratulacje <@" + recruitId + ">").setEmbeds(builder.build()).queue();
-        String oldName = channel.getName();
-        channel.getManager().setName(EmbedSettings.GREEN_CIRCLE + oldName).queue();
     }
 
     /**
