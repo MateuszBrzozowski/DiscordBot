@@ -5,12 +5,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
+import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +40,9 @@ public class Reminder extends TimerTask {
         Optional<Event> eventOptional = eventService.findEventByMsgId(eventID);
         if (eventOptional.isPresent()) {
             Event event = eventOptional.get();
+            if (typeOfReminder == TypeOfReminder.ONE_HOUR) {
+                eventService.setYellowCircleInChannelName(event.getChannelId());
+            }
             List<Player> mainList = eventService.getMainList(event);
             List<Player> reserveList = eventService.getReserveList(event);
             List<UsersReminder> usersReminderList = usersReminderService.findAll();

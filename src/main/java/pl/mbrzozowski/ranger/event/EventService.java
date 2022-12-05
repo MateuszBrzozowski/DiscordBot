@@ -624,4 +624,28 @@ public class EventService {
         event.setActive(isActive);
         eventRepository.save(event);
     }
+
+    public void setYellowCircleInChannelName(String channelId) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
+        if (textChannel == null) {
+            return;
+        }
+        String channelName = textChannel.getName();
+        channelName = removeAnyPrefixCircle(channelName);
+        textChannel.getManager().setName(EmbedSettings.YELLOW_CIRCLE + channelName).queue();
+    }
+
+    @NotNull
+    private String removeAnyPrefixCircle(@NotNull String channelName) {
+        if (channelName.contains(EmbedSettings.YELLOW_CIRCLE)) {
+            channelName = channelName.replaceAll(EmbedSettings.YELLOW_CIRCLE, "");
+        }
+        if (channelName.contains(EmbedSettings.RED_CIRCLE)) {
+            channelName = channelName.replaceAll(EmbedSettings.RED_CIRCLE, "");
+        }
+        if (channelName.contains(EmbedSettings.GREEN_CIRCLE)) {
+            channelName = channelName.replaceAll(EmbedSettings.GREEN_CIRCLE, "");
+        }
+        return channelName;
+    }
 }

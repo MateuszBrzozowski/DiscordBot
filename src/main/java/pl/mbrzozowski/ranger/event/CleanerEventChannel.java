@@ -21,7 +21,7 @@ import static java.time.LocalDate.now;
 public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
     private final EventService eventService;
-    private static final int DELAY_IN_DAYS = 30;
+    private static final int DELAY_IN_DAYS = 28;
 
     @Autowired
     public CleanerEventChannel(EventService eventService) {
