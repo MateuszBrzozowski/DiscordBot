@@ -299,7 +299,7 @@ public class EventService {
             }
         } else {
             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk ["
-                    + event.getName() + "] - Event się już rozpoczął.");
+                    + event.getName() + event.getDate().toString() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
             setRedCircleInChannelName(event);
@@ -315,7 +315,7 @@ public class EventService {
                 player.setMainList(true);
                 player.setTimestamp(LocalDateTime.now());
                 buttonInteractionEvent.deferEdit().queue();
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName());
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName() + event.getDate().toString());
             } else {
                 ResponseMessage.youAreOnList(buttonInteractionEvent);
             }
@@ -323,7 +323,7 @@ public class EventService {
             Player newPlayer = new Player(null, userID, userName, true, event, LocalDateTime.now());
             event.getPlayers().add(newPlayer);
             buttonInteractionEvent.deferEdit().queue();
-            RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę.", event.getName());
+            RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę.", event.getName() + event.getDate().toString());
         }
         eventRepository.save(event);
     }
@@ -336,12 +336,12 @@ public class EventService {
                 if (threeHoursToEvent(event.getDate())) {
                     ResponseMessage.youCantSignReserve(buttonInteractionEvent);
                     RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głównej listy na rezerwową ["
-                            + event.getName() + "] - Czas do eventu 3h lub mniej.");
+                            + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
                 } else {
                     player.setMainList(false);
                     player.setTimestamp(LocalDateTime.now());
                     buttonInteractionEvent.deferEdit().queue();
-                    RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());
+                    RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
                 }
             } else {
                 ResponseMessage.youAreOnList(buttonInteractionEvent);
@@ -350,7 +350,7 @@ public class EventService {
             Player newPlayer = new Player(null, userID, userName, false, event, LocalDateTime.now());
             event.getPlayers().add(newPlayer);
             buttonInteractionEvent.deferEdit().queue();
-            RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName());
+            RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
         }
         eventRepository.save(event);
     }
@@ -362,10 +362,10 @@ public class EventService {
             if (threeHoursToEvent(event.getDate())) {
                 ResponseMessage.youCantSingOut(buttonInteractionEvent);
                 RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
-                        + event.getName() + "] - Czas do eventu 3h lub mniej.");
+                        + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
             } else {
                 event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " wypisał się z eventu", event.getName());
+                RangerLogger.info(Users.getUserNicknameFromID(userID) + " wypisał się z eventu", event.getName() + event.getDate().toString());
                 buttonInteractionEvent.deferEdit().queue();
             }
         } else {
