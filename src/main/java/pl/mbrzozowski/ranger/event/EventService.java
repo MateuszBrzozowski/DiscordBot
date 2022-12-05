@@ -302,7 +302,7 @@ public class EventService {
                     + event.getName() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
-            changeTitleRedCircle(event);
+            setRedCircleInChannelName(event);
         }
         updateEmbed(event);
     }
@@ -411,7 +411,7 @@ public class EventService {
     public void cancelEvent(Event event, boolean sendNotifi) {
         log.info(event.getName() + " cancel event");
         disableButtons(event);
-        changeTitleRedCircle(event);
+        setRedCircleInChannelName(event);
         event.setActive(false);
         timers.cancelByMsgId(event.getMsgId());
         save(event);
@@ -421,13 +421,13 @@ public class EventService {
         }
     }
 
-    public void changeTitleRedCircle(@NotNull Event event) {
+    public void setRedCircleInChannelName(@NotNull Event event) {
         TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
-            String buffor = channel.getName();
-            buffor = buffor.replace(EmbedSettings.GREEN_CIRCLE, EmbedSettings.RED_CIRCLE);
+            String buffer = channel.getName();
+            buffer = removeAnyPrefixCircle(buffer);
             channel.getManager()
-                    .setName(buffor)
+                    .setName(EmbedSettings.RED_CIRCLE + buffer)
                     .queue();
         }
     }

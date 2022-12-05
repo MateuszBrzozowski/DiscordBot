@@ -48,7 +48,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
             } else {
                 eventService.disableButtons(event);
                 eventService.setActive(event, false);
-                eventService.changeTitleRedCircle(event);
+                eventService.setRedCircleInChannelName(event);
             }
         }
     }
