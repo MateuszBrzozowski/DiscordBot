@@ -87,17 +87,28 @@ public class EventService {
         if (guild == null) {
             throw new NullPointerException("Guild by RangersPL is null");
         }
-        String channelName = EmbedSettings.GREEN_CIRCLE + eventRequest.getName() +
-                "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
-        if (channelName.length() >= 99) {
-            channelName = channelName.substring(0, 99);
-        }
+        String channelName = getStringChanelName(eventRequest);
         Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID);
-        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
+        if (category == null) {
+            throw new NullPointerException("Category by Event Id is null");
+        }
+        createEventChannel(eventRequest, guild, channelName, category);
+    }
+
+    private void createEventChannel(@NotNull final EventRequest eventRequest,
+                                    @NotNull final Guild guild,
+                                    @NotNull final String channelName,
+                                    @NotNull final Category category) {
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUT_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
+        } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
         } else {
             guild.createTextChannel(channelName, category)
@@ -107,16 +118,25 @@ public class EventService {
         }
     }
 
+    @NotNull
+    private String getStringChanelName(@NotNull EventRequest eventRequest) {
+        String result = "";
+        if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
+            result += EmbedSettings.BRAIN_WITH_GREEN;
+        } else {
+            result += EmbedSettings.GREEN_CIRCLE;
+        }
+        result += eventRequest.getName() +
+                "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
+        if (result.length() >= 99) {
+            result = result.substring(0, 99);
+        }
+        return result;
+    }
+
     private void createList(final TextChannel textChannel, final @NotNull EventRequest eventRequest) {
         log.info("Creating list");
-        String msg = "";
-        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUT_ID + "> Zapisy!";
-        } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
-            msg = "<@&" + RoleID.RECRUT_ID + "> Zapisy!";
-        } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
-            msg = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
-        }
+        String msg = getMessageForEventList(eventRequest);
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
@@ -155,6 +175,21 @@ public class EventService {
                     CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
                     reminder.create();
                 });
+    }
+
+    @NotNull
+    private String getMessageForEventList(@NotNull EventRequest eventRequest) {
+        String result = "";
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT) {
+            result = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUIT_ID + "> Zapisy!";
+        } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
+            result = "<@&" + RoleID.RECRUIT_ID + "> Zapisy!";
+        } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
+            result = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
+        } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
+            result = "<@&" + RoleID.TACTICAL_GROUP + "> Tactical meeting!";
+        }
+        return result;
     }
 
     private void save(Event event) {

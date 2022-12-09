@@ -37,6 +37,7 @@ public interface ComponentId {
     String GENERATOR_PING_CLAN_MEMBER = "GenPingCM" + SUFFIX;
     String GENERATOR_PING_RECRUIT = "GenPingR" + SUFFIX;
     String GENERATOR_PING_BOTH = "GenPingB" + SUFFIX;
+    String GENERATOR_PING_TACTICAL_GROUP = "genPingTacticalGroup" + SUFFIX;
     String GENERATOR_FINISH_SELECT_MENU = "GenFinMenu" + SUFFIX;
     String GENERATOR_EVENT_NAME = "GenEventName" + SUFFIX;
     String GENERATOR_DATE = "GenDate" + SUFFIX;

@@ -10,7 +10,7 @@ public interface Commands {
     String CANCEL = PREFIX + "cancel" + SUFFIX;
     String DISABLE_BUTTONS = PREFIX + "disable" + SUFFIX;
     String ENABLE_BUTTONS = PREFIX + "enable" + SUFFIX;
-    String GENERATOR = PREFIX + "generator" + SUFFIX;
+    String EVENT = PREFIX + "event" + SUFFIX;
     String DICE = PREFIX + "kostka" + SUFFIX;
     String HELPS = PREFIX + "help" + SUFFIX;
     String CLOSE = PREFIX + "close" + SUFFIX;

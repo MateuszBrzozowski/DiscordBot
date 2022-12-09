@@ -27,4 +27,6 @@ public class Event {
     private LocalDateTime date;
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Player> players;
+    @Enumerated(EnumType.STRING)
+    private EventFor eventFor;
 }

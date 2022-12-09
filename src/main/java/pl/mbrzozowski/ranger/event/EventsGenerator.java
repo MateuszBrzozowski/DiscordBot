@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Validation;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -25,6 +24,8 @@ import pl.mbrzozowski.ranger.response.EmbedSettings;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 
 @Slf4j
 public class EventsGenerator {
@@ -72,7 +73,7 @@ public class EventsGenerator {
     public void saveAnswerAndSetNextStage(ButtonInteractionEvent event) {
         switch (stageOfGenerator) {
             case IF_SET_DESCRIPTION: {
-                if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_DESC_YES)) {
+                if (event.getComponentId().equalsIgnoreCase(GENERATOR_DESC_YES)) {
                     embedGetDescription();
                     stageOfGenerator = EventGeneratorStatus.SET_DESCRIPTION;
                 } else {
@@ -83,28 +84,24 @@ public class EventsGenerator {
                 break;
             }
             case SET_PERMISSION: {
-                boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
-                boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
-                eventRequest.setEventFor(getPerm(ac, r));
+                eventRequest.setEventFor(getPerm(event));
                 embedDoYouWantAnyChange(true);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 disableButtons(event);
                 break;
             }
             case CHANGE_PERMISSION: {
-                boolean ac = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_BOTH);
-                boolean r = event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_PING_RECRUIT);
-                eventRequest.setEventFor(getPerm(ac, r));
+                eventRequest.setEventFor(getPerm(event));
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
                 disableButtons(event);
             }
             case FINISH: {
-                if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_SHOW)) {
+                if (event.getComponentId().equalsIgnoreCase(GENERATOR_SHOW)) {
                     embedDoYouWantAnyChange(true);
-                } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_END)) {
+                } else if (event.getComponentId().equalsIgnoreCase(GENERATOR_END)) {
                     end();
-                } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_CANCEL)) {
+                } else if (event.getComponentId().equalsIgnoreCase(GENERATOR_CANCEL)) {
                     EmbedInfo.cancelEventGenerator(event.getUser().getId());
                     removeThisGenerator();
                 }
@@ -118,19 +115,19 @@ public class EventsGenerator {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         String userChoose = selectedOptions.get(0).getValue();
         if (stageOfGenerator == EventGeneratorStatus.FINISH) {
-            if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_EVENT_NAME)) {
+            if (userChoose.equalsIgnoreCase(GENERATOR_EVENT_NAME)) {
                 embedGetName();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_NAME;
-            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DATE)) {
+            } else if (userChoose.equalsIgnoreCase(GENERATOR_DATE)) {
                 embedGetDate();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_DATE;
-            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_TIME)) {
+            } else if (userChoose.equalsIgnoreCase(GENERATOR_TIME)) {
                 embedGetTime();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_TIME;
-            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_DESC)) {
+            } else if (userChoose.equalsIgnoreCase(GENERATOR_DESC)) {
                 embedGetDescription();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_DESCRIPTION;
-            } else if (userChoose.equalsIgnoreCase(ComponentId.GENERATOR_WHO_PING)) {
+            } else if (userChoose.equalsIgnoreCase(GENERATOR_WHO_PING)) {
                 embedWhoPing();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
             }
@@ -254,16 +251,15 @@ public class EventsGenerator {
             if (showList) embedListExample(privateChannel);
 
 
-
             SelectMenu selectMenu = StringSelectMenu
-                    .create(ComponentId.GENERATOR_FINISH_SELECT_MENU)
+                    .create(GENERATOR_FINISH_SELECT_MENU)
                     .setRequiredRange(1, 1)
                     .setPlaceholder("Czy chcesz wprowadzić jakieś zmiany?")
-                    .addOption("Nazwa eventu", ComponentId.GENERATOR_EVENT_NAME)
-                    .addOption("Data eventu", ComponentId.GENERATOR_DATE)
-                    .addOption("Czas eventu", ComponentId.GENERATOR_TIME)
-                    .addOption("Opis eventu", ComponentId.GENERATOR_DESC)
-                    .addOption("Do kogo są zapisy?", ComponentId.GENERATOR_WHO_PING)
+                    .addOption("Nazwa eventu", GENERATOR_EVENT_NAME)
+                    .addOption("Data eventu", GENERATOR_DATE)
+                    .addOption("Czas eventu", GENERATOR_TIME)
+                    .addOption("Opis eventu", GENERATOR_DESC)
+                    .addOption("Do kogo są zapisy?", GENERATOR_WHO_PING)
                     .build();
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.GREEN);
@@ -271,16 +267,16 @@ public class EventsGenerator {
             privateChannel.sendMessageEmbeds(builder.build())
                     .setComponents(
                             ActionRow.of(selectMenu),
-                            ActionRow.of(Button.primary(ComponentId.GENERATOR_SHOW, "Pokaż listę"),
-                                    Button.success(ComponentId.GENERATOR_END, "Zakończ"),
-                                    Button.danger(ComponentId.GENERATOR_CANCEL, "Anuluj"))
+                            ActionRow.of(Button.primary(GENERATOR_SHOW, "Pokaż listę"),
+                                    Button.success(GENERATOR_END, "Zakończ"),
+                                    Button.danger(GENERATOR_CANCEL, "Anuluj"))
                     )
                     .queue();
         });
     }
 
     private void embedListExample(PrivateChannel privateChannel) {
-        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_ADN_RECRUIT) {
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT) {
             privateChannel.sendMessage("CLAN_MEMBER RECRUT Zapisy!").queue();
         } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
             privateChannel.sendMessage("RECRUT Zapisy!").queue();
@@ -345,9 +341,10 @@ public class EventsGenerator {
             builder.addField("Do kogo kierowane są zapisy?", "", false);
             privateChannel.sendMessageEmbeds(builder.build())
                     .setActionRow(
-                            Button.primary(ComponentId.GENERATOR_PING_CLAN_MEMBER, "Tylko Clan Member"),
-                            Button.primary(ComponentId.GENERATOR_PING_RECRUIT, "Tylko Rekrut"),
-                            Button.primary(ComponentId.GENERATOR_PING_BOTH, "Clan Member + Rekrut")
+                            Button.primary(GENERATOR_PING_CLAN_MEMBER, "Tylko Clan Member"),
+                            Button.primary(GENERATOR_PING_RECRUIT, "Tylko Rekrut"),
+                            Button.primary(GENERATOR_PING_BOTH, "Clan Member + Rekrut"),
+                            Button.primary(GENERATOR_PING_TACTICAL_GROUP, "Grupa taktyczna")
                     )
                     .queue();
         });
@@ -371,8 +368,8 @@ public class EventsGenerator {
             builder.addField("Czy chcesz dodać opis na listę twojego eventu?", "", false);
             privateChannel.sendMessageEmbeds(builder.build())
                     .setActionRow(
-                            Button.success(ComponentId.GENERATOR_DESC_YES, "Tak"),
-                            Button.danger(ComponentId.GENERATOR_DESC_NO, "Nie"))
+                            Button.success(GENERATOR_DESC_YES, "Tak"),
+                            Button.danger(GENERATOR_DESC_NO, "Nie"))
                     .queue();
         });
     }
@@ -463,9 +460,16 @@ public class EventsGenerator {
         message.delete().queue();
     }
 
-    private EventFor getPerm(boolean ac, boolean r) {
-        if (r) return EventFor.RECRUIT;
-        else if (ac) return EventFor.CLAN_MEMBER_ADN_RECRUIT;
-        else return EventFor.CLAN_MEMBER;
+    private EventFor getPerm(ButtonInteractionEvent event) {
+        String componentId = event.getComponentId();
+        if (componentId.equalsIgnoreCase(GENERATOR_PING_CLAN_MEMBER)) {
+            return EventFor.CLAN_MEMBER;
+        } else if (componentId.equalsIgnoreCase(GENERATOR_PING_RECRUIT)) {
+            return EventFor.RECRUIT;
+        } else if (componentId.equalsIgnoreCase(GENERATOR_PING_BOTH)) {
+            return EventFor.CLAN_MEMBER_AND_RECRUIT;
+        } else {
+            return EventFor.TACTICAL_GROUP;
+        }
     }
 }

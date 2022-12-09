@@ -200,8 +200,8 @@ public class RecruitsService {
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Member member = guild.getMemberById(userId);
-            Role roleRecruit = guild.getRoleById(RoleID.RECRUT_ID);
-            boolean hasRoleRecruit = Users.hasUserRole(userId, RoleID.RECRUT_ID);
+            Role roleRecruit = guild.getRoleById(RoleID.RECRUIT_ID);
+            boolean hasRoleRecruit = Users.hasUserRole(userId, RoleID.RECRUIT_ID);
             if (!hasRoleRecruit && roleRecruit != null && member != null) {
                 guild.addRoleToMember(member, roleRecruit).queue();
             }
@@ -212,8 +212,8 @@ public class RecruitsService {
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Member member = guild.getMemberById(userID);
-            Role roleRecruit = guild.getRoleById(RoleID.RECRUT_ID);
-            boolean hasRoleRecruit = Users.hasUserRole(userID, RoleID.RECRUT_ID);
+            Role roleRecruit = guild.getRoleById(RoleID.RECRUIT_ID);
+            boolean hasRoleRecruit = Users.hasUserRole(userID, RoleID.RECRUIT_ID);
             if (hasRoleRecruit && roleRecruit != null && member != null) {
                 guild.removeRoleFromMember(member, roleRecruit).queue();
             }

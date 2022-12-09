@@ -26,7 +26,7 @@ public class GeneratorCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(message.getUserID());
-        if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.GENERATOR)) {
+        if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.EVENT)) {
             if (messageReceived.isFromType(ChannelType.PRIVATE)) {
                 if (messageReceived != null) {
                     String authorID = messageReceived.getAuthor().getId();

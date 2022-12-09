@@ -14,6 +14,7 @@ public interface EmbedSettings {
     String GREEN_CIRCLE = "\uD83D\uDFE2┋";
     String RED_CIRCLE = "\uD83D\uDD34┋";
     String YELLOW_CIRCLE = "\uD83D\uDFE1┋";
+    String BRAIN_WITH_GREEN = "\uD83E\uDDE0\uD83D\uDD34┋";
     String BOOK_RED = "\uD83D\uDCD5";
     String BOOK_BLUE = "\uD83D\uDCD8";
     String BOOK_GREEN = "\uD83D\uDCD7";
