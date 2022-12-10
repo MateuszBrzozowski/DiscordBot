@@ -190,7 +190,8 @@ public class EventService {
         } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
             result = "<@&" + RoleID.TACTICAL_GROUP + "> Tactical meeting!";
         }
-        return result;
+//        return result;
+        return "TEST TEST";
     }
 
     private void save(Event event) {
