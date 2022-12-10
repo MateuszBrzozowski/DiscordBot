@@ -13,8 +13,8 @@ public class InvalidCmd extends Proccess {
     public void proccessMessage(Message message) {
         DiscordBot.getJda().getUserById(message.getUserID()).openPrivateChannel().queue(privateChannel -> {
             privateChannel.sendMessage("Niestety, nie rozumiem Ciebie. \n" +
-                    "**!generator** - otwiera generator eventów.\n" +
-                    "**!events** - edytowanie aktywnych eventów.\n" +
+                    "**!event** - otwiera generator eventów.\n" +
+                    "**!eventsEdit** - edytowanie aktywnych eventów.\n" +
                     "Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**").queue();
         });
     }

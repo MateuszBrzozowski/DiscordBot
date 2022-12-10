@@ -17,7 +17,7 @@ public interface Commands {
     String START_REKRUT = PREFIX + "startRekrut" + SUFFIX;
     String POSITIVE = PREFIX + "p" + SUFFIX;
     String NEGATIVE = PREFIX + "n" + SUFFIX;
-    String EVENTS_SETTINGS = PREFIX + "events" + SUFFIX;
+    String EVENTS_SETTINGS = PREFIX + "eventsEdit" + SUFFIX;
     String MSG = PREFIX + "msg" + SUFFIX;
     String MSG_CANCEL = PREFIX + "msgCancel" + SUFFIX;
     String SQUAD_SEEDERS_INFO = PREFIX + "squadSeedersInfo" + SUFFIX;
