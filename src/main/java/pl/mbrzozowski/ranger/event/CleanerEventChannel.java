@@ -44,7 +44,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
                 .toList();
         for (Event event : eventList) {
             if ((event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS))) ||
-                    (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS_TACTICAL_MEETING)) && event.getEventFor().equals(EventFor.TACTICAL_GROUP))) {
+                    (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS_TACTICAL_MEETING)) && event.getEventFor() == EventFor.TACTICAL_GROUP)) {
                 eventService.delete(event);
                 deleteChannel(event);
             } else {

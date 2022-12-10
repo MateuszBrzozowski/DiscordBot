@@ -99,13 +99,13 @@ public class EventService {
                                     @NotNull final Guild guild,
                                     @NotNull final String channelName,
                                     @NotNull final Category category) {
-        if (eventRequest.getEventFor().equals(EventFor.CLAN_MEMBER_AND_RECRUIT) || eventRequest.getEventFor().equals(EventFor.RECRUIT)) {
+        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
-        } else if (eventRequest.getEventFor().equals(EventFor.TACTICAL_GROUP)) {
+        } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
@@ -668,7 +668,7 @@ public class EventService {
         }
         String channelName = textChannel.getName();
         channelName = removeAnyPrefixCircle(channelName);
-        if (eventFor.equals(EventFor.TACTICAL_GROUP)) {
+        if (eventFor == EventFor.TACTICAL_GROUP) {
             channelName = EmbedSettings.BRAIN_WITH_YELLOW + channelName;
         } else {
             channelName = EmbedSettings.YELLOW_CIRCLE + channelName;
