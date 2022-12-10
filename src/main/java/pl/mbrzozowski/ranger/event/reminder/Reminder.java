@@ -41,7 +41,7 @@ public class Reminder extends TimerTask {
         if (eventOptional.isPresent()) {
             Event event = eventOptional.get();
             if (typeOfReminder == TypeOfReminder.ONE_HOUR) {
-                eventService.setYellowCircleInChannelName(event.getChannelId());
+                eventService.setYellowCircleInChannelName(event.getChannelId(), event.getEventFor());
             }
             List<Player> mainList = eventService.getMainList(event);
             List<Player> reserveList = eventService.getReserveList(event);

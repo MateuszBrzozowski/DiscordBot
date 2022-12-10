@@ -22,6 +22,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
     private final EventService eventService;
     private static final int DELAY_IN_DAYS = 28;
+    private static final int DELAY_IN_DAYS_TACTICAL_MEETING = 2;
 
     @Autowired
     public CleanerEventChannel(EventService eventService) {
@@ -42,7 +43,8 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
                 .filter(event -> event.getDate().isBefore(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : eventList) {
-            if (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS))) {
+            if ((event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS))) ||
+                    (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS_TACTICAL_MEETING)) && event.getEventFor().equals(EventFor.TACTICAL_GROUP))) {
                 eventService.delete(event);
                 deleteChannel(event);
             } else {

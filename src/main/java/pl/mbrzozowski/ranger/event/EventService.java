@@ -99,13 +99,13 @@ public class EventService {
                                     @NotNull final Guild guild,
                                     @NotNull final String channelName,
                                     @NotNull final Category category) {
-        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
+        if (eventRequest.getEventFor().equals(EventFor.CLAN_MEMBER_AND_RECRUIT) || eventRequest.getEventFor().equals(EventFor.RECRUIT)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
-        } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
+        } else if (eventRequest.getEventFor().equals(EventFor.TACTICAL_GROUP)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
@@ -170,6 +170,7 @@ public class EventService {
                             .channelId(textChannel.getId())
                             .isActive(true)
                             .date(dateTime)
+                            .eventFor(eventRequest.getEventFor())
                             .build();
                     save(event);
                     CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
@@ -660,18 +661,29 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public void setYellowCircleInChannelName(String channelId) {
+    public void setYellowCircleInChannelName(String channelId, EventFor eventFor) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
         if (textChannel == null) {
             return;
         }
         String channelName = textChannel.getName();
         channelName = removeAnyPrefixCircle(channelName);
-        textChannel.getManager().setName(EmbedSettings.YELLOW_CIRCLE + channelName).queue();
+        if (eventFor.equals(EventFor.TACTICAL_GROUP)) {
+            channelName = EmbedSettings.BRAIN_WITH_YELLOW + channelName;
+        } else {
+            channelName = EmbedSettings.YELLOW_CIRCLE + channelName;
+        }
+        textChannel.getManager().setName(channelName).queue();
     }
 
     @NotNull
     private String removeAnyPrefixCircle(@NotNull String channelName) {
+        if (channelName.contains(EmbedSettings.BRAIN_WITH_GREEN)) {
+            channelName = channelName.replaceAll(EmbedSettings.BRAIN_WITH_GREEN, "");
+        }
+        if (channelName.contains(EmbedSettings.BRAIN_WITH_YELLOW)) {
+            channelName = channelName.replaceAll(EmbedSettings.BRAIN_WITH_YELLOW, "");
+        }
         if (channelName.contains(EmbedSettings.YELLOW_CIRCLE)) {
             channelName = channelName.replaceAll(EmbedSettings.YELLOW_CIRCLE, "");
         }
