@@ -22,7 +22,7 @@ public class EmbedSender extends Proccess {
         } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.ROLES)) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.sendRoles(messageReceived, roleService);
-        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RECRUT_OPINIONS)) {
+        } else if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.RECRUIT_OPINIONS)) {
             messageReceived.getMessage().delete().submit();
             EmbedInfo.recruitOpinionsFormOpening(messageReceived);
         } else {

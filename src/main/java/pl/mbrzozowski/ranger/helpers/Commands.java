@@ -22,20 +22,8 @@ public interface Commands {
     String MSG_CANCEL = PREFIX + "msgCancel" + SUFFIX;
     String SQUAD_SEEDERS_INFO = PREFIX + "squadSeedersInfo" + SUFFIX;
     String EMBED_SERVER_SERVICE = PREFIX + "ServerService" + SUFFIX;
-    String STATS = PREFIX + "stats" + SUFFIX;
-    String STATS_PROFILE = PREFIX + "profile" + SUFFIX;
-    String RECRUT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
+    String RECRUIT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     String UPDATE_WL = PREFIX + "updateWL" + SUFFIX;
     //ROLE
-    String ROLE = "role.";
     String ROLES = PREFIX + "roles" + SUFFIX;
-    String TARKOV = PREFIX + ROLE + "tarkov" + SUFFIX;
-    String VIRTUAL_REALITY = PREFIX + ROLE + "vr" + SUFFIX;
-    String SQUAD = PREFIX + ROLE + "squad" + SUFFIX;
-    String CS = PREFIX + ROLE + "cs" + SUFFIX;
-    String WAR_THUNDER = PREFIX + ROLE + "wt" + SUFFIX;
-    String MINECRAFT = PREFIX + ROLE + "minecraft" + SUFFIX;
-    String RAINBOW_SIX = PREFIX + ROLE + "r6" + SUFFIX;
-    String WARGAME = PREFIX + ROLE + "wargame" + SUFFIX;
-    String ARMA = PREFIX + ROLE + "arma" + SUFFIX;
 }
