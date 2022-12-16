@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -38,7 +39,7 @@ public class ServerService {
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
-        if (!userHasReport(event.getUser().getId())) {
+        if (!userHasActiveReport(event.getUser().getId())) {
             createChannel(event, buttonType);
             event.deferEdit().queue();
         } else {
@@ -142,9 +143,12 @@ public class ServerService {
         clientRepository.save(client);
     }
 
-    private boolean userHasReport(String userID) {
-        Optional<Client> client = clientRepository.findByUserId(userID);
-        return client.isPresent();
+    protected boolean userHasActiveReport(String userID) {
+        List<Client> clients = clientRepository.findByUserId(userID);
+        clients = clients.stream()
+                .filter(client -> !client.getIsClose())
+                .collect(Collectors.toList());
+        return clients.size() != 0;
     }
 
     public void deleteChannelById(String channelId) {

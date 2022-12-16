@@ -5,12 +5,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.mbrzozowski.ranger.server.service.Client;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Optional<Client> findByUserId(String userID);
+    List<Client> findByUserId(String userID);
 
     @Transactional
     void deleteByChannelId(String channelID);

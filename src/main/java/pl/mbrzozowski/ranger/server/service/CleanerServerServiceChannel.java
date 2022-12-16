@@ -18,7 +18,6 @@ import static java.time.LocalDate.now;
 public class CleanerServerServiceChannel extends TimerTask implements CleanerChannel {
 
     private final ServerService serverService;
-    private static final int DELAY_IN_DAYS = 2;
 
     @Autowired
     public CleanerServerServiceChannel(ServerService serverService) {
@@ -41,7 +40,7 @@ public class CleanerServerServiceChannel extends TimerTask implements CleanerCha
         List<Client> clients = serverService.findAll();
         clients = clients.stream()
                 .filter(client -> client.getIsClose() && client.getCloseTimestamp() != null)
-                .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS)))
+                .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(2)))
                 .toList();
         for (Client client : clients) {
             serverService.deleteChannelById(client.getChannelId());
