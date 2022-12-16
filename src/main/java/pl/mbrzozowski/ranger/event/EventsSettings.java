@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.Validation;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -49,18 +50,22 @@ public class EventsSettings {
     private void embedStart() {
         User user = jda.getUserById(userID);
         if (user != null) {
-            eventsList = eventService.findAll();
-            user.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setTitle("MENADŻER EVENTÓW");
-                builder.setColor(Color.YELLOW);
-                builder.setThumbnail(EmbedSettings.THUMBNAIL);
-                builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
-                        "Wybierz event który chcesz edytować.\n\n" +
-                        getActiveEventsIndexAndName());
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
+            eventsList = eventService.findByIsActive();
+            embedStart(user);
         }
+    }
+
+    private void embedStart(@NotNull User user) {
+        user.openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setTitle("MENADŻER EVENTÓW");
+            builder.setColor(Color.YELLOW);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
+                    "Wybierz event który chcesz edytować.\n\n" +
+                    getActiveEventsIndexAndName());
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
+        });
     }
 
     public String getActiveEventsIndexAndName() {

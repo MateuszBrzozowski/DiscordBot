@@ -55,6 +55,7 @@ public class EventService {
         List<Event> eventList = findAll();
         List<Event> events = eventList
                 .stream()
+                .filter(event -> event.getDate() != null)
                 .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : events) {
@@ -67,6 +68,10 @@ public class EventService {
 
     public List<Event> findAll() {
         return eventRepository.findAll();
+    }
+
+    public List<Event> findByIsActive() {
+        return eventRepository.findByIsActive(true);
     }
 
     public void createNewEvent(final @NotNull EventRequest eventRequest) {
