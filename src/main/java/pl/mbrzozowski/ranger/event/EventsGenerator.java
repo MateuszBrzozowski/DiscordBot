@@ -31,9 +31,9 @@ import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 public class EventsGenerator {
 
     private final EventRequest eventRequest = new EventRequest();
-    private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
     private final EventService eventService;
     private final EventsGeneratorService eventsGeneratorService;
+    private EventGeneratorStatus stageOfGenerator = EventGeneratorStatus.SET_NAME;
 
     @Autowired
     public EventsGenerator(@NotNull MessageReceivedEvent event,

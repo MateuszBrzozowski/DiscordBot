@@ -1,7 +1,6 @@
 package pl.mbrzozowski.ranger.event;
 
 public enum EventSettingsStatus {
-
     CHOOSE_EVENT,
     WHAT_TO_DO,
     SET_TIME,

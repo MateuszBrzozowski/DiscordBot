@@ -20,22 +20,22 @@ import java.util.List;
 public class EventsSettings {
 
     private final EventService eventService;
-
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
-    private boolean isChangedDateTime = false;
-    private boolean isChangedName = false;
-    private boolean isChangedDescription = false;
-    private String description = "";
     private final JDA jda = DiscordBot.getJda();
     private final String userName;
     private final String userID;
+    private final EventsSettingsService eventsSettingsService;
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
+
     private Event event;
+    private String description = "";
+    private List<Event> eventsList = new ArrayList<>();
+    private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
+    private boolean isChangedDateTime = false;
+    private boolean isChangedName = false;
+    private boolean isChangedDescription = false;
     private boolean ifEndingEvent = false;
     private boolean sendNotifi = false;
-    private List<Event> eventsList = new ArrayList<>();
-    private final EventsSettingsService eventsSettingsService;
 
-    private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
 
     public EventsSettings(EventService eventService,
                           MessageReceivedEvent privateEvent,
@@ -55,20 +55,7 @@ public class EventsSettings {
         }
     }
 
-    private void embedStart(@NotNull User user) {
-        user.openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("MENADŻER EVENTÓW");
-            builder.setColor(Color.YELLOW);
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
-                    "Wybierz event który chcesz edytować.\n\n" +
-                    getActiveEventsIndexAndName());
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
-    }
-
-    public String getActiveEventsIndexAndName() {
+    private String getActiveEventsIndexAndName() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < eventsList.size(); i++) {
             result.append(i + 1).append(" : ").append(eventsList.get(i).getName()).append("\n");
@@ -405,6 +392,18 @@ public class EventsSettings {
         }
     }
 
+    private void embedStart(@NotNull User user) {
+        user.openPrivateChannel().queue(privateChannel -> {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setTitle("MENADŻER EVENTÓW");
+            builder.setColor(Color.YELLOW);
+            builder.setThumbnail(EmbedSettings.THUMBNAIL);
+            builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
+                    "Wybierz event który chcesz edytować.\n\n" +
+                    getActiveEventsIndexAndName());
+            privateChannel.sendMessageEmbeds(builder.build()).queue();
+        });
+    }
 
     public boolean isPossiblyEditing() {
         return true;

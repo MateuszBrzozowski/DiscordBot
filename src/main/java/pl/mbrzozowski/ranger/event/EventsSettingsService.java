@@ -35,10 +35,6 @@ public class EventsSettingsService {
     }
 
     public boolean isPossibleEditing(int index) {
-        if (eventsSettings.get(index).isPossiblyEditing()) {
-            return true;
-        } else {
-            return false;
-        }
+        return eventsSettings.get(index).isPossiblyEditing();
     }
 }
