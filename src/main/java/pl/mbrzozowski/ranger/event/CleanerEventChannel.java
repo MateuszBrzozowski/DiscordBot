@@ -22,7 +22,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
     private final EventService eventService;
     private static final int DELAY_IN_DAYS = 28;
-    private static final int DELAY_IN_DAYS_TACTICAL_MEETING = 2;
+    private static final int DELAY_IN_DAYS_TACTICAL_MEETING = 1;
 
     @Autowired
     public CleanerEventChannel(EventService eventService) {
