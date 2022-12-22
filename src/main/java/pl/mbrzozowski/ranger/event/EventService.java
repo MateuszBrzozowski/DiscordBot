@@ -39,8 +39,6 @@ public class EventService {
     private final Timers timers;
     private final UsersReminderService usersReminderService;
 
-    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-
     @Autowired
     public EventService(EventRepository eventRepository,
                         Timers timers,
@@ -104,6 +102,8 @@ public class EventService {
                                     @NotNull final Guild guild,
                                     @NotNull final String channelName,
                                     @NotNull final Category category) {
+        final Collection<Permission> permissions =
+                EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
