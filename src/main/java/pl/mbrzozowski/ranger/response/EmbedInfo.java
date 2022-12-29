@@ -32,6 +32,12 @@ public class EmbedInfo extends EmbedCreator {
         builder.addField("", "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
                 "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością. \n", false);
         builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
+        builder.addField("Wymagamy", """
+                - podstawowa znajomość zasad rozgrywki w Squad
+                - gra zespołowa (używamy TeamSpeak 3)
+                - kultura osobista
+                - duża ilość wolnego czasu
+                - brak VAC bana w ciągu 2 ostatnich lat""", false);
         event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
     }
 
@@ -288,7 +294,7 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
-     * @param userID
+     * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
     public static void sendEmbedReport(String userID, TextChannel channel) {
@@ -317,7 +323,7 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
-     * @param userID
+     * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
     public static void sendEmbedUnban(String userID, TextChannel channel) {
@@ -340,7 +346,7 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wysyła powitalną formatkę z opisem do czego dany kanał służy i co należy zrobić.
      *
-     * @param userID
+     * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
     public static void sendEmbedContact(String userID, TextChannel channel) {
