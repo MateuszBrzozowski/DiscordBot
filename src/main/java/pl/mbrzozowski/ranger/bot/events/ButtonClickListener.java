@@ -54,15 +54,15 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void recruitChannelReaction(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_IN)) {
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_ACCEPTED)) {
             if (isRadaKlanu) {
                 recruitsService.accepted(interactionEvent);
             } else {
                 ResponseMessage.noPermission(interactionEvent);
             }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_CLOSE_CHANNEL)) {
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
             if (isRadaKlanu) {
-                recruitsService.closeChannel(interactionEvent);
+                recruitsService.recruitNotAccepted(interactionEvent);
             } else {
                 ResponseMessage.noPermission(interactionEvent);
             }

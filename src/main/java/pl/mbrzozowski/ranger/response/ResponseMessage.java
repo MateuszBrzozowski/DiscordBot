@@ -100,6 +100,12 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void recruitHasBeenRejected(@NotNull ButtonInteractionEvent event) {
+        event.reply("**Rekrut został już odrzucony**")
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void noPermission(@NotNull ButtonInteractionEvent event) {
         event.reply("Brak uprawnień!")
                 .setEphemeral(true)
@@ -138,9 +144,10 @@ public class ResponseMessage {
     }
 
     public static void connectSuccessfully(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("**Successfully**\n" +
-                        "Your discord account is linked to your Steam profile.\n" +
-                        "Now, You can use command **/stats**")
+        event.reply("""
+                        **Successfully**
+                        Your discord account is linked to your Steam profile.
+                        Now, You can use command **/stats**""")
                 .setEphemeral(false)
                 .queue();
     }

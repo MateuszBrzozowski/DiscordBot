@@ -1,7 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -19,7 +18,6 @@ public class RecruitCmd extends Proccess {
     public void proccessMessage(Message message) {
         String cmd = message.getWords()[0];
         if (message.isTextChannel()) {
-            String parentCategoryId = messageReceived.getChannel().asTextChannel().getParentCategoryId();
             if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
                 messageReceived.getMessage().delete().submit();
                 EmbedInfo.recruiter(messageReceived);
@@ -29,11 +27,6 @@ public class RecruitCmd extends Proccess {
             } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
                 messageReceived.getMessage().delete().submit();
                 recruitsService.positiveResult(message.getUserID(), messageReceived.getChannel().asTextChannel());
-            } else if (cmd.equalsIgnoreCase(Commands.CLOSE)
-                    && parentCategoryId != null
-                    && parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID)) {
-                messageReceived.getMessage().delete().submit();
-                recruitsService.closeChannel(messageReceived);
             } else {
                 getNextProccess().proccessMessage(message);
             }

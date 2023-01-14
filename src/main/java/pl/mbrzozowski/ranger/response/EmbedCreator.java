@@ -31,6 +31,7 @@ public class EmbedCreator {
             case INF_CONFIRM -> getEmbedBuilder(Color.GREEN);
             case INF_RED -> getEmbedBuilder(Color.RED);
             case QUESTION -> getEmbedBuilder(Color.YELLOW);
+            case INF_BLUE -> getEmbedBuilder(new Color(81, 101, 242));
             default -> getEmbedBuilder(Color.YELLOW, ThumbnailType.DEFAULT);
         };
     }
@@ -77,5 +78,6 @@ public class EmbedCreator {
         QUESTION,
         INF_CONFIRM,
         INF_RED,
+        INF_BLUE
     }
 }

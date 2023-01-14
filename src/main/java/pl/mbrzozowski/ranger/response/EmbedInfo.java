@@ -41,21 +41,6 @@ public class EmbedInfo extends EmbedCreator {
         event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
     }
 
-    /**
-     * Wyświetla informację, że kanał podany w parametrze został zamknięty.
-     *
-     * @param userID  ID użytkownika który zamyka kanał
-     * @param channel Kanał który został zamknięty.
-     */
-    public static void closeRecruitChannel(String userID, MessageChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-        builder.setTitle("Kanał zamknięty");
-        builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
-        channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.danger(ComponentId.REMOVE_RECRUIT_CHANNEL, "Usuń kanał"))
-                .queue();
-    }
-
     public static void closeServerServiceChannel(String userID, MessageChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał zamknięty");
@@ -404,8 +389,16 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void recruitAccepted(String userName, TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.QUESTION);
-        builder.setDescription("Rozpoczęto rekrutację");
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_BLUE);
+        builder.setTitle("Rozpoczęto rekrutację");
+        builder.setDescription("Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem wszystkich członków klanu.");
+        builder.setFooter("Podpis: " + userName);
+        textChannel.sendMessageEmbeds(builder.build()).queue();
+    }
+
+    public static void recruitNotAccepted(String userName, TextChannel textChannel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+        builder.setTitle("Podanie odrzucone");
         builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }

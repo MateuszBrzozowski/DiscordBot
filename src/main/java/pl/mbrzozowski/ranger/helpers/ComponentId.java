@@ -25,8 +25,8 @@ public interface ComponentId {
     String RECRUIT_NAME = "RekrutName" + SUFFIX;
     String RECRUIT_OPINION_TEXT = "opinionID" + SUFFIX;
     String RECRUIT_OPINION_MODAL = "rekrutOpinion" + SUFFIX;
-    String RECRUIT_IN = "recruitIN" + SUFFIX;
-    String RECRUIT_CLOSE_CHANNEL = "recruitCloseChannel" + SUFFIX;
+    String RECRUIT_ACCEPTED = "recruitIN" + SUFFIX;
+    String RECRUIT_NOT_ACCEPTED = "recruitNotAccepted" + SUFFIX;
     String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
     String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
     String ROLES = "RolesMenu" + SUFFIX;

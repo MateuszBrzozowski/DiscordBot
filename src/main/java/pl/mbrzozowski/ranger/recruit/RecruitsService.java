@@ -9,9 +9,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -66,20 +64,27 @@ public class RecruitsService {
                 .queue(textChannel -> {
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setColor(Color.GREEN);
-                    builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                    builder.setDescription("Obowiązkowo uzupełnij formularz oraz przeczytaj manual - pomoże Ci w ogarnięciu gry");
-                    builder.addField("Formularz rekrutacyjny:", "https://forms.gle/fbTQSdxBVq3zU7FW9", false);
-                    builder.addField("Manual:", "https://drive.google.com/file/d/1qTHVBEkpMUBUpTaIUR3TNGk9WAuZv8s8/view", false);
+                    builder.addField("Obowiązkowo:",
+                            """
+                                    **1. Uzupełnij formularz rekrutacyjny:**
+                                    https://forms.gle/fbTQSdxBVq3zU7FW9
+
+                                    **2. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
+                                    https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view
+
+                                    **3. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**
+                                    https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717""",
+                            false);
+                    builder.addField("", "", false);
                     builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
-                    textChannel.sendMessage("Cześć <@" + userID + ">!\n" +
-                                    "Cieszymy się, że złożyłeś podanie do klanu. Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> oraz innych członków klanu.\n" +
-                                    "<@&" + RoleID.RADA_KLANU + "> ")
+                    builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + "RoleID.DRILL_INSTRUCTOR_ID" +
+                            "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
+                    textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
+                                    "<@&" + "RoleID.RADA_KLANU" + ">")
                             .setEmbeds(builder.build())
-                            .queue();
-                    textChannel.sendMessage("Wkrótce skontaktuje się z Tobą Drill. Oczekuj na wiadomość.")
                             .setActionRow(
-                                    Button.primary(ComponentId.RECRUIT_IN, " "),
-                                    Button.secondary(ComponentId.RECRUIT_CLOSE_CHANNEL, " "),
+                                    Button.primary(ComponentId.RECRUIT_ACCEPTED, " "),
+                                    Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, " "),
                                     Button.success(ComponentId.RECRUIT_POSITIVE, " "),
                                     Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
                             .queue();
@@ -249,8 +254,11 @@ public class RecruitsService {
             return;
         }
         Recruit recruit = recruitOptional.get();
-        if (recruit.getStartRecruitment() != null || recruit.getRecruitmentResult() != null) {
+        if (recruit.getStartRecruitment() != null) {
             ResponseMessage.recruitHasBeenAccepted(event);
+            return;
+        } else if (recruit.getRecruitmentResult() != null) {
+            ResponseMessage.recruitHasBeenRejected(event);
             return;
         }
         addRoleRecruit(recruit.getUserId());
@@ -397,41 +405,33 @@ public class RecruitsService {
         else return nickname.endsWith("<RangersPL>");
     }
 
-
-    public void closeChannel(@NotNull MessageReceivedEvent event) {
-        log.info("Recruit close channel by " + event.getAuthor().getName());
-        TextChannel textChannel = event.getChannel().asTextChannel();
-        String userID = event.getAuthor().getId();
-        closeChannel(textChannel, userID);
-    }
-
-    public void closeChannel(@NotNull ButtonInteractionEvent event) {
+    public void recruitNotAccepted(@NotNull ButtonInteractionEvent event) {
         log.info("Recruit close channel by " + event.getUser().getName());
         TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
-        closeChannel(textChannel, userID);
+        recruitNotAccepted(event, textChannel, userID);
         setRedCircleInChannelName(textChannel);
-        event.deferEdit().queue();
     }
 
-    private void closeChannel(TextChannel textChannel, String userID) {
+    private void recruitNotAccepted(ButtonInteractionEvent event, TextChannel textChannel, String userID) {
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
             if (recruitOptional.isPresent()) {
                 Recruit recruit = recruitOptional.get();
-                Member member = guild.getMemberById(recruit.getUserId());
-                TextChannelManager manager = textChannel.getManager();
-                Role clanMemberRole = guild.getRoleById(RoleID.CLAN_MEMBER_ID);
-                if (clanMemberRole != null && member != null) {
-                    manager.putPermissionOverride(clanMemberRole, null, permViewChannel).queue();
+                if (recruit.getStartRecruitment() != null) {
+                    ResponseMessage.recruitHasBeenAccepted(event);
+                    return;
+                } else if (recruit.getRecruitmentResult() != null) {
+                    ResponseMessage.recruitHasBeenRejected(event);
+                    return;
                 }
-                if (member != null) {
-                    manager.putPermissionOverride(member, null, permissions).queue();
-                }
+                event.deferEdit().queue();
                 recruit.setIsCloseChannel(true);
+                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+                recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
                 recruitRepository.save(recruit);
-                EmbedInfo.closeRecruitChannel(userID, textChannel);
+                EmbedInfo.recruitNotAccepted(Users.getUserNicknameFromID(userID), textChannel);
             }
         }
     }
