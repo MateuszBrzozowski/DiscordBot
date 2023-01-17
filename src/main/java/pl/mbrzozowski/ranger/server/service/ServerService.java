@@ -106,8 +106,9 @@ public class ServerService {
                 guild.createTextChannel(channelName, category)
                         .addPermissionOverride(guild.getPublicRole(), null, permissions)
                         .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-                        .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.MODERATOR), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.RADA_KLANU), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
                         .queue(channel -> {
                             sendEmbedStartChannel(userID, channel, buttonType);
                             addUser(userID, userName, channel.getId());
