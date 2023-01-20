@@ -64,34 +64,38 @@ public class RecruitsService {
                 .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.DRILL_INSTRUCTOR_ID), permissions, null)
                 .queue(textChannel -> {
-                    EmbedBuilder builder = new EmbedBuilder();
-                    builder.setColor(Color.GREEN);
-                    builder.addField("Obowiązkowo:",
-                            """
-                                    **1. Uzupełnij formularz rekrutacyjny:**
-                                    https://forms.gle/fbTQSdxBVq3zU7FW9
-
-                                    **2. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
-                                    https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view
-
-                                    **3. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**
-                                    https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717""",
-                            false);
-                    builder.addField("", "", false);
-                    builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
-                    builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + RoleID.DRILL_INSTRUCTOR_ID +
-                            "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
-                    textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
-                                    "<@&" + RoleID.RADA_KLANU + ">")
-                            .setEmbeds(builder.build())
-                            .setActionRow(
-                                    Button.primary(ComponentId.RECRUIT_ACCEPTED, " "),
-                                    Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, " "),
-                                    Button.success(ComponentId.RECRUIT_POSITIVE, " "),
-                                    Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
-                            .queue();
+                    sendWelcomeMessage(userID, textChannel);
                     add(userID, userName, textChannel.getId());
                 });
+    }
+
+    public void sendWelcomeMessage(String userID, @NotNull TextChannel textChannel) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.GREEN);
+        builder.addField("Obowiązkowo:",
+                """
+                        **1. Uzupełnij formularz rekrutacyjny:**
+                        https://forms.gle/fbTQSdxBVq3zU7FW9
+
+                        **2. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
+                        https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view
+
+                        **3. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**
+                        https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717""",
+                false);
+        builder.addField("", "", false);
+        builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
+        builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + RoleID.DRILL_INSTRUCTOR_ID +
+                "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
+        textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
+                        "<@&" + RoleID.RADA_KLANU + ">")
+                .setEmbeds(builder.build())
+                .setActionRow(
+                        Button.primary(ComponentId.RECRUIT_ACCEPTED, " "),
+                        Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, " "),
+                        Button.success(ComponentId.RECRUIT_POSITIVE, " "),
+                        Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
+                .queue();
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
