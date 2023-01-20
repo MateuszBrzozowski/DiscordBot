@@ -82,7 +82,7 @@ public class RecruitsService {
                     builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + RoleID.DRILL_INSTRUCTOR_ID +
                             "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
                     textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
-                                    "<@&" + "RoleID.RADA_KLANU" + ">")
+                                    "<@&" + RoleID.RADA_KLANU + ">")
                             .setEmbeds(builder.build())
                             .setActionRow(
                                     Button.primary(ComponentId.RECRUIT_ACCEPTED, " "),
