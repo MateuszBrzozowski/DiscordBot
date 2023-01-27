@@ -36,7 +36,7 @@ import java.util.Optional;
 @Slf4j
 public class RecruitsService {
 
-    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+    private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RecruitRepository recruitRepository;
     private final RecruitBlackListRepository recruitBlackListRepository;
