@@ -11,7 +11,7 @@ public class StringModify {
         return source;
     }
 
-    public static String removeClanTag(String source) {
+    public static String removeClanTag(@NotNull String source) {
         String result = source;
         if (result.matches("(.*)<rRangersPL>(.*)")) {
             result = result.replace("<rRangersPL>", "");

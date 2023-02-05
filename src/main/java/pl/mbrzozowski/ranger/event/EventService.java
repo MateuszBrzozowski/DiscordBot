@@ -290,8 +290,7 @@ public class EventService {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
-                String nickname = Users.getUserNicknameFromID(player.getUserId());
-                nickname = prepareNicknameToEventList(nickname);
+                String nickname = prepareNicknameToEventList(player.getUserName());
                 result.append(nickname).append("\n");
             }
             return result.toString();
@@ -306,8 +305,7 @@ public class EventService {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
-                String nickname = Users.getUserNicknameFromID(player.getUserId());
-                nickname = prepareNicknameToEventList(nickname);
+                String nickname = prepareNicknameToEventList(player.getUserName());
                 result.append(nickname).append("\n");
             }
             return result.toString();
@@ -316,7 +314,7 @@ public class EventService {
         }
     }
 
-    private String prepareNicknameToEventList(String source) {
+    private @NotNull String prepareNicknameToEventList(@NotNull String source) {
         source = StringModify.removeClanTag(source);
         source = StringModify.removeDiscordMarkdowns(source);
         return source;
