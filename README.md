@@ -2,7 +2,7 @@
 Bot wspomagający zarządzanie dla organizacji gamingowej 
 
 
-### Wykorzystane technologie
+## Wykorzystane technologie
 * Java
 * Spring Boot
 * Maven
