@@ -1,12 +1,8 @@
 ## Discord Bot
-
----
 Bot wspomagający zarządzanie dla organizacji gamingowej 
 
 
 ### Wykorzystane technologie
-
----
 * Java
 * Spring Boot
 * Maven
