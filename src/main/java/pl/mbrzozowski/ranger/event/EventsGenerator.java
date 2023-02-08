@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.Validation;
+import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
@@ -149,8 +149,8 @@ public class EventsGenerator {
                 }
             }
             case SET_DATE -> {
-                boolean isDateFormat = Validation.isDateFormat(msg);
-                boolean isDateAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
+                boolean isDateFormat = Validator.isDateFormat(msg);
+                boolean isDateAfterNow = Validator.eventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && isDateAfterNow) {
                     eventRequest.setDate(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
@@ -161,9 +161,9 @@ public class EventsGenerator {
                 }
             }
             case SET_TIME -> {
-                msg = Validation.timeCorrect(msg);
-                boolean isTimeFormat = Validation.isTimeFormat(msg);
-                boolean isTimeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                msg = Validator.timeCorrect(msg);
+                boolean isTimeFormat = Validator.isTimeFormat(msg);
+                boolean isTimeAfterNow = Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 if (isTimeFormat && isTimeAfterNow) {
                     eventRequest.setTime(msg);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
@@ -201,8 +201,8 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_DATE -> {
-                boolean isDateFormat = Validation.isDateFormat(msg);
-                boolean timeAfterNow = Validation.eventDateTimeAfterNow(msg + " 23:59");
+                boolean isDateFormat = Validator.isDateFormat(msg);
+                boolean timeAfterNow = Validator.eventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && timeAfterNow) {
                     eventRequest.setDate(msg);
                 } else {
@@ -212,9 +212,9 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_TIME -> {
-                msg = Validation.timeCorrect(msg);
-                boolean isTimeFormat = Validation.isTimeFormat(msg);
-                boolean timeAfterNow = Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                msg = Validator.timeCorrect(msg);
+                boolean isTimeFormat = Validator.isTimeFormat(msg);
+                boolean timeAfterNow = Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 if (isTimeFormat && timeAfterNow) {
                     eventRequest.setTime(msg);
                 } else {

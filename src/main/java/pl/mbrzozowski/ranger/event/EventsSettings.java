@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.Validation;
+import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
@@ -133,14 +133,14 @@ public class EventsSettings {
                 }
             }
             case SET_TIME -> {
-                msg = Validation.timeCorrect(msg);
-                boolean isTimeFormat = Validation.isTimeFormat(msg);
+                msg = Validator.timeCorrect(msg);
+                boolean isTimeFormat = Validator.isTimeFormat(msg);
                 if (isTimeFormat) {
                     LocalDateTime newDate = LocalDateTime.parse(
                             event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." +
                                     event.getDate().getYear() + " " + msg,
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validation.eventDateAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.eventDateAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);
@@ -154,12 +154,12 @@ public class EventsSettings {
                 embedWhatToDo();
             }
             case SET_DATE -> {
-                boolean isDateFormat = Validation.isDateFormat(msg);
+                boolean isDateFormat = Validator.isDateFormat(msg);
                 if (isDateFormat) {
                     LocalDateTime newDate = LocalDateTime.parse(
                             msg + " " + event.getDate().getHour() + ":" + event.getDate().getMinute(),
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validation.eventDateAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.eventDateAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);

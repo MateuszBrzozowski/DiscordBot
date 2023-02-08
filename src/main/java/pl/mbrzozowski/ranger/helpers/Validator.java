@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 @Slf4j
-public class Validation {
+public class Validator {
 
     private static final String datePattern = "dd.MM.yyyy";
 

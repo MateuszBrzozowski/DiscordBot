@@ -76,7 +76,7 @@ public class EventService {
         String userName = Users.getUserNicknameFromID(eventRequest.getAuthorId());
         log.info(userName + " - creating new event.");
         if (checkRequest(eventRequest)) {
-            if (Validation.eventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
+            if (Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
                 createEventChannel(eventRequest);
             }
         } else {
