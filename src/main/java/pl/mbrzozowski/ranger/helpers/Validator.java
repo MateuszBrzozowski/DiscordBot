@@ -1,13 +1,17 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.event.EventRequest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
 
 @Slf4j
 public class Validator {
@@ -66,8 +70,8 @@ public class Validator {
      * @param dateTime Data i czas w formacie dd.MM.yyyy HH:mm
      * @return Zwraca true jeżeli podany czas w parametrze jest później niż obecny. W innym przypadku zwraca false.
      */
-    public static boolean eventDateTimeAfterNow(String dateTime) {
-        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+    public static boolean isEventDateTimeAfterNow(String dateTime) {
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         LocalDateTime eventDateTime = null;
         try {
@@ -80,7 +84,17 @@ public class Validator {
     }
 
     public static boolean eventDateAfterNow(@NotNull LocalDateTime dateTime) {
-        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
         return dateTime.isAfter(dateTimeNow);
+    }
+
+    public static boolean isValidEventRequest(@NotNull EventRequest eventRequest) {
+        if (StringUtils.isBlank(eventRequest.getName())) {
+            return false;
+        }
+        if (StringUtils.isBlank(eventRequest.getDate())) {
+            return false;
+        }
+        return !StringUtils.isBlank(eventRequest.getTime());
     }
 }

@@ -80,13 +80,13 @@ public class EventService {
     public void createNewEvent(@NotNull final EventRequest eventRequest) {
         String userName = Users.getUserNicknameFromID(eventRequest.getAuthorId());
         log.info(userName + " - creating new event.");
-        if (checkRequest(eventRequest)) {
-            if (Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
-                createEventChannel(eventRequest);
-            }
-        } else {
-            log.info("Brak wymaganych parametrów -name <nazwa> -date <data> -time <czas>");
+        if (!Validator.isValidEventRequest(eventRequest)) {
+            throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste");
         }
+        if (!Validator.isEventDateTimeAfterNow(eventRequest.getDate() + " " + eventRequest.getTime())) {
+            throw new IllegalArgumentException("Data eventu jest z przeszłości.");
+        }
+        createEventChannel(eventRequest);
     }
 
     private void createEventChannel(final EventRequest eventRequest) {
@@ -218,16 +218,6 @@ public class EventService {
         }
     }
 
-
-    public boolean checkRequest(@NotNull EventRequest eventRequest) {
-        if (StringUtils.isBlank(eventRequest.getName())) {
-            return false;
-        }
-        if (StringUtils.isBlank(eventRequest.getDate())) {
-            return false;
-        }
-        return !StringUtils.isBlank(eventRequest.getTime());
-    }
 
     public void updateEmbed(@NotNull Event event) {
         log.info("Event " + event.getName() + " updating embed");

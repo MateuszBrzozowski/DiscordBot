@@ -150,7 +150,7 @@ public class EventsGenerator {
             }
             case SET_DATE -> {
                 boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean isDateAfterNow = Validator.eventDateTimeAfterNow(msg + " 23:59");
+                boolean isDateAfterNow = Validator.isEventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && isDateAfterNow) {
                     eventRequest.setDate(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
@@ -163,7 +163,7 @@ public class EventsGenerator {
             case SET_TIME -> {
                 msg = Validator.timeCorrect(msg);
                 boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean isTimeAfterNow = Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                boolean isTimeAfterNow = Validator.isEventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 if (isTimeFormat && isTimeAfterNow) {
                     eventRequest.setTime(msg);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
@@ -202,7 +202,7 @@ public class EventsGenerator {
             }
             case CHANGE_DATE -> {
                 boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean timeAfterNow = Validator.eventDateTimeAfterNow(msg + " 23:59");
+                boolean timeAfterNow = Validator.isEventDateTimeAfterNow(msg + " 23:59");
                 if (isDateFormat && timeAfterNow) {
                     eventRequest.setDate(msg);
                 } else {
@@ -214,7 +214,7 @@ public class EventsGenerator {
             case CHANGE_TIME -> {
                 msg = Validator.timeCorrect(msg);
                 boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean timeAfterNow = Validator.eventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                boolean timeAfterNow = Validator.isEventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 if (isTimeFormat && timeAfterNow) {
                     eventRequest.setTime(msg);
                 } else {
