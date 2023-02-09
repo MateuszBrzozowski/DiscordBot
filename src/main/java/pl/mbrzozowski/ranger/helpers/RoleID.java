@@ -1,14 +1,14 @@
 package pl.mbrzozowski.ranger.helpers;
 
-public interface RoleID {
+public final class RoleID {
 
-    String DEV_ID = "642402714382237716";
-    String RADA_KLANU = "773233884145647666";
-    String CLAN_MEMBER_ID = "311978154291888141";
-    String TACTICAL_GROUP = "822549829166694421";
-    String RECRUIT_ID = "410808008331886592";
-    String DRILL_INSTRUCTOR_ID = "534737692911468554";
-    String SERVER_ADMIN = "740894839305928764";
-    String MODERATOR = "311978200739741696";
-    String SQUAD = "976110879223451688";
+    public static final String DEV_ID = "642402714382237716";
+    public static final String RADA_KLANU = "773233884145647666";
+    public static final String CLAN_MEMBER_ID = "311978154291888141";
+    public static final String TACTICAL_GROUP = "822549829166694421";
+    public static final String RECRUIT_ID = "410808008331886592";
+    public static final String DRILL_INSTRUCTOR_ID = "534737692911468554";
+    public static final String SERVER_ADMIN = "740894839305928764";
+    public static final String MODERATOR = "311978200739741696";
+    public static final String SQUAD = "976110879223451688";
 }

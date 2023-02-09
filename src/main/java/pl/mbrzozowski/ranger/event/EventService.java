@@ -51,17 +51,22 @@ public class EventService {
 
     private void setReminders() {
         List<Event> eventList = findAll();
-        List<Event> events = eventList
-                .stream()
-                .filter(event -> event.getDate() != null)
-                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
-                .toList();
+        List<Event> events = filterEventsAfterNow(eventList);
         for (Event event : events) {
             if (event.isActive()) {
                 CreateReminder createReminder = new CreateReminder(event, this, timers, usersReminderService);
                 createReminder.create();
             }
         }
+    }
+
+    @NotNull
+    private List<Event> filterEventsAfterNow(@NotNull List<Event> eventList) {
+        return eventList
+                .stream()
+                .filter(event -> event.getDate() != null)
+                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
+                .toList();
     }
 
     public List<Event> findAll() {
@@ -72,7 +77,7 @@ public class EventService {
         return eventRepository.findByIsActive(true);
     }
 
-    public void createNewEvent(final @NotNull EventRequest eventRequest) {
+    public void createNewEvent(@NotNull final EventRequest eventRequest) {
         String userName = Users.getUserNicknameFromID(eventRequest.getAuthorId());
         log.info(userName + " - creating new event.");
         if (checkRequest(eventRequest)) {

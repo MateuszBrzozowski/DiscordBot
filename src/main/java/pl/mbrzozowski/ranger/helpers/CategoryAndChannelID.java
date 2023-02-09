@@ -1,17 +1,17 @@
 package pl.mbrzozowski.ranger.helpers;
 
-public interface CategoryAndChannelID {
+public final class CategoryAndChannelID {
 
     //GUILD
-    String RANGERSPL_GUILD_ID = "311976984861212672";
+    public static final String RANGERSPL_GUILD_ID = "311976984861212672";
 
     //KATEGORIE
-    String CATEGORY_RECRUT_ID = "694916869252972570";
-    String CATEGORY_EVENT_ID = "861657261403406376";
-    String CATEGORY_SERVER = "694911873317077073";
+    public static final String CATEGORY_RECRUT_ID = "694916869252972570";
+    public static final String CATEGORY_EVENT_ID = "861657261403406376";
+    public static final String CATEGORY_SERVER = "694911873317077073";
 
     //KANAŁY
-    String CHANNEL_RANGER_BOT_LOGGER = "860096729457098762";
-    String CHANNEL_STATS = "968422568094732288";
-    String CHANNEL_RECRUITS_OPINIONS = "973453689316597800";
+    public static final String CHANNEL_RANGER_BOT_LOGGER = "860096729457098762";
+    public static final String CHANNEL_STATS = "968422568094732288";
+    public static final String CHANNEL_RECRUITS_OPINIONS = "973453689316597800";
 }
