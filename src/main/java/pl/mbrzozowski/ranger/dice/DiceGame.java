@@ -63,8 +63,8 @@ public class DiceGame {
     public void play(MessageReceivedEvent event) {
         player2Name = getUserNameFromEvent(event);
         while (true) {
-            int player1 = losujLiczbę();
-            int player2 = losujLiczbę();
+            int player1 = drawNumber();
+            int player2 = drawNumber();
             if (player1 > player2) {
                 showResult(player1Name, player1, player2Name, player2, event);
                 break;
@@ -85,7 +85,7 @@ public class DiceGame {
         event.getChannel().sendMessageEmbeds(builder.build()).queue();
     }
 
-    private int losujLiczbę() {
+    private int drawNumber() {
         Random random = new Random();
         int liczba = random.nextInt(6) + 1;
         return liczba;
@@ -94,7 +94,7 @@ public class DiceGame {
     public void playSolo(@NotNull MessageReceivedEvent event) {
         String userName = Users.getUserNicknameFromID(event.getAuthor().getId());
         EmbedBuilder builder = new EmbedBuilder();
-        int liczba = losujLiczbę();
+        int liczba = drawNumber();
         builder.setColor(Color.WHITE);
         builder.setTitle("Wylosowana liczba:");
         builder.addField(String.valueOf(liczba), "", false);
