@@ -17,11 +17,13 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,9 +152,11 @@ public class EventsGenerator {
             }
             case SET_DATE -> {
                 boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean isDateAfterNow = Validator.isEventDateTimeAfterNow(msg + " 23:59");
-                if (isDateFormat && isDateAfterNow) {
+                boolean isDateAfterNow = Validator.isDateTimeAfterNow(msg + " 23:59");
+                LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " 23:59");
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDate(msg);
+                    eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
                 } else {
@@ -163,9 +167,11 @@ public class EventsGenerator {
             case SET_TIME -> {
                 msg = Validator.timeCorrect(msg);
                 boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean isTimeAfterNow = Validator.isEventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
-                if (isTimeFormat && isTimeAfterNow) {
+                boolean isTimeAfterNow = Validator.isDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setTime(msg);
+                    eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
                 } else {
@@ -202,9 +208,11 @@ public class EventsGenerator {
             }
             case CHANGE_DATE -> {
                 boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean timeAfterNow = Validator.isEventDateTimeAfterNow(msg + " 23:59");
-                if (isDateFormat && timeAfterNow) {
+                boolean timeAfterNow = Validator.isDateTimeAfterNow(msg + " 23:59");
+                LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " " + eventRequest.getTime());
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDate(msg);
+                    eventRequest.setDateTime(dateTime);
                 } else {
                     embedDateNotCorrect();
                 }
@@ -214,9 +222,11 @@ public class EventsGenerator {
             case CHANGE_TIME -> {
                 msg = Validator.timeCorrect(msg);
                 boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean timeAfterNow = Validator.isEventDateTimeAfterNow(eventRequest.getDate() + " " + msg);
-                if (isTimeFormat && timeAfterNow) {
+                boolean timeAfterNow = Validator.isDateTimeAfterNow(eventRequest.getDate() + " " + msg);
+                LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setTime(msg);
+                    eventRequest.setDateTime(dateTime);
                 } else {
                     embedTimeNotCorrect();
                 }

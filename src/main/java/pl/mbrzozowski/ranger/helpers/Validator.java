@@ -28,10 +28,6 @@ public class Validator {
         }
     }
 
-    /**
-     * @param s Czas w formacie HH:mm lub H:mm
-     * @return Zwraca true jeżeli czas jes podany w poprawnej formie, w innym przypadku zwraca false.
-     */
     public static boolean isTimeFormat(@NotNull String s) {
         if (s.length() == 5) {
             if (s.substring(2, 3).equalsIgnoreCase(":")) {
@@ -64,28 +60,30 @@ public class Validator {
         return false;
     }
 
-    /**
-     * Sprawdza czy data i czas jest później niż obecna data i czas.
-     *
-     * @param dateTime Data i czas w formacie dd.MM.yyyy HH:mm
-     * @return Zwraca true jeżeli podany czas w parametrze jest później niż obecny. W innym przypadku zwraca false.
-     */
-    public static boolean isEventDateTimeAfterNow(String dateTime) {
+    public static boolean isDateTimeAfterNow(String dateTime) {
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         LocalDateTime eventDateTime = null;
         try {
             eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
         } catch (DateTimeParseException e) {
-            log.error("Date time is not valid [" + dateTime + "]");
             return false;
         }
         return eventDateTime.isAfter(dateTimeNow);
     }
 
-    public static boolean eventDateAfterNow(@NotNull LocalDateTime dateTime) {
+    public static boolean isDateTimeAfterNow(LocalDateTime eventDateTime) {
+        if (eventDateTime == null) {
+            return false;
+        }
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
-        return dateTime.isAfter(dateTimeNow);
+        return eventDateTime.isAfter(dateTimeNow);
+    }
+
+    public static boolean isThreeHoursToEvent(LocalDateTime eventDateTime) {
+        eventDateTime = eventDateTime.minusHours(3);
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
+        return dateTimeNow.isAfter(eventDateTime);
     }
 
     public static boolean isValidEventRequest(@NotNull EventRequest eventRequest) {

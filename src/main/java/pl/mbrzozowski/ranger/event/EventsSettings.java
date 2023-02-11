@@ -140,7 +140,7 @@ public class EventsSettings {
                             event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." +
                                     event.getDate().getYear() + " " + msg,
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.eventDateAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);
@@ -159,7 +159,7 @@ public class EventsSettings {
                     LocalDateTime newDate = LocalDateTime.parse(
                             msg + " " + event.getDate().getHour() + ":" + event.getDate().getMinute(),
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.eventDateAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);

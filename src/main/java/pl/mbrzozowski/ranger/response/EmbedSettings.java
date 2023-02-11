@@ -10,7 +10,7 @@ public interface EmbedSettings {
     String NAME_LIST = ":white_check_mark: Lista ";
     String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
     String WHEN_DATE = ":date: Kiedy";
-    String WHEN_TIME = ":clock930: Godzina";
+    String WHEN_TIME = ":clock930: ";
     String GREEN_CIRCLE = "\uD83D\uDFE2┋";
     String RED_CIRCLE = "\uD83D\uDD34┋";
     String YELLOW_CIRCLE = "\uD83D\uDFE1┋";
