@@ -91,10 +91,10 @@ public class RecruitsService {
                         "<@&" + RoleID.RADA_KLANU + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(
-                        Button.primary(ComponentId.RECRUIT_ACCEPTED, " "),
-                        Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, " "),
-                        Button.success(ComponentId.RECRUIT_POSITIVE, " "),
-                        Button.danger(ComponentId.RECRUIT_NEGATIVE, " "))
+                        Button.primary(ComponentId.RECRUIT_ACCEPTED, "\u200E"),
+                        Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, "\u200E"),
+                        Button.success(ComponentId.RECRUIT_POSITIVE, "\u200E"),
+                        Button.danger(ComponentId.RECRUIT_NEGATIVE, "\u200E"))
                 .queue();
     }
 
