@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
-import pl.mbrzozowski.ranger.helpers.StringModify;
+import pl.mbrzozowski.ranger.helpers.StringProvider;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
@@ -90,6 +90,63 @@ public class EventsEmbed {
                 , fieldsNew);
     }
 
+    @NotNull
+    public static MessageEmbed getUpdatedEmbed(@NotNull Event event,
+                                               @NotNull Message message,
+                                               boolean isChangedDateTime,
+                                               boolean isChangedName,
+                                               boolean isChangedDescription,
+                                               String description) {
+        List<MessageEmbed> embeds = message.getEmbeds();
+        MessageEmbed mOld = embeds.get(0);
+        List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
+        List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
+
+        if (isChangedDateTime) {
+            fieldsNew.clear();
+            for (int i = 0; i < fieldsOld.size(); i++) {
+                if (i == 0) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.WHEN_DATE,
+                            Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                    EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                            true);
+                    fieldsNew.add(fieldNew);
+                } else {
+                    fieldsNew.add(fieldsOld.get(i));
+                }
+            }
+        }
+        String newTitle = getTitle(event, isChangedName, mOld.getTitle());
+        String newDescription = getDescription(isChangedDescription, mOld.getDescription(), description);
+        return new MessageEmbed(mOld.getUrl()
+                , newTitle
+                , newDescription
+                , mOld.getType()
+                , mOld.getTimestamp()
+                , mOld.getColorRaw()
+                , mOld.getThumbnail()
+                , mOld.getSiteProvider()
+                , mOld.getAuthor()
+                , mOld.getVideoInfo()
+                , mOld.getFooter()
+                , mOld.getImage()
+                , fieldsNew);
+    }
+
+    private static String getTitle(@NotNull Event event, boolean isChanged, String title) {
+        if (isChanged) {
+            return event.getName();
+        }
+        return title;
+    }
+
+    private static String getDescription(boolean isChanged, String oldDescription, String newDescription) {
+        if (isChanged) {
+            return newDescription;
+        }
+        return oldDescription;
+    }
+
     private static int getMainListSize(@NotNull Event event) {
         return event.getPlayers().stream().filter(Player::isMainList).toList().size();
     }
@@ -131,7 +188,7 @@ public class EventsEmbed {
 
     private static @NotNull String prepareNicknameToEventList(@NotNull String source) {
 //        source = StringModify.removeClanTag(source);
-        source = StringModify.removeDiscordMarkdowns(source);
+        source = StringProvider.removeDiscordMarkdowns(source);
         return source;
     }
 }

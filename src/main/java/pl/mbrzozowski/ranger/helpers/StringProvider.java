@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventFor;
 import pl.mbrzozowski.ranger.event.EventRequest;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -9,7 +10,7 @@ import static pl.mbrzozowski.ranger.event.EventFor.*;
 import static pl.mbrzozowski.ranger.response.EmbedSettings.BRAIN_WITH_GREEN;
 import static pl.mbrzozowski.ranger.response.EmbedSettings.GREEN_CIRCLE;
 
-public class StringModify {
+public class StringProvider {
 
     @NotNull
     public static String removeDiscordMarkdowns(String source) {
@@ -111,5 +112,32 @@ public class StringModify {
             source = EmbedSettings.YELLOW_CIRCLE + source;
         }
         return source;
+    }
+
+    @NotNull
+    public static String getStringOfEventDateTime(@NotNull Event event) {
+        return getStringOfEventDate(event) + " " + getStringOfEventTime(event);
+    }
+
+    @NotNull
+    private static String getStringOfEventDate(@NotNull Event event) {
+        String month;
+        if (event.getDate().getMonthValue() < 10) {
+            month = "0" + event.getDate().getMonthValue();
+        } else {
+            month = String.valueOf(event.getDate().getMonthValue());
+        }
+        return event.getDate().getDayOfMonth() + "." + month + "." + event.getDate().getYear();
+    }
+
+    @NotNull
+    private static String getStringOfEventTime(@NotNull Event event) {
+        String min;
+        if (event.getDate().getMinute() < 10) {
+            min = "0" + event.getDate().getMinute();
+        } else {
+            min = String.valueOf(event.getDate().getMinute());
+        }
+        return event.getDate().getHour() + ":" + min;
     }
 }

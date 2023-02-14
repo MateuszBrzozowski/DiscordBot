@@ -45,6 +45,47 @@ public class EventService {
         setReminders();
     }
 
+    private void save(Event event) {
+        eventRepository.save(event);
+    }
+
+    public void delete(Event event) {
+        eventRepository.delete(event);
+    }
+
+    public List<Event> findAll() {
+        return eventRepository.findAll();
+    }
+
+    public List<Event> findByIsActive() {
+        return eventRepository.findByIsActive(true);
+    }
+
+    public boolean isActiveEvents() {
+        return eventRepository.findAll().size() > 0;
+    }
+
+    public Optional<Event> findEventByMsgId(String id) {
+        return eventRepository.findByMsgId(id);
+    }
+
+    public void deleteByMsgId(String messageId) {
+        log.info("Event deleting by msg id");
+        timers.cancelByMsgId(messageId);
+        eventRepository.deleteByMsgId(messageId);
+    }
+
+    public void deleteByChannelId(String channelId) {
+        log.info("Event deleting by channel id");
+        timers.cancelByChannelId(channelId);
+        eventRepository.deleteByChannelId(channelId);
+    }
+
+    public void setActive(@NotNull Event event, boolean isActive) {
+        event.setActive(isActive);
+        eventRepository.save(event);
+    }
+
     private void setReminders() {
         List<Event> eventList = findAll();
         List<Event> events = filterEventsAfterNow(eventList);
@@ -61,16 +102,8 @@ public class EventService {
         return eventList
                 .stream()
                 .filter(event -> event.getDate() != null)
-                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
+                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))))
                 .toList();
-    }
-
-    public List<Event> findAll() {
-        return eventRepository.findAll();
-    }
-
-    public List<Event> findByIsActive() {
-        return eventRepository.findByIsActive(true);
     }
 
     public void createNewEvent(@NotNull final EventRequest eventRequest) {
@@ -95,7 +128,7 @@ public class EventService {
         if (category == null) {
             throw new NullPointerException("Category by Event Id is null");
         }
-        String channelName = StringModify.getStringChannelName(eventRequest);
+        String channelName = StringProvider.getStringChannelName(eventRequest);
         createEventChannel(eventRequest, guild, channelName, category);
     }
 
@@ -127,7 +160,7 @@ public class EventService {
 
     private void createList(@NotNull final TextChannel textChannel, @NotNull final EventRequest eventRequest) {
         log.info("Creating list");
-        String msg = StringModify.getMessageForEventList(eventRequest);
+        String msg = StringProvider.getMessageForEventList(eventRequest);
         EmbedBuilder builder = EventsEmbed.getEventEmbedBuilder(eventRequest);
         textChannel
                 .sendMessage(msg)
@@ -158,14 +191,6 @@ public class EventService {
         save(event);
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
-    }
-
-    private void save(Event event) {
-        eventRepository.save(event);
-    }
-
-    public void delete(Event event) {
-        eventRepository.delete(event);
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
@@ -268,7 +293,7 @@ public class EventService {
         return null;
     }
 
-    public void cancelEvent(Event event, boolean sendNotifi) {
+    public void cancelEvent(@NotNull Event event, boolean sendNotifi) {
         log.info(event.getName() + " cancel event");
         disableButtons(event);
         setRedCircleInChannelName(event);
@@ -276,7 +301,7 @@ public class EventService {
         timers.cancelByMsgId(event.getMsgId());
         save(event);
         if (sendNotifi) {
-            String dateTime = "<t:" + event.getDate().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toEpochSecond() + ":F>";
+            String dateTime = Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate());
             sendInfoChanges(event, EventChanges.REMOVE, dateTime);
         }
     }
@@ -285,7 +310,7 @@ public class EventService {
         TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             String buffer = channel.getName();
-            buffer = StringModify.removeAnyPrefixCircle(buffer);
+            buffer = StringProvider.removeAnyPrefixCircle(buffer);
             channel.getManager()
                     .setName(EmbedSettings.RED_CIRCLE + buffer)
                     .queue();
@@ -315,81 +340,35 @@ public class EventService {
         if (textChannel == null) {
             return;
         }
+        if (isChangedDateTime || isChangedName) {
+            updateChannelName(event, textChannel);
+        }
         textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
-            List<MessageEmbed> embeds = message.getEmbeds();
-            MessageEmbed mOld = embeds.get(0);
-            List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-            List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
-            String month;
-            if (event.getDate().getMonthValue() < 10) {
-                month = "0" + event.getDate().getMonthValue();
-            } else {
-                month = String.valueOf(event.getDate().getMonthValue());
-            }
-            String newDate = event.getDate().getDayOfMonth() + "." + month + "." + event.getDate().getYear();
-            String min;
-            if (event.getDate().getMinute() < 10) {
-                min = "0" + event.getDate().getMinute();
-            } else {
-                min = String.valueOf(event.getDate().getMinute());
-            }
-            String newTime = event.getDate().getHour() + ":" + min;
-            String dataTime = newDate + " " + newTime;
-
-            if (isChangedDateTime || isChangedName) {
-                updateChannelName(event, textChannel, dataTime);
-            }
-
-            if (isChangedDateTime) {
-                fieldsNew.clear();
-                for (int i = 0; i < fieldsOld.size(); i++) {
-                    if (i == 0) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":date: Kiedy", newDate, true);
-                        fieldsNew.add(fieldNew);
-                    } else if (i == 2) {
-                        MessageEmbed.Field fieldNew = new MessageEmbed.Field(":clock930: Godzina", newTime, true);
-                        fieldsNew.add(fieldNew);
-                    } else {
-                        fieldsNew.add(fieldsOld.get(i));
-                    }
-                }
-            }
-            String newTitle = mOld.getTitle();
-            if (isChangedName) {
-                newTitle = event.getName();
-            }
-            String newDescription = mOld.getDescription();
-            if (isChangedDescription) {
-                newDescription = description;
-            }
-            MessageEmbed mNew = new MessageEmbed(mOld.getUrl()
-                    , newTitle
-                    , newDescription
-                    , mOld.getType()
-                    , mOld.getTimestamp()
-                    , mOld.getColorRaw()
-                    , mOld.getThumbnail()
-                    , mOld.getSiteProvider()
-                    , mOld.getAuthor()
-                    , mOld.getVideoInfo()
-                    , mOld.getFooter()
-                    , mOld.getImage()
-                    , fieldsNew);
-            message.editMessageEmbeds(mNew).queue(message1 -> {
-                updateTimer(event);
-                if (notifi) {
-                    String dateTime = Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate());
-                    sendInfoChanges(event, EventChanges.CHANGES, dateTime);
-                }
-            });
+            MessageEmbed mNew = EventsEmbed.getUpdatedEmbed(event,
+                    message,
+                    isChangedDateTime,
+                    isChangedName,
+                    isChangedDescription,
+                    description);
+            message.editMessageEmbeds(mNew).queue();
         });
+        updateTimer(event);
+        if (notifi) {
+            String dateTime = Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate());
+            sendInfoChanges(event, EventChanges.CHANGES, dateTime);
+        }
         save(event);
     }
 
-    private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel, String dataTime) {
+    private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel) {
+        String dataTime = StringProvider.getStringOfEventDateTime(event);
+        String newName = EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime;
+        if (newName.length() > 99) {
+            newName = newName.substring(0, 99);
+        }
         textChannel
                 .getManager()
-                .setName(EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime)
+                .setName(newName)
                 .queue();
     }
 
@@ -464,39 +443,14 @@ public class EventService {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 
-    public boolean isActiveEvents() {
-        return eventRepository.findAll().size() > 0;
-    }
-
-    public Optional<Event> findEventByMsgId(String id) {
-        return eventRepository.findByMsgId(id);
-    }
-
-    public void deleteByMsgId(String messageId) {
-        log.info("Event deleting by msg id");
-        timers.cancelByMsgId(messageId);
-        eventRepository.deleteByMsgId(messageId);
-    }
-
-    public void deleteByChannelId(String channelId) {
-        log.info("Event deleting by channel id");
-        timers.cancelByChannelId(channelId);
-        eventRepository.deleteByChannelId(channelId);
-    }
-
-    public void setActive(@NotNull Event event, boolean isActive) {
-        event.setActive(isActive);
-        eventRepository.save(event);
-    }
-
     public void setYellowCircleInChannelName(String channelId, EventFor eventFor) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
         if (textChannel == null) {
             return;
         }
         String channelName = textChannel.getName();
-        channelName = StringModify.removeAnyPrefixCircle(channelName);
-        channelName = StringModify.addYellowCircle(channelName, eventFor);
+        channelName = StringProvider.removeAnyPrefixCircle(channelName);
+        channelName = StringProvider.addYellowCircle(channelName, eventFor);
         textChannel.getManager().setName(channelName).queue();
     }
 }
