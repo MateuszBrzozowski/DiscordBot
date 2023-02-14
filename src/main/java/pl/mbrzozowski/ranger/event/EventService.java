@@ -49,15 +49,15 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public void delete(Event event) {
+    void delete(Event event) {
         eventRepository.delete(event);
     }
 
-    public List<Event> findAll() {
+    List<Event> findAll() {
         return eventRepository.findAll();
     }
 
-    public List<Event> findByIsActive() {
+    List<Event> findByIsActive() {
         return eventRepository.findByIsActive(true);
     }
 
@@ -81,8 +81,8 @@ public class EventService {
         eventRepository.deleteByChannelId(channelId);
     }
 
-    public void setActive(@NotNull Event event, boolean isActive) {
-        event.setActive(isActive);
+    void setActiveToFalse(@NotNull Event event) {
+        event.setActive(false);
         eventRepository.save(event);
     }
 
@@ -114,7 +114,7 @@ public class EventService {
                 .toList();
     }
 
-    public void createNewEvent(@NotNull final EventRequest eventRequest) {
+    void createNewEvent(@NotNull final EventRequest eventRequest) {
         log.info(Users.getUserNicknameFromID(eventRequest.getAuthorId()) + " - creating new event.");
         if (!Validator.isValidEventRequest(eventRequest)) {
             throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste.");
@@ -309,7 +309,7 @@ public class EventService {
         return null;
     }
 
-    public void cancelEvent(@NotNull Event event, boolean sendNotifi) {
+    void cancelEvent(@NotNull Event event, boolean sendNotifi) {
         log.info(event.getName() + " cancel event");
         disableButtons(event);
         setRedCircleInChannelName(event);
@@ -322,7 +322,7 @@ public class EventService {
         }
     }
 
-    public void setRedCircleInChannelName(@NotNull Event event) {
+    void setRedCircleInChannelName(@NotNull Event event) {
         TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             String buffer = channel.getName();
@@ -333,7 +333,7 @@ public class EventService {
         }
     }
 
-    public void updateEmbed(@NotNull Event event) {
+    private void updateEmbed(@NotNull Event event) {
         log.info("Event " + event.getName() + " updating embed");
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
@@ -346,7 +346,7 @@ public class EventService {
         }
     }
 
-    public void updateEmbed(@NotNull Event event,
+    void updateEmbed(@NotNull Event event,
                             boolean isChangedDateTime,
                             boolean isChangedName,
                             boolean isChangedDescription,
@@ -385,7 +385,7 @@ public class EventService {
                 .queue();
     }
 
-    public void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
+    private void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
         List<Player> mainList = getMainList(event);
         List<Player> reserveList = getReserveList(event);
         log.info("Run reminder: Main list - [" + mainList.size() + "], Reserve - [" + reserveList.size() + "]");
