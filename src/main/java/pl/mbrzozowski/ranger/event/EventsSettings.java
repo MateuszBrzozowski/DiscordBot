@@ -133,14 +133,12 @@ public class EventsSettings {
                 }
             }
             case SET_TIME -> {
-                msg = Validator.timeCorrect(msg);
-                boolean isTimeFormat = Validator.isTimeFormat(msg);
-                if (isTimeFormat) {
+                if (Validator.isTimeValid(msg)) {
                     LocalDateTime newDate = LocalDateTime.parse(
                             event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." +
                                     event.getDate().getYear() + " " + msg,
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.isEventDateTimeAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);
@@ -154,12 +152,12 @@ public class EventsSettings {
                 embedWhatToDo();
             }
             case SET_DATE -> {
-                boolean isDateFormat = Validator.isDateFormat(msg);
+                boolean isDateFormat = Validator.isDateValid(msg);
                 if (isDateFormat) {
                     LocalDateTime newDate = LocalDateTime.parse(
                             msg + " " + event.getDate().getHour() + ":" + event.getDate().getMinute(),
                             dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
+                    boolean isTimeAfterNow = Validator.isEventDateTimeAfterNow(newDate);
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);

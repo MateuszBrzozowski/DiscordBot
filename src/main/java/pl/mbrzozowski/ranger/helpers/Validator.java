@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.event.EventRequest;
 
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,39 +18,42 @@ import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
 @Slf4j
 public class Validator {
 
-    private static final String datePattern = "dd.MM.yyyy";
-
-    public static boolean isDateFormat(String source) {
+    public static boolean isDateValid(@NotNull String source) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
         try {
-            LocalDateTime date = LocalDateTime.parse(source + " 23:59", dateTimeFormatter);
-            return true;
+            LocalDateTime dateTime = LocalDateTime.parse(source + " 23:59", dateTimeFormatter);
+            return isDateValidFebruaryOnLeapYear(source.split("\\."), dateTime);
         } catch (DateTimeParseException e) {
             return false;
         }
     }
 
-    public static boolean isTimeFormat(@NotNull String s) {
-        if (s.length() == 5) {
-            if (s.substring(2, 3).equalsIgnoreCase(":")) {
-                if (isDecimal(s.substring(0, 1)) && isDecimal(s.substring(1, 2)) && isDecimal(s.substring(3, 4)) && isDecimal(s.substring(4, 5))) {
-                    int hour = Integer.parseInt(s.substring(0, 2));
-                    int min = Integer.parseInt(s.substring(3, 5));
-                    if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
-                        return true;
-                    } else log.error("Time is not valid - Out of bounds");
-                } else log.error("Time is not valid - No Decimal");
-            } else log.error("Time is not valid :");
+    private static boolean isDateValidFebruaryOnLeapYear(@NotNull String[] splitSource, @NotNull LocalDateTime dateTime) {
+        boolean leap = Year.isLeap(dateTime.getYear());
+        int day = Integer.parseInt(splitSource[0]);
+        return leap || dateTime.getMonth() != Month.FEBRUARY || day < 29;
+    }
+
+    public static boolean isTimeValid(@NotNull String time) {
+        time = timeCorrect(time);
+        if (time.length() == 5) {
+            if (time.substring(2, 3).equalsIgnoreCase(":")) {
+                if (isDecimal(time.substring(0, 1)) && isDecimal(time.substring(1, 2)) && isDecimal(time.substring(3, 4)) && isDecimal(time.substring(4, 5))) {
+                    int hour = Integer.parseInt(time.substring(0, 2));
+                    int min = Integer.parseInt(time.substring(3, 5));
+                    return hour >= 0 && hour <= 23 && min >= 0 && min <= 59;
+                }
+            }
         }
         return false;
     }
 
     @Contract(pure = true)
-    public static @NotNull String timeCorrect(@NotNull String timeOld) {
-        if (timeOld.length() == 4) {
-            timeOld = "0" + timeOld;
+    private static @NotNull String timeCorrect(@NotNull String time) {
+        if (time.length() == 4) {
+            time = "0" + time;
         }
-        return timeOld;
+        return time;
     }
 
     private static boolean isDecimal(String s) {
@@ -60,19 +65,7 @@ public class Validator {
         return false;
     }
 
-    public static boolean isDateTimeAfterNow(String dateTime) {
-        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
-        LocalDateTime eventDateTime = null;
-        try {
-            eventDateTime = LocalDateTime.parse(dateTime, dateTimeFormatter);
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-        return eventDateTime.isAfter(dateTimeNow);
-    }
-
-    public static boolean isDateTimeAfterNow(LocalDateTime eventDateTime) {
+    public static boolean isEventDateTimeAfterNow(LocalDateTime eventDateTime) {
         if (eventDateTime == null) {
             return false;
         }

@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.helpers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventFor;
@@ -22,11 +23,11 @@ public class StringProvider {
 
     @NotNull
     public static String removeClanTag(@NotNull String source) {
-        String result = source;
-        if (result.matches("(.*)<rRangersPL>(.*)")) {
-            result = result.replace("<rRangersPL>", "");
-        } else if (result.matches("(.*)<RangersPL>(.*)")) {
-            result = result.replace("<RangersPL>", "");
+        String result = source.toLowerCase();
+        if (result.matches("(.*)<rrangerspl>(.*)")) {
+            result = result.replace("<rrangerspl>", "");
+        } else if (result.matches("(.*)<rangerspl>(.*)")) {
+            result = result.replace("<rangerspl>", "");
         }
         return result;
     }
@@ -60,8 +61,8 @@ public class StringProvider {
         }
         result += eventRequest.getName() +
                 "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
-        if (result.length() >= 99) {
-            result = result.substring(0, 99);
+        if (result.length() >= 100) {
+            result = result.substring(0, 100);
         }
         return result;
     }
@@ -102,29 +103,39 @@ public class StringProvider {
     }
 
     @NotNull
-    public static String addYellowCircle(String source, EventFor eventFor) {
-        if (source == null) {
-            source = "";
+    public static String addYellowCircleBeforeText(String text, EventFor eventFor) {
+        if (text == null) {
+            text = "";
         }
         if (eventFor == EventFor.TACTICAL_GROUP) {
-            source = EmbedSettings.BRAIN_WITH_YELLOW + source;
+            text = EmbedSettings.BRAIN_WITH_YELLOW + text;
         } else {
-            source = EmbedSettings.YELLOW_CIRCLE + source;
+            text = EmbedSettings.YELLOW_CIRCLE + text;
         }
-        return source;
+        return text;
     }
 
     @NotNull
     public static String getChannelNameWithGreenCircle(@NotNull Event event, String dataTime) {
-        String newName = EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime;
-        if (newName.length() >= 99) {
-            newName = newName.substring(0, 99);
+        String name = "";
+        if (StringUtils.isNotBlank(event.getName())) {
+            name = event.getName();
+        }
+        if (StringUtils.isBlank(dataTime)) {
+            dataTime = "";
+        }
+        String newName = EmbedSettings.GREEN_CIRCLE + name + dataTime;
+        if (newName.length() >= 100) {
+            newName = newName.substring(0, 100);
         }
         return newName;
     }
 
     @NotNull
     public static String getStringOfEventDateTime(@NotNull Event event) {
+        if (event.getDate() == null) {
+            return "";
+        }
         return getStringOfEventDate(event) + " " + getStringOfEventTime(event);
     }
 

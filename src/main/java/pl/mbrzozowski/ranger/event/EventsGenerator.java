@@ -152,7 +152,7 @@ public class EventsGenerator {
             }
             case SET_DATE -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " 23:59");
-                if (Validator.isDateTimeAfterNow(dateTime)) {
+                if (Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
@@ -162,9 +162,8 @@ public class EventsGenerator {
                 }
             }
             case SET_TIME -> {
-                msg = Validator.timeCorrect(msg);
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
-                if (Validator.isDateTimeAfterNow(dateTime)) {
+                if (Validator.isTimeValid(msg) && Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
@@ -202,7 +201,7 @@ public class EventsGenerator {
             }
             case CHANGE_DATE -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " " + eventRequest.getTime());
-                if (Validator.isDateTimeAfterNow(dateTime)) {
+                if (Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                 } else {
                     embedDateNotCorrect();
@@ -211,9 +210,8 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_TIME -> {
-                msg = Validator.timeCorrect(msg);
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
-                if (Validator.isDateTimeAfterNow(dateTime)) {
+                if (Validator.isTimeValid(msg) && Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                 } else {
                     embedTimeNotCorrect();

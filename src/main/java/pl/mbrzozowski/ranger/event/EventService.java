@@ -119,7 +119,7 @@ public class EventService {
         if (!Validator.isValidEventRequest(eventRequest)) {
             throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste.");
         }
-        if (!Validator.isDateTimeAfterNow(eventRequest.getDateTime())) {
+        if (!Validator.isEventDateTimeAfterNow(eventRequest.getDateTime())) {
             throw new IllegalArgumentException("Niepoprawny format daty lub data jest z przeszłości: "
                     + eventRequest.getDateTime());
         }
@@ -211,7 +211,7 @@ public class EventService {
         Event event = eventOptional.get();
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
         String userID = buttonInteractionEvent.getUser().getId();
-        if (Validator.isDateTimeAfterNow(event.getDate())) {
+        if (Validator.isEventDateTimeAfterNow(event.getDate())) {
             switch (buttonClick) {
                 case SIGN_IN -> signIn(buttonInteractionEvent, event, userName, userID);
                 case SIGN_IN_RESERVE -> signInReserve(buttonInteractionEvent, event, userName, userID);
@@ -455,7 +455,7 @@ public class EventService {
         }
         String channelName = textChannel.getName();
         channelName = StringProvider.removeAnyPrefixCircle(channelName);
-        channelName = StringProvider.addYellowCircle(channelName, eventFor);
+        channelName = StringProvider.addYellowCircleBeforeText(channelName, eventFor);
         textChannel.getManager().setName(channelName).queue();
     }
 }

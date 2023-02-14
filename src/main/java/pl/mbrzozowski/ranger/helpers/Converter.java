@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import net.dv8tion.jda.api.utils.TimeFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -14,14 +15,17 @@ public class Converter {
     /**
      * Converting String to {@link LocalDateTime}
      *
-     * @param source date in format d.M.yyyy HH:mm
+     * @param source date in format d.M.yyyy H:mm
      * @return {@link LocalDateTime} or null if can not to parse string to LocalDateTime
      */
     public static @Nullable LocalDateTime stringToLocalDateTime(String source) {
-        if (source == null || source.isBlank()) {
+        if (StringUtils.isBlank(source)) {
             throw new NullPointerException("Wymagane dane wejściowe");
         }
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm");
+        if (!Validator.isDateValid(source.split(" ")[0])) {
+            return null;
+        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:mm");
         try {
             return LocalDateTime.parse(source, dateTimeFormatter);
         } catch (DateTimeParseException e) {
