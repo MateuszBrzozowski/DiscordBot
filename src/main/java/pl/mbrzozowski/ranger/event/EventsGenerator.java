@@ -151,11 +151,8 @@ public class EventsGenerator {
                 }
             }
             case SET_DATE -> {
-                boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean isDateAfterNow = Validator.isDateTimeAfterNow(msg + " 23:59");
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " 23:59");
                 if (Validator.isDateTimeAfterNow(dateTime)) {
-                    eventRequest.setDate(msg);
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
@@ -166,11 +163,8 @@ public class EventsGenerator {
             }
             case SET_TIME -> {
                 msg = Validator.timeCorrect(msg);
-                boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean isTimeAfterNow = Validator.isDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
                 if (Validator.isDateTimeAfterNow(dateTime)) {
-                    eventRequest.setTime(msg);
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
@@ -207,11 +201,8 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_DATE -> {
-                boolean isDateFormat = Validator.isDateFormat(msg);
-                boolean timeAfterNow = Validator.isDateTimeAfterNow(msg + " 23:59");
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " " + eventRequest.getTime());
                 if (Validator.isDateTimeAfterNow(dateTime)) {
-                    eventRequest.setDate(msg);
                     eventRequest.setDateTime(dateTime);
                 } else {
                     embedDateNotCorrect();
@@ -221,11 +212,8 @@ public class EventsGenerator {
             }
             case CHANGE_TIME -> {
                 msg = Validator.timeCorrect(msg);
-                boolean isTimeFormat = Validator.isTimeFormat(msg);
-                boolean timeAfterNow = Validator.isDateTimeAfterNow(eventRequest.getDate() + " " + msg);
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
                 if (Validator.isDateTimeAfterNow(dateTime)) {
-                    eventRequest.setTime(msg);
                     eventRequest.setDateTime(dateTime);
                 } else {
                     embedTimeNotCorrect();

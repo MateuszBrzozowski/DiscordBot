@@ -2,8 +2,10 @@ package pl.mbrzozowski.ranger.helpers;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import pl.mbrzozowski.ranger.event.EventFor;
+import pl.mbrzozowski.ranger.event.EventRequest;
 
-class StringModifyTest {
+class StringProviderTest {
 
     @Test
     public void removeDiscordMarkdowns_RemoveItalicsUnderscoreOneTime() {
@@ -83,4 +85,10 @@ class StringModifyTest {
         Assertions.assertEquals("name", result);
     }
 
+    @Test
+    void getChannelName_NameWithBrain() {
+        EventRequest eventRequest = new EventRequest();
+        eventRequest.setEventFor(EventFor.TACTICAL_GROUP);
+        eventRequest.setName("event");
+    }
 }

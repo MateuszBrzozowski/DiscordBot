@@ -90,9 +90,6 @@ public class Validator {
         if (StringUtils.isBlank(eventRequest.getName())) {
             return false;
         }
-        if (StringUtils.isBlank(eventRequest.getDate())) {
-            return false;
-        }
-        return !StringUtils.isBlank(eventRequest.getTime());
+        return eventRequest.getDateTime() != null;
     }
 }
