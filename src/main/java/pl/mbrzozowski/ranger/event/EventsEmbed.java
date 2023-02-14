@@ -33,10 +33,6 @@ public class EventsEmbed {
                         EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(eventRequest.getDateTime()),
                 true);
         builder.addBlankField(false);
-//        builder.addField(EmbedSettings.WHEN_DATE, eventRequest.getDate(), true);
-//        builder.addBlankField(true);
-//        builder.addField(EmbedSettings.WHEN_TIME, eventRequest.getTime(), true);
-//        builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
         builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
@@ -57,24 +53,8 @@ public class EventsEmbed {
     public static MessageEmbed getMessageEmbedWithUpdatedLists(Event event, @NotNull Message message) {
         List<MessageEmbed> embeds = message.getEmbeds();
         MessageEmbed mOld = embeds.get(0);
-
         List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-        List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-        String mainList = getStringOfMainList(event);
-        String reserveList = getStringOfReserveList(event);
-
-        for (int i = 0; i < fieldsOld.size(); i++) {
-            if (i == 2) {
-                MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")", ">>> " + mainList, true);
-                fieldsNew.add(fieldNew);
-            } else if (i == 4) {
-                MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")", ">>> " + reserveList, true);
-                fieldsNew.add(fieldNew);
-            } else {
-                fieldsNew.add(fieldsOld.get(i));
-            }
-        }
-
+        List<MessageEmbed.Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld);
         return new MessageEmbed(mOld.getUrl()
                 , mOld.getTitle()
                 , mOld.getDescription()
@@ -91,6 +71,32 @@ public class EventsEmbed {
     }
 
     @NotNull
+    private static List<MessageEmbed.Field> getFieldsWithUpdatedLists(@NotNull Event event,
+                                                                      @NotNull List<MessageEmbed.Field> fieldsOld) {
+        List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
+        String mainList = getStringOfMainList(event);
+        String reserveList = getStringOfReserveList(event);
+        for (int i = 0; i < fieldsOld.size(); i++) {
+            if (i == 2) {
+                MessageEmbed.Field fieldNew = new MessageEmbed.Field(
+                        EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")",
+                        ">>> " + mainList,
+                        true);
+                fieldsNew.add(fieldNew);
+            } else if (i == 4) {
+                MessageEmbed.Field fieldNew = new MessageEmbed.Field(
+                        EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")",
+                        ">>> " + reserveList,
+                        true);
+                fieldsNew.add(fieldNew);
+            } else {
+                fieldsNew.add(fieldsOld.get(i));
+            }
+        }
+        return fieldsNew;
+    }
+
+    @NotNull
     public static MessageEmbed getUpdatedEmbed(@NotNull Event event,
                                                @NotNull Message message,
                                                boolean isChangedDateTime,
@@ -100,22 +106,7 @@ public class EventsEmbed {
         List<MessageEmbed> embeds = message.getEmbeds();
         MessageEmbed mOld = embeds.get(0);
         List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-        List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
-
-        if (isChangedDateTime) {
-            fieldsNew.clear();
-            for (int i = 0; i < fieldsOld.size(); i++) {
-                if (i == 0) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.WHEN_DATE,
-                            Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
-                                    EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
-                            true);
-                    fieldsNew.add(fieldNew);
-                } else {
-                    fieldsNew.add(fieldsOld.get(i));
-                }
-            }
-        }
+        List<MessageEmbed.Field> fieldsNew = getFieldsWithUpdatedDateTime(event, fieldsOld, isChangedDateTime);
         String newTitle = getTitle(event, isChangedName, mOld.getTitle());
         String newDescription = getDescription(isChangedDescription, mOld.getDescription(), description);
         return new MessageEmbed(mOld.getUrl()
@@ -131,6 +122,28 @@ public class EventsEmbed {
                 , mOld.getFooter()
                 , mOld.getImage()
                 , fieldsNew);
+    }
+
+    @NotNull
+    private static List<MessageEmbed.Field> getFieldsWithUpdatedDateTime(@NotNull Event event,
+                                                                         @NotNull List<MessageEmbed.Field> fieldsOld,
+                                                                         boolean isChanged) {
+        List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
+        if (isChanged) {
+            fieldsNew.clear();
+            for (int i = 0; i < fieldsOld.size(); i++) {
+                if (i == 0) {
+                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.WHEN_DATE,
+                            Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                    EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                            true);
+                    fieldsNew.add(fieldNew);
+                } else {
+                    fieldsNew.add(fieldsOld.get(i));
+                }
+            }
+        }
+        return fieldsNew;
     }
 
     private static String getTitle(@NotNull Event event, boolean isChanged, String title) {
@@ -161,8 +174,7 @@ public class EventsEmbed {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
-//                String nickname = prepareNicknameToEventList(player.getUserName());
-                String nickname = "<@" + player.getUserId() + ">";
+                String nickname = prepareNicknameToEventList(player.getUserName());
                 result.append(nickname).append(" \n");
             }
             return result.toString();
@@ -187,7 +199,7 @@ public class EventsEmbed {
     }
 
     private static @NotNull String prepareNicknameToEventList(@NotNull String source) {
-//        source = StringModify.removeClanTag(source);
+        source = StringProvider.removeClanTag(source);
         source = StringProvider.removeDiscordMarkdowns(source);
         return source;
     }

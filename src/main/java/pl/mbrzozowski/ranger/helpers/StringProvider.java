@@ -51,7 +51,7 @@ public class StringProvider {
     }
 
     @NotNull
-    public static String getStringChannelName(@NotNull EventRequest eventRequest) {
+    public static String getChannelName(@NotNull EventRequest eventRequest) {
         String result;
         if (eventRequest.getEventFor() == TACTICAL_GROUP) {
             result = BRAIN_WITH_GREEN;
@@ -76,7 +76,7 @@ public class StringProvider {
         } else if (eventRequest.getEventFor() == CLAN_MEMBER) {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
         } else if (eventRequest.getEventFor() == TACTICAL_GROUP) {
-            result = "<@&" + "RoleID.TACTICAL_GROUP" + "> Tactical meeting!";
+            result = "<@&" + RoleID.TACTICAL_GROUP + "> Tactical meeting!";
         }
         return result;
     }
@@ -112,6 +112,15 @@ public class StringProvider {
             source = EmbedSettings.YELLOW_CIRCLE + source;
         }
         return source;
+    }
+
+    @NotNull
+    public static String getChannelNameWithGreenCircle(@NotNull Event event, String dataTime) {
+        String newName = EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime;
+        if (newName.length() >= 99) {
+            newName = newName.substring(0, 99);
+        }
+        return newName;
     }
 
     @NotNull

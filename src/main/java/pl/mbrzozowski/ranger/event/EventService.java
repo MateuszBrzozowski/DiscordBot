@@ -86,6 +86,14 @@ public class EventService {
         eventRepository.save(event);
     }
 
+    public List<Player> getMainList(@NotNull Event event) {
+        return event.getPlayers().stream().filter(Player::isMainList).toList();
+    }
+
+    public List<Player> getReserveList(@NotNull Event event) {
+        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
+    }
+
     private void setReminders() {
         List<Event> eventList = findAll();
         List<Event> events = filterEventsAfterNow(eventList);
@@ -128,7 +136,7 @@ public class EventService {
         if (category == null) {
             throw new NullPointerException("Category by Event Id is null");
         }
-        String channelName = StringProvider.getStringChannelName(eventRequest);
+        String channelName = StringProvider.getChannelName(eventRequest);
         createEventChannel(eventRequest, guild, channelName, category);
     }
 
@@ -220,7 +228,10 @@ public class EventService {
         updateEmbed(event);
     }
 
-    private void signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
+    private void signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                        @NotNull Event event,
+                        String userName,
+                        String userID) {
         log.info(userName + " sign in");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -240,7 +251,10 @@ public class EventService {
         }
     }
 
-    private void signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
+    private void signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                               @NotNull Event event,
+                               String userName,
+                               String userID) {
         log.info(userName + " sign in reserve");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -266,7 +280,9 @@ public class EventService {
         }
     }
 
-    private void signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userID) {
+    private void signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                         @NotNull Event event,
+                         String userID) {
         log.info(userID + " sign out");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -362,10 +378,7 @@ public class EventService {
 
     private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel) {
         String dataTime = StringProvider.getStringOfEventDateTime(event);
-        String newName = EmbedSettings.GREEN_CIRCLE + event.getName() + dataTime;
-        if (newName.length() > 99) {
-            newName = newName.substring(0, 99);
-        }
+        String newName = StringProvider.getChannelNameWithGreenCircle(event, dataTime);
         textChannel
                 .getManager()
                 .setName(newName)
@@ -433,14 +446,6 @@ public class EventService {
             }
             message.editMessageEmbeds(embeds.get(0)).setActionRow(buttonsNew).queue();
         });
-    }
-
-    public List<Player> getMainList(@NotNull Event event) {
-        return event.getPlayers().stream().filter(Player::isMainList).toList();
-    }
-
-    public List<Player> getReserveList(@NotNull Event event) {
-        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
     }
 
     public void setYellowCircleInChannelName(String channelId, EventFor eventFor) {
