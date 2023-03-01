@@ -23,11 +23,11 @@ public class StringProvider {
 
     @NotNull
     public static String removeClanTag(@NotNull String source) {
-        String result = source.toLowerCase();
-        if (result.matches("(.*)<rrangerspl>(.*)")) {
-            result = result.replace("<rrangerspl>", "");
-        } else if (result.matches("(.*)<rangerspl>(.*)")) {
-            result = result.replace("<rangerspl>", "");
+        String result = source;
+        if (result.matches("(.*)<rRangersPL>(.*)")) {
+            result = result.replace("<rRangersPL>", "");
+        } else if (result.matches("(.*)<RangersPL>(.*)")) {
+            result = result.replace("<RangersPL>", "");
         }
         return result;
     }

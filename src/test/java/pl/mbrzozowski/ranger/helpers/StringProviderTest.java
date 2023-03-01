@@ -77,10 +77,16 @@ class StringProviderTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"name<RangersPL>", "name<rRangersPL>", "name<RANGERSPL>", "name<rangerspl>", "name<RaNgErSpL>"})
+    @ValueSource(strings = {"name<RangersPL>", "name<rRangersPL>"})
     public void removeClanTag_RemovedRangersPL(String source) {
         String result = StringProvider.removeClanTag(source);
         Assertions.assertEquals("name", result);
+    }
+
+    @Test
+    public void removeClanTag_RemovedRangersPLAndNoChangingCase() {
+        String result = StringProvider.removeClanTag("Name<RangersPL>");
+        Assertions.assertEquals("Name", result);
     }
 
     @Test
