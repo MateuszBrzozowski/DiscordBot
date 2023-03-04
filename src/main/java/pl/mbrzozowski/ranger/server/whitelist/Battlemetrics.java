@@ -1,13 +1,13 @@
 package pl.mbrzozowski.ranger.server.whitelist;
 
 
-import org.jetbrains.annotations.Nullable;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pl.mbrzozowski.ranger.helpers.RangerLogger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Battlemetrics {
+
+    private static final String SERVER_ID = "17641363";
 
     public List<Player> getPlayers() {
         List<Player> players = new ArrayList<>();
@@ -26,7 +28,7 @@ public class Battlemetrics {
         while (getNextPage) {
             try {
                 Request request = new Request.Builder()
-                        .url("https://api.battlemetrics.com/servers/3508670/relationships/leaderboards/time?filter[period]=" + dateTimeMinusMonth + ":" + dateTimeNow + "&page[offset]=" + offset + "&page[size]=100")
+                        .url("https://api.battlemetrics.com/servers/" + SERVER_ID + "/relationships/leaderboards/time?filter[period]=" + dateTimeMinusMonth + ":" + dateTimeNow + "&page[offset]=" + offset + "&page[size]=100")
                         .addHeader("Authorization", Auth.BM_AUTH_VALUE)
                         .build();
                 Response response = client.newCall(request).execute();
@@ -59,6 +61,7 @@ public class Battlemetrics {
             } catch (IOException e) {
                 RangerLogger.info("Błąd pobierania graczy z battlemetrics: " + e.getMessage());
             }
+            System.out.println(offset);
             offset += 100;
         }
 
