@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,5 +74,20 @@ public class Users {
      */
     public static boolean isUserDev(@NotNull String userID) {
         return userID.equalsIgnoreCase(RoleID.DEV_ID);
+    }
+
+    public static boolean memberOnGuildShorterThan(String userId, int minutes) {
+        JDA jda = DiscordBot.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild == null) {
+            return false;
+        }
+        Member member = guild.getMemberById(userId);
+        if (member == null) {
+            return false;
+        }
+        LocalDateTime dateTimeJoined = member.getTimeJoined().toLocalDateTime();
+        LocalDateTime dateTimeNow = LocalDateTime.now(ZoneOffset.UTC);
+        return dateTimeJoined.plusMinutes(minutes).isAfter(dateTimeNow);
     }
 }

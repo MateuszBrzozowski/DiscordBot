@@ -101,6 +101,10 @@ public class RecruitsService {
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
         log.info("New recruit application - " + event.getUser().getId());
         String userID = event.getUser().getId();
+        if (Users.memberOnGuildShorterThan(userID, 10)) {
+            ResponseMessage.noReqTimeOnServer(event);
+            return;
+        }
         if (hasRecruitChannel(userID)) {
             ResponseMessage.userHaveRecruitChannel(event);
             return;
@@ -145,8 +149,7 @@ public class RecruitsService {
         event.reply("""
                         **Potwierdź czy chcesz złożyć podanie?**
 
-                        Po potwierdzeniu rozpocznie się Twój okres rekrutacyjny w naszym klanie.
-                        Poprosimy o wypełnienie krótkiego formularza.
+                        Po potwierdzeniu poprosimy o wypełnienie krótkiego formularza.
                         Następnie skontaktuję się z Tobą jeden z naszych Drillów.""")
                 .setEphemeral(true)
                 .addActionRow(

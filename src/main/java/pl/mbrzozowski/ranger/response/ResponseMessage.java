@@ -50,6 +50,12 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void noReqTimeOnServer(@NotNull ButtonInteractionEvent event) {
+        event.reply("**Odczekaj 10 minut od dołączenia na serwer zanim złożysz podanie**")
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void operationNotPossible(@NotNull ButtonInteractionEvent event) {
         event.reply("**Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)
