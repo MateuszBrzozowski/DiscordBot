@@ -60,7 +60,7 @@ public class StringProvider {
             result = GREEN_CIRCLE;
         }
         result += eventRequest.getName() +
-                "-" + eventRequest.getDate() + "-" + eventRequest.getTime();
+                "-" + eventRequest.getDateShort();
         if (result.length() >= 100) {
             result = result.substring(0, 100);
         }

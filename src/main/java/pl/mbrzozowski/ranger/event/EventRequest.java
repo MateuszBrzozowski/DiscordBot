@@ -19,6 +19,11 @@ public class EventRequest {
         return dateTime.format(formatter);
     }
 
+    public String getDateShort() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM");
+        return dateTime.format(formatter);
+    }
+
     public String getTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return dateTime.format(formatter);
