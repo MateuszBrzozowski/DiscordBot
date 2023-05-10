@@ -420,7 +420,6 @@ public class RecruitsService {
         TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
         recruitNotAccepted(event, textChannel, userID);
-        setRedCircleInChannelName(textChannel);
     }
 
     private void recruitNotAccepted(ButtonInteractionEvent event, TextChannel textChannel, String userID) {
@@ -429,13 +428,14 @@ public class RecruitsService {
             Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
             if (recruitOptional.isPresent()) {
                 Recruit recruit = recruitOptional.get();
-                if (recruit.getStartRecruitment() != null) {
-                    ResponseMessage.recruitHasBeenAccepted(event);
-                    return;
-                } else if (recruit.getRecruitmentResult() != null) {
+                if (recruit.getRecruitmentResult() != null) {
                     ResponseMessage.recruitHasBeenRejected(event);
                     return;
+                } else if (recruit.getStartRecruitment() != null) {
+                    ResponseMessage.recruitHasBeenAccepted(event);
+                    return;
                 }
+                setRedCircleInChannelName(textChannel);
                 event.deferEdit().queue();
                 recruit.setIsCloseChannel(true);
                 recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());

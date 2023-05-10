@@ -101,13 +101,13 @@ public class ResponseMessage {
     }
 
     public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {
-        event.reply("**Rekrut został już przyjęty**")
+        event.reply("**Rekrut został już przyjęty na rekrutacje. Jeżeli chcesz możesz dać wynik rekrutacji używając przycisku zielonego lub czerwonego.**")
                 .setEphemeral(true)
                 .queue();
     }
 
     public static void recruitHasBeenRejected(@NotNull ButtonInteractionEvent event) {
-        event.reply("**Rekrut został już odrzucony**")
+        event.reply("**Rekrut z wynikiem rekrutacji. Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)
                 .queue();
     }
