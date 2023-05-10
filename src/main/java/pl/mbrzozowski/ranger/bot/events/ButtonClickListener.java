@@ -146,9 +146,15 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void openForm(@NotNull ButtonInteractionEvent interactionEvent) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM)) {
-            RecruitOpinions recruitOpinions = new RecruitOpinions();
-            recruitOpinions.openForm(interactionEvent);
+        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_RECRUIT_OPINION)) {
+            RecruitOpinions.openOpinionAboutRecruit(interactionEvent);
+        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_ANONYMOUS_COMPLAINTS)) {
+            boolean isClanMember = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.CLAN_MEMBER_ID);
+            if (isClanMember) {
+                ResponseMessage.operationNotPossible(interactionEvent);
+            } else {
+                RecruitOpinions.openAnonymousComplaints(interactionEvent);
+            }
         } else {
             eventsGenerator(interactionEvent);
         }

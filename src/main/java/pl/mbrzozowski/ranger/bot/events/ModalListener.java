@@ -13,9 +13,10 @@ public class ModalListener extends ListenerAdapter {
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         log.info("[EVENT] - Modal interaction event");
-        if (event.getModalId().equalsIgnoreCase(ComponentId.RECRUIT_OPINION_MODAL)) {
-            RecruitOpinions recruitOpinions = new RecruitOpinions();
-            recruitOpinions.submitForm(event);
+        if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_RECRUIT_OPINION)) {
+            RecruitOpinions.submitOpinionAboutRecruit(event);
+        } else if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_COMPLAINTS)) {
+            RecruitOpinions.submitAnonymousComplaints(event);
         }
     }
 }

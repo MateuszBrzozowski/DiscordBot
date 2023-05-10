@@ -97,6 +97,7 @@ public class RecruitsService {
                         Button.success(ComponentId.RECRUIT_POSITIVE, "\u200E"),
                         Button.danger(ComponentId.RECRUIT_NEGATIVE, "\u200E"))
                 .queue();
+        EmbedInfo.recruitAnonymousComplaintsFormOpening(textChannel);
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {

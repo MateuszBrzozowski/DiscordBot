@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
@@ -23,7 +24,7 @@ import java.awt.*;
 public class RecruitOpinions {
 
 
-    public void openForm(@NotNull ButtonInteractionEvent event) {
+    public static void openOpinionAboutRecruit(@NotNull ButtonInteractionEvent event) {
         TextInput recruitName = TextInput.create(ComponentId.RECRUIT_NAME, "Nick Rekruta", TextInputStyle.SHORT)
                 .setMaxLength(100)
                 .setPlaceholder("Nick")
@@ -32,13 +33,13 @@ public class RecruitOpinions {
                 .setRequiredRange(10, 1024)
                 .setPlaceholder("Opinia")
                 .build();
-        Modal modal = Modal.create(ComponentId.RECRUIT_OPINION_MODAL, "Rekrut opinie")
+        Modal modal = Modal.create(ComponentId.MODAL_RECRUIT_OPINION, "Rekrut opinie")
                 .addActionRows(ActionRow.of(recruitName), ActionRow.of(opinion))
                 .build();
         event.replyModal(modal).queue();
     }
 
-    public void submitForm(ModalInteractionEvent event) {
+    public static void submitOpinionAboutRecruit(@NotNull ModalInteractionEvent event) {
         String recruitName = event.getValue(ComponentId.RECRUIT_NAME).getAsString();
         String opinion = event.getValue(ComponentId.RECRUIT_OPINION_TEXT).getAsString();
         String userNameWhoSendingOpinion = Users.getUserNicknameFromID(event.getUser().getId());
@@ -48,7 +49,40 @@ public class RecruitOpinions {
         sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
     }
 
-    private void sendOpinionToChannel(TextChannel textChannel, String userNameWhoSendingOpinion, String recruitName, String opinion) {
+    public static void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
+        TextInput text = TextInput.create(ComponentId.MODAL_COMPLAINT_TEXT, "Wiadomość", TextInputStyle.PARAGRAPH)
+                .setRequiredRange(10, 1000)
+                .setPlaceholder("Opisz sytuacje.")
+                .build();
+        Modal modal = Modal.create(ComponentId.MODAL_COMPLAINTS, "Anonimowe zgłoszenie")
+                .addActionRows(ActionRow.of(text))
+                .build();
+        event.replyModal(modal).queue();
+    }
+
+    public static void submitAnonymousComplaints(@NotNull ModalInteractionEvent event) {
+        String text = event.getValue(ComponentId.MODAL_COMPLAINT_TEXT).getAsString();
+        String nickname = Users.getUserNicknameFromID(event.getUser().getId());
+        event.deferEdit().queue();
+        JDA jda = DiscordBot.getJda();
+        TextChannel textChannel = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        if (textChannel != null) {
+            sendMessage(textChannel, nickname, text);
+        }
+    }
+
+    private static void sendMessage(@NotNull TextChannel textChannel, String whoNickname, String text) {
+        log.info("Użytkownik: " + whoNickname + " anonimowo donosi.");
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setTitle("Anonimowy donos!");
+        builder.setDescription("**Wiadomość:**\n" + text);
+        textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + ">")
+                .setEmbeds(builder.build())
+                .queue();
+    }
+
+    private static void sendOpinionToChannel(@NotNull TextChannel textChannel, String userNameWhoSendingOpinion, String recruitName, String opinion) {
         log.info("Send recruit opinion");
         EmbedBuilder builder = new EmbedBuilder();
         builder.setThumbnail(EmbedSettings.THUMBNAIL);

@@ -377,14 +377,24 @@ public class EmbedInfo extends EmbedCreator {
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void recruitOpinionsFormOpening(MessageReceivedEvent messageReceived) {
+    public static void recruitOpinionsFormOpening(@NotNull MessageReceivedEvent messageReceived) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Rekrut opinie");
-        builder.addField("Otwórz formularz by wystawić opinię na temat rekruta.", "", false);
+        builder.addField("Wystaw opinię na temat rekruta używając przycisku poniżej.", "", false);
         messageReceived
                 .getChannel()
                 .sendMessageEmbeds(builder.build())
-                .setActionRow(Button.primary(ComponentId.OPEN_FORM, "Otwórz formularz"))
+                .setActionRow(Button.primary(ComponentId.OPEN_FORM_RECRUIT_OPINION, "Formularz"))
+                .queue();
+    }
+
+    public static void recruitAnonymousComplaintsFormOpening(@NotNull TextChannel textChannel) {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
+        builder.setTitle("Anonimowe zgłoszenia");
+        builder.addField("Zgłoś anonimowo sytuację używając przycisku poniżej", "", false);
+        textChannel
+                .sendMessageEmbeds(builder.build())
+                .setActionRow(Button.primary(ComponentId.OPEN_FORM_ANONYMOUS_COMPLAINTS, "Formularz"))
                 .queue();
     }
 
