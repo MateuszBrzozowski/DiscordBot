@@ -2,7 +2,6 @@ package pl.mbrzozowski.ranger.recruit;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -19,6 +18,7 @@ import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
+import java.util.Objects;
 
 @Slf4j
 public class RecruitOpinions {
@@ -40,13 +40,14 @@ public class RecruitOpinions {
     }
 
     public static void submitOpinionAboutRecruit(@NotNull ModalInteractionEvent event) {
-        String recruitName = event.getValue(ComponentId.RECRUIT_NAME).getAsString();
-        String opinion = event.getValue(ComponentId.RECRUIT_OPINION_TEXT).getAsString();
+        String recruitName = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_NAME)).getAsString();
+        String opinion = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_OPINION_TEXT)).getAsString();
         String userNameWhoSendingOpinion = Users.getUserNicknameFromID(event.getUser().getId());
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_RECRUITS_OPINIONS);
+        if (textChannel != null) {
+            sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
+        }
         event.deferEdit().queue();
-        JDA jda = DiscordBot.getJda();
-        TextChannel textChannel = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_RECRUITS_OPINIONS);
-        sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
     }
 
     public static void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
@@ -61,14 +62,13 @@ public class RecruitOpinions {
     }
 
     public static void submitAnonymousComplaints(@NotNull ModalInteractionEvent event) {
-        String text = event.getValue(ComponentId.MODAL_COMPLAINT_TEXT).getAsString();
+        String text = Objects.requireNonNull(event.getValue(ComponentId.MODAL_COMPLAINT_TEXT)).getAsString();
         String nickname = Users.getUserNicknameFromID(event.getUser().getId());
-        event.deferEdit().queue();
-        JDA jda = DiscordBot.getJda();
-        TextChannel textChannel = jda.getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
             sendMessage(textChannel, nickname, text);
         }
+        event.deferEdit().queue();
     }
 
     private static void sendMessage(@NotNull TextChannel textChannel, String whoNickname, String text) {
@@ -95,7 +95,5 @@ public class RecruitOpinions {
         } catch (IllegalArgumentException e) {
             log.info("Rekrut opinion - IllegalArgumentException " + e.getMessage());
         }
-
-
     }
 }
