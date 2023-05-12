@@ -41,6 +41,7 @@ public final class ComponentId {
     public static final String GENERATOR_PING_RECRUIT = "GenPingR" + SUFFIX;
     public static final String GENERATOR_PING_BOTH = "GenPingB" + SUFFIX;
     public static final String GENERATOR_PING_TACTICAL_GROUP = "genPingTacticalGroup" + SUFFIX;
+    public static final String GENERATOR_PING_SQ_EVENTS = "genPingSqEvents" + SUFFIX;
     public static final String GENERATOR_FINISH_SELECT_MENU = "GenFinMenu" + SUFFIX;
     public static final String GENERATOR_EVENT_NAME = "GenEventName" + SUFFIX;
     public static final String GENERATOR_DATE = "GenDate" + SUFFIX;

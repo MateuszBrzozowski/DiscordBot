@@ -4,5 +4,6 @@ public enum EventFor {
     CLAN_MEMBER,
     RECRUIT,
     CLAN_MEMBER_AND_RECRUIT,
-    TACTICAL_GROUP
+    TACTICAL_GROUP,
+    SQ_EVENTS
 }
