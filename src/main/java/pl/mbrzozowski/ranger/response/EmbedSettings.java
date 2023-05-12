@@ -9,6 +9,7 @@ public interface EmbedSettings {
     String RESULT = "WYNIK REKRUTACJI - ";
     String NAME_LIST = ":white_check_mark: Lista ";
     String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
+    String NAME_LIST_TENTATIVE = ":grey_question: Niepewny ";
     String WHEN_DATE = ":date: Kiedy";
     String WHEN_TIME = ":clock930: ";
     String GREEN_CIRCLE = "\uD83D\uDFE2┋";

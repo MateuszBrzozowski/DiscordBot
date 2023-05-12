@@ -78,6 +78,8 @@ public class StringProvider {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
         } else if (eventRequest.getEventFor() == TACTICAL_GROUP) {
             result = "<@&" + RoleID.TACTICAL_GROUP + "> Tactical meeting!";
+        } else if (eventRequest.getEventFor() == SQ_EVENTS) {
+            result = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUIT_ID + "> <@&" + RoleID.SQ_EVENTS + ">";
         }
         return result;
     }

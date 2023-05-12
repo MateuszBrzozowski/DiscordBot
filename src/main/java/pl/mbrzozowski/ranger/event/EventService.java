@@ -152,6 +152,13 @@ public class EventService {
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
+        } else if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
@@ -178,7 +185,7 @@ public class EventService {
                     String msgId = message.getId();
                     message
                             .editMessageEmbeds(mOld)
-                            .setActionRow(EventsEmbed.getActionRowForEvent(msgId))
+                            .setActionRow(EventsEmbed.getActionRowForEvent(msgId, eventRequest))
                             .queue();
                     message.pin().queue();
                     createEvent(eventRequest, textChannel.getId(), message.getId());
@@ -300,6 +307,13 @@ public class EventService {
         }
     }
 
+    /**
+     * Searching player with id on list. If player exist, return this player. If not return null.
+     *
+     * @param players List of {@link Player}
+     * @param userID  String with user ID
+     * @return player with userID or null
+     */
     private @Nullable Player getPlayer(@NotNull List<Player> players, String userID) {
         for (Player player : players) {
             if (player.getUserId().equalsIgnoreCase(userID)) {
@@ -347,11 +361,11 @@ public class EventService {
     }
 
     void updateEmbed(@NotNull Event event,
-                            boolean isChangedDateTime,
-                            boolean isChangedName,
-                            boolean isChangedDescription,
-                            String description,
-                            boolean notifi) {
+                     boolean isChangedDateTime,
+                     boolean isChangedName,
+                     boolean isChangedDescription,
+                     String description,
+                     boolean notifi) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (textChannel == null) {
             return;

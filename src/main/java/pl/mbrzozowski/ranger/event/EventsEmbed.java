@@ -35,16 +35,24 @@ public class EventsEmbed {
         builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.addBlankField(true);
-        builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
+        if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
+            builder.addField(EmbedSettings.NAME_LIST_TENTATIVE + "(0)", ">>> -", true);
+        } else {
+            builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
+        }
         builder.setFooter("Utworzony przez " + Users.getUserNicknameFromID(eventRequest.getAuthorId()));
         return builder;
     }
 
     @NotNull
-    public static List<Button> getActionRowForEvent(@NotNull String msgId) {
+    public static List<Button> getActionRowForEvent(@NotNull String msgId, @NotNull EventRequest eventRequest) {
         List<Button> buttons = new ArrayList<>();
+        String tentativeLabel = "Rezerwa";
+        if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
+            tentativeLabel = "Niepewny";
+        }
         buttons.add(Button.primary(ComponentId.EVENTS_SIGN_IN + msgId, "Zapisz"));
-        buttons.add(Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgId, "Rezerwa"));
+        buttons.add(Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgId, tentativeLabel));
         buttons.add(Button.danger(ComponentId.EVENTS_SIGN_OUT + msgId, "Wypisz"));
         return buttons;
     }
@@ -88,6 +96,12 @@ public class EventsEmbed {
                         EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")",
                         ">>> " + reserveList,
                         true);
+                if (event.getEventFor() == EventFor.SQ_EVENTS) {
+                    fieldNew = new MessageEmbed.Field(
+                            EmbedSettings.NAME_LIST_TENTATIVE + "(" + getReserveListSize(event) + ")",
+                            ">>> " + reserveList,
+                            true);
+                }
                 fieldsNew.add(fieldNew);
             } else {
                 fieldsNew.add(fieldsOld.get(i));

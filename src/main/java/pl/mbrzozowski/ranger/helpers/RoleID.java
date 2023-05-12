@@ -12,4 +12,5 @@ public final class RoleID {
     public static final String SERVER_ADMIN = "740894839305928764";
     public static final String MODERATOR = "311978200739741696";
     public static final String SQUAD = "976110879223451688";
+    public static final String SQ_EVENTS = "1106551038787461171";
 }
