@@ -17,6 +17,7 @@ import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
+import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -218,11 +219,12 @@ public class EventService {
         Event event = eventOptional.get();
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
         String userID = buttonInteractionEvent.getUser().getId();
+        boolean isSuccess = false;
         if (Validator.isEventDateTimeAfterNow(event.getDate())) {
             switch (buttonClick) {
-                case SIGN_IN -> signIn(buttonInteractionEvent, event, userName, userID);
-                case SIGN_IN_RESERVE -> signInReserve(buttonInteractionEvent, event, userName, userID);
-                case SIGN_OUT -> signOut(buttonInteractionEvent, event, userID);
+                case SIGN_IN -> isSuccess = signIn(buttonInteractionEvent, event, userName, userID);
+                case SIGN_IN_RESERVE -> isSuccess = signInReserve(buttonInteractionEvent, event, userName, userID);
+                case SIGN_OUT -> isSuccess = signOut(buttonInteractionEvent, event, userID);
             }
         } else {
             RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk ["
@@ -231,37 +233,47 @@ public class EventService {
             disableButtons(event);
             setRedCircleInChannelName(event);
         }
-        eventRepository.save(event);
-        updateEmbed(event);
+        if (isSuccess) {
+            buttonInteractionEvent.deferEdit().queue();
+        } else {
+            return;
+        }
+        try {
+            updateEmbed(event);
+            eventRepository.save(event);
+        } catch (FullListException e) {
+            ResponseMessage.listIsFull(buttonInteractionEvent);
+        }
     }
 
-    private void signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                        @NotNull Event event,
-                        String userName,
-                        String userID) {
+    private boolean signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                           @NotNull Event event,
+                           String userName,
+                           String userID) {
         log.info(userName + " sign in");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
             if (!player.isMainList()) {
                 player.setMainList(true);
                 player.setTimestamp(LocalDateTime.now());
-                buttonInteractionEvent.deferEdit().queue();
                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName() + event.getDate().toString());
+                return true;
             } else {
                 ResponseMessage.youAreOnList(buttonInteractionEvent);
+                return false;
             }
         } else {
             Player newPlayer = new Player(null, userID, userName, true, event, LocalDateTime.now());
             event.getPlayers().add(newPlayer);
-            buttonInteractionEvent.deferEdit().queue();
             RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę.", event.getName() + event.getDate().toString());
+            return true;
         }
     }
 
-    private void signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                               @NotNull Event event,
-                               String userName,
-                               String userID) {
+    private boolean signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                                  @NotNull Event event,
+                                  String userName,
+                                  String userID) {
         log.info(userName + " sign in reserve");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -270,26 +282,28 @@ public class EventService {
                     ResponseMessage.youCantSignReserve(buttonInteractionEvent);
                     RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głównej listy na rezerwową ["
                             + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
+                    return false;
                 } else {
                     player.setMainList(false);
                     player.setTimestamp(LocalDateTime.now());
-                    buttonInteractionEvent.deferEdit().queue();
                     RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
+                    return true;
                 }
             } else {
                 ResponseMessage.youAreOnList(buttonInteractionEvent);
+                return false;
             }
         } else {
             Player newPlayer = new Player(null, userID, userName, false, event, LocalDateTime.now());
             event.getPlayers().add(newPlayer);
-            buttonInteractionEvent.deferEdit().queue();
             RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
+            return true;
         }
     }
 
-    private void signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                         @NotNull Event event,
-                         String userID) {
+    private boolean signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                            @NotNull Event event,
+                            String userID) {
         log.info(userID + " sign out");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -297,13 +311,15 @@ public class EventService {
                 ResponseMessage.youCantSingOut(buttonInteractionEvent);
                 RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
                         + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
+                return false;
             } else {
                 event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
                 RangerLogger.info(Users.getUserNicknameFromID(userID) + " wypisał się z eventu", event.getName() + event.getDate().toString());
-                buttonInteractionEvent.deferEdit().queue();
+                return true;
             }
         } else {
             ResponseMessage.youAreNotOnList(buttonInteractionEvent);
+            return false;
         }
     }
 
@@ -347,14 +363,16 @@ public class EventService {
         }
     }
 
-    private void updateEmbed(@NotNull Event event) {
+    void updateEmbed(@NotNull Event event) throws FullListException {
         log.info("Event " + event.getName() + " updating embed");
+        String mainList = EventsEmbed.getStringOfMainList(event);
+        String reserveList = EventsEmbed.getStringOfReserveList(event);
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
         TextChannel channel = DiscordBot.getJda().getTextChannelById(channelID);
         if (channel != null) {
             channel.retrieveMessageById(messageID).queue(message -> {
-                MessageEmbed messageEmbed = EventsEmbed.getMessageEmbedWithUpdatedLists(event, message);
+                MessageEmbed messageEmbed = EventsEmbed.getMessageEmbedWithUpdatedLists(event, message, mainList, reserveList);
                 message.editMessageEmbeds(messageEmbed).queue();
             });
         }

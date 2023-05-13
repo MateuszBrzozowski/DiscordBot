@@ -5,8 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
+import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,7 @@ class EventServiceTest {
         event.setPlayers(players);
         List<Player> resultMainList = eventService.getMainList(event);
         List<Player> exceptedMainList = new ArrayList<>(List.of(player));
-        Assertions.assertEquals(exceptedMainList,resultMainList);
+        Assertions.assertEquals(exceptedMainList, resultMainList);
     }
 
     @Test
@@ -44,7 +46,7 @@ class EventServiceTest {
         event.setPlayers(players);
         List<Player> resultMainList = eventService.getMainList(event);
         List<Player> exceptedMainList = new ArrayList<>();
-        Assertions.assertEquals(exceptedMainList,resultMainList);
+        Assertions.assertEquals(exceptedMainList, resultMainList);
     }
 
     @Test
@@ -56,7 +58,7 @@ class EventServiceTest {
         event.setPlayers(players);
         List<Player> resultMainList = eventService.getReserveList(event);
         List<Player> exceptedMainList = new ArrayList<>(List.of(player1));
-        Assertions.assertEquals(exceptedMainList,resultMainList);
+        Assertions.assertEquals(exceptedMainList, resultMainList);
     }
 
     @Test
@@ -67,6 +69,28 @@ class EventServiceTest {
         event.setPlayers(players);
         List<Player> resultMainList = eventService.getReserveList(event);
         List<Player> exceptedMainList = new ArrayList<>();
-        Assertions.assertEquals(exceptedMainList,resultMainList);
+        Assertions.assertEquals(exceptedMainList, resultMainList);
+    }
+
+    @Test
+    void updateEmbed_FullMainList_ThrowFullListException() {
+        ArrayList<Player> players = new ArrayList<>();
+        Event event = Event.builder().players(players).build();
+        Player player = Player.builder().timestamp(LocalDateTime.now()).mainList(true).userName("a").build();
+        for (int i = 0; i < 512; i++) { //1024 / 2 - add "/n" (1 char) to each line
+            event.getPlayers().add(player);
+        }
+        Assertions.assertThrows(FullListException.class, () -> eventService.updateEmbed(event));
+    }
+
+    @Test
+    void updateEmbed_FullReserveList_ThrowFullListException() {
+        ArrayList<Player> players = new ArrayList<>();
+        Event event = Event.builder().players(players).build();
+        Player player = Player.builder().timestamp(LocalDateTime.now()).mainList(false).userName("a").build();
+        for (int i = 0; i < 512; i++) { //1024 / 2 - add "/n" (1 char) to each line
+            event.getPlayers().add(player);
+        }
+        Assertions.assertThrows(FullListException.class, () -> eventService.updateEmbed(event));
     }
 }

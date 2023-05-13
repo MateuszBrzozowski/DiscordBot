@@ -3,9 +3,11 @@ package pl.mbrzozowski.ranger.event;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.StringProvider;
@@ -58,11 +60,14 @@ public class EventsEmbed {
     }
 
     @NotNull
-    public static MessageEmbed getMessageEmbedWithUpdatedLists(Event event, @NotNull Message message) {
+    public static MessageEmbed getMessageEmbedWithUpdatedLists(Event event,
+                                                               @NotNull Message message,
+                                                               String mainList,
+                                                               String reserveList) {
         List<MessageEmbed> embeds = message.getEmbeds();
         MessageEmbed mOld = embeds.get(0);
-        List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-        List<MessageEmbed.Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld);
+        List<Field> fieldsOld = embeds.get(0).getFields();
+        List<Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld, mainList, reserveList);
         return new MessageEmbed(mOld.getUrl()
                 , mOld.getTitle()
                 , mOld.getDescription()
@@ -79,25 +84,25 @@ public class EventsEmbed {
     }
 
     @NotNull
-    private static List<MessageEmbed.Field> getFieldsWithUpdatedLists(@NotNull Event event,
-                                                                      @NotNull List<MessageEmbed.Field> fieldsOld) {
-        List<MessageEmbed.Field> fieldsNew = new ArrayList<>();
-        String mainList = getStringOfMainList(event);
-        String reserveList = getStringOfReserveList(event);
+    private static List<Field> getFieldsWithUpdatedLists(@NotNull Event event,
+                                                         @NotNull List<Field> fieldsOld,
+                                                         String mainList,
+                                                         String reserveList) {
+        List<Field> fieldsNew = new ArrayList<>();
         for (int i = 0; i < fieldsOld.size(); i++) {
             if (i == 2) {
-                MessageEmbed.Field fieldNew = new MessageEmbed.Field(
+                Field fieldNew = new Field(
                         EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")",
                         ">>> " + mainList,
                         true);
                 fieldsNew.add(fieldNew);
             } else if (i == 4) {
-                MessageEmbed.Field fieldNew = new MessageEmbed.Field(
+                Field fieldNew = new Field(
                         EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")",
                         ">>> " + reserveList,
                         true);
                 if (event.getEventFor() == EventFor.SQ_EVENTS) {
-                    fieldNew = new MessageEmbed.Field(
+                    fieldNew = new Field(
                             EmbedSettings.NAME_LIST_TENTATIVE + "(" + getReserveListSize(event) + ")",
                             ">>> " + reserveList,
                             true);
@@ -119,8 +124,8 @@ public class EventsEmbed {
                                                String description) {
         List<MessageEmbed> embeds = message.getEmbeds();
         MessageEmbed mOld = embeds.get(0);
-        List<MessageEmbed.Field> fieldsOld = embeds.get(0).getFields();
-        List<MessageEmbed.Field> fieldsNew = getFieldsWithUpdatedDateTime(event, fieldsOld, isChangedDateTime);
+        List<Field> fieldsOld = embeds.get(0).getFields();
+        List<Field> fieldsNew = getFieldsWithUpdatedDateTime(event, fieldsOld, isChangedDateTime);
         String newTitle = getTitle(event, isChangedName, mOld.getTitle());
         String newDescription = getDescription(isChangedDescription, mOld.getDescription(), description);
         return new MessageEmbed(mOld.getUrl()
@@ -139,15 +144,15 @@ public class EventsEmbed {
     }
 
     @NotNull
-    private static List<MessageEmbed.Field> getFieldsWithUpdatedDateTime(@NotNull Event event,
-                                                                         @NotNull List<MessageEmbed.Field> fieldsOld,
-                                                                         boolean isChanged) {
-        List<MessageEmbed.Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
+    private static List<Field> getFieldsWithUpdatedDateTime(@NotNull Event event,
+                                                            @NotNull List<Field> fieldsOld,
+                                                            boolean isChanged) {
+        List<Field> fieldsNew = new ArrayList<>(fieldsOld.stream().toList());
         if (isChanged) {
             fieldsNew.clear();
             for (int i = 0; i < fieldsOld.size(); i++) {
                 if (i == 0) {
-                    MessageEmbed.Field fieldNew = new MessageEmbed.Field(EmbedSettings.WHEN_DATE,
+                    Field fieldNew = new Field(EmbedSettings.WHEN_DATE,
                             Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
                                     EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
                             true);
@@ -182,14 +187,17 @@ public class EventsEmbed {
         return event.getPlayers().stream().filter(player -> !player.isMainList()).toList().size();
     }
 
-    private static @NotNull String getStringOfMainList(@NotNull Event event) {
+    public static @NotNull String getStringOfMainList(@NotNull Event event) throws FullListException {
         List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(Player::isMainList).toList());
         if (players.size() > 0) {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
             for (Player player : players) {
                 String nickname = prepareNicknameToEventList(player.getUserName());
-                result.append(nickname).append(" \n");
+                result.append(nickname).append("\n");
+            }
+            if (result.length() >= MessageEmbed.VALUE_MAX_LENGTH) {
+                throw new FullListException("Main list of event [" + event.getName() + "] is full.");
             }
             return result.toString();
         } else {
@@ -197,7 +205,7 @@ public class EventsEmbed {
         }
     }
 
-    private static @NotNull String getStringOfReserveList(@NotNull Event event) {
+    public static @NotNull String getStringOfReserveList(@NotNull Event event) throws FullListException {
         List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(player -> !player.isMainList()).toList());
         if (players.size() > 0) {
             players.sort(Comparator.comparing(Player::getTimestamp));
@@ -205,6 +213,9 @@ public class EventsEmbed {
             for (Player player : players) {
                 String nickname = prepareNicknameToEventList(player.getUserName());
                 result.append(nickname).append("\n");
+            }
+            if (result.length() >= MessageEmbed.VALUE_MAX_LENGTH) {
+                throw new FullListException("Reserve list of event [" + event.getName() + "] is full.");
             }
             return result.toString();
         } else {

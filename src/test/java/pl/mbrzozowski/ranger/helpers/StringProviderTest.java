@@ -96,7 +96,7 @@ class StringProviderTest {
         eventRequest.setName("event");
         LocalDateTime dateTime = LocalDateTime.of(2023, 1, 1, 0, 0);
         eventRequest.setDateTime(dateTime);
-        String excepted = EmbedSettings.BRAIN_WITH_GREEN + "event-1.1.2023-00:00";
+        String excepted = EmbedSettings.BRAIN_WITH_GREEN + "event-01.01";
         String result = StringProvider.getChannelName(eventRequest);
         Assertions.assertEquals(excepted, result);
     }
@@ -108,7 +108,7 @@ class StringProviderTest {
         eventRequest.setName("event");
         LocalDateTime dateTime = LocalDateTime.of(2023, 1, 1, 0, 0);
         eventRequest.setDateTime(dateTime);
-        String excepted = EmbedSettings.GREEN_CIRCLE + "event-1.1.2023-00:00";
+        String excepted = EmbedSettings.GREEN_CIRCLE + "event-01.01";
         String result = StringProvider.getChannelName(eventRequest);
         Assertions.assertEquals(excepted, result);
     }

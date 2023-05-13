@@ -38,6 +38,12 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void listIsFull(@NotNull ButtonInteractionEvent event) {
+        event.reply("Brak miejsc. Lista pełna.")
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void eventIsBefore(@NotNull ButtonInteractionEvent event) {
         event.reply("Event już się wydarzył. Nie możesz się zapisać.")
                 .setEphemeral(true)
