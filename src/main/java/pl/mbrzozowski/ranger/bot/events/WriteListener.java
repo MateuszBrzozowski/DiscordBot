@@ -85,11 +85,11 @@ public class WriteListener extends ListenerAdapter {
         InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
-        diceCmd.setNextProccess(logChannel);
+        diceCmd.setNextProccess(reminderCmd);
+        reminderCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(generatorCmd);
-        generatorCmd.setNextProccess(reminderCmd);
-        reminderCmd.setNextProccess(serverServiceCmd);
+        generatorCmd.setNextProccess(serverServiceCmd);
         serverServiceCmd.setNextProccess(helpCmd);
         helpCmd.setNextProccess(checkUserAdmin);
         checkUserAdmin.setNextProccess(embedSender);

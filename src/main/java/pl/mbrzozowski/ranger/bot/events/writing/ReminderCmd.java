@@ -4,8 +4,7 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.helpers.Commands;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
-import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.response.EmbedHelp;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 
 public class ReminderCmd extends Proccess {
@@ -20,14 +19,14 @@ public class ReminderCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (messageReceived.isFromType(ChannelType.PRIVATE)) {
-            if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_OFF)) {
+            if (message.getWords()[0].equalsIgnoreCase(Commands.HELPS) && message.getWords()[1].equalsIgnoreCase(EmbedHelp.REMINDER)) {
+                EmbedHelp.help(message.getUserID(), message.getWords());
+            } else if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_OFF)) {
                 usersReminderService.add(messageReceived.getAuthor().getId());
                 EmbedInfo.reminderOff(message.getUserID());
-                RangerLogger.info("Użykownik: [" + Users.getUserNicknameFromID(message.getUserID()) + "] wyłączył powiadomienia dla evnetów.");
             } else if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_ON)) {
                 usersReminderService.deleteByUserId(messageReceived.getAuthor().getId());
                 EmbedInfo.reminderOn(message.getUserID());
-                RangerLogger.info("Użykownik: [" + Users.getUserNicknameFromID(message.getUserID()) + "] włączył powiadomienia dla eventów.");
             } else {
                 getNextProccess().proccessMessage(message);
             }

@@ -15,9 +15,9 @@ public class EmbedHelp extends EmbedCreator {
     private static final String title = "Ranger Bot - POMOC";
     private static final String REKRUT = "recrut";
     private static final String GENERATOR = "generator";
-    private static final String REMINDER = "reminder";
     private static final String GAME = "game";
     private static final String EVENT_SETTINGS = "event";
+    public static final String REMINDER = "reminder";
 
     private static void mainHelp() {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
@@ -99,7 +99,7 @@ public class EmbedHelp extends EmbedCreator {
         builder.setTitle(title + " - REMINDER");
         builder.setFooter(getFooter());
         builder.setDescription("""
-                Godzinę przed każdym eventem rozsyłane są przypomnienia do każdego zapisanego użytkownika. Możesz je dla siebie wyłączyć i włączyć przy pomocy komend.
+                Możesz włączyć i wyłączyć powiadomienia dla eventów przy pomocy komend.
 
                 **!reminder Off** - Wyłącza powiadomienia
                 **!reminder On** - Włącza powiadomienia""");
