@@ -84,7 +84,7 @@ public class RecruitsService {
                         https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717""",
                 false);
         builder.addField("", "", false);
-        builder.addField("TeamSpeak3:", "daniolab.pl:6969", false);
+        builder.addField("TeamSpeak3:", "ts.rangerspolska.pl:6969", false);
         builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + RoleID.DRILL_INSTRUCTOR_ID +
                 "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
         textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
