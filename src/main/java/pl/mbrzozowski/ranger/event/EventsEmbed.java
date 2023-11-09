@@ -83,7 +83,7 @@ public class EventsEmbed {
                         ">>> " + mainList,
                         true);
                 fieldsNew.add(fieldNew);
-            } else {
+            } else if (i == 0 || i == 1) {
                 fieldsNew.add(fieldsOld.get(i));
             }
         }
