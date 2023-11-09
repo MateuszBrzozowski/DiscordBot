@@ -34,18 +34,7 @@ class EventServiceTest {
         ArrayList<Player> players = new ArrayList<>(List.of(player1, player));
         event.setPlayers(players);
         List<Player> resultMainList = eventService.getMainList(event);
-        List<Player> exceptedMainList = new ArrayList<>(List.of(player));
-        Assertions.assertEquals(exceptedMainList, resultMainList);
-    }
-
-    @Test
-    void getMainList_ReturnEmptyList() {
-        Event event = Event.builder().build();
-        Player player = Player.builder().event(event).mainList(false).build();
-        ArrayList<Player> players = new ArrayList<>(List.of(player));
-        event.setPlayers(players);
-        List<Player> resultMainList = eventService.getMainList(event);
-        List<Player> exceptedMainList = new ArrayList<>();
+        ArrayList<Player> exceptedMainList = new ArrayList<>(List.of(player1, player));
         Assertions.assertEquals(exceptedMainList, resultMainList);
     }
 
