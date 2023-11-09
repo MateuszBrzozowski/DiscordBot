@@ -9,7 +9,6 @@ import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
@@ -44,20 +43,12 @@ public class Reminder extends TimerTask {
                 eventService.setYellowCircleInChannelName(event.getChannelId(), event.getEventFor());
             }
             List<Player> mainList = eventService.getMainList(event);
-            List<Player> reserveList = eventService.getReserveList(event);
             List<UsersReminder> usersReminderList = usersReminderService.findAll();
-            RangerLogger.info("Zapisanych na głównej liście: [" + mainList.size() + "], Rezerwa: [" +
-                    reserveList.size() + "] - Wysyłam przypomnienia.", event.getName());
             String linkToEvent = "[" + event.getName() + "](https://discord.com/channels/" +
                     CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + eventID + ")";
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             String dateTimeEvent = event.getDate().format(dateFormat);
             for (Player player : mainList) {
-                if (userHasOn(usersReminderList, player.getUserId())) {
-                    sendMessage(player.getUserId(), linkToEvent, dateTimeEvent);
-                }
-            }
-            for (Player player : reserveList) {
                 if (userHasOn(usersReminderList, player.getUserId())) {
                     sendMessage(player.getUserId(), linkToEvent, dateTimeEvent);
                 }

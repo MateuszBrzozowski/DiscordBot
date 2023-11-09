@@ -13,7 +13,7 @@
 
     <groupId>mbrzozowski</groupId>
     <artifactId>038_RangersPLBot</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>

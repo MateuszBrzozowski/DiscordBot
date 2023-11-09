@@ -50,29 +50,6 @@ class EventServiceTest {
     }
 
     @Test
-    void getReserveList() {
-        Event event = Event.builder().build();
-        Player player = Player.builder().event(event).mainList(true).build();
-        Player player1 = Player.builder().event(event).mainList(false).build();
-        ArrayList<Player> players = new ArrayList<>(List.of(player1, player));
-        event.setPlayers(players);
-        List<Player> resultMainList = eventService.getReserveList(event);
-        List<Player> exceptedMainList = new ArrayList<>(List.of(player1));
-        Assertions.assertEquals(exceptedMainList, resultMainList);
-    }
-
-    @Test
-    void getReserveList_ReturnEmptyList() {
-        Event event = Event.builder().build();
-        Player player = Player.builder().event(event).mainList(true).build();
-        ArrayList<Player> players = new ArrayList<>(List.of(player));
-        event.setPlayers(players);
-        List<Player> resultMainList = eventService.getReserveList(event);
-        List<Player> exceptedMainList = new ArrayList<>();
-        Assertions.assertEquals(exceptedMainList, resultMainList);
-    }
-
-    @Test
     void updateEmbed_FullMainList_ThrowFullListException() {
         ArrayList<Player> players = new ArrayList<>();
         Event event = Event.builder().players(players).build();

@@ -36,25 +36,14 @@ public class EventsEmbed {
                 true);
         builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
-        builder.addBlankField(true);
-        if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
-            builder.addField(EmbedSettings.NAME_LIST_TENTATIVE + "(0)", ">>> -", true);
-        } else {
-            builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
-        }
         builder.setFooter("Utworzony przez " + Users.getUserNicknameFromID(eventRequest.getAuthorId()));
         return builder;
     }
 
     @NotNull
-    public static List<Button> getActionRowForEvent(@NotNull String msgId, @NotNull EventRequest eventRequest) {
+    public static List<Button> getActionRowForEvent(@NotNull String msgId) {
         List<Button> buttons = new ArrayList<>();
-        String tentativeLabel = "Rezerwa";
-        if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
-            tentativeLabel = "Niepewny";
-        }
         buttons.add(Button.primary(ComponentId.EVENTS_SIGN_IN + msgId, "Zapisz"));
-        buttons.add(Button.secondary(ComponentId.EVENTS_SIGN_IN_RESERVE + msgId, tentativeLabel));
         buttons.add(Button.danger(ComponentId.EVENTS_SIGN_OUT + msgId, "Wypisz"));
         return buttons;
     }
@@ -62,12 +51,11 @@ public class EventsEmbed {
     @NotNull
     public static MessageEmbed getMessageEmbedWithUpdatedLists(Event event,
                                                                @NotNull Message message,
-                                                               String mainList,
-                                                               String reserveList) {
+                                                               String mainList) {
         List<MessageEmbed> embeds = message.getEmbeds();
         MessageEmbed mOld = embeds.get(0);
         List<Field> fieldsOld = embeds.get(0).getFields();
-        List<Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld, mainList, reserveList);
+        List<Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld, mainList);
         return new MessageEmbed(mOld.getUrl()
                 , mOld.getTitle()
                 , mOld.getDescription()
@@ -86,8 +74,7 @@ public class EventsEmbed {
     @NotNull
     private static List<Field> getFieldsWithUpdatedLists(@NotNull Event event,
                                                          @NotNull List<Field> fieldsOld,
-                                                         String mainList,
-                                                         String reserveList) {
+                                                         String mainList) {
         List<Field> fieldsNew = new ArrayList<>();
         for (int i = 0; i < fieldsOld.size(); i++) {
             if (i == 2) {
@@ -95,18 +82,6 @@ public class EventsEmbed {
                         EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")",
                         ">>> " + mainList,
                         true);
-                fieldsNew.add(fieldNew);
-            } else if (i == 4) {
-                Field fieldNew = new Field(
-                        EmbedSettings.NAME_LIST_RESERVE + "(" + getReserveListSize(event) + ")",
-                        ">>> " + reserveList,
-                        true);
-                if (event.getEventFor() == EventFor.SQ_EVENTS) {
-                    fieldNew = new Field(
-                            EmbedSettings.NAME_LIST_TENTATIVE + "(" + getReserveListSize(event) + ")",
-                            ">>> " + reserveList,
-                            true);
-                }
                 fieldsNew.add(fieldNew);
             } else {
                 fieldsNew.add(fieldsOld.get(i));
@@ -180,15 +155,11 @@ public class EventsEmbed {
     }
 
     private static int getMainListSize(@NotNull Event event) {
-        return event.getPlayers().stream().filter(Player::isMainList).toList().size();
-    }
-
-    private static int getReserveListSize(@NotNull Event event) {
-        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList().size();
+        return event.getPlayers().stream().toList().size();
     }
 
     public static @NotNull String getStringOfMainList(@NotNull Event event) throws FullListException {
-        List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(Player::isMainList).toList());
+        List<Player> players = new ArrayList<>(event.getPlayers().stream().toList());
         if (players.size() > 0) {
             players.sort(Comparator.comparing(Player::getTimestamp));
             StringBuilder result = new StringBuilder();
@@ -198,24 +169,6 @@ public class EventsEmbed {
             }
             if (result.length() >= MessageEmbed.VALUE_MAX_LENGTH) {
                 throw new FullListException("Main list of event [" + event.getName() + "] is full.");
-            }
-            return result.toString();
-        } else {
-            return "-";
-        }
-    }
-
-    public static @NotNull String getStringOfReserveList(@NotNull Event event) throws FullListException {
-        List<Player> players = new ArrayList<>(event.getPlayers().stream().filter(player -> !player.isMainList()).toList());
-        if (players.size() > 0) {
-            players.sort(Comparator.comparing(Player::getTimestamp));
-            StringBuilder result = new StringBuilder();
-            for (Player player : players) {
-                String nickname = prepareNicknameToEventList(player.getUserName());
-                result.append(nickname).append("\n");
-            }
-            if (result.length() >= MessageEmbed.VALUE_MAX_LENGTH) {
-                throw new FullListException("Reserve list of event [" + event.getName() + "] is full.");
             }
             return result.toString();
         } else {

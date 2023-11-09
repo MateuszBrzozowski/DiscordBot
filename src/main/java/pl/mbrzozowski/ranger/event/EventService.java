@@ -37,9 +37,7 @@ public class EventService {
     private final UsersReminderService usersReminderService;
 
     @Autowired
-    public EventService(EventRepository eventRepository,
-                        Timers timers,
-                        UsersReminderService usersReminderService) {
+    public EventService(EventRepository eventRepository, Timers timers, UsersReminderService usersReminderService) {
         this.eventRepository = eventRepository;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
@@ -88,11 +86,7 @@ public class EventService {
     }
 
     public List<Player> getMainList(@NotNull Event event) {
-        return event.getPlayers().stream().filter(Player::isMainList).toList();
-    }
-
-    public List<Player> getReserveList(@NotNull Event event) {
-        return event.getPlayers().stream().filter(player -> !player.isMainList()).toList();
+        return event.getPlayers().stream().toList();
     }
 
     private void setReminders() {
@@ -108,11 +102,7 @@ public class EventService {
 
     @NotNull
     private List<Event> filterEventsAfterNow(@NotNull List<Event> eventList) {
-        return eventList
-                .stream()
-                .filter(event -> event.getDate() != null)
-                .filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))))
-                .toList();
+        return eventList.stream().filter(event -> event.getDate() != null).filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)))).toList();
     }
 
     void createNewEvent(@NotNull final EventRequest eventRequest) {
@@ -121,8 +111,7 @@ public class EventService {
             throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste.");
         }
         if (!Validator.isEventDateTimeAfterNow(eventRequest.getDateTime())) {
-            throw new IllegalArgumentException("Niepoprawny format daty lub data jest z przeszłości: "
-                    + eventRequest.getDateTime());
+            throw new IllegalArgumentException("Niepoprawny format daty lub data jest z przeszłości: " + eventRequest.getDateTime());
         }
         createEventChannel(eventRequest);
     }
@@ -141,35 +130,16 @@ public class EventService {
         createEventChannel(eventRequest, guild, channelName, category);
     }
 
-    private void createEventChannel(@NotNull final EventRequest eventRequest,
-                                    @NotNull final Guild guild,
-                                    @NotNull final String channelName,
-                                    @NotNull final Category category) {
-        final Collection<Permission> permissions =
-                EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
+    private void createEventChannel(@NotNull final EventRequest eventRequest, @NotNull final Guild guild, @NotNull final String channelName, @NotNull final Category category) {
+        final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
-            guild.createTextChannel(channelName, category)
-                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
-                    .queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
-            guild.createTextChannel(channelName, category)
-                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null)
-                    .queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
-            guild.createTextChannel(channelName, category)
-                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
-                    .queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
         } else {
-            guild.createTextChannel(channelName, category)
-                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
-                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
-                    .queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
         }
     }
 
@@ -178,32 +148,17 @@ public class EventService {
         log.info("Creating list");
         String msg = StringProvider.getMessageForEventList(eventRequest);
         EmbedBuilder builder = EventsEmbed.getEventEmbedBuilder(eventRequest);
-        textChannel
-                .sendMessage(msg)
-                .setEmbeds(builder.build())
-                .queue(message -> {
-                    MessageEmbed mOld = message.getEmbeds().get(0);
-                    String msgId = message.getId();
-                    message
-                            .editMessageEmbeds(mOld)
-                            .setActionRow(EventsEmbed.getActionRowForEvent(msgId, eventRequest))
-                            .queue();
-                    message.pin().queue();
-                    createEvent(eventRequest, textChannel.getId(), message.getId());
-                });
+        textChannel.sendMessage(msg).setEmbeds(builder.build()).queue(message -> {
+            MessageEmbed mOld = message.getEmbeds().get(0);
+            String msgId = message.getId();
+            message.editMessageEmbeds(mOld).setActionRow(EventsEmbed.getActionRowForEvent(msgId)).queue();
+            message.pin().queue();
+            createEvent(eventRequest, textChannel.getId(), message.getId());
+        });
     }
 
-    private void createEvent(@NotNull EventRequest eventRequest,
-                             @NotNull String channelId,
-                             @NotNull String messageId) {
-        Event event = Event.builder()
-                .name(eventRequest.getName())
-                .msgId(messageId)
-                .channelId(channelId)
-                .isActive(true)
-                .date(eventRequest.getDateTime())
-                .eventFor(eventRequest.getEventFor())
-                .build();
+    private void createEvent(@NotNull EventRequest eventRequest, @NotNull String channelId, @NotNull String messageId) {
+        Event event = Event.builder().name(eventRequest.getName()).msgId(messageId).channelId(channelId).isActive(true).date(eventRequest.getDateTime()).eventFor(eventRequest.getEventFor()).build();
         save(event);
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
@@ -223,12 +178,10 @@ public class EventService {
         if (Validator.isEventDateTimeAfterNow(event.getDate())) {
             switch (buttonClick) {
                 case SIGN_IN -> isSuccess = signIn(buttonInteractionEvent, event, userName, userID);
-                case SIGN_IN_RESERVE -> isSuccess = signInReserve(buttonInteractionEvent, event, userName, userID);
                 case SIGN_OUT -> isSuccess = signOut(buttonInteractionEvent, event, userID);
             }
         } else {
-            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk ["
-                    + event.getName() + event.getDate().toString() + "] - Event się już rozpoczął.");
+            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk [" + event.getName() + event.getDate().toString() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
             setRedCircleInChannelName(event);
@@ -246,22 +199,12 @@ public class EventService {
         }
     }
 
-    private boolean signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                           @NotNull Event event,
-                           String userName,
-                           String userID) {
+    private boolean signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
         log.info(userName + " sign in");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
-            if (!player.isMainList()) {
-                player.setMainList(true);
-                player.setTimestamp(LocalDateTime.now());
-                RangerLogger.info(Users.getUserNicknameFromID(userID) + " przepisał się na listę.", event.getName() + event.getDate().toString());
-                return true;
-            } else {
-                ResponseMessage.youAreOnList(buttonInteractionEvent);
-                return false;
-            }
+            ResponseMessage.youAreOnList(buttonInteractionEvent);
+            return false;
         } else {
             Player newPlayer = new Player(null, userID, userName, true, event, LocalDateTime.now());
             event.getPlayers().add(newPlayer);
@@ -270,47 +213,13 @@ public class EventService {
         }
     }
 
-    private boolean signInReserve(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                                  @NotNull Event event,
-                                  String userName,
-                                  String userID) {
-        log.info(userName + " sign in reserve");
-        Player player = getPlayer(event.getPlayers(), userID);
-        if (player != null) {
-            if (player.isMainList()) {
-                if (Validator.isThreeHoursToEvent(event.getDate())) {
-                    ResponseMessage.youCantSignReserve(buttonInteractionEvent);
-                    RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z głównej listy na rezerwową ["
-                            + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
-                    return false;
-                } else {
-                    player.setMainList(false);
-                    player.setTimestamp(LocalDateTime.now());
-                    RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
-                    return true;
-                }
-            } else {
-                ResponseMessage.youAreOnList(buttonInteractionEvent);
-                return false;
-            }
-        } else {
-            Player newPlayer = new Player(null, userID, userName, false, event, LocalDateTime.now());
-            event.getPlayers().add(newPlayer);
-            RangerLogger.info(Users.getUserNicknameFromID(userID) + " zapisał się na listę rezerwową.", event.getName() + event.getDate().toString());
-            return true;
-        }
-    }
-
-    private boolean signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent,
-                            @NotNull Event event,
-                            String userID) {
+    private boolean signOut(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userID) {
         log.info(userID + " sign out");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
             if (Validator.isThreeHoursToEvent(event.getDate())) {
                 ResponseMessage.youCantSingOut(buttonInteractionEvent);
-                RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu ["
-                        + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
+                RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] chciał wypisać się z eventu [" + event.getName() + event.getDate().toString() + "] - Czas do eventu 3h lub mniej.");
                 return false;
             } else {
                 event.getPlayers().removeIf(p -> p.getUserId().equalsIgnoreCase(userID));
@@ -357,33 +266,25 @@ public class EventService {
         if (channel != null) {
             String buffer = channel.getName();
             buffer = StringProvider.removeAnyPrefixCircle(buffer);
-            channel.getManager()
-                    .setName(EmbedSettings.RED_CIRCLE + buffer)
-                    .queue();
+            channel.getManager().setName(EmbedSettings.RED_CIRCLE + buffer).queue();
         }
     }
 
     void updateEmbed(@NotNull Event event) throws FullListException {
         log.info("Event " + event.getName() + " updating embed");
         String mainList = EventsEmbed.getStringOfMainList(event);
-        String reserveList = EventsEmbed.getStringOfReserveList(event);
         String channelID = event.getChannelId();
         String messageID = event.getMsgId();
         TextChannel channel = DiscordBot.getJda().getTextChannelById(channelID);
         if (channel != null) {
             channel.retrieveMessageById(messageID).queue(message -> {
-                MessageEmbed messageEmbed = EventsEmbed.getMessageEmbedWithUpdatedLists(event, message, mainList, reserveList);
+                MessageEmbed messageEmbed = EventsEmbed.getMessageEmbedWithUpdatedLists(event, message, mainList);
                 message.editMessageEmbeds(messageEmbed).queue();
             });
         }
     }
 
-    void updateEmbed(@NotNull Event event,
-                     boolean isChangedDateTime,
-                     boolean isChangedName,
-                     boolean isChangedDescription,
-                     String description,
-                     boolean notifi) {
+    void updateEmbed(@NotNull Event event, boolean isChangedDateTime, boolean isChangedName, boolean isChangedDescription, String description, boolean notifi) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (textChannel == null) {
             return;
@@ -392,12 +293,7 @@ public class EventService {
             updateChannelName(event, textChannel);
         }
         textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
-            MessageEmbed mNew = EventsEmbed.getUpdatedEmbed(event,
-                    message,
-                    isChangedDateTime,
-                    isChangedName,
-                    isChangedDescription,
-                    description);
+            MessageEmbed mNew = EventsEmbed.getUpdatedEmbed(event, message, isChangedDateTime, isChangedName, isChangedDescription, description);
             message.editMessageEmbeds(mNew).queue();
         });
         updateTimer(event);
@@ -411,20 +307,13 @@ public class EventService {
     private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel) {
         String dataTime = StringProvider.getStringOfEventDateTime(event);
         String newName = StringProvider.getChannelNameWithGreenCircle(event, dataTime);
-        textChannel
-                .getManager()
-                .setName(newName)
-                .queue();
+        textChannel.getManager().setName(newName).queue();
     }
 
     private void sendInfoChanges(Event event, EventChanges whatChange, String dateTime) {
         List<Player> mainList = getMainList(event);
-        List<Player> reserveList = getReserveList(event);
-        log.info("Run reminder: Main list - [" + mainList.size() + "], Reserve - [" + reserveList.size() + "]");
+        log.info("Run reminder: Main list - [" + mainList.size() + "]");
         for (Player player : mainList) {
-            EmbedInfo.sendInfoChanges(player.getUserId(), event, whatChange, dateTime);
-        }
-        for (Player player : reserveList) {
             EmbedInfo.sendInfoChanges(player.getUserId(), event, whatChange, dateTime);
         }
     }

@@ -56,7 +56,7 @@ public class EventsGenerator {
             builder.setColor(Color.YELLOW);
             builder.setThumbnail(EmbedSettings.THUMBNAIL);
             builder.setDescription("""
-                    Odpowiedz na kilka moich pytań. Nastepnie na podstawie Twoich odpowiedzi utworzę listę na Twój mecz/szkolenie/event.
+                    Odpowiedz na kilka moich pytań. Następnie na podstawie Twoich odpowiedzi utworzę listę na Twój mecz/szkolenie/event.
 
                     Przerwanie generowania - Wpisz tutaj **!cancel**
                     """);
