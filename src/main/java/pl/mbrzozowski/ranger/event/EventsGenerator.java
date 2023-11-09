@@ -270,11 +270,11 @@ public class EventsGenerator {
 
     private void embedListExample(PrivateChannel privateChannel) {
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT) {
-            privateChannel.sendMessage("CLAN_MEMBER RECRUT Zapisy!").queue();
+            privateChannel.sendMessage("**Clan Member Rekrut** Zapisy!").queue();
         } else if (eventRequest.getEventFor() == EventFor.RECRUIT) {
-            privateChannel.sendMessage("RECRUT Zapisy!").queue();
+            privateChannel.sendMessage("**Rekrut** Zapisy!").queue();
         } else if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER) {
-            privateChannel.sendMessage("CLAN_MEMBER Zapisy!").queue();
+            privateChannel.sendMessage("**Clan Member** Zapisy!").queue();
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
@@ -283,13 +283,12 @@ public class EventsGenerator {
         if (eventRequest.getDescription() != null) {
             builder.setDescription(eventRequest.getDescription() + "\n");
         }
-        builder.addField(EmbedSettings.WHEN_DATE, eventRequest.getDate(), true);
-        builder.addBlankField(true);
-        builder.addField(EmbedSettings.WHEN_TIME, eventRequest.getTime(), true);
+        builder.addField(EmbedSettings.WHEN_DATE,
+                Converter.LocalDateTimeToTimestampDateTimeLongFormat(eventRequest.getDateTime()) + "\n" +
+                        EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(eventRequest.getDateTime()),
+                true);
         builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
-        builder.addBlankField(true);
-        builder.addField(EmbedSettings.NAME_LIST_RESERVE + "(0)", ">>> -", true);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
