@@ -102,7 +102,12 @@ public class EventService {
 
     @NotNull
     private List<Event> filterEventsAfterNow(@NotNull List<Event> eventList) {
-        return eventList.stream().filter(event -> event.getDate() != null).filter(event -> event.getDate().isAfter(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)))).toList();
+        return eventList
+                .stream()
+                .filter(event -> event.getDate() != null)
+                .filter(event -> event.getDate()
+                        .isAfter(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))))
+                .toList();
     }
 
     void createNewEvent(@NotNull final EventRequest eventRequest) {
@@ -130,16 +135,34 @@ public class EventService {
         createEventChannel(eventRequest, guild, channelName, category);
     }
 
-    private void createEventChannel(@NotNull final EventRequest eventRequest, @NotNull final Guild guild, @NotNull final String channelName, @NotNull final Category category) {
+    private void createEventChannel(@NotNull final EventRequest eventRequest,
+                                    @NotNull final Guild guild,
+                                    @NotNull final String channelName,
+                                    @NotNull final Category category) {
         final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
         if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
-            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
-            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null).addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
-            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         } else {
-            guild.createTextChannel(channelName, category).addPermissionOverride(guild.getPublicRole(), null, permissions).addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null).queue(textChannel -> createList(textChannel, eventRequest));
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         }
     }
 
@@ -158,7 +181,14 @@ public class EventService {
     }
 
     private void createEvent(@NotNull EventRequest eventRequest, @NotNull String channelId, @NotNull String messageId) {
-        Event event = Event.builder().name(eventRequest.getName()).msgId(messageId).channelId(channelId).isActive(true).date(eventRequest.getDateTime()).eventFor(eventRequest.getEventFor()).build();
+        Event event = Event
+                .builder()
+                .name(eventRequest.getName())
+                .msgId(messageId)
+                .channelId(channelId)
+                .isActive(true)
+                .date(eventRequest.getDateTime())
+                .eventFor(eventRequest.getEventFor()).build();
         save(event);
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
@@ -199,7 +229,10 @@ public class EventService {
         }
     }
 
-    private boolean signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull Event event, String userName, String userID) {
+    private boolean signIn(@NotNull ButtonInteractionEvent buttonInteractionEvent,
+                           @NotNull Event event,
+                           String userName,
+                           String userID) {
         log.info(userName + " sign in");
         Player player = getPlayer(event.getPlayers(), userID);
         if (player != null) {
@@ -284,7 +317,12 @@ public class EventService {
         }
     }
 
-    void updateEmbed(@NotNull Event event, boolean isChangedDateTime, boolean isChangedName, boolean isChangedDescription, String description, boolean notifi) {
+    void updateEmbed(@NotNull Event event,
+                     boolean isChangedDateTime,
+                     boolean isChangedName,
+                     boolean isChangedDescription,
+                     String description,
+                     boolean notifi) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (textChannel == null) {
             return;
