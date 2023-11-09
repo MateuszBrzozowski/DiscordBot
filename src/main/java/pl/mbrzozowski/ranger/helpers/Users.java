@@ -39,7 +39,8 @@ public class Users {
         JDA jda = DiscordBot.getJda();
         User user = jda.getUserById(userID);
         if (user != null) {
-            return user.getName();
+            String globalName = user.getGlobalName();
+            return Objects.requireNonNullElseGet(globalName, user::getName);
         }
         return null;
     }
