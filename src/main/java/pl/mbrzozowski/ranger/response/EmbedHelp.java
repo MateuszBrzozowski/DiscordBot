@@ -13,7 +13,7 @@ public class EmbedHelp extends EmbedCreator {
 
     private static PrivateChannel privateChannel;
     private static final String TITLE = "Ranger Bot - POMOC";
-    private static final String REKRUT = "recruit";
+    private static final String RECRUIT = "recruit";
     public static final String REMINDER = "reminder";
 
     public static void help(String userID, String[] message) {
@@ -29,7 +29,7 @@ public class EmbedHelp extends EmbedCreator {
                 mainHelp();
                 if (Users.isUserDev(userID)) helpDevCommand();
             } else if (message.length == 2) {
-                if (message[1].equalsIgnoreCase(REKRUT)) {
+                if (message[1].equalsIgnoreCase(RECRUIT)) {
                     if (admin) {
                         helpRecruit();
                     }
@@ -44,7 +44,7 @@ public class EmbedHelp extends EmbedCreator {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(TITLE);
         builder.setFooter(getFooter());
-        builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Opis przycisków w kanałach rekrutacyjnych.\n" +
+        builder.addField("", ">>> **!help " + RECRUIT + "** - (Rada klanu) - Opis przycisków w kanałach rekrutacyjnych.\n" +
                 "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n", false);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
