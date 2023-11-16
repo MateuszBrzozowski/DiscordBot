@@ -16,7 +16,6 @@ import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
-import pl.mbrzozowski.ranger.stats.ServerStats;
 
 @Slf4j
 @Service
@@ -26,7 +25,6 @@ public class WriteListener extends ListenerAdapter {
     private final RecruitsService recruitsService;
     private final BotWriter botWriter;
     private final ServerService serverService;
-    private final ServerStats serverStats;
     private final UsersReminderService usersReminderService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
@@ -37,7 +35,6 @@ public class WriteListener extends ListenerAdapter {
                          RecruitsService recruitsService,
                          BotWriter botWriter,
                          ServerService serverService,
-                         ServerStats serverStats,
                          UsersReminderService usersReminderService,
                          EventsGeneratorService eventsGeneratorService,
                          EventsSettingsService eventsSettingsService,
@@ -46,7 +43,6 @@ public class WriteListener extends ListenerAdapter {
         this.recruitsService = recruitsService;
         this.botWriter = botWriter;
         this.serverService = serverService;
-        this.serverStats = serverStats;
         this.usersReminderService = usersReminderService;
         this.eventsGeneratorService = eventsGeneratorService;
         this.eventsSettingsService = eventsSettingsService;
@@ -66,19 +62,19 @@ public class WriteListener extends ListenerAdapter {
                 event);
         log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
 
-        CheckUser checkUser = new CheckUser(event);
-        LogChannel logChannel = new LogChannel(event);
-        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
+        LogChannel logChannel = new LogChannel(event);
+        CheckUser checkUser = new CheckUser(event);
+        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, serverService);
+        HelpCmd helpCmd = new HelpCmd(event);
         CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
         EmbedSender embedSender = new EmbedSender(event, roleService);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
-        HelpCmd helpCmd = new HelpCmd(event);
         RecruitCmd recruitCmd = new RecruitCmd(event, recruitsService);
-        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, serverService);
-        InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
+        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
+        InvalidCmd invalidCmd = new InvalidCmd(event);
 
         reminderCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
@@ -92,7 +88,6 @@ public class WriteListener extends ListenerAdapter {
         checkIsPrivateChannel.setNextProccess(eventsSettingsCmd);
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
-
 
         reminderCmd.proccessMessage(msg);
     }
