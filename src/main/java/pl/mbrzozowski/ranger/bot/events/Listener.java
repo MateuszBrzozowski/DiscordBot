@@ -25,17 +25,19 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
-        log.info("[EVENT] - Guild member join event");
+        log.info(event.getUser() + " - Guild member join event");
         addRole(event.getUser().getId());
         recruitsService.checkIsRecruit(event.getUser().getId());
     }
 
     private void addRole(String userID) {
+        log.info("Assigning a role to a user");
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
         if (guild != null) {
             Role role = guild.getRoleById(RoleID.SQUAD);
             if (role != null) {
                 guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
+                log.info("Squad role given");
             }
         }
     }

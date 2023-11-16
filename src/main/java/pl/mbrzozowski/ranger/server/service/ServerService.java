@@ -39,6 +39,7 @@ public class ServerService {
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
+        log.info(event.getUser() + " - button type: " + buttonType.toString());
         if (!userHasActiveReport(event.getUser().getId())) {
             createChannel(event, buttonType);
             event.deferEdit().queue();
@@ -162,6 +163,7 @@ public class ServerService {
     }
 
     public void deleteByChannelId(String channelID) {
+        log.info("Deleting channel by id(id=" + channelID + ")");
         clientRepository.deleteByChannelId(channelID);
     }
 

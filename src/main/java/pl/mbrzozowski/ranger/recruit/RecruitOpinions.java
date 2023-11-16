@@ -25,6 +25,7 @@ public class RecruitOpinions {
 
 
     public static void openOpinionAboutRecruit(@NotNull ButtonInteractionEvent event) {
+        log.info(event.getUser() + " - open opinion about recruit");
         TextInput recruitName = TextInput.create(ComponentId.RECRUIT_NAME, "Nick Rekruta", TextInputStyle.SHORT)
                 .setMaxLength(100)
                 .setPlaceholder("Nick")
@@ -51,6 +52,7 @@ public class RecruitOpinions {
     }
 
     public static void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
+        log.info(event.getUser() + " - open anonymous complaints");
         TextInput text = TextInput.create(ComponentId.MODAL_COMPLAINT_TEXT, "Wiadomość", TextInputStyle.PARAGRAPH)
                 .setRequiredRange(10, 1000)
                 .setPlaceholder("Opisz sytuacje.")

@@ -60,7 +60,7 @@ public class WriteListener extends ListenerAdapter {
                 contentDisplay,
                 event.getAuthor().getId(),
                 event);
-        log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
+        log.info(event.getAuthor() + " - send message");
 
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         LogChannel logChannel = new LogChannel(event);

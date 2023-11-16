@@ -23,11 +23,11 @@ public class RoleEditor {
             if (!hasRole) {
                 guild.addRoleToMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, true);
-                log.info(Users.getUserNicknameFromID(userID) + " - gave him role " + role.getName());
+                log.info(guild.getMemberById(userID) + " - gave him role " + role.getName());
             } else {
                 guild.removeRoleFromMember(UserSnowflake.fromId(userID), role).queue();
                 sendConfirmation(role, userID, false);
-                log.info(Users.getUserNicknameFromID(userID) + " - take away the role " + role.getName());
+                log.info(guild.getMemberById(userID)+ " - take away the role " + role.getName());
             }
         }
     }

@@ -101,7 +101,7 @@ public class RecruitsService {
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
-        log.info("New recruit application - " + event.getUser().getId());
+        log.info(event.getUser() + " - New recruit application");
         String userID = event.getUser().getId();
         if (Users.memberOnGuildShorterThan(userID, 10)) {
             ResponseMessage.noReqTimeOnServer(event);
@@ -161,7 +161,7 @@ public class RecruitsService {
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
-        log.info("Recruit confirm - " + event.getUser().getId());
+        log.info(event.getUser() + " - Recruit confirm");
         if (!hasRecruitChannel(event.getUser().getId())) {
             String userID = event.getUser().getId();
             String userName = Users.getUserNicknameFromID(userID);
@@ -204,6 +204,7 @@ public class RecruitsService {
     }
 
     public void deleteChannelByID(String channelID) {
+        log.info("Deleting channel by id(id=" + channelID + ")");
         Optional<Recruit> recruitOptional = findByChannelId(channelID);
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
@@ -258,7 +259,7 @@ public class RecruitsService {
     }
 
     public void accepted(@NotNull ButtonInteractionEvent event) {
-        log.info("Recruit accepted - " + event.getUser().getId());
+        log.info(event.getUser() + " - Recruit accepted");
         Optional<Recruit> recruitOptional = findByChannelId(event.getChannel().getId());
         if (recruitOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(event);
@@ -282,7 +283,7 @@ public class RecruitsService {
     }
 
     public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info("Recruit positive result - " + interactionEvent.getUser().getId());
+        log.info(interactionEvent.getUser() + " - Recruit positive result");
         boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
@@ -314,7 +315,7 @@ public class RecruitsService {
     }
 
     public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info("Recruit negative result - " + interactionEvent.getUser().getId());
+        log.info(interactionEvent.getUser() + " - Recruit negative result");
         boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
@@ -417,7 +418,7 @@ public class RecruitsService {
     }
 
     public void recruitNotAccepted(@NotNull ButtonInteractionEvent event) {
-        log.info("Recruit close channel by " + event.getUser().getName());
+        log.info(event.getUser() + " - Recruit not accepted ");
         TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
         recruitNotAccepted(event, textChannel, userID);

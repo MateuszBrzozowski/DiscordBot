@@ -195,7 +195,7 @@ public class EventService {
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
-        log.info("Event button click - " + buttonInteractionEvent.getUser().getName());
+        log.info(buttonInteractionEvent.getUser() + " - Event, button type: " + buttonClick.toString());
         Optional<Event> eventOptional = findEventByMsgId(buttonInteractionEvent.getMessage().getId());
         if (eventOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(buttonInteractionEvent);

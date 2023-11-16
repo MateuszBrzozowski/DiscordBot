@@ -38,7 +38,7 @@ public class ButtonClickListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info("[EVENT] - Button interaction event");
+        log.info(interactionEvent.getUser() + " - Button interaction event");
         boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
         newRecruit(interactionEvent, isRadaKlanu);
     }

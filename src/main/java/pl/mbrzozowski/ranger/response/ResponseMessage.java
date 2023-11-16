@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.response;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -10,6 +11,7 @@ import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
 
+@Slf4j
 public class ResponseMessage {
 
     public static void youAreOnList(@NotNull ButtonInteractionEvent event) {
@@ -63,6 +65,7 @@ public class ResponseMessage {
     }
 
     public static void operationNotPossible(@NotNull ButtonInteractionEvent event) {
+        log.info(event.getUser() + " - operation not possible");
         event.reply("**Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)
                 .queue();
@@ -119,6 +122,7 @@ public class ResponseMessage {
     }
 
     public static void noPermission(@NotNull ButtonInteractionEvent event) {
+        log.info(event.getUser() + " - No permission");
         event.reply("Brak uprawnień!")
                 .setEphemeral(true)
                 .queue();

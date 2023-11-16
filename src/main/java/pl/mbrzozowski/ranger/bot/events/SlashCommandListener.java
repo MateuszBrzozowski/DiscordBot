@@ -42,13 +42,14 @@ public class SlashCommandListener extends ListenerAdapter {
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         if (event.getGuild().getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
             ArrayList<CommandData> commandData = new ArrayList<>();
-            writeCommandData(commandData);
+//            writeCommandData(commandData);
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        log.info(event.getUser() + " - used slash command");
         String name = event.getName();
         if (name.equalsIgnoreCase(ADD_ROLE_TO_RANGER)) {
             boolean isAdded = roleService.addRole(event.getOption(DISCORD_ROLE_OPTION_NAME_ID),

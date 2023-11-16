@@ -31,10 +31,10 @@ public class SelectMenuListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        log.info(event.getUser() + " - String select interaction event");
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
-        log.info(event.getUser().getName() + " menu interaction event");
         if (isRoles) {
             List<ActionRow> actionRows = event.getMessage().getActionRows();
             event.getInteraction().deferEdit().queue();

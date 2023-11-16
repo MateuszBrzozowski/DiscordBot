@@ -25,7 +25,7 @@ public class ChannelUpdate extends ListenerAdapter {
 
     @Override
     public void onChannelDelete(@NotNull ChannelDeleteEvent event) {
-        log.info("[EVENT] - Channel delete event");
+        log.info("Channel delete event");
         String channelID = event.getChannel().getId();
         recruitsService.deleteChannelByID(channelID);
         eventService.deleteByChannelId(channelID);
