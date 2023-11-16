@@ -19,7 +19,9 @@ public class ReminderCmd extends Proccess {
     @Override
     public void proccessMessage(Message message) {
         if (messageReceived.isFromType(ChannelType.PRIVATE)) {
-            if (message.getWords()[0].equalsIgnoreCase(Commands.HELPS) && message.getWords()[1].equalsIgnoreCase(EmbedHelp.REMINDER)) {
+            if (message.getWords().length > 1 &&
+                    message.getWords()[0].equalsIgnoreCase(Commands.HELPS) &&
+                    message.getWords()[1].equalsIgnoreCase(EmbedHelp.REMINDER)) {
                 EmbedHelp.help(message.getUserID(), message.getWords());
             } else if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_OFF)) {
                 usersReminderService.add(messageReceived.getAuthor().getId());
