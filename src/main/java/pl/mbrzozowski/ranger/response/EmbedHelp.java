@@ -12,24 +12,9 @@ import pl.mbrzozowski.ranger.helpers.Users;
 public class EmbedHelp extends EmbedCreator {
 
     private static PrivateChannel privateChannel;
-    private static final String title = "Ranger Bot - POMOC";
-    private static final String REKRUT = "recrut";
-    private static final String GENERATOR = "generator";
-    private static final String GAME = "game";
-    private static final String EVENT_SETTINGS = "event";
+    private static final String TITLE = "Ranger Bot - POMOC";
+    private static final String REKRUT = "recruit";
     public static final String REMINDER = "reminder";
-
-    private static void mainHelp() {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title);
-        builder.setFooter(getFooter());
-        builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Komendy do rekrutów. \n" +
-                "**!help " + GENERATOR + "** - Automatyczny generator eventów.\n" +
-                "**!help " + EVENT_SETTINGS + "** - (Rada klanu) - Zarządzanie eventami.\n" +
-                "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n" +
-                "**!help " + GAME + "** - Gry", false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
 
     public static void help(String userID, String[] message) {
         User userById = DiscordBot.getJda().getUserById(userID);
@@ -38,7 +23,7 @@ public class EmbedHelp extends EmbedCreator {
             boolean admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
             if (!admin) admin = Users.isUserDev(userID);
 
-            log.info("User [" + Users.getUserNicknameFromID(userID) + "] open help. ");
+            log.info(Users.getUserNicknameFromID(userID) + " opened help.");
 
             if (message.length == 1) {
                 mainHelp();
@@ -46,35 +31,21 @@ public class EmbedHelp extends EmbedCreator {
             } else if (message.length == 2) {
                 if (message[1].equalsIgnoreCase(REKRUT)) {
                     if (admin) {
-                        helpRecrut();
+                        helpRecruit();
                     }
-                } else if (message[1].equalsIgnoreCase(GENERATOR)) {
-                    helpGenerator();
                 } else if (message[1].equalsIgnoreCase(REMINDER)) {
                     helpReminder();
-                } else if (message[1].equalsIgnoreCase(GAME)) {
-                    helpGame();
-                } else if (message[1].equalsIgnoreCase(EVENT_SETTINGS)) {
-                    if (admin) {
-                        helpEventsSettings();
-                    }
                 }
             }
         }
     }
 
-    private static void helpEventsSettings() {
+    private static void mainHelp() {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title + " - Zarządznie eventami");
-        builder.setDescription("Niektóre z poniższych komend po poprawnym ich zastosowaniu wysyłają do każdego zapisanego wiadomość prywatną z informacją o zmianach w evencie.");
-        builder.addField("", """
-                **!time [msgID] [HH:mm]** - zmienia godzine w evencie
-                **!time [msgID] [HH:mm] -noNotifi** - zmienia godzine w evencie bez powiadomienia uczestników
-                **!date [msgID] [dd.MM.yyyy]** - zmienia date w evencie
-                **!date [msgID] [dd.MM.yyyy] -noNotifi** - zmienia date w evencie bez powiadomienia uczestników
-                **!cancelEvent [msgID]** - Zamyka Event i usuwa z bazy - OSTROŻNIE! Nie będzie możliwości powrotu. Bądź pewny tego ruchu. Wysyła powiadomienia do każdego uczestnika o odwołaniu.
-                **!cancelEvent [msgID] -noNotifi** - Jak wyżej bez powiadomienia o odwołaniu.""", false);
-        builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
+        builder.setTitle(TITLE);
+        builder.setFooter(getFooter());
+        builder.addField("", ">>> **!help " + REKRUT + "** - (Rada klanu) - Opis przycisków w kanałach rekrutacyjnych.\n" +
+                "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n", false);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
@@ -83,10 +54,10 @@ public class EmbedHelp extends EmbedCreator {
         builder.setTitle("Ranger Bot - POMOC - DEV");
         builder.addField("Komendy DEV", """
                 **!disable [msgID]** -  Wyłącza buttony
-                **!disable [msgID] [channID]** -  Wyłącza buttony
+                **!disable [msgID] [channelID]** -  Wyłącza buttony
                 **!enable [msgID]** - Włącza buttony
-                **!enable [msgID] [channID]** - Włącza buttony
-                **!status** - Wyswietla status aplikacji.
+                **!enable [msgID] [channelID]** - Włącza buttony
+                **!status** - Wyświetla status aplikacji.
                 **!msg [channelID]** - Wysyła wiadomość na kanale o ID [channelID] jako bot
                 **!msgCancel** - Anuluje wysyłanie wiadomości jako bot.
                 **!removeUserFromEvent [USER_ID] [EVENT_ID]** - Wykreśla użytkownika z eventu.
@@ -96,7 +67,7 @@ public class EmbedHelp extends EmbedCreator {
 
     private static void helpReminder() {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title + " - REMINDER");
+        builder.setTitle(TITLE + " - REMINDER");
         builder.setFooter(getFooter());
         builder.setDescription("""
                 Możesz włączyć i wyłączyć powiadomienia dla eventów przy pomocy komend.
@@ -107,42 +78,26 @@ public class EmbedHelp extends EmbedCreator {
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    private static void helpGame() {
+    private static void helpRecruit() {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title + " - GRY");
-        builder.addField("", ">>> **!kostka** - losuje i wyświetla wylosowną liczbę.\n" +
-                "**!kostka <Temat_gry>** - Rozpoczyna grę na kanale na którym zostało wpisane polecenie. Gra na dwie osoby. Osoba z większą liczbą wygrywa.", false);
-        builder.setFooter("Komendy można wpisać na dowolnym kanale na discordzie Rangers Polska.");
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    private static void helpGenerator() {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title + " - GENERATOR");
-        builder.addField("Po wpisaniu poniższych komend uruchamia się generator eventu. Postępuj zgodnie z instrukcjami.",
-                """
-                        >>> **!generator** - Tworzy kanał i listę w sekcji mecze/szkolenia/eventy
-                        *(Polecenie możesz napisać tutaj w prywatnej wiadomości lub na dowolnym kanale)*
-                        **!generatorHere** - Tworzy listę na kanale w którym polecenie zostalo wpisane.\s
-                        Używać gdy opis eventu jest zbyt długi i nie zmieści się bezpośrednio na liście. (Maksymalna liczba znaków - 2048)
-                        Stwórz kanał, dodaj swój opis, a następnie wywołaj tą komendę. *(POMOC - Nowy kanał - !help channel)*
-
-                        """, false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    private static void helpRecrut() {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
-        builder.setTitle(title + " - REKRUT");
-        builder.addField("", """
-
-                >>> **!p** - Pinguje rekruta i wysyła na kanale POZYTYWNY wynik rekrutacji
-                **!n** - Pinguje rekruta i wysyła na kanale NEGATYWNY wynik rekrutacji
-                **!close** - Zamyka kanał rekrutacji - rekrut nie widzi kanału/nie może pisać.
-                **!open** - Otwiera kanał rekrutacji - rekrut ponownie może widzieć i pisać na kanale.
-                **!remove** - Usuwa kanał rekrutacji. Możesz usunąć kanał ręcznie bez komendy.
-
-                """, false);
+        builder.setTitle(TITLE + " - REKRUT");
+        builder.addField("Niebieski przycisk",
+                "Użytkownik przeszedł rozmowę. Rozpoczął się jego okres rekrutacyjny. Dodaje clan tag do nickname." +
+                        "Nadaje rangę rekruta. **(UWAGA! Sprawdzić osobiście tą zmiany).**",
+                false);
+        builder.addField("Szary przycisk",
+                "Odrzuca podanie. Wysyła potwierdzenie zdarzenia na kanale. Najlepiej używać jeżeli użytkownik " +
+                        "nie rozpoczął rekrutacji, nie przeszedł rozmowy lub wyszedł z discorda.",
+                false);
+        builder.addField("Zielony przycisk",
+                "Pinguje rekruta i wysyła na kanale POZYTYWNY wynik rekrutacji. Zmienia nickname bez małego r. " +
+                        "Odbiera rangę rekruta i nadaje Clan Member" +
+                        " **(UWAGA! Sprawdzić osobiście tą zmiany).**",
+                false);
+        builder.addField("Czerwony przycisk",
+                "Pinguje rekruta i wysyła na kanale NEGATYWNY wynik rekrutacji. Usuwa clan tag z nickname. " +
+                        "Odbiera rangę rekruta **(UWAGA! Sprawdzić osobiście tą zmiany).**",
+                false);
         privateChannel.sendMessageEmbeds(builder.build()).queue();
     }
 }
