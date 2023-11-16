@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
-import pl.mbrzozowski.ranger.dice.DiceGames;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
@@ -25,7 +24,6 @@ public class WriteListener extends ListenerAdapter {
 
     private final EventService eventService;
     private final RecruitsService recruitsService;
-    private final DiceGames diceGames;
     private final BotWriter botWriter;
     private final ServerService serverService;
     private final ServerStats serverStats;
@@ -37,7 +35,6 @@ public class WriteListener extends ListenerAdapter {
     @Autowired
     public WriteListener(EventService eventService,
                          RecruitsService recruitsService,
-                         DiceGames diceGames,
                          BotWriter botWriter,
                          ServerService serverService,
                          ServerStats serverStats,
@@ -47,7 +44,6 @@ public class WriteListener extends ListenerAdapter {
                          RoleService roleService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
-        this.diceGames = diceGames;
         this.botWriter = botWriter;
         this.serverService = serverService;
         this.serverStats = serverStats;
@@ -70,7 +66,6 @@ public class WriteListener extends ListenerAdapter {
                 event);
         log.info("[EVENT] - " + event.getAuthor().getName() + " - send message");
 
-        DiceCmd diceCmd = new DiceCmd(event, diceGames);
         CheckUser checkUser = new CheckUser(event);
         LogChannel logChannel = new LogChannel(event);
         GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
@@ -85,7 +80,6 @@ public class WriteListener extends ListenerAdapter {
         InvalidCmd invalidCmd = new InvalidCmd(event);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
 
-        diceCmd.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(generatorCmd);
@@ -100,7 +94,7 @@ public class WriteListener extends ListenerAdapter {
         developerCmd.setNextProccess(invalidCmd);
 
 
-        diceCmd.proccessMessage(msg);
+        reminderCmd.proccessMessage(msg);
     }
 }
 

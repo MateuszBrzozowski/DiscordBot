@@ -9,4 +9,7 @@ public final class SlashCommands {
     public static final String DISCORD_ROLE_OPTION_NAME_DESCRIPTION = "opis";
     public static final String STEAM_PROFILE = "profile";
     public static final String STATS = "stats";
+    public static final String DICE = "kostka";
+    public static final String COIN = "moneta";
+    public static final String ESSA = "essa";
 }

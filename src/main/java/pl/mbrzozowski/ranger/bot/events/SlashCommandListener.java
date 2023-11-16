@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
+import pl.mbrzozowski.ranger.games.DiceGame;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
@@ -99,6 +100,8 @@ public class SlashCommandListener extends ListenerAdapter {
             } else {
                 ResponseMessage.youCanCheckStatsOnChannel(event);
             }
+        } else if (name.equalsIgnoreCase(DICE)) {
+            DiceGame.start(event);
         }
     }
 
@@ -117,5 +120,8 @@ public class SlashCommandListener extends ListenerAdapter {
                         "Link your discord account to your steam profile if you want view stats from our server.")
                 .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
         commandData.add(Commands.slash(STATS, "To view your stats from our server"));
+        commandData.add(Commands.slash(DICE, "Rzut kością do gry"));
+        commandData.add(Commands.slash(COIN, "Rzut monetą"));
+        commandData.add(Commands.slash(ESSA, "Sprawdza twój dzisiejszy poziom essy"));
     }
 }
