@@ -13,7 +13,9 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
-import pl.mbrzozowski.ranger.games.DiceGame;
+import pl.mbrzozowski.ranger.games.Coin;
+import pl.mbrzozowski.ranger.games.Dice;
+import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
@@ -101,7 +103,11 @@ public class SlashCommandListener extends ListenerAdapter {
                 ResponseMessage.youCanCheckStatsOnChannel(event);
             }
         } else if (name.equalsIgnoreCase(DICE)) {
-            DiceGame.start(event);
+            Dice.start(event);
+        } else if (name.equalsIgnoreCase(COIN)) {
+            Coin.start(event);
+        } else if (name.equalsIgnoreCase(ESSA)) {
+            Essa.start(event);
         }
     }
 

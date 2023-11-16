@@ -8,7 +8,7 @@ import pl.mbrzozowski.ranger.response.EmbedSettings;
 import java.awt.*;
 import java.util.Random;
 
-public class DiceGame {
+public class Dice {
 
     public static void start(@NotNull SlashCommandInteractionEvent event) {
         int number = drawNumber();
