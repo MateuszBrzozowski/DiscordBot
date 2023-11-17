@@ -42,7 +42,7 @@ public class SlashCommandListener extends ListenerAdapter {
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         if (event.getGuild().getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
             ArrayList<CommandData> commandData = new ArrayList<>();
-//            writeCommandData(commandData);
+            writeCommandData(commandData);
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }
