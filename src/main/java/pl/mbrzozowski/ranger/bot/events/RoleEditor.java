@@ -48,7 +48,7 @@ public class RoleEditor {
             } else {
                 msg += "Took away the role!";
             }
-            privateChannel.sendMessage(msg).queue(null, throwable -> log.info("Cannot send messages to this user (" + userID + ")"));
+            privateChannel.sendMessage(msg).queue();
         });
     }
 }

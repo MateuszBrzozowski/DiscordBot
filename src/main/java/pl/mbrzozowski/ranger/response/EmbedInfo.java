@@ -8,8 +8,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
@@ -90,7 +92,9 @@ public class EmbedInfo extends EmbedCreator {
         JDA jda = DiscordBot.getJda();
         jda.openPrivateChannelById(recruitId).queue(privateChannel -> {
             builder.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
+            privateChannel.sendMessageEmbeds(builder.build()).queue((s) -> log.info("Private message send"),
+                    new ErrorHandler().handle(ErrorResponse.CANNOT_SEND_TO_USER,
+                            (ex) -> log.info("Cannot send messages to this user in private channel")));
         });
     }
 
