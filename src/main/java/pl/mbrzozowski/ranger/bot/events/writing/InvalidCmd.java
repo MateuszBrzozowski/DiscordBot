@@ -25,6 +25,7 @@ public class InvalidCmd extends Proccess {
                                 Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**""")
                         .queue(message1 -> log.info("{} - misunderstood message", messageReceived.getAuthor()));
             });
+            return;
         }
         log.error("{} - misunderstood message. User is null", messageReceived.getAuthor());
     }
