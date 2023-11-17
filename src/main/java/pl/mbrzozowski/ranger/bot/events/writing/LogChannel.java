@@ -2,8 +2,8 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.response.EmbedInfo;
 
 @Slf4j
 public class LogChannel extends Proccess {
