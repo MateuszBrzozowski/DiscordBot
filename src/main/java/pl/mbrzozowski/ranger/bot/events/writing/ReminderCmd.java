@@ -22,12 +22,12 @@ public class ReminderCmd extends Proccess {
             if (message.getWords().length > 1 &&
                     message.getWords()[0].equalsIgnoreCase(Commands.HELPS) &&
                     message.getWords()[1].equalsIgnoreCase(EmbedHelp.REMINDER)) {
-                EmbedHelp.help(message.getUserID(), message.getWords());
+                EmbedHelp.help(messageReceived.getAuthor(), message);
             } else if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_OFF)) {
-                usersReminderService.add(messageReceived.getAuthor().getId());
+                usersReminderService.add(messageReceived.getAuthor());
                 EmbedInfo.reminderOff(message.getUserID());
             } else if (message.getContentDisplay().equalsIgnoreCase(Commands.REMINDER_ON)) {
-                usersReminderService.deleteByUserId(messageReceived.getAuthor().getId());
+                usersReminderService.deleteByUserId(messageReceived.getAuthor());
                 EmbedInfo.reminderOn(message.getUserID());
             } else {
                 getNextProccess().proccessMessage(message);

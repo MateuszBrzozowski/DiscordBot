@@ -3,53 +3,51 @@ package pl.mbrzozowski.ranger.response;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import pl.mbrzozowski.ranger.DiscordBot;
+import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.bot.events.writing.Message;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 @Slf4j
 public class EmbedHelp extends EmbedCreator {
 
-    private static PrivateChannel privateChannel;
     private static final String TITLE = "Ranger Bot - POMOC";
     private static final String RECRUIT = "recruit";
     public static final String REMINDER = "reminder";
 
-    public static void help(String userID, String[] message) {
-        User userById = DiscordBot.getJda().getUserById(userID);
-        if (userById != null) {
-            privateChannel = userById.openPrivateChannel().complete();
-            boolean admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
-            if (!admin) admin = Users.isUserDev(userID);
+    public static void help(User user, Message message) {
+        if (user != null) {
+            log.info(user + " - open help with command: {}", message.getContentDisplay());
+            boolean admin = Users.hasUserRole(user.getId(), RoleID.RADA_KLANU);
+            if (!admin) admin = Users.isUserDev(user.getId());
 
-            log.info(Users.getUserNicknameFromID(userID) + " opened help.");
-
-            if (message.length == 1) {
-                mainHelp();
-                if (Users.isUserDev(userID)) helpDevCommand();
-            } else if (message.length == 2) {
-                if (message[1].equalsIgnoreCase(RECRUIT)) {
+            if (message.getWords().length == 1) {
+                mainHelp(user);
+                if (Users.isUserDev(user.getId())) helpDevCommand(user);
+            } else if (message.getWords().length == 2) {
+                if (message.getWords()[1].equalsIgnoreCase(RECRUIT)) {
                     if (admin) {
-                        helpRecruit();
+                        helpRecruit(user);
                     }
-                } else if (message[1].equalsIgnoreCase(REMINDER)) {
-                    helpReminder();
+                } else if (message.getWords()[1].equalsIgnoreCase(REMINDER)) {
+                    helpReminder(user);
                 }
             }
         }
     }
 
-    private static void mainHelp() {
+    private static void mainHelp(@NotNull User user) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(TITLE);
         builder.setFooter(getFooter());
         builder.addField("", ">>> **!help " + RECRUIT + "** - (Rada klanu) - Opis przycisków w kanałach rekrutacyjnych.\n" +
                 "**!help " + REMINDER + "** - Przypomnienia dla eventów.\n", false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
+        user.openPrivateChannel().queue(privateChannel -> privateChannel
+                .sendMessageEmbeds(builder.build())
+                .queue(m -> log.info(user + " - main help opened")));
     }
 
-    private static void helpDevCommand() {
+    private static void helpDevCommand(@NotNull User user) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Ranger Bot - POMOC - DEV");
         builder.addField("Komendy DEV", """
@@ -62,10 +60,12 @@ public class EmbedHelp extends EmbedCreator {
                 **!msgCancel** - Anuluje wysyłanie wiadomości jako bot.
                 **!removeUserFromEvent [USER_ID] [EVENT_ID]** - Wykreśla użytkownika z eventu.
                 **!removeUserFromEvents [USER_ID]** - Wykreśla użytkownika ze wszystkich eventów.""", false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
+        user.openPrivateChannel().queue(privateChannel -> privateChannel
+                .sendMessageEmbeds(builder.build())
+                .queue(m -> log.info(user + " - dev help opened")));
     }
 
-    private static void helpReminder() {
+    private static void helpReminder(@NotNull User user) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(TITLE + " - REMINDER");
         builder.setFooter(getFooter());
@@ -75,10 +75,12 @@ public class EmbedHelp extends EmbedCreator {
                 **!reminder Off** - Wyłącza powiadomienia
                 **!reminder On** - Włącza powiadomienia""");
         builder.setFooter("Komendy wpisywać w prywatnej wiadomości do bota.");
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
+        user.openPrivateChannel().queue(privateChannel -> privateChannel
+                .sendMessageEmbeds(builder.build())
+                .queue(m -> log.info(user + " - reminder help opened")));
     }
 
-    private static void helpRecruit() {
+    private static void helpRecruit(@NotNull User user) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT_HELP);
         builder.setTitle(TITLE + " - REKRUT");
         builder.addField("Niebieski przycisk",
@@ -98,6 +100,8 @@ public class EmbedHelp extends EmbedCreator {
                 "Pinguje rekruta i wysyła na kanale NEGATYWNY wynik rekrutacji. Usuwa clan tag z nickname. " +
                         "Odbiera rangę rekruta **(UWAGA! Sprawdzić osobiście tą zmiany).**",
                 false);
-        privateChannel.sendMessageEmbeds(builder.build()).queue();
+        user.openPrivateChannel().queue(privateChannel -> privateChannel
+                .sendMessageEmbeds(builder.build())
+                .queue(m -> log.info(user + " - recruit help opened")));
     }
 }
