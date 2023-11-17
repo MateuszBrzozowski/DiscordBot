@@ -204,12 +204,12 @@ public class RecruitsService {
     }
 
     public void deleteChannelByID(String channelID) {
-        log.info("Deleting channel by id(id=" + channelID + ")");
         Optional<Recruit> recruitOptional = findByChannelId(channelID);
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
             removeRecruitRoleFromUserID(recruit.getUserId());
             recruitRepository.delete(recruit);
+            log.info("(channelId={}) - has been removed", channelID);
         }
     }
 

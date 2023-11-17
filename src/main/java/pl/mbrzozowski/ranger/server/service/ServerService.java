@@ -59,7 +59,7 @@ public class ServerService {
                         .asTextChannel()
                         .getManager()
                         .putPermissionOverride(member, null, permissions)
-                        .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(),member));
+                        .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(), member));
             }
             EmbedInfo.closeServerServiceChannel(event.getAuthor().getId(), event.getChannel());
             clientCloseChannelSave(clientOptional.get());
@@ -78,7 +78,7 @@ public class ServerService {
                             .asTextChannel()
                             .getManager()
                             .putPermissionOverride(member, null, permissions)
-                            .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(),member));
+                            .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(), member));
                 }
                 EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getChannel());
                 clientCloseChannelSave(clientOptional.get());
@@ -163,8 +163,8 @@ public class ServerService {
     }
 
     public void deleteByChannelId(String channelID) {
-        log.info("Deleting channel by id(id=" + channelID + ")");
         clientRepository.deleteByChannelId(channelID);
+        log.info("Check and deleted channel if exist from DB for Server Service (channelId={})", channelID);
     }
 
     public Optional<Client> findByChannelId(String channelID) {
