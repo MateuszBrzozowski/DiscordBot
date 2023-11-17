@@ -49,7 +49,7 @@ public class SlashCommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        log.info(event.getUser() + " - used slash command");
+        log.info(event.getUser() + " - used slash command(command={})", event.getName());
         String name = event.getName();
         if (name.equalsIgnoreCase(ADD_ROLE_TO_RANGER)) {
             boolean isAdded = roleService.addRole(event.getOption(DISCORD_ROLE_OPTION_NAME_ID),

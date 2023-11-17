@@ -52,7 +52,7 @@ public class GeneratorCmd extends Proccess {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
                 EmbedInfo.cancelEventGenerator(message.getUserID());
                 eventsGeneratorService.removeGenerator(indexOfGenerator);
-                log.info(messageReceived.getAuthor() + " - Removed event generator");
+                log.info(messageReceived.getAuthor() + " - canceled event generator");
             } else {
                 eventsGeneratorService.saveAnswerAndNextStage(messageReceived, indexOfGenerator);
             }

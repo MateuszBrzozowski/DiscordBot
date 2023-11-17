@@ -79,9 +79,11 @@ public class EventsGenerator {
                 if (event.getComponentId().equalsIgnoreCase(GENERATOR_DESC_YES)) {
                     embedGetDescription();
                     stageOfGenerator = EventGeneratorStatus.SET_DESCRIPTION;
+                    log.info("{} - wants to set description", event.getUser());
                 } else {
                     embedWhoPing();
                     stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
+                    log.info("{} - won't set description.", event.getUser());
                 }
                 disableButtons(event);
             }
@@ -89,22 +91,26 @@ public class EventsGenerator {
                 eventRequest.setEventFor(getPerm(event));
                 embedDoYouWantAnyChange(true);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
+                log.info("{} - set permission - {}", event.getUser(), event.getButton().getLabel());
                 disableButtons(event);
             }
             case CHANGE_PERMISSION -> {
                 eventRequest.setEventFor(getPerm(event));
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
+                log.info("{} - set permission - {}", event.getUser(), event.getButton().getLabel());
                 disableButtons(event);
             }
             case FINISH -> {
                 if (event.getComponentId().equalsIgnoreCase(GENERATOR_SHOW)) {
                     embedDoYouWantAnyChange(true);
+                    log.info("{} - show list", event.getUser());
                 } else if (event.getComponentId().equalsIgnoreCase(GENERATOR_END)) {
                     end();
                 } else if (event.getComponentId().equalsIgnoreCase(GENERATOR_CANCEL)) {
                     EmbedInfo.cancelEventGenerator(event.getUser().getId());
                     removeThisGenerator();
+                    log.info("{} - canceled event generator", event.getUser());
                 }
                 disableButtonsAndSelectMenu(event.getMessage());
             }
@@ -131,15 +137,18 @@ public class EventsGenerator {
                 embedWhoPing();
                 stageOfGenerator = EventGeneratorStatus.CHANGE_PERMISSION;
             }
+            log.info("{} - selected {} from string select list", event.getUser(), stageOfGenerator);
             disableButtonsAndSelectMenu(event.getMessage());
         }
     }
 
     void saveAnswerAndSetNextStage(@NotNull MessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
+        boolean titleLength = msg.length() < MessageEmbed.TITLE_MAX_LENGTH && msg.length() > 0;
+        boolean descriptionLength = msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH && msg.length() > 0;
         switch (stageOfGenerator) {
             case SET_NAME -> {
-                if (msg.length() < MessageEmbed.TITLE_MAX_LENGTH && msg.length() > 0) {
+                if (titleLength) {
                     eventRequest.setName(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_DATE;
                     embedGetDate();
@@ -177,7 +186,7 @@ public class EventsGenerator {
                 }
             }
             case SET_DESCRIPTION -> {
-                if (msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH) {
+                if (descriptionLength) {
                     eventRequest.setDescription(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
                     embedWhoPing();
@@ -188,7 +197,7 @@ public class EventsGenerator {
                 }
             }
             case CHANGE_NAME -> {
-                if (msg.length() < 256 && msg.length() > 0) {
+                if (titleLength) {
                     eventRequest.setName(msg);
                     log.info(event.getAuthor() + " - changed event name");
                 } else {
@@ -199,7 +208,7 @@ public class EventsGenerator {
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_DESCRIPTION -> {
-                if (msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH && msg.length() > 0) {
+                if (descriptionLength) {
                     eventRequest.setDescription(msg);
                     log.info(event.getAuthor() + " - changed event description");
                 } else {
@@ -454,7 +463,7 @@ public class EventsGenerator {
         }
     }
 
-    private void disableButtons(ButtonInteractionEvent event) {
+    private void disableButtons(@NotNull ButtonInteractionEvent event) {
         Message message = event.getMessage();
         List<Button> buttons = message.getButtons();
         List<Button> buttonsNew = new ArrayList<>();
@@ -464,14 +473,16 @@ public class EventsGenerator {
             buttonsNew.add(button);
         });
         MessageEmbed messageEmbed = embeds.get(0);
-        message.editMessageEmbeds(messageEmbed).setActionRow(buttonsNew).queue();
+        message.editMessageEmbeds(messageEmbed)
+                .setActionRow(buttonsNew)
+                .queue(message1 -> log.info("{} - Buttons have been disabled", event.getUser()));
     }
 
-    private void disableButtonsAndSelectMenu(Message message) {
-        message.delete().queue();
+    private void disableButtonsAndSelectMenu(@NotNull Message message) {
+        message.delete().queue(unused -> log.info("Message deleted"));
     }
 
-    private EventFor getPerm(ButtonInteractionEvent event) {
+    private EventFor getPerm(@NotNull ButtonInteractionEvent event) {
         String componentId = event.getComponentId();
         if (componentId.equalsIgnoreCase(GENERATOR_PING_CLAN_MEMBER)) {
             return EventFor.CLAN_MEMBER;
