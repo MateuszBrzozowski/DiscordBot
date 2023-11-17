@@ -59,7 +59,7 @@ public class ServerService {
                         .asTextChannel()
                         .getManager()
                         .putPermissionOverride(member, null, permissions)
-                        .queue();
+                        .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(),member));
             }
             EmbedInfo.closeServerServiceChannel(event.getAuthor().getId(), event.getChannel());
             clientCloseChannelSave(clientOptional.get());
@@ -78,7 +78,7 @@ public class ServerService {
                             .asTextChannel()
                             .getManager()
                             .putPermissionOverride(member, null, permissions)
-                            .queue();
+                            .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(),member));
                 }
                 EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getChannel());
                 clientCloseChannelSave(clientOptional.get());

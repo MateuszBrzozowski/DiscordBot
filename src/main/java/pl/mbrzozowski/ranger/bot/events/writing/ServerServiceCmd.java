@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -11,6 +12,7 @@ import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
+@Slf4j
 public class ServerServiceCmd extends Proccess {
 
     private final ServerService serverService;
@@ -24,9 +26,11 @@ public class ServerServiceCmd extends Proccess {
     public void proccessMessage(@NotNull Message message) {
         String channelID = messageReceived.getChannel().getId();
         if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && message.isAdmin()) {
+            log.info(messageReceived.getAuthor() + " - msg({}) - creates embed for server service", message.getContentDisplay());
             messageReceived.getMessage().delete().submit();
             EmbedInfo.serverService(messageReceived.getChannel());
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
+            log.info("{} - msg({}) - closes channel in server category", messageReceived.getAuthor(), message.getContentDisplay());
             serverService.closeChannel(messageReceived);
         } else if (message.getWords()[0].equalsIgnoreCase(Commands.UPDATE_WL) && message.isAdmin() && messageReceived.isFromType(ChannelType.PRIVATE)) {
             messageReceived.getMessage().reply("Usługa wyłączona").queue();
