@@ -283,7 +283,7 @@ public class RecruitsService {
     }
 
     public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info(interactionEvent.getUser() + " - Recruit positive result");
+        log.info(interactionEvent.getUser() + " - Send positive result for recruit");
         boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
@@ -315,7 +315,7 @@ public class RecruitsService {
     }
 
     public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info(interactionEvent.getUser() + " - Recruit negative result");
+        log.info(interactionEvent.getUser() + " - Send negative result for recruit");
         boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
