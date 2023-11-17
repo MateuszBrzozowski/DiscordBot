@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.exceptions.IllegalStageException;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -134,7 +135,7 @@ public class EventsGenerator {
         }
     }
 
-    void saveAnswerAndSetNextStage(MessageReceivedEvent event) {
+    void saveAnswerAndSetNextStage(@NotNull MessageReceivedEvent event) {
         String msg = event.getMessage().getContentDisplay();
         switch (stageOfGenerator) {
             case SET_NAME -> {
@@ -142,9 +143,11 @@ public class EventsGenerator {
                     eventRequest.setName(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_DATE;
                     embedGetDate();
+                    log.info(event.getAuthor() + " - set event name");
                 } else {
                     embedGetNameCorrect();
                     embedGetName();
+                    log.warn(event.getAuthor() + " - title({}, length:{}) not correct", msg, msg.length());
                 }
             }
             case SET_DATE -> {
@@ -153,9 +156,11 @@ public class EventsGenerator {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
+                    log.info(event.getAuthor() + " - set event date");
                 } else {
                     embedDateNotCorrect();
                     embedGetDate();
+                    log.warn(event.getAuthor() + " - date({}) not correct", msg);
                 }
             }
             case SET_TIME -> {
@@ -164,9 +169,11 @@ public class EventsGenerator {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
+                    log.info(event.getAuthor() + " - set event time");
                 } else {
                     embedTimeNotCorrect();
                     embedGetTime();
+                    log.warn(event.getAuthor() + " - time({}) not correct", msg);
                 }
             }
             case SET_DESCRIPTION -> {
@@ -174,24 +181,30 @@ public class EventsGenerator {
                     eventRequest.setDescription(msg);
                     stageOfGenerator = EventGeneratorStatus.SET_PERMISSION;
                     embedWhoPing();
+                    log.info(event.getAuthor() + " - set event description");
                 } else {
                     embedDescriptionLong();
+                    log.warn(event.getAuthor() + " - description({}, length:{}) not correct", msg, msg.length());
                 }
             }
             case CHANGE_NAME -> {
                 if (msg.length() < 256 && msg.length() > 0) {
                     eventRequest.setName(msg);
+                    log.info(event.getAuthor() + " - changed event name");
                 } else {
                     embedGetNameCorrect();
+                    log.warn(event.getAuthor() + " - title({}, length:{}) not correct", msg, msg.length());
                 }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
             }
             case CHANGE_DESCRIPTION -> {
-                if (msg.length() < 2048 && msg.length() > 0) {
+                if (msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH && msg.length() > 0) {
                     eventRequest.setDescription(msg);
+                    log.info(event.getAuthor() + " - changed event description");
                 } else {
                     embedDescriptionLong();
+                    log.warn(event.getAuthor() + " - description({}, length:{}) not correct", msg, msg.length());
                 }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
@@ -200,8 +213,10 @@ public class EventsGenerator {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " " + eventRequest.getTime());
                 if (Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
+                    log.info(event.getAuthor() + " - changed event date");
                 } else {
                     embedDateNotCorrect();
+                    log.warn(event.getAuthor() + " - date({}) not correct", msg);
                 }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
@@ -210,8 +225,10 @@ public class EventsGenerator {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
                 if (Validator.isTimeValid(msg) && Validator.isEventDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
+                    log.info(event.getAuthor() + " - changed event time");
                 } else {
                     embedTimeNotCorrect();
+                    log.warn(event.getAuthor() + " - time({}) not correct", msg);
                 }
                 embedDoYouWantAnyChange(false);
                 stageOfGenerator = EventGeneratorStatus.FINISH;
@@ -221,6 +238,7 @@ public class EventsGenerator {
             default -> {
                 embedError();
                 removeThisGenerator();
+                throw new IllegalStageException(event.getAuthor(), stageOfGenerator);
             }
         }
     }

@@ -1,7 +1,9 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGenerator;
@@ -9,6 +11,7 @@ import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 
+@Slf4j
 public class GeneratorCmd extends Proccess {
 
     private final EventService eventService;
@@ -24,15 +27,16 @@ public class GeneratorCmd extends Proccess {
     }
 
     @Override
-    public void proccessMessage(Message message) {
+    public void proccessMessage(@NotNull Message message) {
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(message.getUserID());
-        if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.EVENT)) {
+        if (message.getContentDisplay().equalsIgnoreCase(Commands.EVENT)) {
             if (messageReceived.isFromType(ChannelType.PRIVATE)) {
                 if (messageReceived != null) {
                     String authorID = messageReceived.getAuthor().getId();
                     if (indexOfGenerator == -1) {
                         EventsGenerator eventsGenerator = new EventsGenerator(messageReceived, eventService, eventsGeneratorService);
                         eventsGeneratorService.addEventsGenerator(eventsGenerator);
+                        log.info(messageReceived.getAuthor() + " - Created new event generator");
                     } else {
                         EmbedInfo.userHaveActiveEventGenerator(authorID);
                         EmbedInfo.cancelEventGenerator(message.getUserID());
@@ -40,6 +44,7 @@ public class GeneratorCmd extends Proccess {
                         eventsGeneratorService.removeGenerator(indexOfGenerator);
                         EventsGenerator eventsGenerator = new EventsGenerator(messageReceived, eventService, eventsGeneratorService);
                         eventsGeneratorService.addEventsGenerator(eventsGenerator);
+                        log.info(messageReceived.getAuthor() + " - Had active event generator. Created new event generator");
                     }
                 }
             }
@@ -47,6 +52,7 @@ public class GeneratorCmd extends Proccess {
             if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
                 EmbedInfo.cancelEventGenerator(message.getUserID());
                 eventsGeneratorService.removeGenerator(indexOfGenerator);
+                log.info(messageReceived.getAuthor() + " - Removed event generator");
             } else {
                 eventsGeneratorService.saveAnswerAndNextStage(messageReceived, indexOfGenerator);
             }

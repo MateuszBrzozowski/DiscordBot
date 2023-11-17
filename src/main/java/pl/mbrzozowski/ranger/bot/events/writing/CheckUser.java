@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class CheckUser extends Proccess {
 
@@ -9,7 +10,7 @@ public class CheckUser extends Proccess {
     }
 
     @Override
-    public void proccessMessage(Message message) {
+    public void proccessMessage(@NotNull Message message) {
         if (message.isClanMember()) {
             getNextProccess().proccessMessage(message);
         }
