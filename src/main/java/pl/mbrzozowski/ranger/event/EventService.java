@@ -69,15 +69,15 @@ public class EventService {
     }
 
     public void deleteByMsgId(String messageId) {
-        log.info("Event deleting by msg id");
         timers.cancelByMsgId(messageId);
         eventRepository.deleteByMsgId(messageId);
+        log.info("Event deleted by messageId(messageId={})",messageId);
     }
 
     public void deleteByChannelId(String channelId) {
-        log.info("Event deleting by channel id");
         timers.cancelByChannelId(channelId);
         eventRepository.deleteByChannelId(channelId);
+        log.info("Event deleted by channelId(channelId={})",channelId);
     }
 
     void setActiveToFalse(@NotNull Event event) {

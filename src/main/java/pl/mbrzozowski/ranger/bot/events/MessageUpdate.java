@@ -19,7 +19,7 @@ public class MessageUpdate extends ListenerAdapter {
 
     @Override
     public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-        log.info("Message delete event");
+        log.info("Message delete event(channelName={})", event.getChannel().getName());
         eventService.deleteByMsgId(event.getMessageId());
     }
 
