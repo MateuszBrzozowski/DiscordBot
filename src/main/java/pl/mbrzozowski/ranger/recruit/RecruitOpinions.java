@@ -2,6 +2,8 @@ package pl.mbrzozowski.ranger.recruit;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -49,6 +51,7 @@ public class RecruitOpinions {
             sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
         }
         event.deferEdit().queue();
+        log.info("{} - send opinion({}) about recruit({})", event.getUser(), opinion, recruitName);
     }
 
     public static void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
@@ -65,37 +68,38 @@ public class RecruitOpinions {
 
     public static void submitAnonymousComplaints(@NotNull ModalInteractionEvent event) {
         String text = Objects.requireNonNull(event.getValue(ComponentId.MODAL_COMPLAINT_TEXT)).getAsString();
-        String nickname = Users.getUserNicknameFromID(event.getUser().getId());
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            sendMessage(textChannel, nickname, text);
+            sendMessage(textChannel, event.getUser(), text);
         }
         event.deferEdit().queue();
+        log.info("{} - send anonymous complaints", event.getUser());
     }
 
-    private static void sendMessage(@NotNull TextChannel textChannel, String whoNickname, String text) {
-        log.info("Użytkownik: " + whoNickname + " anonimowo donosi.");
+    private static void sendMessage(@NotNull TextChannel textChannel, User user, String text) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
         builder.setTitle("Anonimowy donos!");
         builder.setDescription("**Wiadomość:**\n" + text);
         textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + ">")
                 .setEmbeds(builder.build())
-                .queue();
+                .queue(message -> log.info("{} -(nickname:{}) send anonymous complaints",
+                        user,
+                        Users.getUserNicknameFromID(user.getId())));
     }
 
     private static void sendOpinionToChannel(@NotNull TextChannel textChannel, String userNameWhoSendingOpinion, String recruitName, String opinion) {
-        log.info("Send recruit opinion");
         EmbedBuilder builder = new EmbedBuilder();
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setColor(Color.YELLOW);
-        try {
-            builder.setTitle("Użytkownik: " + userNameWhoSendingOpinion + " wystawił opinię.");
-            builder.setDescription("Na temat rekruta: **" + recruitName + "**");
-            builder.addField("", opinion, false);
-            textChannel.sendMessageEmbeds(builder.build()).queue();
-        } catch (IllegalArgumentException e) {
-            log.info("Rekrut opinion - IllegalArgumentException " + e.getMessage());
-        }
+        String title = "Użytkownik: " + userNameWhoSendingOpinion + " wystawił opinię.";
+        String description = "Na temat rekruta: **" + recruitName + "**";
+        title = title.substring(0, Math.min(title.length(), MessageEmbed.TITLE_MAX_LENGTH));
+        description = description.substring(0, Math.min(description.length(), MessageEmbed.DESCRIPTION_MAX_LENGTH));
+        opinion = opinion.substring(0, Math.min(opinion.length(), MessageEmbed.VALUE_MAX_LENGTH));
+        builder.setTitle(title);
+        builder.setDescription(description);
+        builder.addField("", opinion, false);
+        textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 }

@@ -12,7 +12,7 @@ public class ModalListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        log.info(event.getUser() + " - Modal interaction event");
+        log.info("{} - Modal(modalId={}) interaction event", event.getUser(), event.getModalId());
         if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_RECRUIT_OPINION)) {
             RecruitOpinions.submitOpinionAboutRecruit(event);
         } else if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_COMPLAINTS)) {
