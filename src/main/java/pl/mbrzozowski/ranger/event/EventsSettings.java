@@ -3,10 +3,12 @@ package pl.mbrzozowski.ranger.event;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.exceptions.IllegalStageException;
 import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
@@ -38,7 +40,7 @@ public class EventsSettings {
 
 
     public EventsSettings(EventService eventService,
-                          MessageReceivedEvent privateEvent,
+                          @NotNull MessageReceivedEvent privateEvent,
                           EventsSettingsService eventsSettingsService) {
         this.eventService = eventService;
         this.userID = privateEvent.getAuthor().getId();
@@ -55,6 +57,7 @@ public class EventsSettings {
         }
     }
 
+    @NotNull
     private String getActiveEventsIndexAndName() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < eventsList.size(); i++) {
@@ -67,7 +70,7 @@ public class EventsSettings {
         return userID;
     }
 
-    public void saveAnswerAndSetNextStage(MessageReceivedEvent messageReceivedEvent) {
+    public void saveAnswerAndSetNextStage(@NotNull MessageReceivedEvent messageReceivedEvent) {
         String msg = messageReceivedEvent.getMessage().getContentDisplay();
         switch (stageOfSettings) {
             case CHOOSE_EVENT -> {
@@ -79,10 +82,11 @@ public class EventsSettings {
                     break;
                 }
                 if (msgInteger > 0 && msgInteger <= eventsList.size()) {
-                    int chossedIndexOFEvent = msgInteger - 1;
+                    int selectedIndexOFEvent = msgInteger - 1;
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    event = eventsList.get(chossedIndexOFEvent);
+                    event = eventsList.get(selectedIndexOFEvent);
                     embedWhatToDo();
+                    log.info("{} - selected event({})", messageReceivedEvent.getAuthor(), eventsList.get(selectedIndexOFEvent).getName());
                 } else {
                     messageReceivedEvent.getMessage().reply("Nieprawidłowy numer!").queue();
                 }
@@ -99,25 +103,33 @@ public class EventsSettings {
                     case 1 -> {
                         embedGetTime();
                         stageOfSettings = EventSettingsStatus.SET_TIME;
+                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
                     }
                     case 2 -> {
                         embedGetDate();
                         stageOfSettings = EventSettingsStatus.SET_DATE;
+                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
                     }
                     case 3 -> {
                         embedGetName();
                         stageOfSettings = EventSettingsStatus.SET_NAME;
+                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
                     }
                     case 4 -> {
                         embedGetDescription();
                         stageOfSettings = EventSettingsStatus.SET_DESCRIPTION;
+                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
                     }
                     case 8 -> {
                         isChangedDateTime = true;
                         embedCancelEvent();
                         stageOfSettings = EventSettingsStatus.CANCEL_EVENT;
+                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
                     }
-                    case 9 -> finishEditor();
+                    case 9 -> {
+                        finishEditor();
+                        log.info("{} - selected cancel events settings", messageReceivedEvent.getAuthor());
+                    }
                     case 0 -> {
                         if (isChangedDateTime) {
                             stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
@@ -125,10 +137,12 @@ public class EventsSettings {
                         } else {
                             endingEditor();
                         }
+                        log.info("{} - selected close and save events settings", messageReceivedEvent.getAuthor());
                     }
                     default -> {
                         embedWrongWhatToDo();
                         embedWhatToDo();
+                        log.info("{} - wrong answer", messageReceivedEvent.getAuthor());
                     }
                 }
             }
@@ -142,11 +156,14 @@ public class EventsSettings {
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);
+                        log.info("{} - set new event time", messageReceivedEvent.getAuthor());
                     } else {
                         embedTimeNotCorrect();
+                        log.warn("{} - time({}) after now", messageReceivedEvent.getAuthor(), msg);
                     }
                 } else {
                     embedTimeNotCorrect();
+                    log.warn("{} - time({}) not correct", messageReceivedEvent.getAuthor(), msg);
                 }
                 stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                 embedWhatToDo();
@@ -161,31 +178,38 @@ public class EventsSettings {
                     if (isTimeAfterNow) {
                         isChangedDateTime = true;
                         event.setDate(newDate);
+                        log.info("{} - set new event date", messageReceivedEvent.getAuthor());
                     } else {
                         embedDateNotCorrect();
+                        log.warn("{} - date({}) after now", messageReceivedEvent.getAuthor(), msg);
                     }
                 } else {
                     embedDateNotCorrect();
+                    log.warn("{} - date({}) not correct", messageReceivedEvent.getAuthor(), msg);
                 }
                 stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                 embedWhatToDo();
             }
             case SET_NAME -> {
-                if (msg.length() < 256 && msg.length() > 0) {
+                if (msg.length() < MessageEmbed.TITLE_MAX_LENGTH && msg.length() > 0) {
                     event.setName(msg);
                     isChangedName = true;
+                    log.info("{} - set new event name", messageReceivedEvent.getAuthor());
                 } else {
                     embedGetNameCorrect();
+                    log.warn("{} - title({}, length:{}) not correct", messageReceivedEvent.getAuthor(), msg, msg.length());
                 }
                 stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                 embedWhatToDo();
             }
             case SET_DESCRIPTION -> {
-                if (msg.length() < 2048 && msg.length() > 0) {
+                if (msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH && msg.length() > 0) {
                     description = msg;
                     isChangedDescription = true;
+                    log.info("{} - set new event description", messageReceivedEvent.getAuthor());
                 } else {
                     embedGetDescriptionCorrect();
+                    log.warn("{} - description({}, length:{}) not correct", messageReceivedEvent.getAuthor(), msg, msg.length());
                 }
                 stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                 embedWhatToDo();
@@ -195,27 +219,33 @@ public class EventsSettings {
                     ifEndingEvent = true;
                     stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
                     embedSendNotifi();
+                    log.info("{} - selected YES to canceling event {}", messageReceivedEvent.getAuthor(), event.getName());
                 } else if (msg.equalsIgnoreCase("N")) {
                     ifEndingEvent = false;
                     embedWhatToDo();
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    log.info("{} - selected NO to canceling event {}", messageReceivedEvent.getAuthor(), event.getName());
                 } else {
                     embedAnswerNotCorrect();
                     embedWhatToDo();
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    log.info("{} - Answer not correct", messageReceivedEvent.getAuthor());
                 }
             }
             case SEND_NOTIFI -> {
                 if (msg.equalsIgnoreCase("T")) {
                     sendNotifi = true;
                     endingEditor();
+                    log.info("{} - selected YES to send notifi for event {}", messageReceivedEvent.getAuthor(), event.getName());
                 } else if (msg.equalsIgnoreCase("N")) {
                     sendNotifi = false;
                     endingEditor();
+                    log.info("{} - selected NO to send notifi for event {}", messageReceivedEvent.getAuthor(), event.getName());
                 } else {
                     embedAnswerNotCorrect();
                     stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
                     embedWhatToDo();
+                    log.info("{} - answer not correct", messageReceivedEvent.getAuthor());
                 }
             }
             case FINISH -> {
@@ -233,6 +263,7 @@ public class EventsSettings {
             default -> {
                 embedError();
                 removeThisEditor();
+                throw new IllegalStageException(messageReceivedEvent.getAuthor(), stageOfSettings);
             }
         }
     }

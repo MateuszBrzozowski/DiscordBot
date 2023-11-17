@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.Commands;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -17,7 +18,7 @@ public class RecruitCmd extends Proccess {
     }
 
     @Override
-    public void proccessMessage(Message message) {
+    public void proccessMessage(@NotNull Message message) {
         String cmd = message.getWords()[0];
         if (message.isTextChannel()) {
             if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
