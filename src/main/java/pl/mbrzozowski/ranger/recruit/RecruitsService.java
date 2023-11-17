@@ -64,6 +64,7 @@ public class RecruitsService {
                 .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.DRILL_INSTRUCTOR_ID), permissions, null)
                 .queue(textChannel -> {
+                    log.info("created text channel(name={}, id={})", textChannel.getName(), textChannel.getId());
                     sendWelcomeMessage(userID, textChannel);
                     add(userID, userName, textChannel.getId());
                 });
@@ -157,11 +158,10 @@ public class RecruitsService {
                 .addActionRow(
                         Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam")
                 )
-                .queue();
+                .queue(m -> log.info("{} - confirm message", event.getUser()));
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
-        log.info(event.getUser() + " - Recruit confirm");
         if (!hasRecruitChannel(event.getUser().getId())) {
             String userID = event.getUser().getId();
             String userName = Users.getUserNicknameFromID(userID);
@@ -191,7 +191,6 @@ public class RecruitsService {
     }
 
     private void add(String userId, String userName, String channelID) {
-        log.info("Recruit adding to db.");
         Recruit recruit = Recruit.builder()
                 .userId(userId)
                 .name(userName)
@@ -199,8 +198,8 @@ public class RecruitsService {
                 .toApply(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime())
                 .isCloseChannel(false)
                 .build();
-        log.info(recruit.toString());
         recruitRepository.save(recruit);
+        log.info("user(name={}, id={}) added to DB as recruit", userName, userId);
     }
 
     public void deleteChannelByID(String channelID) {
@@ -220,7 +219,8 @@ public class RecruitsService {
             Role roleRecruit = guild.getRoleById(RoleID.RECRUIT_ID);
             boolean hasRoleRecruit = Users.hasUserRole(userId, RoleID.RECRUIT_ID);
             if (!hasRoleRecruit && roleRecruit != null && member != null) {
-                guild.addRoleToMember(member, roleRecruit).queue();
+                guild.addRoleToMember(member, roleRecruit)
+                        .queue(unused -> log.info("Added role recruit to user(userId={}", userId));
             }
         }
     }
@@ -259,7 +259,7 @@ public class RecruitsService {
     }
 
     public void accepted(@NotNull ButtonInteractionEvent event) {
-        log.info(event.getUser() + " - Recruit accepted");
+        log.info(event.getUser() + " - use recruit accept button");
         Optional<Recruit> recruitOptional = findByChannelId(event.getChannel().getId());
         if (recruitOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(event);
@@ -280,13 +280,17 @@ public class RecruitsService {
         recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruitRepository.save(recruit);
         event.deferEdit().queue();
+        log.info("{} - accepted recruit (channelId={}, channelName={})",
+                event.getUser(),
+                event.getChannel().getId(),
+                event.getChannel().getName());
     }
 
     public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info(interactionEvent.getUser() + " - Send positive result for recruit");
         boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
+            log.info(interactionEvent.getUser() + " - Send positive result for recruit");
         }
         return result;
     }
@@ -315,10 +319,10 @@ public class RecruitsService {
     }
 
     public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        log.info(interactionEvent.getUser() + " - Send negative result for recruit");
         boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
         if (result) {
             interactionEvent.deferEdit().queue();
+            log.info(interactionEvent.getUser() + " - Send negative result for recruit");
         }
         return result;
     }
@@ -403,7 +407,8 @@ public class RecruitsService {
         if (!isNicknameRNGSuffix(nicknameOld)) {
             Member member = guild.getMemberById(userId);
             if (member != null) {
-                member.modifyNickname(nicknameOld + "<rRangersPL>").queue();
+                member.modifyNickname(nicknameOld + "<rRangersPL>")
+                        .queue(unused -> log.info("Add recruit tag to user(userId={})", userId));
             }
         }
     }
@@ -418,10 +423,14 @@ public class RecruitsService {
     }
 
     public void recruitNotAccepted(@NotNull ButtonInteractionEvent event) {
-        log.info(event.getUser() + " - Recruit not accepted ");
+        log.info(event.getUser() + " - use recruit not accepted ");
         TextChannel textChannel = event.getChannel().asTextChannel();
         String userID = event.getUser().getId();
         recruitNotAccepted(event, textChannel, userID);
+        log.info("{} - not accepted recruit (channelId={}, channelName={})",
+                event.getUser(),
+                event.getChannel().getId(),
+                event.getChannel().getName());
     }
 
     private void recruitNotAccepted(ButtonInteractionEvent event, TextChannel textChannel, String userID) {

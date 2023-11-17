@@ -55,13 +55,13 @@ public class ResponseMessage {
     public static void userHaveRecruitChannel(@NotNull ButtonInteractionEvent event) {
         event.reply("**Złożyłeś już podanie do naszego klanu i masz aktywny kanał rekrutacyjny!**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - user have recruit channel", event.getUser()));
     }
 
     public static void noReqTimeOnServer(@NotNull ButtonInteractionEvent event) {
         event.reply("**Odczekaj 10 minut od dołączenia na serwer zanim złożysz podanie**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - no time req on server", event.getUser()));
     }
 
     public static void operationNotPossible(@NotNull ButtonInteractionEvent event) {
@@ -85,14 +85,14 @@ public class ResponseMessage {
     public static void maxRecruits(@NotNull ButtonInteractionEvent event) {
         event.reply("**REKRUTACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.warn("{} - max recruit channels in category", event.getUser()));
         RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
     }
 
     public static void userBlackList(@NotNull ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - user on black list", event.getUser()));
         RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest na czarnej liście.");
     }
 
@@ -105,20 +105,20 @@ public class ResponseMessage {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
                         "Jesteś już w naszym klanie dzbanie!")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - user is already clan member", event.getUser()));
         RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
     }
 
     public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {
         event.reply("**Rekrut został już przyjęty na rekrutacje. Jeżeli chcesz możesz dać wynik rekrutacji używając przycisku zielonego lub czerwonego.**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - recruit(channelId={}) has been accepted", event.getUser(), event.getChannel().getId()));
     }
 
     public static void recruitHasBeenRejected(@NotNull ButtonInteractionEvent event) {
         event.reply("**Rekrut z wynikiem rekrutacji. Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)
-                .queue();
+                .queue(m -> log.info("{} - recruit(channelId={}) has been rejected", event.getUser(), event.getChannel().getId()));
     }
 
     public static void noPermission(@NotNull ButtonInteractionEvent event) {
