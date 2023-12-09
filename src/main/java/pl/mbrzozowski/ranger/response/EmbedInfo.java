@@ -286,7 +286,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedReport(String userID, TextChannel channel) {
+    public static void sendEmbedReport(String userID, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
         builder.setTitle("Report player");
         builder.addField("", """
@@ -315,7 +315,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedUnban(String userID, TextChannel channel) {
+    public static void sendEmbedUnban(String userID, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLUE, ThumbnailType.DEFAULT);
         builder.setTitle("Unban player");
         builder.addField("", """
@@ -338,7 +338,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedContact(String userID, TextChannel channel) {
+    public static void sendEmbedContact(String userID, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.GREEN, ThumbnailType.DEFAULT);
         builder.setTitle("Contact with Admin");
         builder.addField("", "Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. " +

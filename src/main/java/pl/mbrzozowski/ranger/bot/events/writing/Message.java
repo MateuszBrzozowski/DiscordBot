@@ -10,7 +10,7 @@ public class Message {
 
     private final String[] words;
     private final String contentDisplay;
-    private final boolean admin;
+    private boolean admin;
     private final boolean clanMember;
     private final boolean isPrivate;
     private final boolean isTextChannel;
@@ -20,7 +20,7 @@ public class Message {
         this.words = words;
         this.contentDisplay = contentDisplay;
         this.admin = Users.hasUserRole(userID, RoleID.RADA_KLANU);
-        if (!this.admin) Users.isUserDev(userID);
+        if (!this.admin) this.admin = Users.isUserDev(userID);
         this.clanMember = Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID);
         this.userID = userID;
         this.isPrivate = event.isFromType(ChannelType.PRIVATE);

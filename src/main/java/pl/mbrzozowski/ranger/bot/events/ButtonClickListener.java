@@ -108,9 +108,11 @@ public class ButtonClickListener extends ListenerAdapter {
             interactionEvent.deferEdit().queue();
             EmbedInfo.confirmCloseChannel(interactionEvent.getChannel().asTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
+            interactionEvent.deferEdit().queue();
             interactionEvent.getMessage().delete().queue();
             serverService.closeChannel(interactionEvent);
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
+            interactionEvent.deferEdit().queue();
             interactionEvent.getMessage().delete().queue();
         } else {
             removeChannelsButtons(interactionEvent, isRadaKlanu);
@@ -120,12 +122,14 @@ public class ButtonClickListener extends ListenerAdapter {
     private void removeChannelsButtons(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
         if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
             if (isRadaKlanu) {
+                interactionEvent.deferEdit().queue();
                 interactionEvent.getMessage().delete().queue();
                 EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
             } else {
                 ResponseMessage.noPermission(interactionEvent);
             }
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
+            interactionEvent.deferEdit().queue();
             interactionEvent.getMessage().delete().queue();
             EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
         } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
