@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.Users;
-import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
+import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.stats.model.*;
 import pl.mbrzozowski.ranger.stats.service.*;
 
@@ -48,10 +48,10 @@ public class ServerStats {
             if (hasPlayerData(playerStats)) {
                 sendEmbedWithStats(event, userId, playerStats);
             } else {
-                EmbedInfo.noDataToShow(userId, channel);
+                sendEmbedWithNoStats(event, userId, playerStats);
             }
         } else {
-            EmbedInfo.noDataToShow(userId, channel);
+            ResponseMessage.playerStatsIsNull(event);
         }
     }
 
@@ -98,6 +98,34 @@ public class ServerStats {
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
         event.reply("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        log.info("Embed with stats sent for user(id=" + userID + ")");
+    }
+
+    private void sendEmbedWithNoStats(@NotNull SlashCommandInteractionEvent event, String userID, @NotNull PlayerStats playerStats) {
+        DecimalFormat df = new DecimalFormat("0.00");
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.BLACK);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle(Users.getUserNicknameFromID(userID) + " profile");
+        builder.setDescription("**Profile info:**```yaml\n" + playerStats.getProfileName() + "\n```");
+        builder.addBlankField(false);
+        builder.addField("⚔ K/D", "**0**", true);
+        builder.addField("⚔ Kills/Wounds", "**0** effectiveness", true);
+        builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
+        builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
+        builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);
+        builder.addField("⚕ Revives", "**" + playerStats.getRevives() + "** revive(s)", true);
+        builder.addField("⚕ Revived", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
+        builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
+        builder.addField("\uD83D\uDC9E Weapon", playerStats.getWeapon(), true);
+        builder.addBlankField(false);
+        builder.addField("Most kills", "-", true);
+        builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
+        builder.addField("Most revives", playerStats.getMostRevives(), true);
+        builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
+        builder.setFooter("Data from 8.04.2022r.");
+        event.reply("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        log.info("Embed with no stats sent for user(id=" + userID + ")");
     }
 
     private @Nullable PlayerStats pullStatsFromDB(String userId) {

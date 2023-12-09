@@ -186,4 +186,9 @@ public class ResponseMessage {
                 .setEphemeral(false)
                 .queue();
     }
+
+    public static void playerStatsIsNull(@NotNull SlashCommandInteractionEvent event) {
+        log.warn("User can not be found in the database");
+        event.reply("User can not be found in the database").queue();
+    }
 }

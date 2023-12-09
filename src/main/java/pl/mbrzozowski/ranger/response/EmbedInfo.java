@@ -364,19 +364,6 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
-    public static void noDataToShow(String userId, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
-        builder.setTitle("No data to show.");
-        builder.setDescription("""
-                If you played on our server and there is no data, please check your Steam64ID and update it by command !profile.
-
-                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
-
-                e.g.\s
-                *!profile 76561197990543288*""");
-        channel.sendMessage("<@" + userId + ">").setEmbeds(builder.build()).queue();
-    }
-
     public static void noActiveEvents(@NotNull MessageChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Brak aktywnych eventów");
