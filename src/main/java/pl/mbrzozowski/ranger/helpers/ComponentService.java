@@ -44,9 +44,7 @@ public class ComponentService {
     }
 
     public static void removeChannel(@NotNull ButtonInteractionEvent event) {
-        event.deferEdit().queue();
-        event.getMessage().delete().queue();
-        EmbedInfo.removedChannel(event.getChannel().asTextChannel());
+        EmbedInfo.removedChannel(event);
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(5000);

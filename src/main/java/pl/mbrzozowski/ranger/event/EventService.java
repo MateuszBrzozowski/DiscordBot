@@ -194,7 +194,7 @@ public class EventService {
         reminder.create();
     }
 
-    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, ButtonClickType buttonClick) {
+    public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull ButtonClickType buttonClick) {
         log.info(buttonInteractionEvent.getUser() + " - Event, button type: " + buttonClick.toString());
         Optional<Event> eventOptional = findEventByMsgId(buttonInteractionEvent.getMessage().getId());
         if (eventOptional.isEmpty()) {

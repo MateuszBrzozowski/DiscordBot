@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -28,7 +29,7 @@ import java.awt.*;
 public class EmbedInfo extends EmbedCreator {
 
 
-    public static void recruiter(MessageReceivedEvent event) {
+    public static void recruiter(@NotNull MessageReceivedEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
         builder.setTitle("PODANIE");
         builder.addField("", "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
@@ -43,7 +44,7 @@ public class EmbedInfo extends EmbedCreator {
         event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
     }
 
-    public static void closeServerServiceChannel(String userID, MessageChannel channel) {
+    public static void closeServerServiceChannel(String userID, @NotNull MessageChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
@@ -52,16 +53,17 @@ public class EmbedInfo extends EmbedCreator {
                 .queue();
     }
 
-    public static void confirmCloseChannel(@NotNull TextChannel channel) {
+    public static void confirmCloseChannel(@NotNull ButtonInteractionEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.QUESTION);
         builder.setTitle("Do you want close the ticket?");
-        channel.sendMessageEmbeds(builder.build())
+        event.reply("")
+                .setEmbeds(builder.build())
                 .setActionRow(Button.success(ComponentId.CLOSE_YES, "Yes"),
                         Button.danger(ComponentId.CLOSE_NO, "No"))
                 .queue();
     }
 
-    public static void confirmRemoveChannel(TextChannel channel) {
+    public static void confirmRemoveChannel(@NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.QUESTION);
         builder.setTitle("Potwierdź czy chcesz usunąć kanał?");
         channel.sendMessageEmbeds(builder.build())
@@ -73,15 +75,15 @@ public class EmbedInfo extends EmbedCreator {
     /**
      * Wyświetla informację że kanał został usunięty i że za chwilę zniknie.
      *
-     * @param channel Kanał który został usunięty.b
+     * @param event Button interaction
      */
-    public static void removedChannel(TextChannel channel) {
+    public static void removedChannel(@NotNull ButtonInteractionEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał wkrótce zostanie usunięty.");
-        channel.sendMessageEmbeds(builder.build()).queue();
+        event.reply("").setEmbeds(builder.build()).queue();
     }
 
-    public static void endNegative(String drillId, String recruitId, TextChannel channel) {
+    public static void endNegative(String drillId, String recruitId, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
         builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
@@ -98,7 +100,7 @@ public class EmbedInfo extends EmbedCreator {
         });
     }
 
-    public static void endPositive(String drillId, String recruitId, TextChannel channel) {
+    public static void endPositive(String drillId, String recruitId, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
         builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
@@ -201,7 +203,7 @@ public class EmbedInfo extends EmbedCreator {
      * @param whatChange jaka zmiana zostala wykonana
      * @param dateTime   data i czas
      */
-    public static void sendInfoChanges(String userID, Event event, EventChanges whatChange, String dateTime) {
+    public static void sendInfoChanges(String userID, Event event, @NotNull EventChanges whatChange, String dateTime) {
         String description = "";
         if (whatChange.equals(EventChanges.CHANGES)) {
             description = "Zmieniona data lub czas wydarzenia na które się zapisałeś.";
@@ -253,7 +255,7 @@ public class EmbedInfo extends EmbedCreator {
         }
     }
 
-    public static void seedersRoleJoining(TextChannel channel) {
+    public static void seedersRoleJoining(@NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("SQUAD SERVER SEEDER");
         builder.addField("", "Jeśli chcesz pomóc nam w rozkręcaniu naszego serwera. Możesz przypisać sobię rolę klikając w poniższy przycisk by otrzymywać ping.", false);
@@ -267,7 +269,7 @@ public class EmbedInfo extends EmbedCreator {
      *
      * @param channel Kanał na którym wstawiana jest formatka.
      */
-    public static void serverService(MessageChannel channel) {
+    public static void serverService(@NotNull MessageChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
         builder.setTitle("Rangers Polska Servers - Create Ticket :ticket:");
         builder.addField("", "Jeśli potrzebujesz pomocy admina naszych serwerów, " +
@@ -351,7 +353,7 @@ public class EmbedInfo extends EmbedCreator {
                 .queue(message -> message.pin().queue());
     }
 
-    public static void connectUnSuccessfully(String userID, TextChannel channel) {
+    public static void connectUnSuccessfully(String userID, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Steam64ID is not valid");
         builder.setDescription("""
@@ -362,7 +364,7 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
     }
 
-    public static void noDataToShow(String userId, TextChannel channel) {
+    public static void noDataToShow(String userId, @NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(Color.BLACK);
         builder.setTitle("No data to show.");
         builder.setDescription("""
@@ -375,7 +377,7 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessage("<@" + userId + ">").setEmbeds(builder.build()).queue();
     }
 
-    public static void noActiveEvents(MessageChannel textChannel) {
+    public static void noActiveEvents(@NotNull MessageChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Brak aktywnych eventów");
         textChannel.sendMessageEmbeds(builder.build()).queue();
@@ -402,7 +404,7 @@ public class EmbedInfo extends EmbedCreator {
                 .queue();
     }
 
-    public static void recruitAccepted(String userName, TextChannel textChannel) {
+    public static void recruitAccepted(String userName, @NotNull TextChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_BLUE);
         builder.setTitle("Rozpoczęto rekrutację");
         builder.setDescription("Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem wszystkich członków klanu.");
@@ -410,14 +412,14 @@ public class EmbedInfo extends EmbedCreator {
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void recruitNotAccepted(String userName, TextChannel textChannel) {
+    public static void recruitNotAccepted(String userName, @NotNull TextChannel textChannel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
         builder.setTitle("Podanie odrzucone");
         builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
-    public static void sendRoles(MessageReceivedEvent messageReceived, RoleService roleService) {
+    public static void sendRoles(@NotNull MessageReceivedEvent messageReceived, @NotNull RoleService roleService) {
         SelectMenu roles = roleService.getRoleToSelectMenu();
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Discord role");

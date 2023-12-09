@@ -37,157 +37,158 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     @Override
-    public void onButtonInteraction(@NotNull ButtonInteractionEvent interactionEvent) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         log.info("{} - Button interaction event button(Label={}), channel(channelId={}, channelName={})",
-                interactionEvent.getUser(),
-                interactionEvent.getButton().getLabel(),
-                interactionEvent.getChannel().getId(),
-                interactionEvent.getChannel().getName());
-        boolean isRadaKlanu = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.RADA_KLANU);
-        newRecruit(interactionEvent, isRadaKlanu);
+                event.getUser(),
+                event.getButton().getLabel(),
+                event.getChannel().getId(),
+                event.getChannel().getName());
+        boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
+        newRecruit(event, isRadaKlanu);
     }
 
-    private void newRecruit(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
-            recruitsService.newPodanie(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
-            recruitsService.confirm(interactionEvent);
+    private void newRecruit(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
+            recruitsService.newPodanie(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
+            recruitsService.confirm(event);
         } else {
-            recruitChannelReaction(interactionEvent, isRadaKlanu);
+            recruitChannelReaction(event, isRadaKlanu);
         }
     }
 
-    private void recruitChannelReaction(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_ACCEPTED)) {
+    private void recruitChannelReaction(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_ACCEPTED)) {
             if (isRadaKlanu) {
-                recruitsService.accepted(interactionEvent);
+                recruitsService.accepted(event);
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
             if (isRadaKlanu) {
-                recruitsService.recruitNotAccepted(interactionEvent);
+                recruitsService.recruitNotAccepted(event);
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
             if (isRadaKlanu) {
-                if (!recruitsService.positiveResult(interactionEvent)) {
-                    ResponseMessage.operationNotPossible(interactionEvent);
+                if (!recruitsService.positiveResult(event)) {
+                    ResponseMessage.operationNotPossible(event);
                 }
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
             if (isRadaKlanu) {
-                if (!recruitsService.negativeResult(interactionEvent)) {
-                    ResponseMessage.operationNotPossible(interactionEvent);
+                if (!recruitsService.negativeResult(event)) {
+                    ResponseMessage.operationNotPossible(event);
                 }
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
         } else {
-            serverServiceReport(interactionEvent, isRadaKlanu);
+            serverServiceReport(event, isRadaKlanu);
         }
     }
 
-    private void serverServiceReport(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {
-            serverService.buttonClick(interactionEvent, ButtonClickType.REPORT);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_UNBAN)) {
-            serverService.buttonClick(interactionEvent, ButtonClickType.UNBAN);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_CONTACT)) {
-            serverService.buttonClick(interactionEvent, ButtonClickType.CONTACT);
+    private void serverServiceReport(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {
+            serverService.buttonClick(event, ButtonClickType.REPORT);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_UNBAN)) {
+            serverService.buttonClick(event, ButtonClickType.UNBAN);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_CONTACT)) {
+            serverService.buttonClick(event, ButtonClickType.CONTACT);
         } else {
-            serverServiceCloseChannel(interactionEvent, isRadaKlanu);
+            serverServiceCloseChannel(event, isRadaKlanu);
         }
     }
 
-    private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
-            interactionEvent.deferEdit().queue();
-            EmbedInfo.confirmCloseChannel(interactionEvent.getChannel().asTextChannel());
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
-            interactionEvent.deferEdit().queue();
-            interactionEvent.getMessage().delete().queue();
-            serverService.closeChannel(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
-            interactionEvent.deferEdit().queue();
-            interactionEvent.getMessage().delete().queue();
+    private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
+            EmbedInfo.confirmCloseChannel(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES) ||
+                event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_NO)) {
+            deleteMessageAfterButtonInteraction(event);
+            if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES)) {
+                serverService.closeChannel(event);
+            }
         } else {
-            removeChannelsButtons(interactionEvent, isRadaKlanu);
+            removeChannelsButtons(event, isRadaKlanu);
         }
     }
 
-    private void removeChannelsButtons(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
+    private void removeChannelsButtons(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
             if (isRadaKlanu) {
-                interactionEvent.deferEdit().queue();
-                interactionEvent.getMessage().delete().queue();
-                EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
+                deleteMessageAfterButtonInteraction(event);
+                EmbedInfo.confirmRemoveChannel(event.getChannel().asTextChannel());
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
-            interactionEvent.deferEdit().queue();
-            interactionEvent.getMessage().delete().queue();
-            EmbedInfo.confirmRemoveChannel(interactionEvent.getChannel().asTextChannel());
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
-            removeChannelDB(interactionEvent, isRadaKlanu);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
-            interactionEvent.deferEdit().queue();
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
+            deleteMessageAfterButtonInteraction(event);
+            EmbedInfo.confirmRemoveChannel(event.getChannel().asTextChannel());
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
+            removeChannelDB(event, isRadaKlanu);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
+            event.deferEdit().queue();
         } else {
-            eventsButtons(interactionEvent);
+            eventsButtons(event);
         }
     }
 
-    private void eventsButtons(@NotNull ButtonInteractionEvent interactionEvent) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_IN);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN_RESERVE + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_IN_RESERVE);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_OUT + interactionEvent.getMessage().getId())) {
-            eventService.buttonClick(interactionEvent, ButtonClickType.SIGN_OUT);
+    private void eventsButtons(@NotNull ButtonInteractionEvent event) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN + event.getMessage().getId())) {
+            eventService.buttonClick(event, ButtonClickType.SIGN_IN);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_IN_RESERVE + event.getMessage().getId())) {
+            eventService.buttonClick(event, ButtonClickType.SIGN_IN_RESERVE);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENTS_SIGN_OUT + event.getMessage().getId())) {
+            eventService.buttonClick(event, ButtonClickType.SIGN_OUT);
         } else {
-            openForm(interactionEvent);
+            openForm(event);
         }
     }
 
-    private void openForm(@NotNull ButtonInteractionEvent interactionEvent) {
-        if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_RECRUIT_OPINION)) {
-            RecruitOpinions.openOpinionAboutRecruit(interactionEvent);
-        } else if (interactionEvent.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_ANONYMOUS_COMPLAINTS)) {
-            boolean isClanMember = Users.hasUserRole(interactionEvent.getUser().getId(), RoleID.CLAN_MEMBER_ID);
+    private void openForm(@NotNull ButtonInteractionEvent event) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_RECRUIT_OPINION)) {
+            RecruitOpinions.openOpinionAboutRecruit(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.OPEN_FORM_ANONYMOUS_COMPLAINTS)) {
+            boolean isClanMember = Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID);
             if (isClanMember) {
-                ResponseMessage.operationNotPossible(interactionEvent);
+                ResponseMessage.operationNotPossible(event);
             } else {
-                RecruitOpinions.openAnonymousComplaints(interactionEvent);
+                RecruitOpinions.openAnonymousComplaints(event);
             }
         } else {
-            eventsGenerator(interactionEvent);
+            eventsGenerator(event);
         }
     }
 
-    private void eventsGenerator(@NotNull ButtonInteractionEvent interactionEvent) {
-        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(interactionEvent.getUser().getId());
+    private void eventsGenerator(@NotNull ButtonInteractionEvent event) {
+        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         if (indexOfGenerator >= 0) {
-            interactionEvent.deferEdit().queue();
-            eventsGeneratorService.saveAnswerAndNextStage(interactionEvent, indexOfGenerator);
+            event.deferEdit().queue();
+            eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);
         }
     }
 
-    private void removeChannelDB(@NotNull ButtonInteractionEvent interactionEvent, boolean isRadaKlanu) {
-        String parentCategoryId = interactionEvent.getChannel().asTextChannel().getParentCategoryId();
+    private void removeChannelDB(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+        String parentCategoryId = event.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
             if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isRadaKlanu) {
-                recruitsService.deleteChannelByID(interactionEvent.getChannel().getId());
-                ComponentService.removeChannel(interactionEvent);
+                recruitsService.deleteChannelByID(event.getChannel().getId());
+                ComponentService.removeChannel(event);
             } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
-                serverService.removeChannel(interactionEvent);
-                ComponentService.removeChannel(interactionEvent);
+                serverService.removeChannel(event);
+                ComponentService.removeChannel(event);
             } else {
-                ResponseMessage.noPermission(interactionEvent);
+                ResponseMessage.noPermission(event);
             }
         }
+    }
+
+    private void deleteMessageAfterButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        event.deferEdit().queue();
+        event.getMessage().delete().queue();
     }
 }
