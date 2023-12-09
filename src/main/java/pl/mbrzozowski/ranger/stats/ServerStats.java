@@ -46,7 +46,7 @@ public class ServerStats {
         PlayerStats playerStats = pullStatsFromDB(userId);
         if (playerStats != null) {
             if (hasPlayerData(playerStats)) {
-                sendEmbedWithStats(event, userId, channel, playerStats);
+                sendEmbedWithStats(event, userId, playerStats);
             } else {
                 EmbedInfo.noDataToShow(userId, channel);
             }
@@ -74,7 +74,7 @@ public class ServerStats {
         }
     }
 
-    private void sendEmbedWithStats(SlashCommandInteractionEvent event, String userID, @NotNull TextChannel channel, @NotNull PlayerStats playerStats) {
+    private void sendEmbedWithStats(@NotNull SlashCommandInteractionEvent event, String userID, @NotNull PlayerStats playerStats) {
         DecimalFormat df = new DecimalFormat("0.00");
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.BLACK);

@@ -76,7 +76,6 @@ public class SlashCommandListener extends ListenerAdapter {
                     }
                     if (serverStats.connectUserToSteam(event.getUser().getId(), steam64id.getAsString())) {
                         ResponseMessage.connectSuccessfully(event);
-                        serverStats.viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
                     } else {
                         ResponseMessage.connectUnSuccessfully(event);
                     }
