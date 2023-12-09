@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RangerLogger;
+import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
@@ -86,7 +87,9 @@ public class ResponseMessage {
         event.reply("**REKRUTACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
                 .setEphemeral(true)
                 .queue(m -> log.warn("{} - max recruit channels in category", event.getUser()));
-        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Maksymalna liczba kanałów w kategorii StrefaRekruta.");
+        RangerLogger.info("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
+                "Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
+                "Maksymalna liczba kanałów w kategorii StrefaRekruta.");
     }
 
     public static void userBlackList(@NotNull ButtonInteractionEvent event) {

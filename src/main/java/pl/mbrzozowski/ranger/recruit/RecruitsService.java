@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.exceptions.MaxNumberOfChannels;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
@@ -114,7 +115,7 @@ public class RecruitsService {
         }
         if (isMaxRecruits()) {
             ResponseMessage.maxRecruits(event);
-            return;
+            throw new MaxNumberOfChannels("Maximum number of channels in recruit category");
         }
         if (userBlackList(userID)) {
             ResponseMessage.userBlackList(event);
