@@ -111,7 +111,6 @@ public class ResponseMessage {
                         "Jesteś już w naszym klanie dzbanie!")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user is already clan member", event.getUser()));
-        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. Jest już w naszym klanie.");
     }
 
     public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {
