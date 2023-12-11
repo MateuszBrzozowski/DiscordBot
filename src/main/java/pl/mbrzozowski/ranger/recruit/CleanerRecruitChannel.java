@@ -19,13 +19,13 @@ import static java.time.LocalDate.now;
 public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
 
     private final RecruitsService recruitsService;
-    private final int DELAY_IN_DAYS;
+    private final int delayInDays;
 
     @Autowired
     public CleanerRecruitChannel(RecruitsService recruitsService,
                                  @Value("${recruit.channel.cleaning}") int delay) {
         this.recruitsService = recruitsService;
-        this.DELAY_IN_DAYS = delay;
+        this.delayInDays = delay;
         Timer timer = new Timer();
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
         date.setHours(23);
@@ -40,7 +40,7 @@ public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
         recruits = recruits
                 .stream()
                 .filter(recruit -> recruit.getRecruitmentResult() != null && recruit.getEndRecruitment() != null)
-                .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS)))
+                .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(delayInDays)))
                 .toList();
         for (Recruit recruit : recruits) {
             recruitsService.deleteChannel(recruit);

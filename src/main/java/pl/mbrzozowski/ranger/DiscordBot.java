@@ -25,7 +25,7 @@ public class DiscordBot {
     private final SelectMenuListener selectMenuListener;
     private final SlashCommandListener slashCommandListener;
     private static JDA jda;
-    private final String TOKEN;
+    private final String token;
 
     @Autowired
     public DiscordBot(WriteListener writeListener,
@@ -43,7 +43,7 @@ public class DiscordBot {
         this.listener = listener;
         this.selectMenuListener = selectMenuListener;
         this.slashCommandListener = slashCommandListener;
-        this.TOKEN = token;
+        this.token = token;
         DiscordBotRun();
     }
 
@@ -54,7 +54,7 @@ public class DiscordBot {
         intents.add(GatewayIntent.DIRECT_MESSAGES);
         intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
         intents.add(GatewayIntent.MESSAGE_CONTENT);
-        JDA jda = JDABuilder.create(TOKEN, intents)
+        JDA jda = JDABuilder.create(token, intents)
                 .addEventListeners(this.writeListener)
                 .addEventListeners(this.buttonClickListener)
                 .addEventListeners(this.channelUpdate)

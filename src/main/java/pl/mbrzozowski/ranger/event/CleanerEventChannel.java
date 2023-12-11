@@ -22,16 +22,16 @@ import static java.time.LocalDate.now;
 public class CleanerEventChannel extends TimerTask implements CleanerChannel {
 
     private final EventService eventService;
-    private final int DELAY_IN_DAYS;
-    private final int DELAY_IN_DAYS_FOR_TACTICAL;
+    private final int delayInDays;
+    private final int delayInDaysForTactical;
 
     @Autowired
     public CleanerEventChannel(EventService eventService,
                                @Value("${event.channel.cleaning}") int delay,
                                @Value("${event.tactical.channel.cleaning}") int delayForTactical) {
         this.eventService = eventService;
-        this.DELAY_IN_DAYS = delay;
-        this.DELAY_IN_DAYS_FOR_TACTICAL = delayForTactical;
+        this.delayInDays = delay;
+        this.delayInDaysForTactical = delayForTactical;
         Timer timer = new Timer();
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
         date.setHours(23);
@@ -48,8 +48,8 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
                 .filter(event -> event.getDate().isBefore(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
                 .toList();
         for (Event event : eventList) {
-            if ((event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS))) ||
-                    (event.getDate().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS_FOR_TACTICAL)) && event.getEventFor() == EventFor.TACTICAL_GROUP)) {
+            if ((event.getDate().isBefore(LocalDateTime.now().minusDays(delayInDays))) ||
+                    (event.getDate().isBefore(LocalDateTime.now().minusDays(delayInDaysForTactical)) && event.getEventFor() == EventFor.TACTICAL_GROUP)) {
                 eventService.delete(event);
                 deleteChannel(event);
             } else {
