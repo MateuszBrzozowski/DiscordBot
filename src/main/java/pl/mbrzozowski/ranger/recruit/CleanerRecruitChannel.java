@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.recruit;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
@@ -18,11 +19,13 @@ import static java.time.LocalDate.now;
 public class CleanerRecruitChannel extends TimerTask implements CleanerChannel {
 
     private final RecruitsService recruitsService;
-    private static final int DELAY_IN_DAYS = 5;
+    private final int DELAY_IN_DAYS;
 
     @Autowired
-    public CleanerRecruitChannel(RecruitsService recruitsService) {
+    public CleanerRecruitChannel(RecruitsService recruitsService,
+                                 @Value("${recruit.channel.cleaning}") int delay) {
         this.recruitsService = recruitsService;
+        this.DELAY_IN_DAYS = delay;
         Timer timer = new Timer();
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
         date.setHours(23);

@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.server.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
@@ -18,10 +19,13 @@ import static java.time.LocalDate.now;
 public class CleanerServerServiceChannel extends TimerTask implements CleanerChannel {
 
     private final ServerService serverService;
+    private final int DELAY_IN_DAYS;
 
     @Autowired
-    public CleanerServerServiceChannel(ServerService serverService) {
+    public CleanerServerServiceChannel(ServerService serverService,
+                                       @Value("${server.service.channel.cleaning}") int delay) {
         this.serverService = serverService;
+        this.DELAY_IN_DAYS = delay;
         Timer timer = new Timer();
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
         date.setHours(23);
@@ -40,7 +44,7 @@ public class CleanerServerServiceChannel extends TimerTask implements CleanerCha
         List<Client> clients = serverService.findAll();
         clients = clients.stream()
                 .filter(client -> client.getIsClose() && client.getCloseTimestamp() != null)
-                .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(2)))
+                .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(DELAY_IN_DAYS)))
                 .toList();
         for (Client client : clients) {
             serverService.deleteChannelById(client.getChannelId());
