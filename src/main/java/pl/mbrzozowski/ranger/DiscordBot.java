@@ -6,14 +6,13 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pl.mbrzozowski.ranger.bot.events.*;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static pl.mbrzozowski.ranger.configuration.Configuration.TOKEN_RANGER_TESTER;
 
 @Component
 public class DiscordBot {
@@ -26,6 +25,7 @@ public class DiscordBot {
     private final SelectMenuListener selectMenuListener;
     private final SlashCommandListener slashCommandListener;
     private static JDA jda;
+    private final String TOKEN;
 
     @Autowired
     public DiscordBot(WriteListener writeListener,
@@ -34,7 +34,8 @@ public class DiscordBot {
                       MessageUpdate messageUpdate,
                       Listener listener,
                       SelectMenuListener selectMenuListener,
-                      SlashCommandListener slashCommandListener) throws LoginException {
+                      SlashCommandListener slashCommandListener,
+                      @Value("${discord.token}") String token) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
         this.channelUpdate = channelUpdate;
@@ -42,6 +43,7 @@ public class DiscordBot {
         this.listener = listener;
         this.selectMenuListener = selectMenuListener;
         this.slashCommandListener = slashCommandListener;
+        this.TOKEN = token;
         DiscordBotRun();
     }
 
@@ -52,7 +54,7 @@ public class DiscordBot {
         intents.add(GatewayIntent.DIRECT_MESSAGES);
         intents.add(GatewayIntent.GUILD_MESSAGE_REACTIONS);
         intents.add(GatewayIntent.MESSAGE_CONTENT);
-        JDA jda = JDABuilder.create(TOKEN_RANGER_TESTER, intents)
+        JDA jda = JDABuilder.create(TOKEN, intents)
                 .addEventListeners(this.writeListener)
                 .addEventListeners(this.buttonClickListener)
                 .addEventListeners(this.channelUpdate)
