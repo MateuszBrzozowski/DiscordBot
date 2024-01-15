@@ -2,25 +2,28 @@ package pl.mbrzozowski.ranger.settings;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 
 
 public class SettingsRepository {
 
-    private final String pathFile;
+    private final String pathFile = "settings.properties";
     private final Properties properties = new Properties();
 
     public SettingsRepository() {
-        URL url = getClass().getClassLoader().getResource("settings.properties");
-        if (url != null) {
-            pathFile = url.getPath();
-        } else {
-            pathFile = null;
+        System.out.println(pathFile);
+        File file = new File(pathFile);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
