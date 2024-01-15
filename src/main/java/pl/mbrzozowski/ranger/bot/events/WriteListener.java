@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
+import pl.mbrzozowski.ranger.disboard.DisboardService;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
@@ -29,6 +30,7 @@ public class WriteListener extends ListenerAdapter {
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
     private final RoleService roleService;
+    private final DisboardService disboardService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -38,7 +40,8 @@ public class WriteListener extends ListenerAdapter {
                          UsersReminderService usersReminderService,
                          EventsGeneratorService eventsGeneratorService,
                          EventsSettingsService eventsSettingsService,
-                         RoleService roleService) {
+                         RoleService roleService,
+                         DisboardService disboardService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.botWriter = botWriter;
@@ -47,6 +50,7 @@ public class WriteListener extends ListenerAdapter {
         this.eventsGeneratorService = eventsGeneratorService;
         this.eventsSettingsService = eventsSettingsService;
         this.roleService = roleService;
+        this.disboardService = disboardService;
     }
 
 
@@ -62,6 +66,7 @@ public class WriteListener extends ListenerAdapter {
                 event);
         log.info(event.getAuthor() + " - send message");
 
+        DisboardBot disboardBot = new DisboardBot(event, disboardService);
         ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
         LogChannel logChannel = new LogChannel(event);
         CheckUser checkUser = new CheckUser(event);
@@ -76,6 +81,7 @@ public class WriteListener extends ListenerAdapter {
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd(event);
 
+        disboardBot.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(checkUser);
         checkUser.setNextProccess(generatorCmd);
@@ -89,7 +95,7 @@ public class WriteListener extends ListenerAdapter {
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
 
-        reminderCmd.proccessMessage(msg);
+        disboardBot.proccessMessage(msg);
     }
 }
 
