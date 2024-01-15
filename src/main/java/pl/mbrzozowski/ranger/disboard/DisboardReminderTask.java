@@ -10,7 +10,7 @@ import java.util.TimerTask;
 @Slf4j
 public class DisboardReminderTask extends TimerTask {
 
-    private static final String CHANNEL_ID = "1183009418539970630"; //testowo
+    private static final String CHANNEL_ID = "1154107337347448872";
     private final DisboardService disboardService;
 
     public DisboardReminderTask(DisboardService disboardService) {
