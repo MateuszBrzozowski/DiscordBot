@@ -417,4 +417,25 @@ public class EmbedInfo extends EmbedCreator {
                 .setActionRow(roles)
                 .queue();
     }
+
+    public static void warningMaxRecruits() {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
+        builder.setTitle("Brak wolnych miejsc. Rekrutacja zamknięta.");
+        builder.setDescription("Osiągnięto maksymalną ilość kanałów w kategorii.");
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        if (textChannel != null) {
+            textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+                    .setEmbeds(builder.build()).queue();
+        }
+    }
+
+    public static void warningFewSlots() {
+        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+        builder.setTitle("Pozostały 2 lub mniej miejsc dla rekrutów.");
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        if (textChannel != null) {
+            textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+                    .setEmbeds(builder.build()).queue();
+        }
+    }
 }

@@ -68,6 +68,16 @@ public class RecruitsService {
                     sendWelcomeMessage(userID, textChannel);
                     add(userID, userName, textChannel.getId());
                 });
+        checkCountOfRecruitChannels();
+    }
+
+    private void checkCountOfRecruitChannels() {
+        int channelsInCategory = howManyChannelsInCategory();
+        if (channelsInCategory == MAX_CHANNELS) {
+            EmbedInfo.warningMaxRecruits();
+        } else if (channelsInCategory >= MAX_CHANNELS - 2) {
+            EmbedInfo.warningFewSlots();
+        }
     }
 
     public void sendWelcomeMessage(String userID, @NotNull TextChannel textChannel) {
