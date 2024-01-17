@@ -75,8 +75,10 @@ public class RecruitsService {
         int channelsInCategory = howManyChannelsInCategory();
         if (channelsInCategory == MAX_CHANNELS) {
             EmbedInfo.warningMaxRecruits();
+            log.info("Maximum number of recruitment channels achieved. Warning sent.");
         } else if (channelsInCategory >= MAX_CHANNELS - 2) {
             EmbedInfo.warningFewSlots();
+            log.info("Low number of recruitment channels. Warning sent.");
         }
     }
 
