@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.settings;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -9,18 +10,19 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 
-
+@Slf4j
 public class SettingsRepository {
 
     private final String pathFile = "settings.properties";
     private final Properties properties = new Properties();
 
     public SettingsRepository() {
-        System.out.println(pathFile);
         File file = new File(pathFile);
         if (!file.exists()) {
+            log.info("File {} not exist", pathFile);
             try {
                 file.createNewFile();
+                log.info("Created file {}", pathFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
