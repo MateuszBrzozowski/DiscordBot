@@ -24,6 +24,7 @@ public final class Commands {
     public static final String EMBED_SERVER_SERVICE = PREFIX + "ServerService" + SUFFIX;
     public static final String RECRUIT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     public static final String UPDATE_WL = PREFIX + "updateWL" + SUFFIX;
+    public static final String DISCORD_MEMBERS = PREFIX + "discord members" + SUFFIX;
     //ROLE
     public static final String ROLES = PREFIX + "roles" + SUFFIX;
 }

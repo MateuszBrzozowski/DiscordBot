@@ -13,6 +13,7 @@ import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
+import pl.mbrzozowski.ranger.members.GuildMembersService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
@@ -31,6 +32,7 @@ public class WriteListener extends ListenerAdapter {
     private final EventsSettingsService eventsSettingsService;
     private final RoleService roleService;
     private final DisboardService disboardService;
+    private final GuildMembersService guildMembersService;
 
     @Autowired
     public WriteListener(EventService eventService,
@@ -41,7 +43,8 @@ public class WriteListener extends ListenerAdapter {
                          EventsGeneratorService eventsGeneratorService,
                          EventsSettingsService eventsSettingsService,
                          RoleService roleService,
-                         DisboardService disboardService) {
+                         DisboardService disboardService,
+                         GuildMembersService guildMembersService) {
         this.eventService = eventService;
         this.recruitsService = recruitsService;
         this.botWriter = botWriter;
@@ -51,6 +54,7 @@ public class WriteListener extends ListenerAdapter {
         this.eventsSettingsService = eventsSettingsService;
         this.roleService = roleService;
         this.disboardService = disboardService;
+        this.guildMembersService = guildMembersService;
     }
 
 
@@ -77,6 +81,7 @@ public class WriteListener extends ListenerAdapter {
         EmbedSender embedSender = new EmbedSender(event, roleService);
         RecruitCmd recruitCmd = new RecruitCmd(event, recruitsService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
+        AdminCommands adminCommands = new AdminCommands(event, guildMembersService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
         DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd(event);
@@ -91,7 +96,8 @@ public class WriteListener extends ListenerAdapter {
         checkUserAdmin.setNextProccess(embedSender);
         embedSender.setNextProccess(recruitCmd);
         recruitCmd.setNextProccess(checkIsPrivateChannel);
-        checkIsPrivateChannel.setNextProccess(eventsSettingsCmd);
+        checkIsPrivateChannel.setNextProccess(adminCommands);
+        adminCommands.setNextProccess(eventsSettingsCmd);
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
 
