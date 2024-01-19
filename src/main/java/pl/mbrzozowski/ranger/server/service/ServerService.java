@@ -74,7 +74,7 @@ public class ServerService {
                     textChannel
                             .getManager()
                             .putPermissionOverride(member, null, permissions)
-                            .queue(unused -> log.info("{} - permission override for member:{}", textChannel, member));
+                            .queue(unused -> log.info("{} - Close channel - permission override for member:{}", textChannel, member));
                 }
                 EmbedInfo.closeServerServiceChannel(whoClose, textChannel);
                 clientCloseChannelSave(client);
@@ -86,6 +86,7 @@ public class ServerService {
         client.setIsClose(true);
         client.setCloseTimestamp(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         clientRepository.save(client);
+        log.info("Client=({}) channel closed", client);
     }
 
     public void removeChannel(@NotNull ButtonInteractionEvent event) {

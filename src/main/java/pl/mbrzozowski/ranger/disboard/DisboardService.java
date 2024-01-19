@@ -20,11 +20,12 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.*;
 @Service
 public class DisboardService {
 
-    private final SettingsRepository settingsRepository = new SettingsRepository();
+    private final SettingsRepository settingsRepository;
     private final Timer[] timers = new Timer[1];
 
     @Autowired
-    public DisboardService() {
+    public DisboardService(SettingsRepository settingsRepository) {
+        this.settingsRepository = settingsRepository;
         setNextReminder();
     }
 

@@ -6,7 +6,8 @@ public enum SettingsKey {
     DISBOARD_REMINDER_DATE("disboard.reminder.date"),
     DISBOARD_REMINDER_DATE_ANSWER("disboard.reminder.date.answer"),
     DISBOARD_REMINDER_COUNT_FOR_DAY("disboard.reminder.count"),
-    ;
+    SERVER_SERVICE_DELETE_CHANNEL_AFTER_DAYS("server.service.delete.channel.after.days"),
+    SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS("server.service.close.channel.after.days");
 
     private final String key;
 

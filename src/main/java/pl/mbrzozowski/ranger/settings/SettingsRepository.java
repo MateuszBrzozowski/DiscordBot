@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.settings;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Slf4j
+@Repository
 public class SettingsRepository {
 
     private final String pathFile = "settings.properties";
@@ -48,6 +50,7 @@ public class SettingsRepository {
     public void save(@NotNull SettingsKey key, String value) {
         loadProperties();
         properties.setProperty(key.getKey(), value);
+        log.info("Saved settings({}={})", key.getKey(), value);
         storeProperties();
     }
 
