@@ -44,10 +44,16 @@ public class EmbedInfo extends EmbedCreator {
         event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
     }
 
-    public static void closeServerServiceChannel(String userID, @NotNull MessageChannel channel) {
+    /**
+     * Sends information about closed channel
+     *
+     * @param signature user who closing channel
+     * @param channel   channel which is closing
+     */
+    public static void closeServerServiceChannel(String signature, @NotNull MessageChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał zamknięty");
-        builder.setDescription("Kanał zamknięty przez " + Users.getUserNicknameFromID(userID) + ".");
+        builder.setDescription("Kanał zamknięty przez " + signature + ".");
         channel.sendMessageEmbeds(builder.build())
                 .setActionRow(Button.danger(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL, "Usuń kanał"))
                 .queue();

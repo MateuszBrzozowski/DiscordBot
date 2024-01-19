@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.server.service;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -14,6 +15,7 @@ import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -38,8 +40,8 @@ public class ServerService {
         this.clientRepository = clientRepository;
     }
 
-    public void buttonClick(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
-        log.info(event.getUser() + " - button type: " + buttonType.toString());
+    public void buttonClick(@NotNull ButtonInteractionEvent event, @NotNull ButtonClickType buttonType) {
+        log.info(event.getUser() + " - button type: " + buttonType);
         if (!userHasActiveReport(event.getUser().getId())) {
             createChannel(event, buttonType);
             event.deferEdit().queue();
@@ -52,36 +54,30 @@ public class ServerService {
         Optional<Client> clientOptional = findByChannelId(event.getChannel().getId());
         if (clientOptional.isPresent()) {
             event.getMessage().delete().submit();
-            Member member = event.getGuild().getMemberById(clientOptional.get().getUserId());
-            if (member != null) {
-                event
-                        .getChannel()
-                        .asTextChannel()
-                        .getManager()
-                        .putPermissionOverride(member, null, permissions)
-                        .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(), member));
-            }
-            EmbedInfo.closeServerServiceChannel(event.getAuthor().getId(), event.getChannel());
-            clientCloseChannelSave(clientOptional.get());
+            closeChannel(clientOptional.get(), Users.getUserNicknameFromID(event.getAuthor().getId()));
         }
     }
 
     public void closeChannel(@NotNull ButtonInteractionEvent event) {
         Optional<Client> clientOptional = clientRepository.findByChannelId(event.getChannel().getId());
-        if (clientOptional.isPresent()) {
-            Guild guild = event.getGuild();
-            if (guild != null) {
-                Member member = guild.getMemberById(clientOptional.get().getUserId());
+        clientOptional.ifPresent(client -> closeChannel(client, Users.getUserNicknameFromID(event.getUser().getId())));
+    }
+
+    public void closeChannel(Client client, String whoClose) {
+        JDA jda = DiscordBot.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild != null) {
+            TextChannel textChannel = guild.getTextChannelById(client.getChannelId());
+            Member member = guild.getMemberById(client.getUserId());
+            if (textChannel != null) {
                 if (member != null) {
-                    event
-                            .getChannel()
-                            .asTextChannel()
+                    textChannel
                             .getManager()
                             .putPermissionOverride(member, null, permissions)
-                            .queue(unused -> log.info("{} - closed for member:{}", event.getChannel(), member));
+                            .queue(unused -> log.info("{} - permission override for member:{}", textChannel, member));
                 }
-                EmbedInfo.closeServerServiceChannel(event.getUser().getId(), event.getChannel());
-                clientCloseChannelSave(clientOptional.get());
+                EmbedInfo.closeServerServiceChannel(whoClose, textChannel);
+                clientCloseChannelSave(client);
             }
         }
     }
