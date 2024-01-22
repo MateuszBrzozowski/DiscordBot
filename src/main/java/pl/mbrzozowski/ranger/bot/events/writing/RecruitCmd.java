@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.bot.events.writing;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.Commands;
@@ -12,32 +13,30 @@ public class RecruitCmd extends Proccess {
 
     private final RecruitsService recruitsService;
 
-    public RecruitCmd(MessageReceivedEvent messageReceived, RecruitsService recruitsService) {
-        super(messageReceived);
+    public RecruitCmd(RecruitsService recruitsService) {
         this.recruitsService = recruitsService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        String cmd = message.getWords()[0];
-        if (message.isTextChannel()) {
-            if (cmd.equalsIgnoreCase(Commands.START_REKRUT)) {
-                messageReceived.getMessage().delete().submit();
-                EmbedInfo.recruiter(messageReceived);
-                log.info("{} - msg({}) - creates embed for recruit application", messageReceived.getAuthor(), message.getContentDisplay());
-            } else if (cmd.equalsIgnoreCase(Commands.NEGATIVE)) {
-                messageReceived.getMessage().delete().submit();
-                recruitsService.negativeResult(message.getUserID(), messageReceived.getChannel().asTextChannel());
-                log.info(messageReceived.getAuthor() + " - Send negative result for recruit");
-            } else if (cmd.equalsIgnoreCase(Commands.POSITIVE)) {
-                messageReceived.getMessage().delete().submit();
-                recruitsService.positiveResult(message.getUserID(), messageReceived.getChannel().asTextChannel());
-                log.info(messageReceived.getAuthor() + " - Send positive result for recruit");
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        if (event.isFromType(ChannelType.TEXT)) {
+            if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.START_REKRUT)) {
+                event.getMessage().delete().submit();
+                EmbedInfo.recruiter(event);
+                log.info("{} - msg({}) - creates embed for recruit application", event.getAuthor(), event.getMessage().getContentRaw());
+            } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.NEGATIVE)) {
+                event.getMessage().delete().submit();
+                recruitsService.negativeResult(event.getAuthor().getId(), event.getChannel().asTextChannel());
+                log.info(event.getAuthor() + " - Send negative result for recruit");
+            } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.POSITIVE)) {
+                event.getMessage().delete().submit();
+                recruitsService.positiveResult(event.getAuthor().getId(), event.getChannel().asTextChannel());
+                log.info(event.getAuthor() + " - Send positive result for recruit");
             } else {
-                getNextProccess().proccessMessage(message);
+                getNextProccess().proccessMessage(event);
             }
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 }

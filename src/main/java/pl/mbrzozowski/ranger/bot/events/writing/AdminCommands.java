@@ -9,17 +9,16 @@ public class AdminCommands extends Proccess {
 
     private final GuildMembersService guildMembersService;
 
-    public AdminCommands(MessageReceivedEvent messageReceived, GuildMembersService guildMembersService) {
-        super(messageReceived);
+    public AdminCommands(GuildMembersService guildMembersService) {
         this.guildMembersService = guildMembersService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        if (message.getContentDisplay().equalsIgnoreCase(Commands.DISCORD_MEMBERS)) {
-            guildMembersService.getMemberCountCSV(messageReceived.getChannel());
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.DISCORD_MEMBERS)) {
+            guildMembersService.getMemberCountCSV(event.getChannel());
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 }

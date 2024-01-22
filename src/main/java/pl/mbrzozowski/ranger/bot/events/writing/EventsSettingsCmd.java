@@ -15,41 +15,39 @@ public class EventsSettingsCmd extends Proccess {
     private final EventService eventService;
     private final EventsSettingsService eventsSettingsService;
 
-    public EventsSettingsCmd(MessageReceivedEvent messageReceived,
-                             EventService eventService,
+    public EventsSettingsCmd(EventService eventService,
                              EventsSettingsService eventsSettingsService) {
-        super(messageReceived);
         this.eventService = eventService;
         this.eventsSettingsService = eventsSettingsService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        int indexOfSettings = eventsSettingsService.userHaveActiveSettingsPanel(message.getUserID());
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        int indexOfSettings = eventsSettingsService.userHaveActiveSettingsPanel(event.getAuthor().getId());
 
-        if (message.getWords().length == 1 && message.getWords()[0].equalsIgnoreCase(Commands.EVENTS_SETTINGS)) {
+        if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EVENTS_SETTINGS)) {
             if (indexOfSettings >= 0) {
                 eventsSettingsService.removeSettingsPanel(indexOfSettings);
-                log.info("{} - removed events settings", messageReceived.getAuthor());
+                log.info("{} - removed events settings", event.getAuthor());
             }
             if (eventService.isActiveEvents()) {
-                EventsSettings eventsSettings = new EventsSettings(eventService, messageReceived, eventsSettingsService);
+                EventsSettings eventsSettings = new EventsSettings(eventService, event, eventsSettingsService);
                 eventsSettingsService.addEventsSettings(eventsSettings);
-                log.info("{} - Created new events settings", messageReceived.getAuthor());
+                log.info("{} - Created new events settings", event.getAuthor());
             } else {
-                EmbedInfo.noActiveEvents(messageReceived.getChannel());
-                log.info("{} - No active events. Settings not opened", messageReceived.getAuthor());
+                EmbedInfo.noActiveEvents(event.getChannel());
+                log.info("{} - No active events. Settings not opened", event.getAuthor());
             }
         } else if (indexOfSettings >= 0) {
-            if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL) || !eventsSettingsService.isPossibleEditing(indexOfSettings)) {
-                EmbedInfo.cancelEventEditing(messageReceived.getAuthor().getId());
+            if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.CANCEL) || !eventsSettingsService.isPossibleEditing(indexOfSettings)) {
+                EmbedInfo.cancelEventEditing(event.getAuthor().getId());
                 eventsSettingsService.removeSettingsPanel(indexOfSettings);
-                log.info("{} - Removed events settings", messageReceived.getAuthor());
+                log.info("{} - Removed events settings", event.getAuthor());
             } else {
-                eventsSettingsService.saveAnswerAndNextStage(indexOfSettings, messageReceived);
+                eventsSettingsService.saveAnswerAndNextStage(indexOfSettings, event);
             }
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 }

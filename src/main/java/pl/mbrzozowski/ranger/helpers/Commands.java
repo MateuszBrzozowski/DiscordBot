@@ -13,10 +13,11 @@ public final class Commands {
     public static final String EVENT = PREFIX + "event" + SUFFIX;
     public static final String DICE = PREFIX + "kostka" + SUFFIX;
     public static final String HELPS = PREFIX + "help" + SUFFIX;
+    public static final String HELP_REMINDER = PREFIX + "help reminder" + SUFFIX;
     public static final String CLOSE = PREFIX + "close" + SUFFIX;
     public static final String START_REKRUT = PREFIX + "startRekrut" + SUFFIX;
-    public static final String POSITIVE = PREFIX + "p" + SUFFIX;
-    public static final String NEGATIVE = PREFIX + "n" + SUFFIX;
+    public static final String POSITIVE = PREFIX + "pozytyw" + SUFFIX;
+    public static final String NEGATIVE = PREFIX + "negatyw" + SUFFIX;
     public static final String EVENTS_SETTINGS = PREFIX + "eventsEdit" + SUFFIX;
     public static final String MSG = PREFIX + "msg" + SUFFIX;
     public static final String MSG_CANCEL = PREFIX + "msgCancel" + SUFFIX;

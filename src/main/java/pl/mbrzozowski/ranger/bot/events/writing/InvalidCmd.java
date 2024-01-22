@@ -9,24 +9,18 @@ import pl.mbrzozowski.ranger.DiscordBot;
 @Slf4j
 public class InvalidCmd extends Proccess {
 
-    public InvalidCmd(MessageReceivedEvent messageReceived) {
-        super(messageReceived);
-    }
-
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        User user = DiscordBot.getJda().getUserById(message.getUserID());
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        User user = DiscordBot.getJda().getUserById(event.getAuthor().getId());
         if (user != null) {
-            user.openPrivateChannel().queue(privateChannel -> {
-                privateChannel.sendMessage("""
-                                Niestety, nie rozumiem Ciebie.\s
-                                **!event** - otwiera generator eventów.
-                                **!eventsEdit** - edytowanie aktywnych eventów.
-                                Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**""")
-                        .queue(message1 -> log.info("{} - misunderstood message", messageReceived.getAuthor()));
-            });
+            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
+                            Niestety, nie rozumiem Ciebie.\s
+                            **!event** - otwiera generator eventów.
+                            **!eventsEdit** - edytowanie aktywnych eventów.
+                            Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**""")
+                    .queue(message1 -> log.info("{} - misunderstood message", event.getAuthor())));
             return;
         }
-        log.error("{} - misunderstood message. User is null", messageReceived.getAuthor());
+        log.error("{} - misunderstood message or user is null", event.getAuthor());
     }
 }

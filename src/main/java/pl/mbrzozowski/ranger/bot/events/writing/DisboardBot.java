@@ -12,15 +12,14 @@ public class DisboardBot extends Proccess {
     private static final String DISBOARD_ID = "302050872383242240";
     private final DisboardService disboardService;
 
-    public DisboardBot(MessageReceivedEvent messageReceived, DisboardService disboardService) {
-        super(messageReceived);
+    public DisboardBot(DisboardService disboardService) {
         this.disboardService = disboardService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        if (message.getUserID().equalsIgnoreCase(DISBOARD_ID)) {
-            List<MessageEmbed> embeds = messageReceived.getMessage().getEmbeds();
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        if (event.getMessage().getAuthor().getId().equalsIgnoreCase(DISBOARD_ID)) {
+            List<MessageEmbed> embeds = event.getMessage().getEmbeds();
             if (embeds.size() == 0) {
                 return;
             }
@@ -34,7 +33,7 @@ public class DisboardBot extends Proccess {
                 disboardService.setNextReminder();
             }
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 }

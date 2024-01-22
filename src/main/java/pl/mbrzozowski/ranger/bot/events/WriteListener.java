@@ -60,40 +60,32 @@ public class WriteListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        String[] message = event.getMessage().getContentRaw().split(" ");
-        String contentDisplay = event.getMessage().getContentDisplay();
-
-        Message msg = new Message(
-                message,
-                contentDisplay,
-                event.getAuthor().getId(),
-                event);
         log.info(event.getAuthor() + " - send message");
 
-        DisboardBot disboardBot = new DisboardBot(event, disboardService);
-        ReminderCmd reminderCmd = new ReminderCmd(event, usersReminderService);
-        LogChannel logChannel = new LogChannel(event);
-        CheckUser checkUser = new CheckUser(event);
-        GeneratorCmd generatorCmd = new GeneratorCmd(event, eventService, eventsGeneratorService);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(event, serverService);
-        HelpCmd helpCmd = new HelpCmd(event);
-        CheckUserAdmin checkUserAdmin = new CheckUserAdmin(event);
-        EmbedSender embedSender = new EmbedSender(event, roleService);
-        RecruitCmd recruitCmd = new RecruitCmd(event, recruitsService);
-        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel(event);
-        AdminCommands adminCommands = new AdminCommands(event, guildMembersService);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(event, eventService, eventsSettingsService);
-        DeveloperCmd developerCmd = new DeveloperCmd(event, eventService, botWriter);
-        InvalidCmd invalidCmd = new InvalidCmd(event);
+        DisboardBot disboardBot = new DisboardBot(disboardService);
+        ReminderCmd reminderCmd = new ReminderCmd(usersReminderService);
+        LogChannel logChannel = new LogChannel();
+        ClanMemberCheck clanMemberCheck = new ClanMemberCheck();
+        GeneratorCmd generatorCmd = new GeneratorCmd(eventService, eventsGeneratorService);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(serverService);
+        HelpCmd helpCmd = new HelpCmd();
+        AdminCheck adminCheck = new AdminCheck();
+        EmbedSender embedSender = new EmbedSender(roleService);
+        RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
+        CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
+        AdminCommands adminCommands = new AdminCommands(guildMembersService);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventService, eventsSettingsService);
+        DeveloperCmd developerCmd = new DeveloperCmd(eventService, botWriter);
+        InvalidCmd invalidCmd = new InvalidCmd();
 
         disboardBot.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(logChannel);
-        logChannel.setNextProccess(checkUser);
-        checkUser.setNextProccess(generatorCmd);
+        logChannel.setNextProccess(clanMemberCheck);
+        clanMemberCheck.setNextProccess(generatorCmd);
         generatorCmd.setNextProccess(serverServiceCmd);
         serverServiceCmd.setNextProccess(helpCmd);
-        helpCmd.setNextProccess(checkUserAdmin);
-        checkUserAdmin.setNextProccess(embedSender);
+        helpCmd.setNextProccess(adminCheck);
+        adminCheck.setNextProccess(embedSender);
         embedSender.setNextProccess(recruitCmd);
         recruitCmd.setNextProccess(checkIsPrivateChannel);
         checkIsPrivateChannel.setNextProccess(adminCommands);
@@ -101,7 +93,7 @@ public class WriteListener extends ListenerAdapter {
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
 
-        disboardBot.proccessMessage(msg);
+        disboardBot.proccessMessage(event);
     }
 }
 

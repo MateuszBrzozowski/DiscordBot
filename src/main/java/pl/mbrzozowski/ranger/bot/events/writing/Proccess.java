@@ -5,17 +5,11 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public abstract class Proccess {
 
     private Proccess nextProccess;
-    protected MessageReceivedEvent messageReceived;
 
+    abstract public void proccessMessage(MessageReceivedEvent message);
 
-    public Proccess(MessageReceivedEvent messageReceived) {
-        this.messageReceived = messageReceived;
-    }
-
-    abstract public void proccessMessage(Message message);
-
-    public void setNextProccess(Proccess nexxt) {
-        this.nextProccess = nexxt;
+    public void setNextProccess(Proccess next) {
+        this.nextProccess = next;
     }
 
     protected Proccess getNextProccess() {

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Commands;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
@@ -17,29 +18,29 @@ public class ServerServiceCmd extends Proccess {
 
     private final ServerService serverService;
 
-    public ServerServiceCmd(MessageReceivedEvent messageReceived, ServerService serverService) {
-        super(messageReceived);
+    public ServerServiceCmd(ServerService serverService) {
         this.serverService = serverService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        String channelID = messageReceived.getChannel().getId();
-        if (message.getWords()[0].equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && message.isAdmin()) {
-            log.info(messageReceived.getAuthor() + " - msg({}) - creates embed for server service", message.getContentDisplay());
-            messageReceived.getMessage().delete().submit();
-            EmbedInfo.serverService(messageReceived.getChannel());
-        } else if (message.getWords()[0].equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
-            log.info("{} - msg({}) - closes channel in server category", messageReceived.getAuthor(), message.getContentDisplay());
-            serverService.closeChannel(messageReceived);
-        } else if (message.getWords()[0].equalsIgnoreCase(Commands.UPDATE_WL) && message.isAdmin() && messageReceived.isFromType(ChannelType.PRIVATE)) {
-            messageReceived.getMessage().reply("Usługa wyłączona").queue();
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        String channelID = event.getChannel().getId();
+        boolean isAdmin = Users.isAdmin(event.getAuthor().getId());
+        if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && isAdmin) {
+            log.info(event.getAuthor() + " - msg({}) - creates embed for server service", event.getMessage().getContentRaw());
+            event.getMessage().delete().submit();
+            EmbedInfo.serverService(event.getChannel());
+        } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
+            log.info("{} - msg({}) - closes channel in server category", event.getAuthor(), event.getMessage().getContentRaw());
+            serverService.closeChannel(event);
+        } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.UPDATE_WL) && isAdmin && event.isFromType(ChannelType.PRIVATE)) {
+            event.getMessage().reply("Usługa wyłączona").queue();
 //            new Thread(() -> {
 //                Whitelist whitelist = new Whitelist();
 //                whitelist.whitelistUpdate();
 //            }).start();
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 

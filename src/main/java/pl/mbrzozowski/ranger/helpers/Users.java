@@ -73,7 +73,7 @@ public class Users {
      * @param userID ID użytkownika którego sprawdzamy czy jest twórcą bota
      * @return Zwraca true jeżeli użytkownik to twórca bota, W innym przypadku zwraca false.
      */
-    public static boolean isUserDev(@NotNull String userID) {
+    public static boolean isDev(@NotNull String userID) {
         return userID.equalsIgnoreCase(RoleID.DEV_ID);
     }
 
@@ -90,5 +90,13 @@ public class Users {
         LocalDateTime dateTimeJoined = member.getTimeJoined().toLocalDateTime();
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneOffset.UTC);
         return dateTimeJoined.plusMinutes(minutes).isAfter(dateTimeNow);
+    }
+
+    public static boolean isAdmin(String userId) {
+        boolean isAdmin = hasUserRole(userId, RoleID.RADA_KLANU);
+        if (!isAdmin) {
+            isAdmin = isDev(userId);
+        }
+        return isAdmin;
     }
 }

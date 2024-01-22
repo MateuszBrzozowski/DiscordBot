@@ -18,46 +18,42 @@ public class GeneratorCmd extends Proccess {
     private final EventsGeneratorService eventsGeneratorService;
 
     @Autowired
-    public GeneratorCmd(MessageReceivedEvent messageReceived,
-                        EventService eventService,
+    public GeneratorCmd(EventService eventService,
                         EventsGeneratorService eventsGeneratorService) {
-        super(messageReceived);
         this.eventService = eventService;
         this.eventsGeneratorService = eventsGeneratorService;
     }
 
     @Override
-    public void proccessMessage(@NotNull Message message) {
-        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(message.getUserID());
-        if (message.getContentDisplay().equalsIgnoreCase(Commands.EVENT)) {
-            if (messageReceived.isFromType(ChannelType.PRIVATE)) {
-                if (messageReceived != null) {
-                    String authorID = messageReceived.getAuthor().getId();
-                    if (indexOfGenerator == -1) {
-                        EventsGenerator eventsGenerator = new EventsGenerator(messageReceived, eventService, eventsGeneratorService);
-                        eventsGeneratorService.addEventsGenerator(eventsGenerator);
-                        log.info(messageReceived.getAuthor() + " - Created new event generator");
-                    } else {
-                        EmbedInfo.userHaveActiveEventGenerator(authorID);
-                        EmbedInfo.cancelEventGenerator(message.getUserID());
-                        EmbedInfo.createNewGenerator(authorID);
-                        eventsGeneratorService.removeGenerator(indexOfGenerator);
-                        EventsGenerator eventsGenerator = new EventsGenerator(messageReceived, eventService, eventsGeneratorService);
-                        eventsGeneratorService.addEventsGenerator(eventsGenerator);
-                        log.info(messageReceived.getAuthor() + " - Had active event generator. Created new event generator");
-                    }
+    public void proccessMessage(@NotNull MessageReceivedEvent event) {
+        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getAuthor().getId());
+        if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EVENT)) {
+            if (event.isFromType(ChannelType.PRIVATE)) {
+                String authorID = event.getAuthor().getId();
+                if (indexOfGenerator == -1) {
+                    EventsGenerator eventsGenerator = new EventsGenerator(event, eventService, eventsGeneratorService);
+                    eventsGeneratorService.addEventsGenerator(eventsGenerator);
+                    log.info(event.getAuthor() + " - Created new event generator");
+                } else {
+                    EmbedInfo.userHaveActiveEventGenerator(authorID);
+                    EmbedInfo.cancelEventGenerator(event.getAuthor().getId());
+                    EmbedInfo.createNewGenerator(authorID);
+                    eventsGeneratorService.removeGenerator(indexOfGenerator);
+                    EventsGenerator eventsGenerator = new EventsGenerator(event, eventService, eventsGeneratorService);
+                    eventsGeneratorService.addEventsGenerator(eventsGenerator);
+                    log.info(event.getAuthor() + " - Had active event generator. Created new event generator");
                 }
             }
-        } else if (indexOfGenerator >= 0 && messageReceived.isFromType(ChannelType.PRIVATE)) {
-            if (message.getWords()[0].equalsIgnoreCase(Commands.CANCEL)) {
-                EmbedInfo.cancelEventGenerator(message.getUserID());
+        } else if (indexOfGenerator >= 0 && event.isFromType(ChannelType.PRIVATE)) {
+            if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.CANCEL)) {
+                EmbedInfo.cancelEventGenerator(event.getAuthor().getId());
                 eventsGeneratorService.removeGenerator(indexOfGenerator);
-                log.info(messageReceived.getAuthor() + " - canceled event generator");
+                log.info(event.getAuthor() + " - canceled event generator");
             } else {
-                eventsGeneratorService.saveAnswerAndNextStage(messageReceived, indexOfGenerator);
+                eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);
             }
         } else {
-            getNextProccess().proccessMessage(message);
+            getNextProccess().proccessMessage(event);
         }
     }
 }

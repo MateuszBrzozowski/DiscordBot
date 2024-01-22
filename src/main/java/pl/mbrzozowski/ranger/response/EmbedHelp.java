@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.bot.events.writing.Message;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
@@ -15,21 +14,22 @@ public class EmbedHelp extends EmbedCreator {
     private static final String RECRUIT = "recruit";
     public static final String REMINDER = "reminder";
 
-    public static void help(User user, Message message) {
+    public static void help(User user, String contentRaw) {
         if (user != null) {
-            log.info(user + " - open help with command: {}", message.getContentDisplay());
+            log.info(user + " - open help with command: {}", contentRaw);
+            String[] words = contentRaw.split(" ");
             boolean admin = Users.hasUserRole(user.getId(), RoleID.RADA_KLANU);
-            if (!admin) admin = Users.isUserDev(user.getId());
+            if (!admin) admin = Users.isDev(user.getId());
 
-            if (message.getWords().length == 1) {
+            if (words.length == 1) {
                 mainHelp(user);
-                if (Users.isUserDev(user.getId())) helpDevCommand(user);
-            } else if (message.getWords().length == 2) {
-                if (message.getWords()[1].equalsIgnoreCase(RECRUIT)) {
+                if (Users.isDev(user.getId())) helpDevCommand(user);
+            } else if (words.length == 2) {
+                if (words[1].equalsIgnoreCase(RECRUIT)) {
                     if (admin) {
                         helpRecruit(user);
                     }
-                } else if (message.getWords()[1].equalsIgnoreCase(REMINDER)) {
+                } else if (words[1].equalsIgnoreCase(REMINDER)) {
                     helpReminder(user);
                 }
             }
