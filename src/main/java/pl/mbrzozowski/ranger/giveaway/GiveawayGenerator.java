@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.exceptions.StageNoSupportedException;
 
 import java.awt.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +59,14 @@ public class GiveawayGenerator {
                 builder.addField("BŁĄD: Nie wybrano sposobu określenia czasu zakończenia", "", false);
                 builder.setColor(Color.RED);
             }
+            case DATE_SELECT -> builder.setDescription("Wybierz date zakończenia");
+            case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
             case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
+            case DATE_NOT_SELECTED -> {
+                builder.setDescription("Wybierz date i czas zakończenia");
+                builder.addField("BŁĄD: Nie wybrano daty", "", false);
+                builder.setColor(Color.RED);
+            }
             case CANCEL -> builder.setDescription("Przerwano generowanie giveawaya");
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
         }
@@ -81,28 +89,21 @@ public class GiveawayGenerator {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR)
                         .setPlaceholder("Ile ma trwać giveaway?")
-                        .addOption(SelectMenuOption.MINUTES_10.getLabel(), SelectMenuOption.MINUTES_10.getValue())
-                        .addOption(SelectMenuOption.MINUTES_15.getLabel(), SelectMenuOption.MINUTES_15.getValue())
-                        .addOption(SelectMenuOption.MINUTES_30.getLabel(), SelectMenuOption.MINUTES_30.getValue())
-                        .addOption(SelectMenuOption.MINUTES_45.getLabel(), SelectMenuOption.MINUTES_45.getValue())
-                        .addOption(SelectMenuOption.HOUR_1.getLabel(), SelectMenuOption.HOUR_1.getValue())
-                        .addOption(SelectMenuOption.HOUR_2.getLabel(), SelectMenuOption.HOUR_2.getValue())
-                        .addOption(SelectMenuOption.HOUR_3.getLabel(), SelectMenuOption.HOUR_3.getValue())
-                        .addOption(SelectMenuOption.HOUR_4.getLabel(), SelectMenuOption.HOUR_4.getValue())
-                        .addOption(SelectMenuOption.HOUR_5.getLabel(), SelectMenuOption.HOUR_5.getValue())
-                        .addOption(SelectMenuOption.HOUR_6.getLabel(), SelectMenuOption.HOUR_6.getValue())
-                        .addOption(SelectMenuOption.HOUR_8.getLabel(), SelectMenuOption.HOUR_8.getValue())
-                        .addOption(SelectMenuOption.HOUR_10.getLabel(), SelectMenuOption.HOUR_10.getValue())
-                        .addOption(SelectMenuOption.HOUR_12.getLabel(), SelectMenuOption.HOUR_12.getValue())
-                        .addOption(SelectMenuOption.DAY_1.getLabel(), SelectMenuOption.DAY_1.getValue())
-                        .addOption(SelectMenuOption.DAY_2.getLabel(), SelectMenuOption.DAY_2.getValue())
-                        .addOption(SelectMenuOption.DAY_3.getLabel(), SelectMenuOption.DAY_3.getValue())
-                        .addOption(SelectMenuOption.DAY_4.getLabel(), SelectMenuOption.DAY_4.getValue())
-                        .addOption(SelectMenuOption.DAY_5.getLabel(), SelectMenuOption.DAY_5.getValue())
-                        .addOption(SelectMenuOption.DAY_6.getLabel(), SelectMenuOption.DAY_6.getValue())
-                        .addOption(SelectMenuOption.DAY_7.getLabel(), SelectMenuOption.DAY_7.getValue())
-                        .addOption(SelectMenuOption.DAY_14.getLabel(), SelectMenuOption.DAY_14.getValue())
-                        .addOption(SelectMenuOption.DAY_21.getLabel(), SelectMenuOption.DAY_21.getValue())
+                        .addOptions(SelectMenuOption.getDurationTimes())
+                        .build();
+            }
+            case DATE_SELECT, DATE_NOT_SELECTED -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_DATE_SELECTOR)
+                        .setPlaceholder("Wybierz date zakończenia")
+                        .addOptions(SelectMenuOption.getDays())
+                        .build();
+            }
+            case TIME_SELECT -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
+                        .setPlaceholder("Wybierz godzinę zakończenia")
+                        .addOptions(SelectMenuOption.getHours())
                         .build();
             }
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
@@ -147,31 +148,66 @@ public class GiveawayGenerator {
         switch (stage) {
             case TIME_MODE -> message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
-            case TIME_DURATION -> {
+            case TIME_DURATION, DATE_SELECT -> {
                 stage = TIME_MODE;
                 selectMenuValue = null;
                 buttonBack();
+            }
+            case TIME_SELECT -> {
+                stage = DATE_SELECT;
+                selectMenuValue = null;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
     }
 
     private void buttonNext() {
-        if (stage.equals(TIME_MODE)) {
-            if (selectMenuValue == null) {
-                stage = TIME_MODE_NOT_SELECTED;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
-                stage = TIME_MODE;
-            } else {
-                if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue())) {
-                    stage = GiveawayGeneratorStage.DATE_TIME_SELECT;
-                } else if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue())) {
-                    stage = TIME_DURATION;
+        switch (stage) {
+            case TIME_MODE -> {
+                if (selectMenuValue == null) {
+                    stage = TIME_MODE_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                    stage = TIME_MODE;
+                } else {
+                    if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue())) {
+                        //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                        selectMenuValue = null;
+                        stage = DATE_SELECT;
+                        message.editMessageEmbeds(getEmbed())
+                                .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                    } else if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue())) {
+                        //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                        selectMenuValue = null;
+                        stage = TIME_DURATION;
+                        message.editMessageEmbeds(getEmbed())
+                                .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                    }
+                }
+            }
+            case DATE_SELECT -> {
+                if (selectMenuValue == null) {
+                    stage = DATE_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                    stage = DATE_SELECT;
+                } else {
+                    //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                    LocalDateTime date = SelectMenuOption.getDate(selectMenuValue);
+                    selectMenuValue = null;
+                    stage = TIME_SELECT;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
                 }
             }
+            case TIME_SELECT, TIME_DURATION -> {
+                //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                selectMenuValue = null;
+
+            }
+            default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
     }
 }

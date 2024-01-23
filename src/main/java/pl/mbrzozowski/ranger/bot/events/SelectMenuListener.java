@@ -40,7 +40,8 @@ public class SelectMenuListener extends ListenerAdapter {
         log.info(event.getUser() + " - String select interaction event");
         Set<String> giveawaySelectMenus = new HashSet<>(Set.of(
                 ComponentId.GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_DATETIME_SELECTOR,
+                ComponentId.GIVEAWAY_GENERATOR_DATE_SELECTOR,
+                ComponentId.GIVEAWAY_GENERATOR_TIME_SELECTOR,
                 ComponentId.GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR));
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);

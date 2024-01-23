@@ -1,10 +1,11 @@
 package pl.mbrzozowski.ranger.giveaway;
 
 public enum GiveawayGeneratorStage {
-    START,
     TIME_MODE,
     TIME_MODE_NOT_SELECTED,
     TIME_DURATION,
+    DATE_NOT_SELECTED,
     CANCEL,
-    DATE_TIME_SELECT
+    DATE_SELECT,
+    TIME_SELECT
 }
