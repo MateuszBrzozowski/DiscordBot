@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
+import pl.mbrzozowski.ranger.giveaway.Giveaway;
+import pl.mbrzozowski.ranger.giveaway.GiveawayUser;
+import pl.mbrzozowski.ranger.giveaway.Prize;
 import pl.mbrzozowski.ranger.members.InOutGuildMembers;
 import pl.mbrzozowski.ranger.recruit.Recruit;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackList;
@@ -64,7 +67,10 @@ public class MainDataSourceConfiguration {
                         Client.class,
                         UsersReminder.class,
                         Role.class,
-                        InOutGuildMembers.class)
+                        InOutGuildMembers.class,
+                        Giveaway.class,
+                        GiveawayUser.class,
+                        Prize.class)
                 .properties(properties)
                 .build();
     }
