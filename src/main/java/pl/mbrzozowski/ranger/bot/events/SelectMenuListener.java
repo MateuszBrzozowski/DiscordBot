@@ -9,11 +9,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.role.Role;
 import pl.mbrzozowski.ranger.role.RoleService;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -21,17 +24,24 @@ public class SelectMenuListener extends ListenerAdapter {
 
     private final EventsGeneratorService eventsGeneratorService;
     private final RoleService roleService;
+    private final GiveawayService giveawayService;
 
     @Autowired
     public SelectMenuListener(EventsGeneratorService eventsGeneratorService,
-                              RoleService roleService) {
+                              RoleService roleService,
+                              GiveawayService giveawayService) {
         this.eventsGeneratorService = eventsGeneratorService;
         this.roleService = roleService;
+        this.giveawayService = giveawayService;
     }
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         log.info(event.getUser() + " - String select interaction event");
+        Set<String> giveawaySelectMenus = new HashSet<>(Set.of(
+                ComponentId.GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR,
+                ComponentId.GIVEAWAY_GENERATOR_DATETIME_SELECTOR,
+                ComponentId.GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR));
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
@@ -52,6 +62,9 @@ public class SelectMenuListener extends ListenerAdapter {
                     roleEditor.addRemoveRole(event.getUser().getId(), role.getDiscordId());
                 }
             }
+        } else if (giveawaySelectMenus.contains(event.getComponentId())) {
+            event.getInteraction().deferEdit().queue();
+            giveawayService.selectAnswer(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
             event.getInteraction().deferEdit().queue();
             eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);

@@ -51,4 +51,13 @@ public final class ComponentId {
     public static final String GENERATOR_SHOW = "GenShow" + SUFFIX;
     public static final String GENERATOR_END = "GenEnd" + SUFFIX;
     public static final String GENERATOR_CANCEL = "GenCancel" + SUFFIX;
+
+    //Generator  giveaway
+    public static final String GIVEAWAY_GENERATOR_BTN_BACK = "GiveGenBack" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_BTN_NEXT = "GiveGenNext" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_BTN_CANCEL = "GiveGenCancel" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR = "GiveGenTimeMode" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_DATETIME_SELECTOR = "GiveGenDateTimeSelect" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR = "GiveGenTimeDurationSelect" + SUFFIX;
+
 }

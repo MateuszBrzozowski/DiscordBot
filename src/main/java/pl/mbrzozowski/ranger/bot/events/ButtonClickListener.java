@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -24,16 +25,19 @@ public class ButtonClickListener extends ListenerAdapter {
     private final RecruitsService recruitsService;
     private final ServerService serverService;
     private final EventsGeneratorService eventsGeneratorService;
+    private final GiveawayService giveawayService;
 
     @Autowired
     public ButtonClickListener(EventService events,
                                RecruitsService recruitsService,
                                ServerService serverService,
-                               EventsGeneratorService eventsGeneratorService) {
+                               EventsGeneratorService eventsGeneratorService,
+                               GiveawayService giveawayService) {
         this.eventService = events;
         this.recruitsService = recruitsService;
         this.serverService = serverService;
         this.eventsGeneratorService = eventsGeneratorService;
+        this.giveawayService = giveawayService;
     }
 
     @Override
@@ -43,35 +47,35 @@ public class ButtonClickListener extends ListenerAdapter {
                 event.getButton().getLabel(),
                 event.getChannel().getId(),
                 event.getChannel().getName());
-        boolean isRadaKlanu = Users.hasUserRole(event.getUser().getId(), RoleID.RADA_KLANU);
-        newRecruit(event, isRadaKlanu);
+        boolean isAdmin = Users.isAdmin(event.getUser().getId());
+        newRecruit(event, isAdmin);
     }
 
-    private void newRecruit(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void newRecruit(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
             recruitsService.newPodanie(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
             recruitsService.confirm(event);
         } else {
-            recruitChannelReaction(event, isRadaKlanu);
+            recruitChannelReaction(event, isAdmin);
         }
     }
 
-    private void recruitChannelReaction(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void recruitChannelReaction(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_ACCEPTED)) {
-            if (isRadaKlanu) {
+            if (isAdmin) {
                 recruitsService.accepted(event);
             } else {
                 ResponseMessage.noPermission(event);
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
-            if (isRadaKlanu) {
+            if (isAdmin) {
                 recruitsService.recruitNotAccepted(event);
             } else {
                 ResponseMessage.noPermission(event);
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
-            if (isRadaKlanu) {
+            if (isAdmin) {
                 if (!recruitsService.positiveResult(event)) {
                     ResponseMessage.operationNotPossible(event);
                 }
@@ -79,7 +83,7 @@ public class ButtonClickListener extends ListenerAdapter {
                 ResponseMessage.noPermission(event);
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
-            if (isRadaKlanu) {
+            if (isAdmin) {
                 if (!recruitsService.negativeResult(event)) {
                     ResponseMessage.operationNotPossible(event);
                 }
@@ -87,11 +91,11 @@ public class ButtonClickListener extends ListenerAdapter {
                 ResponseMessage.noPermission(event);
             }
         } else {
-            serverServiceReport(event, isRadaKlanu);
+            serverServiceReport(event, isAdmin);
         }
     }
 
-    private void serverServiceReport(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void serverServiceReport(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_REPORT)) {
             serverService.buttonClick(event, ButtonClickType.REPORT);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_UNBAN)) {
@@ -99,11 +103,11 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.SERVER_SERVICE_CONTACT)) {
             serverService.buttonClick(event, ButtonClickType.CONTACT);
         } else {
-            serverServiceCloseChannel(event, isRadaKlanu);
+            serverServiceCloseChannel(event, isAdmin);
         }
     }
 
-    private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void serverServiceCloseChannel(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE)) {
             EmbedInfo.confirmCloseChannel(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.CLOSE_YES) ||
@@ -113,13 +117,13 @@ public class ButtonClickListener extends ListenerAdapter {
                 serverService.closeChannel(event);
             }
         } else {
-            removeChannelsButtons(event, isRadaKlanu);
+            removeChannelsButtons(event, isAdmin);
         }
     }
 
-    private void removeChannelsButtons(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void removeChannelsButtons(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_RECRUIT_CHANNEL)) {
-            if (isRadaKlanu) {
+            if (isAdmin) {
                 deleteMessageAfterButtonInteraction(event);
                 EmbedInfo.confirmRemoveChannel(event.getChannel().asTextChannel());
             } else {
@@ -129,9 +133,21 @@ public class ButtonClickListener extends ListenerAdapter {
             deleteMessageAfterButtonInteraction(event);
             EmbedInfo.confirmRemoveChannel(event.getChannel().asTextChannel());
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
-            removeChannelDB(event, isRadaKlanu);
+            removeChannelDB(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
             event.deferEdit().queue();
+        } else {
+            giveawayGeneratorButtons(event, isAdmin);
+        }
+    }
+
+    private void giveawayGeneratorButtons(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
+        if (isAdmin
+                && (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_BACK)
+                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_NEXT)
+                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL))) {
+            event.deferEdit().queue();
+            giveawayService.buttonGeneratorEvent(event);
         } else {
             eventsButtons(event);
         }
@@ -172,10 +188,10 @@ public class ButtonClickListener extends ListenerAdapter {
         }
     }
 
-    private void removeChannelDB(@NotNull ButtonInteractionEvent event, boolean isRadaKlanu) {
+    private void removeChannelDB(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         String parentCategoryId = event.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
-            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isRadaKlanu) {
+            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isAdmin) {
                 recruitsService.deleteChannelByID(event.getChannel().getId());
                 ComponentService.removeChannel(event);
             } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
