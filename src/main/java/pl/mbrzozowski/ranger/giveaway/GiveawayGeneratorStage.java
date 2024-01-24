@@ -15,5 +15,6 @@ public enum GiveawayGeneratorStage {
     MAX_NUMBER_OF_PRIZE_STAGE,
     CLAN_MEMBER_EXCLUDE,
     CLAN_MEMBER_EXCLUDE_NOT_SELECTED,
+    END,
     CANCEL
 }

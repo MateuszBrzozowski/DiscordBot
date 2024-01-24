@@ -59,11 +59,6 @@ public final class ComponentId {
     public static final String GIVEAWAY_GENERATOR_BTN_REMOVE = "GiveGenRemove" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_BTN_REMOVE_ALL = "GiveGenRemoveAll" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_SELECT_MENU = "GiveGenSelectMenu" + SUFFIX;
-    public static final String GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR = "GiveGenTimeMode" + SUFFIX;
-    public static final String GIVEAWAY_GENERATOR_DATE_SELECTOR = "GiveGenDateTimeSelect" + SUFFIX;
-    public static final String GIVEAWAY_GENERATOR_TIME_SELECTOR = "GiveGenTimeSelect" + SUFFIX;
-    public static final String GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR = "GiveGenTimeDurationSelect" + SUFFIX;
-    public static final String GIVEAWAY_GENERATOR_PRIZE_SELECTOR = "GiveGenPrizeSelect" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD = "GiveGenPrizeAddModal" + SUFFIX;
 
 }

@@ -14,9 +14,7 @@ import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.role.Role;
 import pl.mbrzozowski.ranger.role.RoleService;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -38,12 +36,6 @@ public class SelectMenuListener extends ListenerAdapter {
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         log.info(event.getUser() + " - String select interaction event({})", event);
-        Set<String> giveawaySelectMenus = new HashSet<>(Set.of(
-                ComponentId.GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_DATE_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_TIME_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_PRIZE_SELECTOR));
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();

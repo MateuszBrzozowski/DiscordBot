@@ -123,6 +123,13 @@ public class GiveawayGenerator {
                     builder.addField("Nagrody:", getPrizesDescription(), false);
                 }
             }
+            case END -> {
+                builder.setColor(Color.GREEN);
+                builder.setDescription("Giveaway utworzony");
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
+            }
             case CANCEL -> builder.setDescription("Przerwano generowanie giveawaya");
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
         }
@@ -154,7 +161,6 @@ public class GiveawayGenerator {
 
     @NotNull
     private SelectMenu getSelectMenu() {
-        //TODO sprawdzić czy id string menu może być tylko jedno.
         switch (stage) {
             case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
                 return StringSelectMenu
@@ -207,7 +213,6 @@ public class GiveawayGenerator {
             }
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
         }
-
     }
 
     @NotNull
@@ -462,6 +467,8 @@ public class GiveawayGenerator {
             case PRIZE -> {
                 //TODO zakończyć generator
                 // Stworzyć giveaway i przekazać do serwisu który utworzy rekordy w DB i utworzy formatke na kanale
+                stage = END;
+                message.editMessageEmbeds(getEmbed()).setComponents().queue();
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
