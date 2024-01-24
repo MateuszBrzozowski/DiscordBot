@@ -77,7 +77,9 @@ enum SelectMenuOption {
     TIME_22(LocalDateTime.now().withHour(22).withMinute(0)),
     TIME_23(LocalDateTime.now().withHour(23).withMinute(0)),
     ADD_PRIZE("Dodaj nagrodę", "addPrize"),
-    REMOVE_PRIZE("Usuń nagrodę", "removePrize");
+    REMOVE_PRIZE("Usuń nagrodę", "removePrize"),
+    EXCLUDE_YES("Tak", "excludeYes"),
+    EXCLUDE_NO("Nie", "excludeNo");
 
     private final String label;
     private final String value;
@@ -164,6 +166,14 @@ enum SelectMenuOption {
         return new ArrayList<>(
                 List.of(SelectOption.of(ADD_PRIZE.getLabel(), ADD_PRIZE.getValue()),
                         SelectOption.of(REMOVE_PRIZE.getLabel(), REMOVE_PRIZE.getValue()))
+        );
+    }
+
+    @NotNull
+    public static Collection<? extends SelectOption> getExclude() {
+        return new ArrayList<>(
+                List.of(SelectOption.of(EXCLUDE_YES.getLabel(), EXCLUDE_YES.getValue()),
+                        SelectOption.of(EXCLUDE_NO.getLabel(), EXCLUDE_NO.getValue()))
         );
     }
 }

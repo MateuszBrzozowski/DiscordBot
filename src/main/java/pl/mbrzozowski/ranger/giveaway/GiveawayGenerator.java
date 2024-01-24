@@ -65,25 +65,31 @@ public class GiveawayGenerator {
             case TIME_MODE -> builder.setDescription("Wybierz w jaki sposób chcesz określić czas zakończenia");
             case TIME_MODE_NOT_SELECTED -> {
                 builder.setDescription("Wybierz w jaki sposób chcesz określić czas zakończenia");
-                builder.addField("", "**BŁĄD: Nie wybrano sposobu określenia czasu zakończenia**", false);
+                builder.addField("", "- Nie wybrano sposobu określenia czasu zakończenia!", false);
                 builder.setColor(Color.RED);
             }
             case DATE_SELECT -> builder.setDescription("Wybierz date zakończenia");
             case DATE_NOT_SELECTED -> {
                 builder.setDescription("Wybierz date zakończenia");
-                builder.addField("", "**BŁĄD: Nie wybrano daty**", false);
+                builder.addField("", "-: Nie wybrano daty!", false);
                 builder.setColor(Color.RED);
             }
             case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
             case TIME_NOT_SELECTED -> {
                 builder.setDescription("Wybierz czas zakończenia");
-                builder.addField("", "**BŁĄD: Nie wybrano czasu**", false);
+                builder.addField("", "- Nie wybrano czasu!", false);
                 builder.setColor(Color.RED);
             }
             case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
             case TIME_DURATION_NOT_SELECTED -> {
                 builder.setDescription("Wybierz jak długo ma trwać giveaway");
-                builder.addField("", "**BŁĄD: Nie wybrano czasu trwania**", false);
+                builder.addField("", "- Nie wybrano czasu trwania!", false);
+                builder.setColor(Color.RED);
+            }
+            case CLAN_MEMBER_EXCLUDE -> builder.setDescription("Czy wykluczyć **Clan Memberów** z giveawaya?");
+            case CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
+                builder.setDescription("Czy wykluczyć **Clan Memberów** z giveawaya?");
+                builder.addField("", "- Nie wybrano odpowiedzi!", false);
                 builder.setColor(Color.RED);
             }
             case PRIZE -> {
@@ -94,8 +100,7 @@ public class GiveawayGenerator {
             }
             case PRIZE_QTY_NOT_CORRECT -> {
                 builder.setDescription("Ustaw nagrody");
-                builder.addField("", "**BŁĄD: Wprowadzona nagroda nie może zostać dodana**\n" +
-                        "- Sprawdź czy wprowadzona ilość sztuk to liczba", false);
+                builder.addField("", "- Ilość sztuk musi być liczbą!**\n", false);
                 builder.setColor(Color.RED);
                 if (!prizes.isEmpty()) {
                     builder.addField("Nagrody:", getPrizesDescription(), false);
@@ -103,7 +108,7 @@ public class GiveawayGenerator {
             }
             case MAX_NUMBER_OF_PRIZE_STAGE -> {
                 builder.setDescription("Ustaw nagrody");
-                builder.addField("", "- Osiągnięto maksymalną ilość nagród dla tego giveawaya", false);
+                builder.addField("", "- Osiągnięto maksymalną ilość nagród dla tego giveawaya!", false);
                 builder.setColor(Color.RED);
                 if (!prizes.isEmpty()) {
                     builder.addField("Nagrody:", getPrizesDescription(), false);
@@ -175,6 +180,13 @@ public class GiveawayGenerator {
                         .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
                         .setPlaceholder("Wybierz godzinę zakończenia")
                         .addOptions(SelectMenuOption.getHours())
+                        .build();
+            }
+            case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
+                        .setPlaceholder("Czy wykluczyć Clan Memberów?")
+                        .addOptions(SelectMenuOption.getExclude())
                         .build();
             }
             case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE -> {
@@ -386,7 +398,7 @@ public class GiveawayGenerator {
                 } else {
                     //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
                     selectMenuValue = null;
-                    stage = PRIZE;
+                    stage = CLAN_MEMBER_EXCLUDE;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
@@ -400,6 +412,20 @@ public class GiveawayGenerator {
                 } else {
                     //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
                     selectMenuValue = null;
+                    stage = CLAN_MEMBER_EXCLUDE;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                }
+            }
+            case CLAN_MEMBER_EXCLUDE -> {
+                if (selectMenuValue == null) {
+                    stage = CLAN_MEMBER_EXCLUDE_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    stage = CLAN_MEMBER_EXCLUDE;
+                } else {
+                    //TODO zapisać zmieną czy wybrano tak czy nie wykluczać
+                    selectMenuValue = null;
                     stage = PRIZE;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
@@ -410,7 +436,6 @@ public class GiveawayGenerator {
     }
 
     public void saveAnswer(@NotNull ModalInteractionEvent event) {
-        //TODO zapisac i wypisać informacje na embed
         boolean isCorrect = false;
         String name = Objects.requireNonNull(event.getValue(PRIZE_NAME_ID)).getAsString();
         String qty = Objects.requireNonNull(event.getValue(PRIZE_QTY_ID)).getAsString();
