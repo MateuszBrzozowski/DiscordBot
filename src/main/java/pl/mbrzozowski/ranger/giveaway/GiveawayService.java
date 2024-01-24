@@ -30,8 +30,18 @@ public class GiveawayService {
     }
 
     public void create(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("Sprawdź wiadomości prywatne.").setEphemeral(true).queue();
-        giveawayGenerator = new GiveawayGenerator(event.getUser());
+        if (giveawayGenerator == null) {
+            event.reply("Sprawdź wiadomości prywatne.").setEphemeral(true).queue();
+            giveawayGenerator = new GiveawayGenerator(event.getUser());
+        } else {
+            if (giveawayGenerator.userHasActiveGenerator(event.getUser())) {
+                giveawayGenerator.cancel();
+                event.reply("Sprawdź wiadomości prywatne").setEphemeral(true).queue();
+                giveawayGenerator = new GiveawayGenerator(event.getUser());
+            } else {
+                event.reply("Inny użytkownik jest w czasie tworzenia giveawaya").setEphemeral(true).queue();
+            }
+        }
     }
 
     public void selectAnswer(StringSelectInteractionEvent event) {
@@ -40,6 +50,10 @@ public class GiveawayService {
 
     public void buttonGeneratorEvent(@NotNull ButtonInteractionEvent event) {
         if (giveawayGenerator == null) {
+            event.getMessage().delete().queue();
+            return;
+        }
+        if (!giveawayGenerator.isActualActiveGenerator(event)) {
             event.getMessage().delete().queue();
             return;
         }

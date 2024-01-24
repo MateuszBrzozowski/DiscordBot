@@ -500,4 +500,18 @@ public class GiveawayGenerator {
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
         }
     }
+
+    public boolean isActualActiveGenerator(@NotNull ButtonInteractionEvent event) {
+        if (message.getId().equalsIgnoreCase(event.getMessage().getId())) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean userHasActiveGenerator(@NotNull User user) {
+        if (this.user.getId().equalsIgnoreCase(user.getId())) {
+            return true;
+        }
+        return false;
+    }
 }
