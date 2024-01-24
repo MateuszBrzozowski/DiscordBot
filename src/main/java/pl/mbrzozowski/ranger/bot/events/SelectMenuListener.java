@@ -37,7 +37,7 @@ public class SelectMenuListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        log.info(event.getUser() + " - String select interaction event");
+        log.info(event.getUser() + " - String select interaction event({})", event);
         Set<String> giveawaySelectMenus = new HashSet<>(Set.of(
                 ComponentId.GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR,
                 ComponentId.GIVEAWAY_GENERATOR_DATE_SELECTOR,

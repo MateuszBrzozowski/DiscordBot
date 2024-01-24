@@ -11,5 +11,7 @@ public enum GiveawayGeneratorStage {
     TIME_DURATION_NOT_SELECTED,
     PRIZE,
     PRIZE_QTY_NOT_CORRECT,
+    PRIZE_REMOVE,
+    MAX_NUMBER_OF_PRIZE_STAGE,
     CANCEL
 }

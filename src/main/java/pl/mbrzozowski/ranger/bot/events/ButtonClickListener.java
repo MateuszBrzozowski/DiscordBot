@@ -145,7 +145,9 @@ public class ButtonClickListener extends ListenerAdapter {
         if (isAdmin
                 && (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_BACK)
                 || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_NEXT)
-                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL))) {
+                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL)
+                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE)
+                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE_ALL))) {
             event.deferEdit().queue();
             giveawayService.buttonGeneratorEvent(event);
         } else {

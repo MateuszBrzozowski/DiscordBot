@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.exceptions.StageNoSupportedException;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
 
 import java.awt.*;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class GiveawayGenerator {
 
     private static final String PRIZE_NAME_ID = "prizeNameId";
     private static final String PRIZE_QTY_ID = "prizeQtyId";
+    private static final int MAX_NUMBER_OF_PRIZE = 25;
     private List<Prize> prizes = new ArrayList<>();
     private final User user;
     private Message message;
@@ -63,25 +65,25 @@ public class GiveawayGenerator {
             case TIME_MODE -> builder.setDescription("Wybierz w jaki sposób chcesz określić czas zakończenia");
             case TIME_MODE_NOT_SELECTED -> {
                 builder.setDescription("Wybierz w jaki sposób chcesz określić czas zakończenia");
-                builder.addField("BŁĄD: Nie wybrano sposobu określenia czasu zakończenia", "", false);
+                builder.addField("", "**BŁĄD: Nie wybrano sposobu określenia czasu zakończenia**", false);
                 builder.setColor(Color.RED);
             }
             case DATE_SELECT -> builder.setDescription("Wybierz date zakończenia");
             case DATE_NOT_SELECTED -> {
                 builder.setDescription("Wybierz date zakończenia");
-                builder.addField("BŁĄD: Nie wybrano daty", "", false);
+                builder.addField("", "**BŁĄD: Nie wybrano daty**", false);
                 builder.setColor(Color.RED);
             }
             case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
             case TIME_NOT_SELECTED -> {
                 builder.setDescription("Wybierz czas zakończenia");
-                builder.addField("BŁĄD: Nie wybrano czasu", "", false);
+                builder.addField("", "**BŁĄD: Nie wybrano czasu**", false);
                 builder.setColor(Color.RED);
             }
             case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
             case TIME_DURATION_NOT_SELECTED -> {
                 builder.setDescription("Wybierz jak długo ma trwać giveaway");
-                builder.addField("BŁĄD: Nie wybrano czasu trwania", "", false);
+                builder.addField("", "**BŁĄD: Nie wybrano czasu trwania**", false);
                 builder.setColor(Color.RED);
             }
             case PRIZE -> {
@@ -92,8 +94,25 @@ public class GiveawayGenerator {
             }
             case PRIZE_QTY_NOT_CORRECT -> {
                 builder.setDescription("Ustaw nagrody");
-                builder.addField("BŁĄD: Wprowadzona nagroda nie może zostać dodana", "- Sprawdź czy wprowadzona ilość sztuk to liczba", false);
+                builder.addField("", "**BŁĄD: Wprowadzona nagroda nie może zostać dodana**\n" +
+                        "- Sprawdź czy wprowadzona ilość sztuk to liczba", false);
                 builder.setColor(Color.RED);
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
+            }
+            case MAX_NUMBER_OF_PRIZE_STAGE -> {
+                builder.setDescription("Ustaw nagrody");
+                builder.addField("", "- Osiągnięto maksymalną ilość nagród dla tego giveawaya", false);
+                builder.setColor(Color.RED);
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
+            }
+            case PRIZE_REMOVE -> {
+                builder.setDescription("Ustaw nagrody");
+                builder.addField("Usuwanie nagród", "", false);
+                builder.setColor(Color.CYAN);
                 if (!prizes.isEmpty()) {
                     builder.addField("Nagrody:", getPrizesDescription(), false);
                 }
@@ -118,6 +137,13 @@ public class GiveawayGenerator {
                     .append("\n");
         }
         return stringBuilder.toString();
+    }
+
+    @NotNull
+    private String getPrizeDescription(@NotNull Prize prize) {
+        return prize.getNumberOfPrizes() +
+                "x " +
+                prize.getName();
     }
 
     @NotNull
@@ -151,11 +177,18 @@ public class GiveawayGenerator {
                         .addOptions(SelectMenuOption.getHours())
                         .build();
             }
-            case PRIZE, PRIZE_QTY_NOT_CORRECT -> {
+            case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_PRIZE_SELECTOR)
                         .setPlaceholder("Wybierz opcję")
                         .addOptions(SelectMenuOption.getPrize())
+                        .build();
+            }
+            case PRIZE_REMOVE -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_PRIZE_SELECTOR)
+                        .setPlaceholder("Wybierz nagrodę do usunięcia")
+                        .addOptions(getPrizesAsSelectMenuOptions())
                         .build();
             }
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
@@ -164,14 +197,29 @@ public class GiveawayGenerator {
     }
 
     @NotNull
+    private Collection<? extends SelectOption> getPrizesAsSelectMenuOptions() {
+        List<SelectOption> selectOptions = new ArrayList<>();
+        for (int i = 0; i < prizes.size(); i++) {
+            selectOptions.add(SelectOption.of(getPrizeDescription(prizes.get(i)), "prize:" + i));
+        }
+        return selectOptions;
+    }
+
+    @NotNull
     private Collection<? extends ItemComponent> getButtons() {
         List<Button> buttons = new ArrayList<>();
-        if (stage.equals(TIME_MODE)) {
-            buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz").asDisabled());
+        if (stage.equals(PRIZE_REMOVE)) {
+            buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_REMOVE, "Usuń zaznaczony"));
+            buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_REMOVE_ALL, "Usuń wszystkie"));
+            buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_BACK, "Powrót"));
         } else {
-            buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
+            if (stage.equals(TIME_MODE)) {
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz").asDisabled());
+            } else {
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
+            }
+            buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
         }
-        buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
         buttons.add(Button.danger(GIVEAWAY_GENERATOR_BTN_CANCEL, "Przerwij"));
         return buttons;
     }
@@ -180,27 +228,50 @@ public class GiveawayGenerator {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
         if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.ADD_PRIZE.getValue())) {
-            TextInput name = TextInput.create(PRIZE_NAME_ID, "Nazwa", TextInputStyle.SHORT)
-                    .setPlaceholder("Podaj nazwę nagrody")
-                    .setRequired(true)
-                    .setRequiredRange(3, 255)
-                    .build();
-
-            TextInput qty = TextInput.create(PRIZE_QTY_ID, "Ilość", TextInputStyle.SHORT)
-                    .setPlaceholder("Ilość sztuk")
-                    .setRequired(true)
-                    .setRequiredRange(1, 3)
-                    .build();
-
-            Modal modal = Modal.create("customId", "Dodawanie nagrody")
-                    .addComponents(ActionRow.of(name), ActionRow.of(qty))
-                    .build();
-            event.replyModal(modal).queue();
-            message.editMessageEmbeds(getEmbed())
-                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            if (prizes.size() < MAX_NUMBER_OF_PRIZE) {
+                showModalToAddPrize(event);
+            } else {
+                event.getInteraction().deferEdit().queue();
+                stage = MAX_NUMBER_OF_PRIZE_STAGE;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                stage = PRIZE;
+            }
         } else {
             event.getInteraction().deferEdit().queue();
+            if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.REMOVE_PRIZE.getValue())) {
+                selectMenuValue = null;
+                if (prizes.isEmpty()) {
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    return;
+                }
+                stage = PRIZE_REMOVE;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
         }
+    }
+
+    private void showModalToAddPrize(@NotNull StringSelectInteractionEvent event) {
+        TextInput name = TextInput.create(PRIZE_NAME_ID, "Nazwa", TextInputStyle.SHORT)
+                .setPlaceholder("Podaj nazwę nagrody")
+                .setRequired(true)
+                .setRequiredRange(3, 255)
+                .build();
+
+        TextInput qty = TextInput.create(PRIZE_QTY_ID, "Ilość", TextInputStyle.SHORT)
+                .setPlaceholder("Ilość sztuk")
+                .setRequired(true)
+                .setRequiredRange(1, 3)
+                .build();
+
+        Modal modal = Modal.create(ComponentId.GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD, "Dodawanie nagrody")
+                .addComponents(ActionRow.of(name), ActionRow.of(qty))
+                .build();
+        event.replyModal(modal).queue();
+        message.editMessageEmbeds(getEmbed())
+                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
     }
 
     public void cancel() {
@@ -213,9 +284,33 @@ public class GiveawayGenerator {
             buttonBack();
         } else if (event.getComponentId().equalsIgnoreCase(GIVEAWAY_GENERATOR_BTN_NEXT)) {
             buttonNext();
+        } else if (event.getComponentId().equalsIgnoreCase(GIVEAWAY_GENERATOR_BTN_REMOVE)) {
+            buttonRemoveSelected();
+        } else if (event.getComponentId().equalsIgnoreCase(GIVEAWAY_GENERATOR_BTN_REMOVE_ALL)) {
+            buttonRemoveAllPrizes();
         } else {
             throw new NoSuchElementException("No such button - " + event.getComponentId());
         }
+    }
+
+    private void buttonRemoveSelected() {
+        if (selectMenuValue == null) {
+            return;
+        }
+        selectMenuValue = selectMenuValue.substring("prize:" .length());
+        prizes.remove(Integer.parseInt(selectMenuValue));
+        if (prizes.isEmpty()) {
+            stage = PRIZE;
+        }
+        message.editMessageEmbeds(getEmbed())
+                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+    }
+
+    private void buttonRemoveAllPrizes() {
+        prizes.clear();
+        stage = PRIZE;
+        message.editMessageEmbeds(getEmbed())
+                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
     }
 
     private void buttonBack() {
@@ -229,6 +324,12 @@ public class GiveawayGenerator {
             }
             case TIME_SELECT -> {
                 stage = DATE_SELECT;
+                selectMenuValue = null;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PRIZE_REMOVE -> {
+                stage = PRIZE;
                 selectMenuValue = null;
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
