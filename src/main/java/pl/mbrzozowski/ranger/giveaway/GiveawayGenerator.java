@@ -35,6 +35,7 @@ public class GiveawayGenerator {
     private static final String PRIZE_NAME_ID = "prizeNameId";
     private static final String PRIZE_QTY_ID = "prizeQtyId";
     private static final int MAX_NUMBER_OF_PRIZE = 25;
+    private boolean isPathSelectTimeduration = false;
     private List<Prize> prizes = new ArrayList<>();
     private final User user;
     private Message message;
@@ -71,7 +72,7 @@ public class GiveawayGenerator {
             case DATE_SELECT -> builder.setDescription("Wybierz date zakończenia");
             case DATE_NOT_SELECTED -> {
                 builder.setDescription("Wybierz date zakończenia");
-                builder.addField("", "-: Nie wybrano daty!", false);
+                builder.addField("", "- Nie wybrano daty!", false);
                 builder.setColor(Color.RED);
             }
             case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
@@ -153,52 +154,53 @@ public class GiveawayGenerator {
 
     @NotNull
     private SelectMenu getSelectMenu() {
+        //TODO sprawdzić czy id string menu może być tylko jedno.
         switch (stage) {
             case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz sposób")
                         .addOptions(SelectMenuOption.getTimeMode())
                         .build();
             }
             case TIME_DURATION, TIME_DURATION_NOT_SELECTED -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Ile ma trwać giveaway?")
                         .addOptions(SelectMenuOption.getDurationTimes())
                         .build();
             }
             case DATE_SELECT, DATE_NOT_SELECTED -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_DATE_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz date zakończenia")
                         .addOptions(SelectMenuOption.getDays())
                         .build();
             }
             case TIME_SELECT, TIME_NOT_SELECTED -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz godzinę zakończenia")
                         .addOptions(SelectMenuOption.getHours())
                         .build();
             }
             case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Czy wykluczyć Clan Memberów?")
                         .addOptions(SelectMenuOption.getExclude())
                         .build();
             }
             case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_PRIZE_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz opcję")
                         .addOptions(SelectMenuOption.getPrize())
                         .build();
             }
             case PRIZE_REMOVE -> {
                 return StringSelectMenu
-                        .create(GIVEAWAY_GENERATOR_PRIZE_SELECTOR)
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz nagrodę do usunięcia")
                         .addOptions(getPrizesAsSelectMenuOptions())
                         .build();
@@ -317,7 +319,7 @@ public class GiveawayGenerator {
         if (selectMenuValue == null) {
             return;
         }
-        selectMenuValue = selectMenuValue.substring("prize:" .length());
+        selectMenuValue = selectMenuValue.substring("prize:".length());
         prizes.remove(Integer.parseInt(selectMenuValue));
         if (prizes.isEmpty()) {
             stage = PRIZE;
@@ -348,6 +350,22 @@ public class GiveawayGenerator {
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
+            case CLAN_MEMBER_EXCLUDE -> {
+                if (isPathSelectTimeduration) {
+                    stage = TIME_DURATION;
+                } else {
+                    stage = TIME_SELECT;
+                }
+                selectMenuValue = null;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PRIZE -> {
+                stage = CLAN_MEMBER_EXCLUDE;
+                selectMenuValue = null;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
             case PRIZE_REMOVE -> {
                 stage = PRIZE;
                 selectMenuValue = null;
@@ -371,12 +389,14 @@ public class GiveawayGenerator {
                         //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
                         selectMenuValue = null;
                         stage = DATE_SELECT;
+                        isPathSelectTimeduration = false;
                         message.editMessageEmbeds(getEmbed())
                                 .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     } else if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue())) {
                         //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
                         selectMenuValue = null;
                         stage = TIME_DURATION;
+                        isPathSelectTimeduration = true;
                         message.editMessageEmbeds(getEmbed())
                                 .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     }

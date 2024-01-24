@@ -64,7 +64,7 @@ public class SelectMenuListener extends ListenerAdapter {
                     roleEditor.addRemoveRole(event.getUser().getId(), role.getDiscordId());
                 }
             }
-        } else if (giveawaySelectMenus.contains(event.getComponentId())) {
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_SELECT_MENU)) {
             giveawayService.selectAnswer(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
             event.getInteraction().deferEdit().queue();
