@@ -230,7 +230,15 @@ public class GiveawayGenerator {
             } else {
                 buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
             }
-            buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
+            if (stage.equals(PRIZE)) {
+                if (prizes.isEmpty()) {
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ").asDisabled());
+                } else {
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ"));
+                }
+            } else {
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
+            }
         }
         buttons.add(Button.danger(GIVEAWAY_GENERATOR_BTN_CANCEL, "Przerwij"));
         return buttons;
@@ -430,6 +438,10 @@ public class GiveawayGenerator {
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
+            }
+            case PRIZE -> {
+                //TODO zakończyć generator
+                // Stworzyć giveaway i przekazać do serwisu który utworzy rekordy w DB i utworzy formatke na kanale
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
