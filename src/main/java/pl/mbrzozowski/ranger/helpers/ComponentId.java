@@ -60,5 +60,6 @@ public final class ComponentId {
     public static final String GIVEAWAY_GENERATOR_DATE_SELECTOR = "GiveGenDateTimeSelect" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_TIME_SELECTOR = "GiveGenTimeSelect" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR = "GiveGenTimeDurationSelect" + SUFFIX;
+    public static final String GIVEAWAY_GENERATOR_PRIZE_SELECTOR = "GiveGenPrizeSelect" + SUFFIX;
 
 }

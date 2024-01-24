@@ -25,7 +25,6 @@ import java.util.Objects;
 @Slf4j
 public class RecruitOpinions {
 
-
     public static void openOpinionAboutRecruit(@NotNull ButtonInteractionEvent event) {
         log.info(event.getUser() + " - open opinion about recruit");
         TextInput recruitName = TextInput.create(ComponentId.RECRUIT_NAME, "Nick Rekruta", TextInputStyle.SHORT)

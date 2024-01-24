@@ -24,6 +24,7 @@ public class DiscordBot {
     private final GuildMemberListener guildMemberListener;
     private final SelectMenuListener selectMenuListener;
     private final SlashCommandListener slashCommandListener;
+    private final ModalListener modalListener;
     private static JDA jda;
     private final String token;
 
@@ -35,6 +36,7 @@ public class DiscordBot {
                       GuildMemberListener guildMemberListener,
                       SelectMenuListener selectMenuListener,
                       SlashCommandListener slashCommandListener,
+                      ModalListener modalListener,
                       @Value("${discord.token}") String token) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
@@ -43,6 +45,7 @@ public class DiscordBot {
         this.guildMemberListener = guildMemberListener;
         this.selectMenuListener = selectMenuListener;
         this.slashCommandListener = slashCommandListener;
+        this.modalListener = modalListener;
         this.token = token;
         DiscordBotRun();
     }
@@ -60,7 +63,7 @@ public class DiscordBot {
                 .addEventListeners(this.channelUpdate)
                 .addEventListeners(this.messageUpdate)
                 .addEventListeners(this.guildMemberListener)
-                .addEventListeners(new ModalListener())
+                .addEventListeners(this.modalListener)
                 .addEventListeners(this.selectMenuListener)
                 .addEventListeners(this.slashCommandListener)
                 .build();

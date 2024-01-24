@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public enum SelectMenuOption {
+enum SelectMenuOption {
 
     DATE_TIME("Określę dokładną date i godzinę", "datetime"),
     TIME_DURATION("Określę czas trwania", "timeDuration"),
@@ -75,7 +75,9 @@ public enum SelectMenuOption {
     TIME_20(LocalDateTime.now().withHour(20).withMinute(0)),
     TIME_21(LocalDateTime.now().withHour(21).withMinute(0)),
     TIME_22(LocalDateTime.now().withHour(22).withMinute(0)),
-    TIME_23(LocalDateTime.now().withHour(23).withMinute(0));
+    TIME_23(LocalDateTime.now().withHour(23).withMinute(0)),
+    ADD_PRIZE("Dodaj nagrodę", "addPrize"),
+    REMOVE_PRIZE("Usuń nagrodę", "removePrize");
 
     private final String label;
     private final String value;
@@ -147,5 +149,21 @@ public enum SelectMenuOption {
             selectOptions.add(of);
         }
         return selectOptions;
+    }
+
+    @NotNull
+    public static Collection<? extends SelectOption> getTimeMode() {
+        return new ArrayList<>
+                (List.of(SelectOption.of(DATE_TIME.getLabel(), DATE_TIME.getValue()),
+                        SelectOption.of(TIME_DURATION.getLabel(), TIME_DURATION.getValue())));
+
+    }
+
+    @NotNull
+    public static Collection<? extends SelectOption> getPrize() {
+        return new ArrayList<>(
+                List.of(SelectOption.of(ADD_PRIZE.getLabel(), ADD_PRIZE.getValue()),
+                        SelectOption.of(REMOVE_PRIZE.getLabel(), REMOVE_PRIZE.getValue()))
+        );
     }
 }

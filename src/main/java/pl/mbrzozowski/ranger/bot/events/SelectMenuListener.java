@@ -42,7 +42,8 @@ public class SelectMenuListener extends ListenerAdapter {
                 ComponentId.GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR,
                 ComponentId.GIVEAWAY_GENERATOR_DATE_SELECTOR,
                 ComponentId.GIVEAWAY_GENERATOR_TIME_SELECTOR,
-                ComponentId.GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR));
+                ComponentId.GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR,
+                ComponentId.GIVEAWAY_GENERATOR_PRIZE_SELECTOR));
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
@@ -64,7 +65,6 @@ public class SelectMenuListener extends ListenerAdapter {
                 }
             }
         } else if (giveawaySelectMenus.contains(event.getComponentId())) {
-            event.getInteraction().deferEdit().queue();
             giveawayService.selectAnswer(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
             event.getInteraction().deferEdit().queue();

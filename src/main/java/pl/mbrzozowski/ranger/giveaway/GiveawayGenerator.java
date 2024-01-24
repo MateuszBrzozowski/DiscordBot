@@ -1,9 +1,11 @@
 package pl.mbrzozowski.ranger.giveaway;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -12,21 +14,26 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.exceptions.StageNoSupportedException;
 
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static pl.mbrzozowski.ranger.giveaway.GiveawayGeneratorStage.*;
 import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 
+@Slf4j
 public class GiveawayGenerator {
 
+    private static final String PRIZE_NAME_ID = "prizeNameId";
+    private static final String PRIZE_QTY_ID = "prizeQtyId";
+    private List<Prize> prizes = new ArrayList<>();
     private final User user;
     private Message message;
     private String selectMenuValue;
@@ -60,12 +67,36 @@ public class GiveawayGenerator {
                 builder.setColor(Color.RED);
             }
             case DATE_SELECT -> builder.setDescription("Wybierz date zakończenia");
-            case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
-            case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
             case DATE_NOT_SELECTED -> {
-                builder.setDescription("Wybierz date i czas zakończenia");
+                builder.setDescription("Wybierz date zakończenia");
                 builder.addField("BŁĄD: Nie wybrano daty", "", false);
                 builder.setColor(Color.RED);
+            }
+            case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
+            case TIME_NOT_SELECTED -> {
+                builder.setDescription("Wybierz czas zakończenia");
+                builder.addField("BŁĄD: Nie wybrano czasu", "", false);
+                builder.setColor(Color.RED);
+            }
+            case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
+            case TIME_DURATION_NOT_SELECTED -> {
+                builder.setDescription("Wybierz jak długo ma trwać giveaway");
+                builder.addField("BŁĄD: Nie wybrano czasu trwania", "", false);
+                builder.setColor(Color.RED);
+            }
+            case PRIZE -> {
+                builder.setDescription("Ustaw nagrody");
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
+            }
+            case PRIZE_QTY_NOT_CORRECT -> {
+                builder.setDescription("Ustaw nagrody");
+                builder.addField("BŁĄD: Wprowadzona nagroda nie może zostać dodana", "- Sprawdź czy wprowadzona ilość sztuk to liczba", false);
+                builder.setColor(Color.RED);
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
             }
             case CANCEL -> builder.setDescription("Przerwano generowanie giveawaya");
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
@@ -75,17 +106,31 @@ public class GiveawayGenerator {
     }
 
     @NotNull
+    private String getPrizesDescription() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < prizes.size(); i++) {
+            stringBuilder
+                    .append(i + 1)
+                    .append(". ")
+                    .append(prizes.get(i).getNumberOfPrizes())
+                    .append("x ")
+                    .append(prizes.get(i).getName())
+                    .append("\n");
+        }
+        return stringBuilder.toString();
+    }
+
+    @NotNull
     private SelectMenu getSelectMenu() {
         switch (stage) {
             case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_TIME_MODE_SELECTOR)
                         .setPlaceholder("Wybierz sposób")
-                        .addOption(SelectMenuOption.DATE_TIME.getLabel(), SelectMenuOption.DATE_TIME.getValue())
-                        .addOption(SelectMenuOption.TIME_DURATION.getLabel(), SelectMenuOption.TIME_DURATION.getValue())
+                        .addOptions(SelectMenuOption.getTimeMode())
                         .build();
             }
-            case TIME_DURATION -> {
+            case TIME_DURATION, TIME_DURATION_NOT_SELECTED -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_TIME_DURATION_SELECTOR)
                         .setPlaceholder("Ile ma trwać giveaway?")
@@ -99,11 +144,18 @@ public class GiveawayGenerator {
                         .addOptions(SelectMenuOption.getDays())
                         .build();
             }
-            case TIME_SELECT -> {
+            case TIME_SELECT, TIME_NOT_SELECTED -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_TIME_SELECTOR)
                         .setPlaceholder("Wybierz godzinę zakończenia")
                         .addOptions(SelectMenuOption.getHours())
+                        .build();
+            }
+            case PRIZE, PRIZE_QTY_NOT_CORRECT -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_PRIZE_SELECTOR)
+                        .setPlaceholder("Wybierz opcję")
+                        .addOptions(SelectMenuOption.getPrize())
                         .build();
             }
             default -> throw new IllegalArgumentException("Incorrect stage - " + stage.name());
@@ -127,6 +179,28 @@ public class GiveawayGenerator {
     public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
+        if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.ADD_PRIZE.getValue())) {
+            TextInput name = TextInput.create(PRIZE_NAME_ID, "Nazwa", TextInputStyle.SHORT)
+                    .setPlaceholder("Podaj nazwę nagrody")
+                    .setRequired(true)
+                    .setRequiredRange(3, 255)
+                    .build();
+
+            TextInput qty = TextInput.create(PRIZE_QTY_ID, "Ilość", TextInputStyle.SHORT)
+                    .setPlaceholder("Ilość sztuk")
+                    .setRequired(true)
+                    .setRequiredRange(1, 3)
+                    .build();
+
+            Modal modal = Modal.create("customId", "Dodawanie nagrody")
+                    .addComponents(ActionRow.of(name), ActionRow.of(qty))
+                    .build();
+            event.replyModal(modal).queue();
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        } else {
+            event.getInteraction().deferEdit().queue();
+        }
     }
 
     public void cancel() {
@@ -147,7 +221,7 @@ public class GiveawayGenerator {
     private void buttonBack() {
         switch (stage) {
             case TIME_MODE -> message.editMessageEmbeds(getEmbed())
-                    .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             case TIME_DURATION, DATE_SELECT -> {
                 stage = TIME_MODE;
                 selectMenuValue = null;
@@ -157,7 +231,7 @@ public class GiveawayGenerator {
                 stage = DATE_SELECT;
                 selectMenuValue = null;
                 message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
@@ -169,7 +243,7 @@ public class GiveawayGenerator {
                 if (selectMenuValue == null) {
                     stage = TIME_MODE_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     stage = TIME_MODE;
                 } else {
                     if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue())) {
@@ -177,13 +251,13 @@ public class GiveawayGenerator {
                         selectMenuValue = null;
                         stage = DATE_SELECT;
                         message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     } else if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue())) {
                         //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
                         selectMenuValue = null;
                         stage = TIME_DURATION;
                         message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     }
                 }
             }
@@ -191,7 +265,7 @@ public class GiveawayGenerator {
                 if (selectMenuValue == null) {
                     stage = DATE_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                     stage = DATE_SELECT;
                 } else {
                     //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
@@ -199,15 +273,66 @@ public class GiveawayGenerator {
                     selectMenuValue = null;
                     stage = TIME_SELECT;
                     message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getButtons()), ActionRow.of(getSelectMenu())).queue();
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
             }
-            case TIME_SELECT, TIME_DURATION -> {
-                //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
-                selectMenuValue = null;
-
+            case TIME_SELECT -> {
+                if (selectMenuValue == null) {
+                    stage = TIME_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    stage = TIME_SELECT;
+                } else {
+                    //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                    selectMenuValue = null;
+                    stage = PRIZE;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                }
+            }
+            case TIME_DURATION -> {
+                if (selectMenuValue == null) {
+                    stage = TIME_DURATION_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    stage = TIME_DURATION;
+                } else {
+                    //TODO zapisanie danej do późniejszego stworzenia rekordu w DB.
+                    selectMenuValue = null;
+                    stage = PRIZE;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                }
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
+        }
+    }
+
+    public void saveAnswer(@NotNull ModalInteractionEvent event) {
+        //TODO zapisac i wypisać informacje na embed
+        boolean isCorrect = false;
+        String name = Objects.requireNonNull(event.getValue(PRIZE_NAME_ID)).getAsString();
+        String qty = Objects.requireNonNull(event.getValue(PRIZE_QTY_ID)).getAsString();
+        int qtyInt = 0;
+        try {
+            qtyInt = Integer.parseInt(qty);
+            isCorrect = true;
+        } catch (NumberFormatException e) {
+            log.info("Cannot create number from input string");
+            stage = PRIZE_QTY_NOT_CORRECT;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            stage = PRIZE;
+        } finally {
+            event.deferEdit().queue();
+        }
+        if (isCorrect) {
+            Prize prize = new Prize();
+            prize.setName(name);
+            prize.setNumberOfPrizes(qtyInt);
+            prizes.add(prize);
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
         }
     }
 }
