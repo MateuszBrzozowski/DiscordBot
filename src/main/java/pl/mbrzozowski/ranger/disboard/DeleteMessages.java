@@ -20,13 +20,15 @@ public class DeleteMessages extends TimerTask {
     public void run() {
         try {
             reqMessage.delete().queue();
+            log.info("Deleted reqMessage");
         } catch (Exception e) {
-            log.info("It is not possible to delete the message", e);
+            log.info("It is not possible to delete the reqMessage");
         }
         try {
             disboardMessage.delete().queue();
+            log.info("Deleted disboardMessage");
         } catch (Exception e) {
-            log.info("It is not possible to delete the message", e);
+            log.info("It is not possible to delete the disboardMessage");
         }
     }
 }
