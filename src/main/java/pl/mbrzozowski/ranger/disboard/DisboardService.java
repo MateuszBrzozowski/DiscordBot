@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.disboard;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class DisboardService {
 
     private final SettingsRepository settingsRepository;
     private final Timer[] timers = new Timer[1];
+    private Message reqMessage;
+    private Message disboardMessage;
 
     @Autowired
     public DisboardService(SettingsRepository settingsRepository) {
@@ -160,5 +163,21 @@ public class DisboardService {
         settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, getReminderCounter() + 1);
         settingsRepository.save(DISBOARD_REMINDER_DATE, LocalDateTime.now().toString());
         timers[0] = null;
+    }
+
+    public void setReqMessage(Message reqMessage) {
+        this.reqMessage = reqMessage;
+    }
+
+    public void setDisboardMessage(@NotNull Message disboardMessage) {
+        if (disboardMessage.getChannelId().equalsIgnoreCase(DisboardReminderTask.CHANNEL_ID)) {
+            this.disboardMessage = disboardMessage;
+        }
+    }
+
+    public void planDeleteMessages() {
+        DeleteMessages deleteMessages = new DeleteMessages(reqMessage, disboardMessage);
+        Timer timer = new Timer();
+        timer.schedule(deleteMessages, 5 * 60 * 1000); //5 minut
     }
 }

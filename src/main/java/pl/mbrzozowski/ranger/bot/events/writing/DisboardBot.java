@@ -29,6 +29,8 @@ public class DisboardBot extends Proccess {
             }
             description = description.substring(0, 15);
             if (description.equalsIgnoreCase("Podbito serwer!")) {
+                disboardService.setDisboardMessage(event.getMessage());
+                disboardService.planDeleteMessages();
                 disboardService.saveAnswerTime();
                 disboardService.setNextReminder();
             }

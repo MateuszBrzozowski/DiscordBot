@@ -10,7 +10,7 @@ import java.util.TimerTask;
 @Slf4j
 public class DisboardReminderTask extends TimerTask {
 
-    private static final String CHANNEL_ID = "1154107337347448872";
+    static final String CHANNEL_ID = "1154107337347448872";
     private final DisboardService disboardService;
 
     public DisboardReminderTask(DisboardService disboardService) {
@@ -31,7 +31,7 @@ public class DisboardReminderTask extends TimerTask {
             if (jda != null) {
                 TextChannel channel = jda.getTextChannelById(CHANNEL_ID);
                 if (channel != null) {
-                    channel.sendMessage("Witaj Sir, Użyj proszę komendy **/bump** aby podbić nasz serwer.").queue();
+                    channel.sendMessage("Witaj Sir, Użyj proszę komendy **/bump** aby podbić nasz serwer.").queue(disboardService::setReqMessage);
                     disboardService.sentBumpReminder();
                     return;
                 }
