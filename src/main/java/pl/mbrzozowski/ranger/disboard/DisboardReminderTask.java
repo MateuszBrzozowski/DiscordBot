@@ -52,6 +52,7 @@ public class DisboardReminderTask extends TimerTask {
                 if (channel != null) {
                     channel.sendMessage(getMessage()).queue(disboardService::setReqMessage);
                     disboardService.sentBumpReminder();
+                    disboardService.setNextReminder();
                     return;
                 }
             }

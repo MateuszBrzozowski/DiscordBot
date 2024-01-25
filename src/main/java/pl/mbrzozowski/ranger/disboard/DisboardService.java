@@ -10,11 +10,9 @@ import pl.mbrzozowski.ranger.settings.SettingsRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Timer;
 
-import static java.time.LocalDate.now;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.*;
 
 @Slf4j
@@ -22,7 +20,7 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.*;
 public class DisboardService {
 
     private final SettingsRepository settingsRepository;
-    private final Timer[] timers = new Timer[1];
+    private Timer timer;
     private Message reqMessage;
     private Message disboardMessage;
 
@@ -46,17 +44,17 @@ public class DisboardService {
 
     private void setNextReminder(int times, int startHour) {
         int counter = getReminderCounter();
-        LocalDateTime lastAnswerFromDisboard = getLastDisboardAnswer();
         if (counter < times) {
+            LocalDateTime lastAnswerFromDisboard = getLastDisboardAnswer();
             LocalDateTime dateTime = LocalDateTime.now().withHour(startHour).withMinute(0);
             if (dateTime.isAfter(lastAnswerFromDisboard.plusHours(2))) {
                 setReminder(dateTime.getHour(), dateTime.getMinute(), false);
             } else {
-                if (lastAnswerFromDisboard.plusMinutes(121).getDayOfYear() != LocalDateTime.now().getDayOfYear()) {
-                    LocalDateTime dateTimeNextDay = LocalDateTime.now().plusDays(1L).withHour(startHour).withMinute(0);
-                    setReminder(dateTimeNextDay.getHour(), dateTimeNextDay.getMinute(), true);
+                LocalDateTime lastReminderDate = getLastReminderDate();
+                if (lastReminderDate.isBefore(lastAnswerFromDisboard)) {
+                    setNextReminder(startHour, lastReminderDate);
                 } else {
-                    setReminder(lastAnswerFromDisboard.plusMinutes(119).getHour(), lastAnswerFromDisboard.getMinute(), false);
+                    setNextReminder(startHour, lastAnswerFromDisboard);
                 }
             }
         } else {
@@ -65,24 +63,30 @@ public class DisboardService {
         }
     }
 
+    private void setNextReminder(int startHour, @NotNull LocalDateTime lastDate) {
+        if (lastDate.plusMinutes(121).getDayOfYear() != LocalDateTime.now().getDayOfYear()) {
+            LocalDateTime dateTimeNextDay = LocalDateTime.now().plusDays(1L).withHour(startHour).withMinute(0);
+            setReminder(dateTimeNextDay.getHour(), dateTimeNextDay.getMinute(), true);
+        } else {
+            setReminder(lastDate.plusMinutes(119).getHour(), lastDate.getMinute(), false);
+        }
+    }
+
     private void setReminder(int hour, int minute, boolean nextDay) {
         Timer timer = new Timer();
-        Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
         if (nextDay) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
             calendar.add(Calendar.DATE, 1);
-            date = calendar.getTime();
         }
-        date.setHours(hour);
-        date.setMinutes(minute);
-        if (timers[0] != null) {
-            timers[0].cancel();
+        if (this.timer != null) {
+            this.timer.cancel();
             log.info("Bump reminder cancel");
         }
-        timer.schedule(new DisboardReminderTask(this), date);
-        timers[0] = timer;
-        log.info("Bump reminder set to {}:{}", hour, String.format("%02d", minute));
+        timer.schedule(new DisboardReminderTask(this), calendar.getTime());
+        this.timer = timer;
+        log.info("Bump reminder set to {}.{} {}:{}", calendar.get(Calendar.DAY_OF_MONTH), String.format("%02d", calendar.get(Calendar.MONTH) + 1), hour, String.format("%02d", minute));
     }
 
     private ReminderMode getReminderMode() {
@@ -162,7 +166,8 @@ public class DisboardService {
     protected void sentBumpReminder() {
         settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, getReminderCounter() + 1);
         settingsRepository.save(DISBOARD_REMINDER_DATE, LocalDateTime.now().toString());
-        timers[0] = null;
+        timer = null;
+        log.info("Reminder sent");
     }
 
     public void setReqMessage(Message reqMessage) {
