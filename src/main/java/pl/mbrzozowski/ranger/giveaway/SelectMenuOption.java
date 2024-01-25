@@ -2,7 +2,6 @@ package pl.mbrzozowski.ranger.giveaway;
 
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -60,22 +59,22 @@ enum SelectMenuOption {
     DATE_PLUS_22(LocalDateTime.now().plusDays(22)),
     DATE_PLUS_23(LocalDateTime.now().plusDays(23)),
     DATE_PLUS_24(LocalDateTime.now().plusDays(24)), //48
-    TIME_8(LocalDateTime.now().withHour(8).withMinute(0)), //49
-    TIME_9(LocalDateTime.now().withHour(9).withMinute(0)),
-    TIME_10(LocalDateTime.now().withHour(10).withMinute(0)),
-    TIME_11(LocalDateTime.now().withHour(11).withMinute(0)),
-    TIME_12(LocalDateTime.now().withHour(12).withMinute(0)),
-    TIME_13(LocalDateTime.now().withHour(13).withMinute(0)),
-    TIME_14(LocalDateTime.now().withHour(14).withMinute(0)),
-    TIME_15(LocalDateTime.now().withHour(15).withMinute(0)),
-    TIME_16(LocalDateTime.now().withHour(16).withMinute(0)),
-    TIME_17(LocalDateTime.now().withHour(17).withMinute(0)),
-    TIME_18(LocalDateTime.now().withHour(18).withMinute(0)),
-    TIME_19(LocalDateTime.now().withHour(19).withMinute(0)),
-    TIME_20(LocalDateTime.now().withHour(20).withMinute(0)),
-    TIME_21(LocalDateTime.now().withHour(21).withMinute(0)),
-    TIME_22(LocalDateTime.now().withHour(22).withMinute(0)),
-    TIME_23(LocalDateTime.now().withHour(23).withMinute(0)),
+    TIME_8(LocalDateTime.now().withHour(8).withMinute(0).withSecond(0)), //49
+    TIME_9(LocalDateTime.now().withHour(9).withMinute(0).withSecond(0)),
+    TIME_10(LocalDateTime.now().withHour(10).withMinute(0).withSecond(0)),
+    TIME_11(LocalDateTime.now().withHour(11).withMinute(0).withSecond(0)),
+    TIME_12(LocalDateTime.now().withHour(12).withMinute(0).withSecond(0)),
+    TIME_13(LocalDateTime.now().withHour(13).withMinute(0).withSecond(0)),
+    TIME_14(LocalDateTime.now().withHour(14).withMinute(0).withSecond(0)),
+    TIME_15(LocalDateTime.now().withHour(15).withMinute(0).withSecond(0)),
+    TIME_16(LocalDateTime.now().withHour(16).withMinute(0).withSecond(0)),
+    TIME_17(LocalDateTime.now().withHour(17).withMinute(0).withSecond(0)),
+    TIME_18(LocalDateTime.now().withHour(18).withMinute(0).withSecond(0)),
+    TIME_19(LocalDateTime.now().withHour(19).withMinute(0).withSecond(0)),
+    TIME_20(LocalDateTime.now().withHour(20).withMinute(0).withSecond(0)),
+    TIME_21(LocalDateTime.now().withHour(21).withMinute(0).withSecond(0)),
+    TIME_22(LocalDateTime.now().withHour(22).withMinute(0).withSecond(0)),
+    TIME_23(LocalDateTime.now().withHour(23).withMinute(0).withSecond(0)),
     ADD_PRIZE("Dodaj nagrodę", "addPrize"),
     REMOVE_PRIZE("Usuń nagrodę", "removePrize"),
     EXCLUDE_YES("Tak", "excludeYes"),
@@ -110,14 +109,14 @@ enum SelectMenuOption {
         return dateTime;
     }
 
-    @Nullable
-    public static LocalDateTime getDate(String value) {
+    @NotNull
+    public static SelectMenuOption getByValue(String value) {
         for (SelectMenuOption option : ENUMS) {
             if (option.value.equalsIgnoreCase(value)) {
-                return option.dateTime;
+                return option;
             }
         }
-        return null;
+        throw new NoSuchFieldError("Select menu option not exist (value=" + value + ")");
     }
 
     @NotNull

@@ -1,9 +1,6 @@
 package pl.mbrzozowski.ranger.giveaway;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -19,12 +16,12 @@ public class Giveaway {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private boolean isActive;
     private String channelId;
     private String messageId;
+    private boolean isClanMemberExclude;
     @ToString.Exclude
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "giveaway", cascade = CascadeType.ALL, orphanRemoval = true)

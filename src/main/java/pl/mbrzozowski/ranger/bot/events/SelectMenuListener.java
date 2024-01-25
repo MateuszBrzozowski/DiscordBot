@@ -35,7 +35,7 @@ public class SelectMenuListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        log.info(event.getUser() + " - String select interaction event({})", event);
+        log.info("{} - StringSelectInteractionEvent{ComponentId={}} interaction event", event.getUser(), event.getComponentId());
         int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
