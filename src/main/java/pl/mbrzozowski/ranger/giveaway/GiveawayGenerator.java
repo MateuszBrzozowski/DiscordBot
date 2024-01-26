@@ -45,7 +45,6 @@ public class GiveawayGenerator {
     private String selectMenuValue;
     private GiveawayGeneratorStage stage = TIME_MODE;
 
-
     public GiveawayGenerator(User user, TextChannel channel, GiveawayService giveawayService) {
         log.info("{} - Open giveaway generator", user);
         this.user = user;
@@ -85,7 +84,10 @@ public class GiveawayGenerator {
             case TIME_SELECT -> builder.setDescription("Wybierz czas zakończenia");
             case TIME_NOT_SELECTED -> {
                 builder.setDescription("Wybierz czas zakończenia");
-                builder.addField("", "- Nie wybrano czasu!", false);
+                builder.addField("", """
+                        - Nie wybrano czasu lub niepoprawny czas!
+                        - Minimalny czas trwania to 1 minuta.
+                        """, false);
                 builder.setColor(Color.RED);
             }
             case TIME_DURATION -> builder.setDescription("Wybierz jak długo ma trwać giveaway");
@@ -136,6 +138,16 @@ public class GiveawayGenerator {
                 if (!prizes.isEmpty()) {
                     builder.addField("Nagrody:", getPrizesDescription(), false);
                 }
+            }
+            case CANNOT_END -> {
+                builder.setColor(Color.RED);
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                }
+                builder.addField("", """
+                        - Niepoprawny czas zakończenia! Wróć i wprowadź nowy.
+                        - Minimalny czas trwania to 1 minuta.
+                        """, false);
             }
             case UNEXPECTED_ERROR -> {
                 builder.setDescription("Przerwano generowanie giveawaya");
@@ -212,7 +224,7 @@ public class GiveawayGenerator {
                         .addOptions(SelectMenuOption.getExclude())
                         .build();
             }
-            case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE -> {
+            case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE, CANNOT_END -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_SELECT_MENU)
                         .setPlaceholder("Wybierz opcję")
@@ -453,10 +465,17 @@ public class GiveawayGenerator {
                 } else {
                     SelectMenuOption time = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setExactTime(time);
-                    selectMenuValue = null;
-                    stage = CLAN_MEMBER_EXCLUDE;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    if (giveawayRequest.isEndTimeAfterNow()) {
+                        selectMenuValue = null;
+                        stage = CLAN_MEMBER_EXCLUDE;
+                        message.editMessageEmbeds(getEmbed())
+                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    } else {
+                        stage = TIME_NOT_SELECTED;
+                        message.editMessageEmbeds(getEmbed())
+                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                        stage = TIME_SELECT;
+                    }
                 }
             }
             case TIME_DURATION -> {
@@ -490,12 +509,19 @@ public class GiveawayGenerator {
                 }
             }
             case PRIZE -> {
-                stage = END;
-                message.editMessageEmbeds(getEmbed()).setComponents().queue();
-                giveawayRequest.build();
-                Giveaway giveaway = giveawayRequest.getGiveaway();
-                giveaway.setChannelId(channelToPublish.getId());
-                giveawayService.publishOnChannel(channelToPublish, giveaway, prizes);
+                giveawayRequest.setStartTime();
+                if (giveawayRequest.isEndTimeAfterNow()) {
+                    stage = END;
+                    message.editMessageEmbeds(getEmbed()).setComponents().queue();
+                    Giveaway giveaway = giveawayRequest.getGiveaway();
+                    giveaway.setChannelId(channelToPublish.getId());
+                    giveawayService.publishOnChannel(channelToPublish, giveaway, prizes);
+                } else {
+                    stage = CANNOT_END;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    stage = PRIZE;
+                }
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }

@@ -17,5 +17,5 @@ public enum GiveawayGeneratorStage {
     CLAN_MEMBER_EXCLUDE_NOT_SELECTED,
     END,
     UNEXPECTED_ERROR,
-    CANCEL
+    CANNOT_END, CANCEL
 }

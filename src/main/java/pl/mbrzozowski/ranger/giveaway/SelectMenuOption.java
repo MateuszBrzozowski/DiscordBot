@@ -12,28 +12,28 @@ enum SelectMenuOption {
 
     DATE_TIME("Określę dokładną date i godzinę", "datetime"),
     TIME_DURATION("Określę czas trwania", "timeDuration"),
-    MINUTES_10("10m", "10m"), //2
-    MINUTES_15("15m", "15m"),
-    MINUTES_30("30m", "30m"),
-    MINUTES_45("45m", "45m"),
-    HOUR_1("1h", "1h"),
-    HOUR_2("2h", "2h"),
-    HOUR_3("3h", "3h"),
-    HOUR_4("4h", "4h"),
-    HOUR_5("5h", "5h"),//10
-    HOUR_6("6h", "6h"),
-    HOUR_8("8h", "8h"),
-    HOUR_10("10h", "10h"),
-    HOUR_12("12h", "12h"),
-    DAY_1("1d", "1d"),
-    DAY_2("2d", "2d"),
-    DAY_3("3d", "3d"),
-    DAY_4("4d", "4d"),
-    DAY_5("5d", "5d"),
-    DAY_6("6d", "6d"),//20
-    DAY_7("7d", "7d"),
-    DAY_14("14d", "14d"),
-    DAY_21("21d", "21d"),
+    MINUTE_1("1 minute", "1"), //2
+    MINUTE_2("2 minuty", "2"),
+    MINUTE_3("3 minuty", "3"),
+    MINUTE_4("4 minuty", "4"),
+    MINUTE_5("5 minut", "5"),
+    MINUTE_6("6 minut", "6"),
+    MINUTE_7("7 minut", "7"),
+    MINUTE_8("8 minut", "8"),
+    MINUTE_9("9 minut", "9"),
+    MINUTE_10("10 minut", "10"),
+    MINUTE_15("15 minut", "11"),
+    MINUTE_20("20 minut", "12"),
+    MINUTE_25("25 minut", "13"),
+    MINUTE_30("30 minut", "14"),
+    MINUTE_35("35 minut", "15"),
+    MINUTE_40("40 minut", "16"),
+    MINUTE_45("45 minut", "17"),
+    MINUTE_50("50 minut", "18"),
+    MINUTE_55("55 minut", "19"),
+    HOUR_1("1 godzinę", "20"),
+    HOUR_2("2 godziny", "21"),
+    HOUR_3("3 godziny", "22"),
     DATE_TODAY(LocalDateTime.now()),//24
     DATE_PLUS_1(LocalDateTime.now().plusDays(1)),
     DATE_PLUS_2(LocalDateTime.now().plusDays(2)),
@@ -93,7 +93,7 @@ enum SelectMenuOption {
 
     SelectMenuOption(@NotNull LocalDateTime dateTime) {
         this.label = dateTime.getDayOfMonth() + "." + String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear();
-        this.value = dateTime.getDayOfYear() + "H" + dateTime.getHour();
+        this.value = dateTime.getDayOfYear() + "H" + dateTime.hashCode();
         this.dateTime = dateTime;
     }
 

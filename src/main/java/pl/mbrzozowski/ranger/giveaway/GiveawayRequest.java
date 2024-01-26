@@ -12,16 +12,15 @@ import java.time.ZoneId;
 @NoArgsConstructor
 public class GiveawayRequest {
 
-    private LocalDateTime startTime;
+    private LocalDateTime startTime = LocalDateTime.now().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toLocalDateTime();
     private LocalDateTime endTime;
     private SelectMenuOption timeDuration;
     private SelectMenuOption exactDate;
     private SelectMenuOption exactTime;
     private boolean isClanMemberExclude;
 
-    public void build() {
+    public void setStartTime() {
         this.startTime = LocalDateTime.now().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toLocalDateTime();
-        setEndTime();
     }
 
     private void setEndTime() {
@@ -55,5 +54,13 @@ public class GiveawayRequest {
         giveaway.setClanMemberExclude(isClanMemberExclude);
         giveaway.setActive(true);
         return giveaway;
+    }
+
+    public boolean isEndTimeAfterNow() {
+        setEndTime();
+        if (endTime == null) {
+            return false;
+        }
+        return endTime.isAfter(LocalDateTime.now().plusMinutes(1));
     }
 }
