@@ -66,7 +66,7 @@ public class GiveawayGenerator {
     @NotNull
     private MessageEmbed getEmbed() {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Giveaway - Generator");
+        builder.setTitle(":tada: Giveaway - Generator :tada:\n");
         builder.setColor(Color.YELLOW);
         switch (stage) {
             case TIME_MODE -> builder.setDescription("Wybierz w jaki sposób chcesz określić czas zakończenia");
@@ -105,7 +105,7 @@ public class GiveawayGenerator {
             case PRIZE -> {
                 builder.setDescription("Ustaw nagrody");
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
             }
             case PRIZE_QTY_NOT_CORRECT -> {
@@ -113,7 +113,7 @@ public class GiveawayGenerator {
                 builder.addField("", "- Ilość sztuk musi być liczbą!**\n", false);
                 builder.setColor(Color.RED);
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
             }
             case MAX_NUMBER_OF_PRIZE_STAGE -> {
@@ -121,7 +121,7 @@ public class GiveawayGenerator {
                 builder.addField("", "- Osiągnięto maksymalną ilość nagród dla tego giveawaya!", false);
                 builder.setColor(Color.RED);
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
             }
             case PRIZE_REMOVE -> {
@@ -129,20 +129,20 @@ public class GiveawayGenerator {
                 builder.addField("Usuwanie nagród", "", false);
                 builder.setColor(Color.CYAN);
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
             }
             case END -> {
                 builder.setColor(Color.GREEN);
                 builder.setDescription("Giveaway utworzony");
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
             }
             case CANNOT_END -> {
                 builder.setColor(Color.RED);
                 if (!prizes.isEmpty()) {
-                    builder.addField("Nagrody:", getPrizesDescription(), false);
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
                 builder.addField("", """
                         - Niepoprawny czas zakończenia! Wróć i wprowadź nowy.
@@ -165,7 +165,7 @@ public class GiveawayGenerator {
     }
 
     @NotNull
-    private String getPrizesDescription() {
+    static String getPrizesDescription(@NotNull List<Prize> prizes) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < prizes.size(); i++) {
             stringBuilder
@@ -514,7 +514,6 @@ public class GiveawayGenerator {
                     stage = END;
                     message.editMessageEmbeds(getEmbed()).setComponents().queue();
                     Giveaway giveaway = giveawayRequest.getGiveaway();
-                    giveaway.setChannelId(channelToPublish.getId());
                     giveawayService.publishOnChannel(channelToPublish, giveaway, prizes);
                 } else {
                     stage = CANNOT_END;
