@@ -73,7 +73,7 @@ class ValidatorTest {
     void isEventDateTimeAfterNow_ReturnTrue() {
         LocalDateTime eventDateTime = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS))
                 .plusMinutes(1);
-        boolean result = Validator.isEventDateTimeAfterNow(eventDateTime);
+        boolean result = Validator.isDateTimeAfterNow(eventDateTime);
         Assertions.assertTrue(result);
     }
 
@@ -81,7 +81,7 @@ class ValidatorTest {
     void isEventDateTimeAfterNow_ReturnFalse() {
         LocalDateTime eventDateTime = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS))
                 .minusMinutes(1);
-        boolean result = Validator.isEventDateTimeAfterNow(eventDateTime);
+        boolean result = Validator.isDateTimeAfterNow(eventDateTime);
         Assertions.assertFalse(result);
     }
 

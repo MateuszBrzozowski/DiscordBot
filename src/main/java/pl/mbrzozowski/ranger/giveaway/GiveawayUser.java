@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.giveaway;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "giveaway_user")
 public class GiveawayUser {
     @Id

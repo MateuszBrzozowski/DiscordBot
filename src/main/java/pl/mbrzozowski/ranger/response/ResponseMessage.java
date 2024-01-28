@@ -191,4 +191,18 @@ public class ResponseMessage {
         log.warn("User can not be found in the database");
         event.reply("User can not be found in the database").queue();
     }
+
+    public static void giveawayUnexpectedException(@NotNull ButtonInteractionEvent event) {
+        event.reply("Wystąpił nieoczekiwany błąd.\n" +
+                        "Spróbuj ponownie później lub skontaktuj się z administracją <@&" + RoleID.RADA_KLANU + ">")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void giveawayAdded(@NotNull ButtonInteractionEvent event) {
+        event.reply("Gratulacje! Twój zapis na giveaway został właśnie zarejestrowany poprawnie! " +
+                        "Życzę powodzenia i trzymam kciuki za Twoją wygraną!")
+                .setEphemeral(true)
+                .queue();
+    }
 }

@@ -115,7 +115,7 @@ public class EventService {
         if (!Validator.isValidEventRequest(eventRequest)) {
             throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste.");
         }
-        if (!Validator.isEventDateTimeAfterNow(eventRequest.getDateTime())) {
+        if (!Validator.isDateTimeAfterNow(eventRequest.getDateTime())) {
             throw new IllegalArgumentException("Niepoprawny format daty lub data jest z przeszłości: " + eventRequest.getDateTime());
         }
         createEventChannel(eventRequest);
@@ -195,7 +195,7 @@ public class EventService {
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent buttonInteractionEvent, @NotNull ButtonClickType buttonClick) {
-        log.info(buttonInteractionEvent.getUser() + " - Event, button type: " + buttonClick.toString());
+        log.info(buttonInteractionEvent.getUser() + " - Event, button type: " + buttonClick);
         Optional<Event> eventOptional = findEventByMsgId(buttonInteractionEvent.getMessage().getId());
         if (eventOptional.isEmpty()) {
             ResponseMessage.operationNotPossible(buttonInteractionEvent);
@@ -205,7 +205,7 @@ public class EventService {
         String userName = Users.getUserNicknameFromID(buttonInteractionEvent.getUser().getId());
         String userID = buttonInteractionEvent.getUser().getId();
         boolean isSuccess = false;
-        if (Validator.isEventDateTimeAfterNow(event.getDate())) {
+        if (Validator.isDateTimeAfterNow(event.getDate())) {
             switch (buttonClick) {
                 case SIGN_IN -> isSuccess = signIn(buttonInteractionEvent, event, userName, userID);
                 case SIGN_OUT -> isSuccess = signOut(buttonInteractionEvent, event, userID);

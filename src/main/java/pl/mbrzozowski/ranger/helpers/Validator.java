@@ -65,12 +65,12 @@ public class Validator {
         return false;
     }
 
-    public static boolean isEventDateTimeAfterNow(LocalDateTime eventDateTime) {
-        if (eventDateTime == null) {
+    public static boolean isDateTimeAfterNow(LocalDateTime dateTime) {
+        if (dateTime == null) {
             return false;
         }
         LocalDateTime dateTimeNow = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS));
-        return eventDateTime.isAfter(dateTimeNow);
+        return dateTime.isAfter(dateTimeNow);
     }
 
     public static boolean isThreeHoursToEvent(LocalDateTime eventDateTime) {

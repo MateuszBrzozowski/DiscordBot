@@ -150,6 +150,8 @@ public class ButtonClickListener extends ListenerAdapter {
                 || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE_ALL))) {
             event.deferEdit().queue();
             giveawayService.buttonGeneratorEvent(event);
+        } else if (event.getComponentId().substring(0, "giveaway".length()).equalsIgnoreCase("giveaway")) {
+            giveawayService.buttonClick(event);
         } else {
             eventsButtons(event);
         }

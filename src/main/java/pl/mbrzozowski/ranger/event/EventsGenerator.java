@@ -161,7 +161,7 @@ public class EventsGenerator {
             }
             case SET_DATE -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " 23:59");
-                if (Validator.isEventDateTimeAfterNow(dateTime)) {
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.SET_TIME;
                     embedGetTime();
@@ -174,7 +174,7 @@ public class EventsGenerator {
             }
             case SET_TIME -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
-                if (Validator.isTimeValid(msg) && Validator.isEventDateTimeAfterNow(dateTime)) {
+                if (Validator.isTimeValid(msg) && Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     stageOfGenerator = EventGeneratorStatus.IF_SET_DESCRIPTION;
                     embedIsDescription();
@@ -220,7 +220,7 @@ public class EventsGenerator {
             }
             case CHANGE_DATE -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(msg + " " + eventRequest.getTime());
-                if (Validator.isEventDateTimeAfterNow(dateTime)) {
+                if (Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     log.info(event.getAuthor() + " - changed event date");
                 } else {
@@ -232,7 +232,7 @@ public class EventsGenerator {
             }
             case CHANGE_TIME -> {
                 LocalDateTime dateTime = Converter.stringToLocalDateTime(eventRequest.getDate() + " " + msg);
-                if (Validator.isTimeValid(msg) && Validator.isEventDateTimeAfterNow(dateTime)) {
+                if (Validator.isTimeValid(msg) && Validator.isDateTimeAfterNow(dateTime)) {
                     eventRequest.setDateTime(dateTime);
                     log.info(event.getAuthor() + " - changed event time");
                 } else {
