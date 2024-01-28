@@ -158,10 +158,6 @@ public class GiveawayService {
         giveawayRepository.save(giveaway);
     }
 
-    protected void setGiveawayGenerator(GiveawayGenerator giveawayGenerator) {
-        this.giveawayGenerator = giveawayGenerator;
-    }
-
     public void buttonClick(@NotNull ButtonInteractionEvent event) {
         Giveaway giveaway = getGiveaway(event);
         boolean isActive = isActive(giveaway);
@@ -171,9 +167,25 @@ public class GiveawayService {
             setEndEmbed(event.getMessage());
             throw new IllegalStateException(giveaway + " - Giveaway is ended. Button was still active");
         }
+        if (isUserExist(event, giveaway)) {
+            return;
+        }
         saveUser(event, giveaway);
         updateEmbed(event, giveaway, messageEmbed);
         save(giveaway);
+    }
+
+    private boolean isUserExist(@NotNull ButtonInteractionEvent event, @NotNull Giveaway giveaway) {
+        Optional<GiveawayUser> userOptional = giveaway.getGiveawayUsers()
+                .stream()
+                .filter(giveawayUser -> giveawayUser.getUserId().equalsIgnoreCase(event.getUser().getId()))
+                .findFirst();
+        if (userOptional.isPresent()) {
+            ResponseMessage.giveawayUserExist(event);
+            log.info("{}, {} is exist", event.getUser(), giveaway);
+            return true;
+        }
+        return false;
     }
 
     private boolean isActive(@NotNull Giveaway giveaway) {

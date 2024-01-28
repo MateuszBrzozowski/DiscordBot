@@ -205,4 +205,10 @@ public class ResponseMessage {
                 .setEphemeral(true)
                 .queue();
     }
+
+    public static void giveawayUserExist(@NotNull ButtonInteractionEvent event) {
+        event.reply("Wygląda na to, że już jesteś zapisany na nasz giveaway")
+                .setEphemeral(true)
+                .queue();
+    }
 }
