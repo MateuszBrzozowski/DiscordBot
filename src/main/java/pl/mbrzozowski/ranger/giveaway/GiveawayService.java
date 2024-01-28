@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.giveaway;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -21,8 +22,10 @@ import pl.mbrzozowski.ranger.response.ResponseMessage;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
@@ -36,7 +39,14 @@ public class GiveawayService {
 
     public GiveawayService(GiveawayRepository giveawayRepository) {
         this.giveawayRepository = giveawayRepository;
+        findActiveAndSetTimer();
     }
+
+    private void findActiveAndSetTimer() {
+        List<Giveaway> giveaways = giveawayRepository.findAll();
+        giveaways.stream().filter(this::isActive).forEach(this::setTimerToEnding);
+    }
+
 
     public void create(@NotNull SlashCommandInteractionEvent event) {
         if (giveawayGenerator == null) {
@@ -90,7 +100,23 @@ public class GiveawayService {
         giveaway.setChannelId(textChannel.getId());
         EmbedBuilder builder = createEmbed(giveaway, prizes);
         sendEmbed(textChannel, giveaway, builder);
+
+        setTimerToEnding(giveaway);
     }
+
+    private void setTimerToEnding(@NotNull Giveaway giveaway) {
+        Timer timer = new Timer();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(
+                giveaway.getEndTime().getYear(),
+                giveaway.getEndTime().getMonthValue(),
+                giveaway.getEndTime().getDayOfMonth(),
+                giveaway.getEndTime().getHour(),
+                giveaway.getEndTime().getMinute(),
+                giveaway.getEndTime().getSecond());
+        timer.schedule(new EndGiveaway(this, giveaway), calendar.getTime());
+    }
+
 
     private void validateGeneratorOutput(@NotNull Giveaway giveaway, List<Prize> prizes) {
         if (prizes == null) {
@@ -138,16 +164,20 @@ public class GiveawayService {
 
     public void buttonClick(@NotNull ButtonInteractionEvent event) {
         Giveaway giveaway = getGiveaway(event);
-        boolean isActive = LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)).isBefore(giveaway.getEndTime());
+        boolean isActive = isActive(giveaway);
         MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
         if (!isActive) {
             ResponseMessage.giveawayUnexpectedException(event);
-            setEndEmbed(event, messageEmbed);
+            setEndEmbed(event.getMessage());
             throw new IllegalStateException(giveaway + " - Giveaway is ended. Button was still active");
         }
         saveUser(event, giveaway);
         updateEmbed(event, giveaway, messageEmbed);
         save(giveaway);
+    }
+
+    private boolean isActive(@NotNull Giveaway giveaway) {
+        return LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)).isBefore(giveaway.getEndTime());
     }
 
     @NotNull
@@ -165,10 +195,12 @@ public class GiveawayService {
         return giveaway;
     }
 
-    private void setEndEmbed(@NotNull ButtonInteractionEvent event, MessageEmbed messageEmbed) {
+    void setEndEmbed(@NotNull Message message) {
+        MessageEmbed messageEmbed = message.getEmbeds().get(0);
         EmbedBuilder builder = new EmbedBuilder(messageEmbed);
         builder.setColor(new Color(151, 1, 95));
-        event.getMessage().editMessageEmbeds(builder.build()).setActionRow().queue();
+        message.editMessageEmbeds(builder.build()).setActionRow().queue();
+        log.info("Embed set to end stage");
     }
 
     private void saveUser(@NotNull ButtonInteractionEvent event, Giveaway giveaway) {
@@ -192,6 +224,7 @@ public class GiveawayService {
         Field field = new Field("", "Liczba zapisanych: " + giveaway.getGiveawayUsers().size(), false);
         fields.add(1, field);
         event.getMessage().editMessageEmbeds(builder.build()).queue();
+
         log.info("Giveaway embed updated");
     }
 }
