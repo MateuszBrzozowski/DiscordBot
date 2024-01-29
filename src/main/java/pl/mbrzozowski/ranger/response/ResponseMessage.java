@@ -243,7 +243,8 @@ public class ResponseMessage {
                     .append("/")
                     .append(giveaway.getChannelId())
                     .append("/")
-                    .append(giveaway.getMessageId());
+                    .append(giveaway.getMessageId())
+                    .append("\n");
         }
         return builder.toString();
     }
