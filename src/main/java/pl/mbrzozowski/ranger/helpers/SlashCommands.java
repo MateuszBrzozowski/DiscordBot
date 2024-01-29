@@ -12,5 +12,7 @@ public final class SlashCommands {
     public static final String DICE = "kostka";
     public static final String COIN = "moneta";
     public static final String ESSA = "essa";
-    public static final String GIVEAWAY_CREATE = "gcrate";
+    public static final String GIVEAWAY_CREATE = "gcreate";
+    public static final String GIVEAWAY_END = "gend";
+    public static final String GIVEAWAY_ID = "id";
 }

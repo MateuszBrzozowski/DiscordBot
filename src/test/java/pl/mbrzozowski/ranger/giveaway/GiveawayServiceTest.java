@@ -29,7 +29,7 @@ class GiveawayServiceTest {
         giveawayRepository = mock(GiveawayRepository.class);
         giveawayUsersRepository = mock(GiveawayUsersRepository.class);
         prizeRepository = mock(PrizeRepository.class);
-        giveawayService = new GiveawayService(giveawayRepository, giveawayUsersRepository, prizeRepository);
+        giveawayService = new GiveawayService(giveawayRepository);
     }
 
 

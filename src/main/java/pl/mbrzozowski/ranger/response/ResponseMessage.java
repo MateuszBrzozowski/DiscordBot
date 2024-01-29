@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.RangerLogger;
-import pl.mbrzozowski.ranger.helpers.RoleID;
-import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.giveaway.Giveaway;
+import pl.mbrzozowski.ranger.helpers.*;
 
 import java.awt.*;
+import java.util.List;
 
 @Slf4j
 public class ResponseMessage {
@@ -199,6 +199,13 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void giveawayNoExist(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Giveaway o podanym ID nie istnieje. " +
+                        "Spróbuj ponownie lub zgłoś problem <@" + RoleID.DEV_ID + ">")
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void giveawayAdded(@NotNull ButtonInteractionEvent event) {
         event.reply("Gratulacje! Twój zapis na giveaway został właśnie zarejestrowany poprawnie! " +
                         "Życzę powodzenia i trzymam kciuki za Twoją wygraną!")
@@ -210,5 +217,46 @@ public class ResponseMessage {
         event.reply("Wygląda na to, że już jesteś zapisany na nasz giveaway")
                 .setEphemeral(true)
                 .queue();
+    }
+
+    public static void noActiveGiveaways(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Brak aktywnych giveawayów.").setEphemeral(true).queue();
+    }
+
+    public static void moreThanOneGiveaway(@NotNull SlashCommandInteractionEvent event, List<Giveaway> activeGiveaways) {
+        event.reply("Więcej niż jeden giveaway. Użyj ponownie komendy i uzupełnij id\n"
+                        + getDescriptionOfActiveGiveaways(activeGiveaways))
+                .setEphemeral(true)
+                .queue();
+    }
+
+    @NotNull
+    private static String getDescriptionOfActiveGiveaways(@NotNull List<Giveaway> giveaways) {
+        StringBuilder builder = new StringBuilder();
+        for (Giveaway giveaway : giveaways) {
+            builder
+                    .append("**ID=")
+                    .append(giveaway.getId())
+                    .append("** - ")
+                    .append("https://discord.com/channels/")
+                    .append(CategoryAndChannelID.RANGERSPL_GUILD_ID)
+                    .append("/")
+                    .append(giveaway.getChannelId())
+                    .append("/")
+                    .append(giveaway.getMessageId());
+        }
+        return builder.toString();
+    }
+
+    public static void endGiveawayAreYouSure(@NotNull SlashCommandInteractionEvent event, int idAsInt) {
+        event.reply("Czy jesteś pewien, że chcesz zakończyć giveaway od id=" + idAsInt + " i wylosować nagrody?")
+                .setActionRow(
+                        Button.success(ComponentId.GIVEAWAY_END_SURE_YES + idAsInt, "Tak"))
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void giveawayEnded(@NotNull ButtonInteractionEvent event) {
+        event.reply("Giveaway zakończony").setEphemeral(true).queue();
     }
 }

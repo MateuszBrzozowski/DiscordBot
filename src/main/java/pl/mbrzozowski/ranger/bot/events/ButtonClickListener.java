@@ -142,16 +142,19 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void giveawayGeneratorButtons(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
-        if (isAdmin
-                && (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_BACK)
-                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_NEXT)
-                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL)
-                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE)
-                || event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE_ALL))) {
+        if (isAdmin && (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_BACK) ||
+                event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_NEXT) ||
+                event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL) ||
+                event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE) ||
+                event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE_ALL))) {
             event.deferEdit().queue();
             giveawayService.buttonGeneratorEvent(event);
-        } else if (event.getComponentId().substring(0, "giveaway".length()).equalsIgnoreCase("giveaway")) {
+        } else if (event.getComponentId().length() > "giveaway".length() &&
+                event.getComponentId().substring(0, "giveaway".length()).equalsIgnoreCase("giveaway")) {
             giveawayService.buttonClick(event);
+        } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_END_SURE_YES.length() &&
+                event.getComponentId().substring(0, ComponentId.GIVEAWAY_END_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_END_SURE_YES)) {
+            giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_END_SURE_YES.length()));
         } else {
             eventsButtons(event);
         }

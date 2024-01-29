@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.giveaway;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -9,15 +10,17 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
+import pl.mbrzozowski.ranger.helpers.SlashCommands;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
-import pl.mbrzozowski.ranger.repository.main.GiveawayUsersRepository;
-import pl.mbrzozowski.ranger.repository.main.PrizeRepository;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
@@ -36,13 +39,9 @@ public class GiveawayService {
 
     private GiveawayGenerator giveawayGenerator;
     private final GiveawayRepository giveawayRepository;
-    private final GiveawayUsersRepository giveawayUsersRepository;
-    private final PrizeRepository prizeRepository;
 
-    public GiveawayService(GiveawayRepository giveawayRepository, GiveawayUsersRepository giveawayUsersRepository, PrizeRepository prizeRepository) {
+    public GiveawayService(GiveawayRepository giveawayRepository) {
         this.giveawayRepository = giveawayRepository;
-        this.giveawayUsersRepository = giveawayUsersRepository;
-        this.prizeRepository = prizeRepository;
         findActiveAndSetTimer();
     }
 
@@ -209,6 +208,14 @@ public class GiveawayService {
         log.info("Embed set to end stage");
     }
 
+    private void setEndEmbed(String channelId, String messageId) {
+        JDA jda = DiscordBot.getJda();
+        TextChannel textChannel = jda.getTextChannelById(channelId);
+        if (textChannel != null) {
+            textChannel.retrieveMessageById(messageId).queue(this::setEndEmbed);
+        }
+    }
+
     private void saveUser(@NotNull ButtonInteractionEvent event, Giveaway giveaway) {
         GiveawayUser giveawayUser = GiveawayUser.builder().userId(event.getUser().getId()).userName(Users.getUserNicknameFromID(event.getUser().getId())).timestamp(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS))).giveaway(giveaway).build();
         giveaway.getGiveawayUsers().add(giveawayUser);
@@ -300,14 +307,6 @@ public class GiveawayService {
         return prizes;
     }
 
-    private void save(Prize prize) {
-        prizeRepository.save(prize);
-    }
-
-    private void save(GiveawayUser giveawayUser) {
-        giveawayUsersRepository.save(giveawayUser);
-    }
-
     @NotNull
     private Giveaway findByMessageId(String messageId) {
         Optional<Giveaway> giveawayOptional = giveawayRepository.findByMessageId(messageId);
@@ -315,5 +314,81 @@ public class GiveawayService {
             throw new IllegalStateException("Giveaway not exist giveaway{messageId=" + messageId + "}");
         }
         return giveawayOptional.get();
+    }
+
+    public void end(@NotNull SlashCommandInteractionEvent event) {
+        if (isFillId(event)) {
+            return;
+        }
+        List<Giveaway> all = findAll();
+        List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
+        if (activeGiveaways.size() == 0) {
+            ResponseMessage.noActiveGiveaways(event);
+        } else if (activeGiveaways.size() == 1) {
+            ResponseMessage.endGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
+        } else {
+            ResponseMessage.moreThanOneGiveaway(event, activeGiveaways);
+        }
+    }
+
+    private boolean isFillId(@NotNull SlashCommandInteractionEvent event) {
+        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID);
+        if (id != null) {
+            int idAsInt = id.getAsInt();
+            Optional<Giveaway> giveawayOptional = findById(idAsInt);
+            if (giveawayOptional.isEmpty()) {
+                ResponseMessage.giveawayNoExist(event);
+                log.info("Giveaway by id={} not exist in DB", idAsInt);
+                return true;
+            }
+            Giveaway giveaway = giveawayOptional.get();
+            boolean active = isActive(giveaway);
+            if (active) {
+                ResponseMessage.endGiveawayAreYouSure(event, idAsInt);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void endGiveaway(@NotNull Giveaway giveaway) {
+        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
+        giveaway.setEndTime(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
+        save(giveaway);
+        log.info("{} is ended", giveaway);
+    }
+
+    public void end(ButtonInteractionEvent event, String giveawayId) {
+        Optional<Giveaway> giveawayOptional = findById(giveawayId);
+        if (giveawayOptional.isEmpty()) {
+            throw new IllegalArgumentException("Giveaway by id=" + giveawayId + " not exist in DB");
+        }
+        Giveaway giveaway = giveawayOptional.get();
+        boolean isActive = isActive(giveaway);
+        if (isActive) {
+            endGiveaway(giveaway);
+        } else {
+            ResponseMessage.giveawayEnded(event);
+        }
+    }
+
+    @NotNull
+    private Optional<Giveaway> findById(String id) {
+        if (StringUtils.isBlank(id)) {
+            throw new IllegalArgumentException("ID is blank");
+        }
+        long lId = Long.parseLong(id);
+        return findById(lId);
+    }
+
+    @NotNull
+    private Optional<Giveaway> findById(int id) {
+        Long lId = (long) id;
+        return findById(lId);
+    }
+
+    @NotNull
+    private Optional<Giveaway> findById(Long id) {
+        return giveawayRepository.findById(id);
     }
 }

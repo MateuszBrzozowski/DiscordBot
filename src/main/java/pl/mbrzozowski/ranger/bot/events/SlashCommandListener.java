@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
@@ -111,6 +112,8 @@ public class SlashCommandListener extends ListenerAdapter {
             Essa.start(event);
         } else if (name.equalsIgnoreCase(GIVEAWAY_CREATE)) {
             giveawayService.create(event);
+        } else if (name.equalsIgnoreCase(GIVEAWAY_END)) {
+            giveawayService.end(event);
         }
     }
 
@@ -133,5 +136,7 @@ public class SlashCommandListener extends ListenerAdapter {
 //        commandData.add(Commands.slash(COIN, "Rzut monetą"));
 //        commandData.add(Commands.slash(ESSA, "Sprawdza twój dzisiejszy poziom essy"));
         commandData.add(Commands.slash(GIVEAWAY_CREATE, "Tworzy giveaway na tym kanale"));
+        commandData.add(Commands.slash(GIVEAWAY_END, "Kończy giveaway i losuje nagrody")
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
     }
 }
