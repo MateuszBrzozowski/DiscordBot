@@ -282,6 +282,14 @@ public class GiveawayGenerator {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
         log.info("Selected value={}", selectMenuValue);
+        if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue()) ||
+                selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue()) ||
+                selectMenuValue.equalsIgnoreCase(SelectMenuOption.EXCLUDE_YES.getValue()) ||
+                selectMenuValue.equalsIgnoreCase(SelectMenuOption.EXCLUDE_NO.getValue())) {
+            event.getInteraction().deferEdit().queue();
+            buttonNext();
+            return;
+        }
         if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.ADD_PRIZE.getValue())) {
             if (prizes.size() < MAX_NUMBER_OF_PRIZE) {
                 showModalToAddPrize(event);
