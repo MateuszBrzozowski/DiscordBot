@@ -8,21 +8,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
+import pl.mbrzozowski.ranger.repository.main.GiveawayUsersRepository;
+import pl.mbrzozowski.ranger.repository.main.PrizeRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class GiveawayServiceTest {
 
     GiveawayService giveawayService;
     GiveawayRepository giveawayRepository;
+    GiveawayUsersRepository giveawayUsersRepository;
+    PrizeRepository prizeRepository;
 
     @BeforeEach
     void beforeEach() {
         giveawayRepository = mock(GiveawayRepository.class);
-        giveawayService = new GiveawayService(giveawayRepository);
+        giveawayUsersRepository = mock(GiveawayUsersRepository.class);
+        prizeRepository = mock(PrizeRepository.class);
+        giveawayService = new GiveawayService(giveawayRepository, giveawayUsersRepository, prizeRepository);
     }
 
 
@@ -39,19 +46,89 @@ class GiveawayServiceTest {
         Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.buttonClick(event));
     }
 
-//    @Test
-//    void buttonClick_GiveawayNullEndTime_ThrowNullPointerException() {
-//        ButtonInteractionEvent event = mock(ButtonInteractionEvent.class);
-//        Message message = mock(Message.class);
-//        ReplyCallbackAction reply = mock(ReplyCallbackAction.class);
-//        Giveaway giveaway = new Giveaway();
-//        MessageEmbed messageEmbed = mock(MessageEmbed.class);
-//        when(event.getMessage()).thenReturn(message);
-//        when(message.getId()).thenReturn("123");
-//        when(giveawayRepository.findByMessageId("123")).thenReturn(Optional.of(giveaway));
-//        when(event.reply(Mockito.anyString())).thenReturn(reply);
-//        when(reply.setEphemeral(true)).thenReturn(reply);
-//        when(message.getEmbeds()).thenReturn(List.of(messageEmbed));
-//        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.buttonClick(event));
-//    }
+    @Test
+    void draw_GiveawayNotExist_ThrowIllegalStateException() {
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.empty());
+        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.draw("1"));
+    }
+
+    @Test
+    void draw_PrizesListNull_ThrowIllegalStateException() {
+        Giveaway giveaway = new Giveaway();
+        giveaway.setGiveawayUsers(new ArrayList<>());
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.draw("1"));
+    }
+
+    @Test
+    void draw_UsersListNull_ThrowIllegalStateException() {
+        Giveaway giveaway = new Giveaway();
+        giveaway.setPrizes(new ArrayList<>());
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.draw("1"));
+    }
+
+    @Test
+    void draw_ListOfPrizeNull_DoesNotThrowException() {
+        Giveaway giveaway = new Giveaway();
+        giveaway.setPrizes(new ArrayList<>());
+        giveaway.setGiveawayUsers(new ArrayList<>());
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        Assertions.assertDoesNotThrow(() -> giveawayService.draw("1"));
+    }
+
+    @Test
+    void draw_1Prize1User_SizeListOfWin1() {
+        Giveaway giveaway = new Giveaway();
+        GiveawayUser giveawayUser = mock(GiveawayUser.class);
+        Prize prize = new Prize(1L, "Prize", 1, giveaway, new ArrayList<>());
+        giveaway.setId(1L);
+        giveaway.setGiveawayUsers(new ArrayList<>(List.of(giveawayUser)));
+        giveaway.setPrizes(new ArrayList<>(List.of(prize)));
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        giveawayService.draw("1");
+        verify(giveawayUser, times(1)).setPrize(prize);
+        verify(giveawayRepository).save(giveaway);
+    }
+
+    @Test
+    void draw_1Prize2Users_SizeListOfWin1() {
+        Giveaway giveaway = new Giveaway();
+        GiveawayUser giveawayUser = mock(GiveawayUser.class);
+        Prize prize = new Prize(1L, "Prize", 1, giveaway, new ArrayList<>());
+        giveaway.setId(1L);
+        giveaway.setGiveawayUsers(new ArrayList<>(List.of(giveawayUser,giveawayUser)));
+        giveaway.setPrizes(new ArrayList<>(List.of(prize)));
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        giveawayService.draw("1");
+        verify(giveawayUser, times(1)).setPrize(prize);
+        verify(giveawayRepository).save(giveaway);
+    }
+
+    @Test
+    void draw_UserListEmpty_SizeListOfWin1() {
+        Giveaway giveaway = new Giveaway();
+        GiveawayUser giveawayUser = mock(GiveawayUser.class);
+        Prize prize = new Prize(1L, "Prize", 1, giveaway, new ArrayList<>());
+        giveaway.setId(1L);
+        giveaway.setGiveawayUsers(new ArrayList<>());
+        giveaway.setPrizes(new ArrayList<>(List.of(prize)));
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        giveawayService.draw("1");
+        verify(giveawayUser, times(0)).setPrize(prize);
+    }
+
+    @Test
+    void draw_2Prizes1User_SizeListOfWin1() {
+        Giveaway giveaway = new Giveaway();
+        GiveawayUser giveawayUser = mock(GiveawayUser.class);
+        Prize prize = new Prize(1L, "Prize", 2, giveaway, new ArrayList<>());
+        giveaway.setId(1L);
+        giveaway.setGiveawayUsers(new ArrayList<>(List.of(giveawayUser)));
+        giveaway.setPrizes(new ArrayList<>(List.of(prize)));
+        when(giveawayRepository.findByMessageId("1")).thenReturn(Optional.of(giveaway));
+        giveawayService.draw("1");
+        verify(giveawayUser, times(1)).setPrize(prize);
+        verify(giveawayRepository).save(giveaway);
+    }
 }

@@ -16,16 +16,16 @@ import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
+import pl.mbrzozowski.ranger.repository.main.GiveawayUsersRepository;
+import pl.mbrzozowski.ranger.repository.main.PrizeRepository;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
-import java.util.Timer;
+import java.util.*;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
@@ -36,15 +36,24 @@ public class GiveawayService {
 
     private GiveawayGenerator giveawayGenerator;
     private final GiveawayRepository giveawayRepository;
+    private final GiveawayUsersRepository giveawayUsersRepository;
+    private final PrizeRepository prizeRepository;
 
-    public GiveawayService(GiveawayRepository giveawayRepository) {
+    public GiveawayService(GiveawayRepository giveawayRepository, GiveawayUsersRepository giveawayUsersRepository, PrizeRepository prizeRepository) {
         this.giveawayRepository = giveawayRepository;
+        this.giveawayUsersRepository = giveawayUsersRepository;
+        this.prizeRepository = prizeRepository;
         findActiveAndSetTimer();
     }
 
     private void findActiveAndSetTimer() {
-        List<Giveaway> giveaways = giveawayRepository.findAll();
+        List<Giveaway> giveaways = findAll();
         giveaways.stream().filter(this::isActive).forEach(this::setTimerToEnding);
+    }
+
+    @NotNull
+    private List<Giveaway> findAll() {
+        return giveawayRepository.findAll();
     }
 
 
@@ -100,21 +109,13 @@ public class GiveawayService {
         giveaway.setChannelId(textChannel.getId());
         EmbedBuilder builder = createEmbed(giveaway, prizes);
         sendEmbed(textChannel, giveaway, builder);
-
-        setTimerToEnding(giveaway);
     }
 
     private void setTimerToEnding(@NotNull Giveaway giveaway) {
         Timer timer = new Timer();
         Calendar calendar = Calendar.getInstance();
-        calendar.set(
-                giveaway.getEndTime().getYear(),
-                giveaway.getEndTime().getMonthValue(),
-                giveaway.getEndTime().getDayOfMonth(),
-                giveaway.getEndTime().getHour(),
-                giveaway.getEndTime().getMinute(),
-                giveaway.getEndTime().getSecond());
-        timer.schedule(new EndGiveaway(this, giveaway), calendar.getTime());
+        calendar.set(giveaway.getEndTime().getYear(), giveaway.getEndTime().getMonthValue(), giveaway.getEndTime().getDayOfMonth(), giveaway.getEndTime().getHour(), giveaway.getEndTime().getMinute(), giveaway.getEndTime().getSecond());
+        timer.schedule(new EndGiveaway(this, giveaway.getChannelId(), giveaway.getMessageId()), calendar.getTime());
     }
 
 
@@ -133,11 +134,10 @@ public class GiveawayService {
     private void sendEmbed(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, @NotNull EmbedBuilder builder) {
         textChannel.sendMessageEmbeds(builder.build()).queue(message -> {
             MessageEmbed messageEmbed = message.getEmbeds().get(0);
-            message.editMessageEmbeds(messageEmbed)
-                    .setActionRow(Button.success("giveawayIn" + message.getId(), "Zapisz się"))
-                    .queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success("giveawayIn" + message.getId(), "Zapisz się")).queue();
             giveaway.setMessageId(message.getId());
             save(giveaway);
+            setTimerToEnding(giveaway);
         });
     }
 
@@ -147,10 +147,7 @@ public class GiveawayService {
         builder.setColor(new Color(143, 203, 209));
         builder.setDescription("## :tada:  GIVEAWAY  :tada:");
         builder.addField("Nagrody", GiveawayGenerator.getPrizesDescription(prizes), false);
-        builder.addField(EmbedSettings.WHEN_END_DATE,
-                Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" +
-                        EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()),
-                false);
+        builder.addField(EmbedSettings.WHEN_END_DATE, Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" + EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()), false);
         return builder;
     }
 
@@ -176,10 +173,7 @@ public class GiveawayService {
     }
 
     private boolean isUserExist(@NotNull ButtonInteractionEvent event, @NotNull Giveaway giveaway) {
-        Optional<GiveawayUser> userOptional = giveaway.getGiveawayUsers()
-                .stream()
-                .filter(giveawayUser -> giveawayUser.getUserId().equalsIgnoreCase(event.getUser().getId()))
-                .findFirst();
+        Optional<GiveawayUser> userOptional = giveaway.getGiveawayUsers().stream().filter(giveawayUser -> giveawayUser.getUserId().equalsIgnoreCase(event.getUser().getId())).findFirst();
         if (userOptional.isPresent()) {
             ResponseMessage.giveawayUserExist(event);
             log.info("{}, {} is exist", event.getUser(), giveaway);
@@ -216,12 +210,7 @@ public class GiveawayService {
     }
 
     private void saveUser(@NotNull ButtonInteractionEvent event, Giveaway giveaway) {
-        GiveawayUser giveawayUser = GiveawayUser.builder()
-                .userId(event.getUser().getId())
-                .userName(Users.getUserNicknameFromID(event.getUser().getId()))
-                .timestamp(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)))
-                .giveaway(giveaway)
-                .build();
+        GiveawayUser giveawayUser = GiveawayUser.builder().userId(event.getUser().getId()).userName(Users.getUserNicknameFromID(event.getUser().getId())).timestamp(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS))).giveaway(giveaway).build();
         giveaway.getGiveawayUsers().add(giveawayUser);
         ResponseMessage.giveawayAdded(event);
         log.info("{} added to giveaway {}", giveawayUser, giveaway);
@@ -238,5 +227,93 @@ public class GiveawayService {
         event.getMessage().editMessageEmbeds(builder.build()).queue();
 
         log.info("Giveaway embed updated");
+    }
+
+    public void draw(@NotNull String messageId) {
+        log.info("Draw prizes for messageId={}", messageId);
+        Giveaway giveaway = findByMessageId(messageId);
+        log.info("Draw prizes for {}", giveaway);
+        List<GiveawayUser> giveawayUsers = getGiveawayUsers(giveaway);
+        List<Prize> prizes = getPrizes(giveaway);
+        if (checkIsListsEmpty(giveawayUsers, prizes)) {
+            return;
+        }
+        List<GiveawayUser> usersToDraw = new ArrayList<>(giveawayUsers);
+        List<GiveawayUser> winUsers = new ArrayList<>();
+        for (Prize prize : prizes) {
+            for (int i = 0; i < prize.getNumberOfPrizes(); i++) {
+                log.info("Draw {}", prize);
+                if (usersToDraw.size() > 0) {
+                    Random random = new Random();
+                    int index = random.nextInt(usersToDraw.size());
+                    GiveawayUser winUser = usersToDraw.get(index);
+                    winUser.setPrize(prize);
+                    winUsers.add(usersToDraw.get(index));
+                    usersToDraw.remove(index);
+                }
+            }
+        }
+        setWinUsersToMainList(giveawayUsers, winUsers);
+        save(giveaway);
+        log.info("Giveaway saved");
+    }
+
+    private void setWinUsersToMainList(@NotNull List<GiveawayUser> giveawayUsers, @NotNull List<GiveawayUser> winUsers) {
+        for (GiveawayUser winUser : winUsers) {
+            for (GiveawayUser giveawayUser : giveawayUsers) {
+                if (giveawayUser.getId().equals(winUser.getId())) {
+                    giveawayUser.setPrize(winUser.getPrize());
+                    log.info("Prize set for user {}", giveawayUser);
+                }
+            }
+        }
+    }
+
+    private boolean checkIsListsEmpty(@NotNull List<GiveawayUser> giveawayUsers, List<Prize> prizes) {
+        if (giveawayUsers.size() == 0) {
+            log.info("Registered 0 users. Draw canceled");
+            return true;
+        }
+        log.info("Registered {} users", giveawayUsers.size());
+        if (prizes.size() == 0) {
+            log.error("List of prizes is empty.");
+            return true;
+        }
+        return false;
+    }
+
+    @NotNull
+    private List<GiveawayUser> getGiveawayUsers(@NotNull Giveaway giveaway) {
+        List<GiveawayUser> giveawayUsers = giveaway.getGiveawayUsers();
+        if (giveawayUsers == null) {
+            throw new IllegalStateException("List of users is null");
+        }
+        return giveawayUsers;
+    }
+
+    @NotNull
+    private List<Prize> getPrizes(@NotNull Giveaway giveaway) {
+        List<Prize> prizes = giveaway.getPrizes();
+        if (prizes == null) {
+            throw new IllegalStateException("List of prizes is null");
+        }
+        return prizes;
+    }
+
+    private void save(Prize prize) {
+        prizeRepository.save(prize);
+    }
+
+    private void save(GiveawayUser giveawayUser) {
+        giveawayUsersRepository.save(giveawayUser);
+    }
+
+    @NotNull
+    private Giveaway findByMessageId(String messageId) {
+        Optional<Giveaway> giveawayOptional = giveawayRepository.findByMessageId(messageId);
+        if (giveawayOptional.isEmpty()) {
+            throw new IllegalStateException("Giveaway not exist giveaway{messageId=" + messageId + "}");
+        }
+        return giveawayOptional.get();
     }
 }

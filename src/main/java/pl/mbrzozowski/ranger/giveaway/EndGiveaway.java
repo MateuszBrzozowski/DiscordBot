@@ -11,23 +11,28 @@ import java.util.TimerTask;
 public class EndGiveaway extends TimerTask {
 
     private final GiveawayService giveawayService;
-    private final Giveaway giveaway;
+    private final String giveawayChannelId;
+    private final String giveawayMessageId;
 
-    public EndGiveaway(GiveawayService giveawayService, Giveaway giveaway) {
+    public EndGiveaway(GiveawayService giveawayService, String giveawayChannelId, String messageId) {
         this.giveawayService = giveawayService;
-        this.giveaway = giveaway;
+        this.giveawayChannelId = giveawayChannelId;
+        this.giveawayMessageId = messageId;
     }
 
     @Override
     public void run() {
         int attempt = 1;
         while (attempt <= 5) {
-            log.info("Request to set end of giveaway {}", giveaway);
+            log.info("Request to set end of giveaway{channelId={}, messageId={}}", giveawayChannelId, giveawayMessageId);
             JDA jda = DiscordBot.getJda();
             if (jda != null) {
-                TextChannel textChannel = jda.getTextChannelById(giveaway.getChannelId());
+                TextChannel textChannel = jda.getTextChannelById(giveawayChannelId);
                 if (textChannel != null) {
-                    textChannel.retrieveMessageById(giveaway.getMessageId()).queue(giveawayService::setEndEmbed);
+                    textChannel.retrieveMessageById(giveawayMessageId).queue(message -> {
+                        giveawayService.setEndEmbed(message);
+                        giveawayService.draw(message.getId());
+                    });
                     return;
                 }
             }
@@ -38,6 +43,6 @@ public class EndGiveaway extends TimerTask {
             }
             attempt++;
         }
-        log.warn("{} Final stage of embed can not be set", giveaway);
+        log.warn("Final stage of embed can not be set giveaway{channelId={}, messageId={}}", giveawayChannelId, giveawayMessageId);
     }
 }
