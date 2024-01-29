@@ -256,6 +256,14 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void cancelGiveawayAreYouSure(@NotNull SlashCommandInteractionEvent event, int idAsInt) {
+        event.reply("Czy jesteś pewien, że chcesz zakończyć giveaway od id=" + idAsInt + " bez losowania nagród?")
+                .setActionRow(
+                        Button.success(ComponentId.GIVEAWAY_CANCEL_SURE_YES + idAsInt, "Tak"))
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void giveawayEnded(@NotNull ButtonInteractionEvent event) {
         event.reply("Giveaway zakończony").setEphemeral(true).queue();
     }

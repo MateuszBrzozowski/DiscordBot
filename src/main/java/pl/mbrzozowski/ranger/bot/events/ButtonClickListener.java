@@ -154,7 +154,10 @@ public class ButtonClickListener extends ListenerAdapter {
             giveawayService.buttonClick(event);
         } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_END_SURE_YES.length() &&
                 event.getComponentId().substring(0, ComponentId.GIVEAWAY_END_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_END_SURE_YES)) {
-            giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_END_SURE_YES.length()));
+            giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_END_SURE_YES.length()), true);
+        } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_CANCEL_SURE_YES.length() &&
+                event.getComponentId().substring(0, ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_CANCEL_SURE_YES)) {
+            giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()), false);
         } else {
             eventsButtons(event);
         }

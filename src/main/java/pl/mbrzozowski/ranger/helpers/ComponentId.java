@@ -61,5 +61,6 @@ public final class ComponentId {
     public static final String GIVEAWAY_GENERATOR_SELECT_MENU = "GiveGenSelectMenu" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD = "GiveGenPrizeAddModal" + SUFFIX;
     public static final String GIVEAWAY_END_SURE_YES = "giveaway_end_sure_" + SUFFIX;
+    public static final String GIVEAWAY_CANCEL_SURE_YES = "giveaway_cancel_sure_" + SUFFIX;
 
 }

@@ -39,6 +39,7 @@ public class GiveawayService {
 
     private GiveawayGenerator giveawayGenerator;
     private final GiveawayRepository giveawayRepository;
+    private final Map<Long, Timer> timers = new HashMap<>();
 
     public GiveawayService(GiveawayRepository giveawayRepository) {
         this.giveawayRepository = giveawayRepository;
@@ -115,6 +116,7 @@ public class GiveawayService {
         Calendar calendar = Calendar.getInstance();
         calendar.set(giveaway.getEndTime().getYear(), giveaway.getEndTime().getMonthValue(), giveaway.getEndTime().getDayOfMonth(), giveaway.getEndTime().getHour(), giveaway.getEndTime().getMinute(), giveaway.getEndTime().getSecond());
         timer.schedule(new EndGiveaway(this, giveaway.getChannelId(), giveaway.getMessageId()), calendar.getTime());
+        timers.put(giveaway.getId(), timer);
     }
 
 
@@ -316,8 +318,23 @@ public class GiveawayService {
         return giveawayOptional.get();
     }
 
+    public void cancel(@NotNull SlashCommandInteractionEvent event) {
+        if (isFillId(event, false)) {
+            return;
+        }
+        List<Giveaway> all = findAll();
+        List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
+        if (activeGiveaways.size() == 0) {
+            ResponseMessage.noActiveGiveaways(event);
+        } else if (activeGiveaways.size() == 1) {
+            ResponseMessage.cancelGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
+        } else {
+            ResponseMessage.moreThanOneGiveaway(event, activeGiveaways);
+        }
+    }
+
     public void end(@NotNull SlashCommandInteractionEvent event) {
-        if (isFillId(event)) {
+        if (isFillId(event, true)) {
             return;
         }
         List<Giveaway> all = findAll();
@@ -331,7 +348,7 @@ public class GiveawayService {
         }
     }
 
-    private boolean isFillId(@NotNull SlashCommandInteractionEvent event) {
+    private boolean isFillId(@NotNull SlashCommandInteractionEvent event, boolean isEnd) {
         OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID);
         if (id != null) {
             int idAsInt = id.getAsInt();
@@ -344,11 +361,22 @@ public class GiveawayService {
             Giveaway giveaway = giveawayOptional.get();
             boolean active = isActive(giveaway);
             if (active) {
-                ResponseMessage.endGiveawayAreYouSure(event, idAsInt);
+                if (isEnd) {
+                    ResponseMessage.endGiveawayAreYouSure(event, idAsInt);
+                } else {
+                    ResponseMessage.cancelGiveawayAreYouSure(event, idAsInt);
+                }
             }
             return true;
         }
         return false;
+    }
+
+    private void cancelGiveaway(@NotNull Giveaway giveaway) {
+        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
+        giveaway.setEndTime(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
+        save(giveaway);
+        log.info("{} is canceled", giveaway);
     }
 
     private void endGiveaway(@NotNull Giveaway giveaway) {
@@ -356,9 +384,10 @@ public class GiveawayService {
         giveaway.setEndTime(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
         save(giveaway);
         log.info("{} is ended", giveaway);
+        draw(giveaway.getMessageId());
     }
 
-    public void end(ButtonInteractionEvent event, String giveawayId) {
+    public void end(ButtonInteractionEvent event, String giveawayId, boolean isEnding) {
         Optional<Giveaway> giveawayOptional = findById(giveawayId);
         if (giveawayOptional.isEmpty()) {
             throw new IllegalArgumentException("Giveaway by id=" + giveawayId + " not exist in DB");
@@ -366,7 +395,12 @@ public class GiveawayService {
         Giveaway giveaway = giveawayOptional.get();
         boolean isActive = isActive(giveaway);
         if (isActive) {
-            endGiveaway(giveaway);
+            if (isEnding) {
+                endGiveaway(giveaway);
+            } else {
+                cancelGiveaway(giveaway);
+            }
+            timers.remove(giveaway.getId()).cancel();
         } else {
             ResponseMessage.giveawayEnded(event);
         }
