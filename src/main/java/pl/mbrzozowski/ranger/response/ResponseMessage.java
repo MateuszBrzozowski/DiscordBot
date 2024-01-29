@@ -248,6 +248,12 @@ public class ResponseMessage {
         return builder.toString();
     }
 
+    public static void showActiveGiveaways(@NotNull SlashCommandInteractionEvent event, List<Giveaway> activeGiveaways) {
+        event.reply("Aktywne giveawaye:\n" + getDescriptionOfActiveGiveaways(activeGiveaways))
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void endGiveawayAreYouSure(@NotNull SlashCommandInteractionEvent event, int idAsInt) {
         event.reply("Czy jesteś pewien, że chcesz zakończyć giveaway od id=" + idAsInt + " i wylosować nagrody?")
                 .setActionRow(

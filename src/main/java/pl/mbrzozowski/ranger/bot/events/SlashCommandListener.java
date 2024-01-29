@@ -116,6 +116,8 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.end(event);
         } else if (name.equalsIgnoreCase(GIVEAWAY_CANCEL)) {
             giveawayService.cancel(event);
+        } else if (name.equalsIgnoreCase(GIVEAWAY_LIST)) {
+            giveawayService.showActive(event);
         }
     }
 
@@ -142,5 +144,6 @@ public class SlashCommandListener extends ListenerAdapter {
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
         commandData.add(Commands.slash(GIVEAWAY_CANCEL, "Kończy giveaway bez losowania nagród")
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
+        commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze"));
     }
 }

@@ -425,4 +425,14 @@ public class GiveawayService {
     private Optional<Giveaway> findById(Long id) {
         return giveawayRepository.findById(id);
     }
+
+    public void showActive(SlashCommandInteractionEvent event) {
+        List<Giveaway> all = findAll();
+        List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
+        if (activeGiveaways.size() > 0) {
+            ResponseMessage.showActiveGiveaways(event, activeGiveaways);
+        } else {
+            ResponseMessage.noActiveGiveaways(event);
+        }
+    }
 }
