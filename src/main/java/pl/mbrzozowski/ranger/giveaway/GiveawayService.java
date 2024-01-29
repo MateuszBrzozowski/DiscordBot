@@ -435,4 +435,65 @@ public class GiveawayService {
             ResponseMessage.noActiveGiveaways(event);
         }
     }
+
+    public void reRoll(@NotNull SlashCommandInteractionEvent event) {
+        if (reRollIsFillId(event)) {
+            return;
+        }
+        List<Giveaway> all = findAll();
+        List<Giveaway> canReRoll = all.stream().filter(this::isCanReRoll).toList();
+        if (canReRoll.size() == 0) {
+            ResponseMessage.noActiveGiveaways(event);
+        } else if (canReRoll.size() == 1) {
+            ResponseMessage.reRollAreYouSure(event, canReRoll.get(0).getId().intValue());
+        } else {
+            ResponseMessage.moreThanOneGiveaway(event, canReRoll);
+        }
+    }
+
+    private boolean reRollIsFillId(@NotNull SlashCommandInteractionEvent event) {
+        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID);
+        if (id != null) {
+            int idAsInt = id.getAsInt();
+            Optional<Giveaway> giveawayOptional = findById(idAsInt);
+            if (giveawayOptional.isEmpty()) {
+                ResponseMessage.giveawayNoExist(event);
+                log.info("Giveaway by id={} not exist in DB", idAsInt);
+                return true;
+            }
+            Giveaway giveaway = giveawayOptional.get();
+            if (isCanReRoll(giveaway)) {
+                ResponseMessage.reRollAreYouSure(event, idAsInt);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCanReRoll(@NotNull Giveaway giveaway) {
+        LocalDateTime endTime = giveaway.getEndTime();
+        return endTime.isAfter(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)).minusDays(7)) &&
+                endTime.isBefore(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
+    }
+
+    public void reRoll(ButtonInteractionEvent event, String giveawayId) {
+        Optional<Giveaway> giveawayOptional = findById(giveawayId);
+        if (giveawayOptional.isEmpty()) {
+            throw new IllegalArgumentException("Giveaway by id=" + giveawayId + " not exist in DB");
+        }
+        Giveaway giveaway = giveawayOptional.get();
+        if (isCanReRoll(giveaway)) {
+            reRoll(giveaway);
+        } else {
+            ResponseMessage.giveawayNotPossibleReRoll(event);
+        }
+    }
+
+    private void reRoll(Giveaway giveaway) {
+        log.info("{} Reroll prizes", giveaway);
+        giveaway.getGiveawayUsers().forEach(giveawayUser -> giveawayUser.setPrize(null));
+        save(giveaway);
+        log.info("Set null prizes for users in giveaway");
+        draw(giveaway.getMessageId());
+    }
 }

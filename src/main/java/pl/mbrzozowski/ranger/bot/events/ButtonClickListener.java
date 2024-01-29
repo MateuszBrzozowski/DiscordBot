@@ -137,11 +137,11 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {
             event.deferEdit().queue();
         } else {
-            giveawayGeneratorButtons(event, isAdmin);
+            giveawayButtons(event, isAdmin);
         }
     }
 
-    private void giveawayGeneratorButtons(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
+    private void giveawayButtons(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (isAdmin && (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_BACK) ||
                 event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_NEXT) ||
                 event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_CANCEL) ||
@@ -158,6 +158,9 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_CANCEL_SURE_YES.length() &&
                 event.getComponentId().substring(0, ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_CANCEL_SURE_YES)) {
             giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()), false);
+        }else if (event.getComponentId().length() > ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length() &&
+                event.getComponentId().substring(0, ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_CANCEL_SURE_YES)) {
+            giveawayService.reRoll(event, event.getComponentId().substring(ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length()));
         } else {
             eventsButtons(event);
         }

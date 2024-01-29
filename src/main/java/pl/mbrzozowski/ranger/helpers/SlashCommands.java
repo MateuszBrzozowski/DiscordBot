@@ -16,5 +16,6 @@ public final class SlashCommands {
     public static final String GIVEAWAY_END = "gend";
     public static final String GIVEAWAY_CANCEL = "gcancel";
     public static final String GIVEAWAY_LIST = "glist";
+    public static final String GIVEAWAY_RE_ROLL = "greroll";
     public static final String GIVEAWAY_ID = "id";
 }
