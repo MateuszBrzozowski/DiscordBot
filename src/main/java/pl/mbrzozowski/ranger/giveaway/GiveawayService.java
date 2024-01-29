@@ -16,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.Converter;
-import pl.mbrzozowski.ranger.helpers.SlashCommands;
-import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -265,6 +262,7 @@ public class GiveawayService {
         setWinUsersToMainList(giveawayUsers, winUsers);
         save(giveaway);
         log.info("Giveaway saved");
+        sendInfoAboutWinners(giveaway);
     }
 
     private void setWinUsersToMainList(@NotNull List<GiveawayUser> giveawayUsers, @NotNull List<GiveawayUser> winUsers) {
@@ -325,7 +323,7 @@ public class GiveawayService {
         List<Giveaway> all = findAll();
         List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
         if (activeGiveaways.size() == 0) {
-            ResponseMessage.noActiveGiveaways(event);
+            ResponseMessage.noGiveaways(event);
         } else if (activeGiveaways.size() == 1) {
             ResponseMessage.cancelGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
         } else {
@@ -340,7 +338,7 @@ public class GiveawayService {
         List<Giveaway> all = findAll();
         List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
         if (activeGiveaways.size() == 0) {
-            ResponseMessage.noActiveGiveaways(event);
+            ResponseMessage.noGiveaways(event);
         } else if (activeGiveaways.size() == 1) {
             ResponseMessage.endGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
         } else {
@@ -432,7 +430,7 @@ public class GiveawayService {
         if (activeGiveaways.size() > 0) {
             ResponseMessage.showActiveGiveaways(event, activeGiveaways);
         } else {
-            ResponseMessage.noActiveGiveaways(event);
+            ResponseMessage.noGiveaways(event);
         }
     }
 
@@ -443,7 +441,7 @@ public class GiveawayService {
         List<Giveaway> all = findAll();
         List<Giveaway> canReRoll = all.stream().filter(this::isCanReRoll).toList();
         if (canReRoll.size() == 0) {
-            ResponseMessage.noActiveGiveaways(event);
+            ResponseMessage.noGiveaways(event);
         } else if (canReRoll.size() == 1) {
             ResponseMessage.reRollAreYouSure(event, canReRoll.get(0).getId().intValue());
         } else {
@@ -490,10 +488,36 @@ public class GiveawayService {
     }
 
     private void reRoll(Giveaway giveaway) {
-        log.info("{} Reroll prizes", giveaway);
+        log.info("{} ReRoll prizes", giveaway);
         giveaway.getGiveawayUsers().forEach(giveawayUser -> giveawayUser.setPrize(null));
         save(giveaway);
         log.info("Set null prizes for users in giveaway");
         draw(giveaway.getMessageId());
+    }
+
+    private void sendInfoAboutWinners(@NotNull Giveaway giveaway) {
+        List<Prize> prizes = giveaway.getPrizes();
+        JDA jda = DiscordBot.getJda();
+        TextChannel textChannel = jda.getTextChannelById(giveaway.getChannelId());
+        if (textChannel == null) {
+            return;
+        }
+        for (Prize prize : prizes) {
+            for (int i = 0; i < prize.getGiveawayUsers().size(); i++) {
+                textChannel.sendMessage("Gratulacje <@" + prize.getGiveawayUsers().get(i).getUserId() + ">! " +
+                                "Wygrałeś **" + prize.getName() + "**!\n" + getLinkToGiveaway(giveaway))
+                        .queue();
+            }
+        }
+    }
+
+    @NotNull
+    private static String getLinkToGiveaway(@NotNull Giveaway giveaway) {
+        return "https://discord.com/channels/" +
+                CategoryAndChannelID.RANGERSPL_GUILD_ID +
+                "/" +
+                giveaway.getChannelId() +
+                "/" +
+                giveaway.getMessageId();
     }
 }

@@ -219,8 +219,8 @@ public class ResponseMessage {
                 .queue();
     }
 
-    public static void noActiveGiveaways(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("Brak aktywnych giveawayów.").setEphemeral(true).queue();
+    public static void noGiveaways(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Brak giveawayów.").setEphemeral(true).queue();
     }
 
     public static void moreThanOneGiveaway(@NotNull SlashCommandInteractionEvent event, List<Giveaway> activeGiveaways) {
