@@ -77,7 +77,7 @@ public class EventsGenerator {
                         .addOptions(EventFor.getAll())
                         .build();
             }
-            default -> throw new IllegalStageException("Incorrect stage - " + stageOfGenerator);
+            default -> throw new IllegalStageException(stageOfGenerator);
         }
     }
 
@@ -367,7 +367,7 @@ public class EventsGenerator {
         switch (modalId) {
             case EVENT_GENERATOR_MODAL_TITLE -> saveTitleAndDescription(event);
             case EVENT_GENERATOR_MODAL_TIME -> saveDateAndTime(event);
-            default -> throw new IllegalStageException("Stage - " + stageOfGenerator);
+            default -> throw new IllegalStageException(stageOfGenerator);
         }
     }
 
