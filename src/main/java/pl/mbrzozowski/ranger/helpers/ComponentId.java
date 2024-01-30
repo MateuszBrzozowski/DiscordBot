@@ -60,8 +60,9 @@ public final class ComponentId {
     public static final String GIVEAWAY_GENERATOR_BTN_REMOVE_ALL = "GiveGenRemoveAll" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_SELECT_MENU = "GiveGenSelectMenu" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD = "GiveGenPrizeAddModal" + SUFFIX;
-    public static final String GIVEAWAY_END_SURE_YES = "giveaway_end_sure_" + SUFFIX;
-    public static final String GIVEAWAY_RE_ROLL_SURE_YES = "giveaway_reRoll_sure_" + SUFFIX;
-    public static final String GIVEAWAY_CANCEL_SURE_YES = "giveaway_cancel_sure_" + SUFFIX;
+    public static final String GIVEAWAY_SIGN_IN = "giveawaySignIn" + SUFFIX;
+    public static final String GIVEAWAY_END_SURE_YES = "giveawayEndSure" + SUFFIX;
+    public static final String GIVEAWAY_RE_ROLL_SURE_YES = "giveawayReRollSure" + SUFFIX;
+    public static final String GIVEAWAY_CANCEL_SURE_YES = "giveawayCancelSure" + SUFFIX;
 
 }

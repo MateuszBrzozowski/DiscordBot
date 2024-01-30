@@ -102,6 +102,9 @@ public class GiveawayService {
 
     void publishOnChannel(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, List<Prize> prizes) {
         validateGeneratorOutput(giveaway, prizes);
+        for (Prize prize : prizes) {
+            prize.setGiveaway(giveaway);
+        }
         giveaway.setPrizes(prizes);
         giveaway.setChannelId(textChannel.getId());
         EmbedBuilder builder = createEmbed(giveaway, prizes);
@@ -111,9 +114,16 @@ public class GiveawayService {
     private void setTimerToEnding(@NotNull Giveaway giveaway) {
         Timer timer = new Timer();
         Calendar calendar = Calendar.getInstance();
-        calendar.set(giveaway.getEndTime().getYear(), giveaway.getEndTime().getMonthValue(), giveaway.getEndTime().getDayOfMonth(), giveaway.getEndTime().getHour(), giveaway.getEndTime().getMinute(), giveaway.getEndTime().getSecond());
+        calendar.set(giveaway.getEndTime().getYear(), giveaway.getEndTime().getMonthValue() - 1, giveaway.getEndTime().getDayOfMonth(), giveaway.getEndTime().getHour(), giveaway.getEndTime().getMinute(), giveaway.getEndTime().getSecond());
         timer.schedule(new EndGiveaway(this, giveaway.getChannelId(), giveaway.getMessageId()), calendar.getTime());
         timers.put(giveaway.getId(), timer);
+        log.info("Set timer to end giveaway{id={}}, date={}.{}.{} time={}:{}",
+                giveaway.getId(),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                String.format("%02d", calendar.get(Calendar.MONTH)),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.HOUR_OF_DAY),
+                String.format("%02d", calendar.get(Calendar.MINUTE)));
     }
 
 
@@ -132,8 +142,9 @@ public class GiveawayService {
     private void sendEmbed(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, @NotNull EmbedBuilder builder) {
         textChannel.sendMessageEmbeds(builder.build()).queue(message -> {
             MessageEmbed messageEmbed = message.getEmbeds().get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success("giveawayIn" + message.getId(), "Zapisz się")).queue();
+            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.GIVEAWAY_SIGN_IN + message.getId(), "Zapisz się")).queue();
             giveaway.setMessageId(message.getId());
+            log.info("{}", giveaway);
             save(giveaway);
             setTimerToEnding(giveaway);
         });
@@ -145,6 +156,7 @@ public class GiveawayService {
         builder.setColor(new Color(143, 203, 209));
         builder.setDescription("## :tada:  GIVEAWAY  :tada:");
         builder.addField("Nagrody", GiveawayGenerator.getPrizesDescription(prizes), false);
+        builder.addBlankField(false);
         builder.addField(EmbedSettings.WHEN_END_DATE, Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" + EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()), false);
         return builder;
     }
@@ -203,7 +215,7 @@ public class GiveawayService {
         MessageEmbed messageEmbed = message.getEmbeds().get(0);
         EmbedBuilder builder = new EmbedBuilder(messageEmbed);
         builder.setColor(new Color(151, 1, 95));
-        message.editMessageEmbeds(builder.build()).setActionRow().queue();
+        message.editMessageEmbeds(builder.build()).setComponents().queue();
         log.info("Embed set to end stage");
     }
 
@@ -247,7 +259,9 @@ public class GiveawayService {
         List<GiveawayUser> usersToDraw = new ArrayList<>(giveawayUsers);
         List<GiveawayUser> winUsers = new ArrayList<>();
         for (Prize prize : prizes) {
-            for (int i = 0; i < prize.getNumberOfPrizes(); i++) {
+            for (int i = 0; i < prize.getNumberOfPrizes() && i <= usersToDraw.size(); i++) {
+                log.info(String.valueOf(prize.getNumberOfPrizes()));
+                log.info(String.valueOf(usersToDraw.size()));
                 log.info("Draw {}", prize);
                 if (usersToDraw.size() > 0) {
                     Random random = new Random();
@@ -255,8 +269,11 @@ public class GiveawayService {
                     GiveawayUser winUser = usersToDraw.get(index);
                     winUser.setPrize(prize);
                     winUsers.add(usersToDraw.get(index));
+                    prize.getGiveawayUsers().add(usersToDraw.get(index));
                     usersToDraw.remove(index);
                 }
+                log.info(String.valueOf(prize.getNumberOfPrizes()));
+                log.info(String.valueOf(usersToDraw.size()));
             }
         }
         setWinUsersToMainList(giveawayUsers, winUsers);
@@ -394,8 +411,10 @@ public class GiveawayService {
         boolean isActive = isActive(giveaway);
         if (isActive) {
             if (isEnding) {
+                event.getInteraction().getMessage().editMessage("Kończę i losuje nagrody dla giveawaya o id=" + giveawayId).queue();
                 endGiveaway(giveaway);
             } else {
+                event.getInteraction().getMessage().editMessage("Anuluje giveawaya o id=" + giveawayId).queue();
                 cancelGiveaway(giveaway);
             }
             timers.remove(giveaway.getId()).cancel();
@@ -477,10 +496,12 @@ public class GiveawayService {
     public void reRoll(ButtonInteractionEvent event, String giveawayId) {
         Optional<Giveaway> giveawayOptional = findById(giveawayId);
         if (giveawayOptional.isEmpty()) {
+            event.deferEdit().queue();
             throw new IllegalArgumentException("Giveaway by id=" + giveawayId + " not exist in DB");
         }
         Giveaway giveaway = giveawayOptional.get();
         if (isCanReRoll(giveaway)) {
+            event.editMessage("Powtarzam losowanie").setComponents().queue();
             reRoll(giveaway);
         } else {
             ResponseMessage.giveawayNotPossibleReRoll(event);

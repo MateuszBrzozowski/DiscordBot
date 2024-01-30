@@ -61,6 +61,6 @@ public class GiveawayRequest {
         if (endTime == null) {
             return false;
         }
-        return endTime.isAfter(LocalDateTime.now().plusMinutes(1));
+        return endTime.isAfter(LocalDateTime.now().plusSeconds(10));
     }
 }
