@@ -232,11 +232,25 @@ public class GiveawayService {
     }
 
     void setEndEmbed(@NotNull Message message) {
-        MessageEmbed messageEmbed = message.getEmbeds().get(0);
-        EmbedBuilder builder = new EmbedBuilder(messageEmbed);
+        Giveaway giveaway = findByMessageId(message.getId());
+        EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(new Color(151, 1, 95));
+        builder.setDescription("## :tada:  GIVEAWAY  :tada:");
+        builder.addField("", getWinnersString(giveaway), false);
+        builder.addField("", "Zakończony: " + Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()), false);
         message.editMessageEmbeds(builder.build()).setComponents().queue();
         log.info("Embed set to end stage");
+    }
+
+    @NotNull
+    private String getWinnersString(@NotNull Giveaway giveaway) {
+        List<GiveawayUser> giveawayUsers = giveaway.getGiveawayUsers();
+        List<GiveawayUser> winners = giveawayUsers.stream().filter(giveawayUser -> giveawayUser.getPrize() != null).toList();
+        StringBuilder builder = new StringBuilder("Wygrani:\n");
+        for (GiveawayUser winner : winners) {
+            builder.append("<@").append(winner.getId()).append(">\n");
+        }
+        return builder.toString();
     }
 
     private void setEndEmbed(String channelId, String messageId) {
@@ -358,12 +372,20 @@ public class GiveawayService {
         if (isFillId(event, false)) {
             return;
         }
+        cancelEndResponse(event, false);
+    }
+
+    private void cancelEndResponse(@NotNull SlashCommandInteractionEvent event, boolean isEnd) {
         List<Giveaway> all = findAll();
         List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
         if (activeGiveaways.size() == 0) {
             ResponseMessage.noGiveaways(event);
         } else if (activeGiveaways.size() == 1) {
-            ResponseMessage.cancelGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
+            if (isEnd) {
+                ResponseMessage.endGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
+            } else {
+                ResponseMessage.cancelGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
+            }
         } else {
             ResponseMessage.moreThanOneGiveaway(event, activeGiveaways);
         }
@@ -373,15 +395,7 @@ public class GiveawayService {
         if (isFillId(event, true)) {
             return;
         }
-        List<Giveaway> all = findAll();
-        List<Giveaway> activeGiveaways = all.stream().filter(this::isActive).toList();
-        if (activeGiveaways.size() == 0) {
-            ResponseMessage.noGiveaways(event);
-        } else if (activeGiveaways.size() == 1) {
-            ResponseMessage.endGiveawayAreYouSure(event, activeGiveaways.get(0).getId().intValue());
-        } else {
-            ResponseMessage.moreThanOneGiveaway(event, activeGiveaways);
-        }
+        cancelEndResponse(event, true);
     }
 
     private boolean isFillId(@NotNull SlashCommandInteractionEvent event, boolean isEnd) {
@@ -409,16 +423,16 @@ public class GiveawayService {
     }
 
     private void cancelGiveaway(@NotNull Giveaway giveaway) {
-        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
         giveaway.setEndTime(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
         save(giveaway);
+        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
         log.info("{} is canceled", giveaway);
     }
 
     private void endGiveaway(@NotNull Giveaway giveaway) {
-        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
         giveaway.setEndTime(LocalDateTime.now(ZoneId.of(ZONE_ID_EUROPE_PARIS)));
         save(giveaway);
+        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
         log.info("{} is ended", giveaway);
         draw(giveaway.getMessageId());
     }
@@ -429,8 +443,7 @@ public class GiveawayService {
             throw new IllegalArgumentException("Giveaway by id=" + giveawayId + " not exist in DB");
         }
         Giveaway giveaway = giveawayOptional.get();
-        boolean isActive = isActive(giveaway);
-        if (isActive) {
+        if (isActive(giveaway)) {
             giveaway.setActive(false);
             if (isEnding) {
                 event.getInteraction().getMessage().editMessage("Kończę i losuje nagrody dla giveawaya o id=" + giveawayId).queue();
