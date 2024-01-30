@@ -382,7 +382,7 @@ public class EmbedInfo extends EmbedCreator {
         builder.setDescription("Osiągnięto maksymalną ilość kanałów w kategorii.");
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+            textChannel.sendMessage("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
                     .setEmbeds(builder.build()).queue();
         }
     }
@@ -392,7 +392,7 @@ public class EmbedInfo extends EmbedCreator {
         builder.setTitle("Pozostały 2 lub mniej miejsc dla rekrutów.");
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+            textChannel.sendMessage("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
                     .setEmbeds(builder.build()).queue();
         }
     }

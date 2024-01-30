@@ -80,7 +80,7 @@ public class RecruitOpinions {
         builder.setColor(Color.YELLOW);
         builder.setTitle("Anonimowy donos!");
         builder.setDescription("**Wiadomość:**\n" + text);
-        textChannel.sendMessage("<@&" + RoleID.RADA_KLANU + ">")
+        textChannel.sendMessage("<@&" + RoleID.CLAN_COUNCIL + ">")
                 .setEmbeds(builder.build())
                 .queue(message -> log.info("{} -(nickname:{}) send anonymous complaints",
                         user,

@@ -93,7 +93,7 @@ public class Users {
     }
 
     public static boolean isAdmin(String userId) {
-        boolean isAdmin = hasUserRole(userId, RoleID.RADA_KLANU);
+        boolean isAdmin = hasUserRole(userId, RoleID.CLAN_COUNCIL);
         if (!isAdmin) {
             isAdmin = isDev(userId);
         }

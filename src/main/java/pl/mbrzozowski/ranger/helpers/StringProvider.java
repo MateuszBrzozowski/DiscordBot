@@ -70,16 +70,18 @@ public class StringProvider {
     @NotNull
     public static String getMessageForEventList(@NotNull EventRequest eventRequest) {
         String result = "";
-        if (eventRequest.getEventFor() == CLAN_MEMBER_AND_RECRUIT) {
+        if (eventRequest.getEventFor().equals(CLAN_MEMBER_AND_RECRUIT)) {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUIT_ID + "> Zapisy!";
-        } else if (eventRequest.getEventFor() == RECRUIT) {
+        } else if (eventRequest.getEventFor().equals(RECRUIT)) {
             result = "<@&" + RoleID.RECRUIT_ID + "> Zapisy!";
-        } else if (eventRequest.getEventFor() == CLAN_MEMBER) {
+        } else if (eventRequest.getEventFor().equals(CLAN_MEMBER)) {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> Zapisy!";
-        } else if (eventRequest.getEventFor() == TACTICAL_GROUP) {
+        } else if (eventRequest.getEventFor().equals(TACTICAL_GROUP)) {
             result = "<@&" + RoleID.TACTICAL_GROUP + "> Tactical meeting!";
-        } else if (eventRequest.getEventFor() == SQ_EVENTS) {
+        } else if (eventRequest.getEventFor().equals(SQ_EVENTS)) {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUIT_ID + "> <@&" + RoleID.SQ_EVENTS + ">";
+        } else if (eventRequest.getEventFor().equals(CLAN_COUNCIL)) {
+            result = "<@&" + RoleID.CLAN_COUNCIL + ">!";
         }
         return result;
     }

@@ -135,23 +135,28 @@ public class EventService {
                                     @NotNull final String channelName,
                                     @NotNull final Category category) {
         final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
-        if (eventRequest.getEventFor() == EventFor.CLAN_MEMBER_AND_RECRUIT || eventRequest.getEventFor() == EventFor.RECRUIT) {
+        if (eventRequest.getEventFor().equals(EventFor.CLAN_MEMBER_AND_RECRUIT) || eventRequest.getEventFor().equals(EventFor.RECRUIT)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
-        } else if (eventRequest.getEventFor() == EventFor.SQ_EVENTS) {
+        } else if (eventRequest.getEventFor().equals(EventFor.SQ_EVENTS)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.SQ_EVENTS), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
-        } else if (eventRequest.getEventFor() == EventFor.TACTICAL_GROUP) {
+        } else if (eventRequest.getEventFor().equals(EventFor.TACTICAL_GROUP)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)
                     .addRolePermissionOverride(Long.parseLong(RoleID.TACTICAL_GROUP), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
+        } else if (eventRequest.getEventFor().equals(EventFor.CLAN_COUNCIL)) {
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_COUNCIL), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
         } else {
             guild.createTextChannel(channelName, category)

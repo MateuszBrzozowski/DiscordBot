@@ -18,7 +18,7 @@ public class EmbedHelp extends EmbedCreator {
         if (user != null) {
             log.info(user + " - open help with command: {}", contentRaw);
             String[] words = contentRaw.split(" ");
-            boolean admin = Users.hasUserRole(user.getId(), RoleID.RADA_KLANU);
+            boolean admin = Users.hasUserRole(user.getId(), RoleID.CLAN_COUNCIL);
             if (!admin) admin = Users.isDev(user.getId());
 
             if (words.length == 1) {

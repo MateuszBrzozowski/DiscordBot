@@ -12,7 +12,8 @@ public enum EventFor {
     RECRUIT("Rekruci"),
     CLAN_MEMBER_AND_RECRUIT("Clan Member i rekruci"),
     TACTICAL_GROUP("Grupa taktyczna"),
-    SQ_EVENTS("Squad Events");
+    SQ_EVENTS("Squad Events"),
+    CLAN_COUNCIL("Rada klanu");
 
     private static final EventFor[] ENUMS = EventFor.values();
     private final String value;

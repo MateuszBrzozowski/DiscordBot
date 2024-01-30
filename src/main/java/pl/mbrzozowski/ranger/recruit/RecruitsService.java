@@ -60,7 +60,7 @@ public class RecruitsService {
         guild.createTextChannel("rekrut-" + userName, category)
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
-                .addRolePermissionOverride(Long.parseLong(RoleID.RADA_KLANU), permissions, null)
+                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_COUNCIL), permissions, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.DRILL_INSTRUCTOR_ID), permissions, null)
                 .queue(textChannel -> {

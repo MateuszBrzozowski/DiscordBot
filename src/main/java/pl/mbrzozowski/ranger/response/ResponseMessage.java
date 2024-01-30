@@ -87,7 +87,7 @@ public class ResponseMessage {
         event.reply("**REKRUTACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
                 .setEphemeral(true)
                 .queue(m -> log.warn("{} - maximum number of channels in recruit category", event.getUser()));
-        RangerLogger.info("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
+        RangerLogger.info("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
                 "Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
                 "Maksymalna liczba kanałów w kategorii StrefaRekruta.");
     }
@@ -96,7 +96,7 @@ public class ResponseMessage {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user on black list", event.getUser()));
-        RangerLogger.info("<@&" + RoleID.RADA_KLANU + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
+        RangerLogger.info("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
                 "Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
                 "Jest na czarnej liście.");
     }
@@ -194,7 +194,7 @@ public class ResponseMessage {
 
     public static void giveawayUnexpectedException(@NotNull ButtonInteractionEvent event) {
         event.reply("Wystąpił nieoczekiwany błąd.\n" +
-                        "Spróbuj ponownie później lub skontaktuj się z administracją <@&" + RoleID.RADA_KLANU + ">")
+                        "Spróbuj ponownie później lub skontaktuj się z administracją <@&" + RoleID.CLAN_COUNCIL + ">")
                 .setEphemeral(true)
                 .queue();
     }
