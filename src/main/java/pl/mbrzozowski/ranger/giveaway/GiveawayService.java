@@ -44,8 +44,16 @@ public class GiveawayService {
     }
 
     private void findActiveAndSetTimer() {
-        List<Giveaway> giveaways = findAll();
-        giveaways.stream().filter(this::isActive).forEach(this::setTimerToEnding);
+        List<Giveaway> giveaways = findByIsActive();
+        giveaways.stream().filter(giveaway -> giveaway.getGiveawayUsers().size() > 0)
+                .filter(giveaway -> {
+                    List<GiveawayUser> giveawayUsers = giveaway.getGiveawayUsers().stream().filter(giveawayUser -> giveawayUser.getPrize() != null).toList();
+                    return giveawayUsers.size() <= 0;
+                }).forEach(this::setTimerToEnding);
+    }
+
+    private List<Giveaway> findByIsActive() {
+        return giveawayRepository.findByIsActiveTrue();
     }
 
     @NotNull
@@ -167,9 +175,8 @@ public class GiveawayService {
 
     public void buttonClick(@NotNull ButtonInteractionEvent event) {
         Giveaway giveaway = getGiveaway(event);
-        boolean isActive = isActive(giveaway);
         MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
-        if (!isActive) {
+        if (!isActive(giveaway)) {
             ResponseMessage.giveawayUnexpectedException(event);
             setEndEmbed(event.getMessage());
             throw new IllegalStateException(giveaway + " - Giveaway is ended. Button was still active");
@@ -277,6 +284,7 @@ public class GiveawayService {
             }
         }
         setWinUsersToMainList(giveawayUsers, winUsers);
+        giveaway.setActive(false);
         save(giveaway);
         log.info("Giveaway saved");
         sendInfoAboutWinners(giveaway);
@@ -410,6 +418,7 @@ public class GiveawayService {
         Giveaway giveaway = giveawayOptional.get();
         boolean isActive = isActive(giveaway);
         if (isActive) {
+            giveaway.setActive(false);
             if (isEnding) {
                 event.getInteraction().getMessage().editMessage("Kończę i losuje nagrody dla giveawaya o id=" + giveawayId).queue();
                 endGiveaway(giveaway);
@@ -511,6 +520,7 @@ public class GiveawayService {
     private void reRoll(Giveaway giveaway) {
         log.info("{} ReRoll prizes", giveaway);
         giveaway.getGiveawayUsers().forEach(giveawayUser -> giveawayUser.setPrize(null));
+        giveaway.setActive(false);
         save(giveaway);
         log.info("Set null prizes for users in giveaway");
         draw(giveaway.getMessageId());
