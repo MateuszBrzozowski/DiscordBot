@@ -24,7 +24,11 @@ public class GeneratorCmd extends Proccess {
     @Override
     public void proccessMessage(@NotNull MessageReceivedEvent event) {
         if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EVENT)) {
-            eventsGeneratorService.createGenerator(event, eventService);
+            if (eventService.isMaxEvents()) {
+                event.getMessage().reply("Osiągnięto maksymalną liczbę eventów").queue();
+            } else {
+                eventsGeneratorService.createGenerator(event, eventService);
+            }
         } else {
             getNextProccess().proccessMessage(event);
         }

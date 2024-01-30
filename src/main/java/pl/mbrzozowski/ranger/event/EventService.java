@@ -36,6 +36,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final Timers timers;
     private final UsersReminderService usersReminderService;
+    private static final int MAX_EVENTS = 25;
 
     @Autowired
     public EventService(EventRepository eventRepository, Timers timers, UsersReminderService usersReminderService) {
@@ -433,5 +434,10 @@ public class EventService {
         } else {
             event.reply("Event o podanym id nie istnieje").setEphemeral(true).queue();
         }
+    }
+
+    public boolean isMaxEvents() {
+        List<Event> all = findAll();
+        return all.size() >= MAX_EVENTS;
     }
 }
