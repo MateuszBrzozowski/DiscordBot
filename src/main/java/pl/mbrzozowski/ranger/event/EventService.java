@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
@@ -312,7 +313,8 @@ public class EventService {
         if (channel != null) {
             channel.retrieveMessageById(messageID).queue(message -> {
                 MessageEmbed messageEmbed = EventsEmbed.getMessageEmbedWithUpdatedLists(event, message, mainList);
-                message.editMessageEmbeds(messageEmbed).queue();
+                message.editMessageEmbeds(messageEmbed).setSuppressEmbeds(false).queue();
+                log.info("Embed updated");
             });
         }
     }
@@ -416,5 +418,20 @@ public class EventService {
         channelName = StringProvider.removeAnyPrefixCircle(channelName);
         channelName = StringProvider.addYellowCircleBeforeText(channelName, eventFor);
         textChannel.getManager().setName(channelName).queue();
+    }
+
+    public void fixEmbed(@NotNull SlashCommandInteractionEvent event) {
+        String messageId = Objects.requireNonNull(event.getOption("id")).getAsString();
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        if (eventOptional.isPresent()) {
+            event.reply("Naprawiam listę").setEphemeral(true).queue();
+            try {
+                updateEmbed(eventOptional.get());
+            } catch (FullListException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            event.reply("Event o podanym id nie istnieje").setEphemeral(true).queue();
+        }
     }
 }

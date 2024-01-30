@@ -41,6 +41,22 @@ public class EventsEmbed {
     }
 
     @NotNull
+    public static MessageEmbed getEventEmbedBuilder(@NotNull Event event) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setThumbnail(EmbedSettings.THUMBNAIL);
+        builder.setTitle(event.getName());
+        builder.addField(EmbedSettings.WHEN_DATE,
+                Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                        EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                true);
+        builder.addBlankField(false);
+        builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
+        builder.setFooter("Utworzony przez ---");
+        return builder.build();
+    }
+
+    @NotNull
     public static List<Button> getActionRowForEvent(@NotNull String msgId) {
         List<Button> buttons = new ArrayList<>();
         buttons.add(Button.primary(ComponentId.EVENTS_SIGN_IN + msgId, "Zapisz"));
@@ -53,8 +69,13 @@ public class EventsEmbed {
                                                                @NotNull Message message,
                                                                String mainList) {
         List<MessageEmbed> embeds = message.getEmbeds();
-        MessageEmbed mOld = embeds.get(0);
-        List<Field> fieldsOld = embeds.get(0).getFields();
+        MessageEmbed mOld;
+        if (embeds.isEmpty()) {
+            mOld = getEventEmbedBuilder(event);
+        } else {
+            mOld = embeds.get(0);
+        }
+        List<Field> fieldsOld = mOld.getFields();
         List<Field> fieldsNew = getFieldsWithUpdatedLists(event, fieldsOld, mainList);
         return new MessageEmbed(mOld.getUrl()
                 , mOld.getTitle()

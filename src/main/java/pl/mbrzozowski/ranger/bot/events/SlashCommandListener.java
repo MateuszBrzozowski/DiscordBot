@@ -120,45 +120,46 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.cancel(event);
         } else if (name.equalsIgnoreCase(GIVEAWAY_LIST)) {
             giveawayService.showActive(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
+        }else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
             giveawayService.reRoll(event);
+        } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED)) {
+            eventService.fixEmbed(event);
         } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
             giveawayService.fixEmbed(event);
         }
     }
 
     private void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(ADD_ROLE_TO_RANGER,
-                        "Dodaje nową rolę do Ranger bota dzięki czemu użytkownicy serwera będą mogli sobie ją sami przypisać.")
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID dodawanej roli", true)
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_NAME, "Nazwa dodawanej roli", true)
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_DESCRIPTION, "Opis dodawanej roli", false)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
-        commandData.add(Commands.slash(REMOVE_ROLE_FROM_RANGER,
-                        "Usuwa rolę z Ranger bota. Użytkownik serwera nie będzie mógł samemu przypisać sobie usuniętej roli.")
-                .addOption(OptionType.STRING, "id", "Discord ID usuwanej roli", true)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
-        commandData.add(Commands.slash(STEAM_PROFILE,
-                        "Link your discord account to your steam profile if you want view stats from our server.")
-                .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
-        commandData.add(Commands.slash(STATS, "To view your stats from our server"));
-        commandData.add(Commands.slash(DICE, "Rzut kością do gry"));
-        commandData.add(Commands.slash(COIN, "Rzut monetą"));
-        commandData.add(Commands.slash(ESSA, "Sprawdza twój dzisiejszy poziom essy"));
-        commandData.add(Commands.slash(GIVEAWAY_CREATE, "Tworzy giveaway na tym kanale")
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+//        commandData.add(Commands.slash(ADD_ROLE_TO_RANGER,
+//                        "Dodaje nową rolę do Ranger bota dzięki czemu użytkownicy serwera będą mogli sobie ją sami przypisać.")
+//                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID dodawanej roli", true)
+//                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_NAME, "Nazwa dodawanej roli", true)
+//                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_DESCRIPTION, "Opis dodawanej roli", false)
+//                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
+//        commandData.add(Commands.slash(REMOVE_ROLE_FROM_RANGER,
+//                        "Usuwa rolę z Ranger bota. Użytkownik serwera nie będzie mógł samemu przypisać sobie usuniętej roli.")
+//                .addOption(OptionType.STRING, "id", "Discord ID usuwanej roli", true)
+//                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
+//        commandData.add(Commands.slash(STEAM_PROFILE,
+//                        "Link your discord account to your steam profile if you want view stats from our server.")
+//                .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
+//        commandData.add(Commands.slash(STATS, "To view your stats from our server"));
+//        commandData.add(Commands.slash(DICE, "Rzut kością do gry"));
+//        commandData.add(Commands.slash(COIN, "Rzut monetą"));
+//        commandData.add(Commands.slash(ESSA, "Sprawdza twój dzisiejszy poziom essy"));
+        commandData.add(Commands.slash(GIVEAWAY_CREATE, "Tworzy giveaway na tym kanale"));
         commandData.add(Commands.slash(GIVEAWAY_END, "Kończy giveaway i losuje nagrody")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
         commandData.add(Commands.slash(GIVEAWAY_CANCEL, "Kończy giveaway bez losowania nagród")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze")
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
+        commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze"));
         commandData.add(Commands.slash(GIVEAWAY_RE_ROLL, "Losowanie nagród dla zakończonego giveawaya")
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED, "Przywraca embed dla eventu")
+                .addOption(OptionType.STRING, "id", "id wiadomości", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(FIX_EVENT_EMBED, "Przywraca embed dla eventu")
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
