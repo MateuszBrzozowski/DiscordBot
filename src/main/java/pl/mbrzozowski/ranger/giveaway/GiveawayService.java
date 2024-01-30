@@ -246,7 +246,10 @@ public class GiveawayService {
     private String getWinnersString(@NotNull Giveaway giveaway) {
         List<GiveawayUser> giveawayUsers = giveaway.getGiveawayUsers();
         List<GiveawayUser> winners = giveawayUsers.stream().filter(giveawayUser -> giveawayUser.getPrize() != null).toList();
-        StringBuilder builder = new StringBuilder("Wygrani:\n");
+        StringBuilder builder = new StringBuilder();
+        if (!winners.isEmpty()) {
+            builder.append("Wygrani:\n");
+        }
         for (GiveawayUser winner : winners) {
             builder.append("<@").append(winner.getId()).append(">\n");
         }
