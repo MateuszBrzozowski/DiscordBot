@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
@@ -14,9 +15,11 @@ import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 public class ModalListener extends ListenerAdapter {
 
     private final GiveawayService giveawayService;
+    private final EventsGeneratorService eventsGeneratorService;
 
-    public ModalListener(GiveawayService giveawayService) {
+    public ModalListener(GiveawayService giveawayService, EventsGeneratorService eventsGeneratorService) {
         this.giveawayService = giveawayService;
+        this.eventsGeneratorService = eventsGeneratorService;
     }
 
     @Override
@@ -29,6 +32,9 @@ public class ModalListener extends ListenerAdapter {
         } else if (event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD) ||
                 event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_MODAL_RULES_LINK)) {
             giveawayService.generatorSaveAnswer(event);
+        } else if (event.getModalId().equalsIgnoreCase(ComponentId.EVENT_GENERATOR_MODAL_TITLE) ||
+                event.getModalId().equalsIgnoreCase(ComponentId.EVENT_GENERATOR_MODAL_TIME)) {
+            eventsGeneratorService.generatorSaveAnswer(event);
         }
     }
 }

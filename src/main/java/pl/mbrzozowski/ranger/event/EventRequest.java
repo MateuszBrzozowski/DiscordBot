@@ -7,9 +7,9 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 public class EventRequest {
-    private String name;
+    private String name = "";
     private LocalDateTime dateTime;
-    private String description;
+    private String description = "";
     private EventFor eventFor = EventFor.CLAN_MEMBER;
     private String authorName;
     private String authorId;

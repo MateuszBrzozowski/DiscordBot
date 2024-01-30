@@ -149,9 +149,9 @@ public class ButtonClickListener extends ListenerAdapter {
                 event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_BTN_REMOVE_ALL))) {
             event.deferEdit().queue();
             giveawayService.buttonGeneratorEvent(event);
-        } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_SIGN_IN.length() &&
-                event.getComponentId().substring(0, ComponentId.GIVEAWAY_SIGN_IN.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_SIGN_IN)) {
-            giveawayService.buttonClickSignIn(event);
+        } else if (event.getComponentId().length() > "giveaway".length() &&
+                event.getComponentId().substring(0, "giveaway".length()).equalsIgnoreCase("giveaway")) {
+            giveawayService.buttonClick(event);
         } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_END_SURE_YES.length() &&
                 event.getComponentId().substring(0, ComponentId.GIVEAWAY_END_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_END_SURE_YES)) {
             giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_END_SURE_YES.length()), true);

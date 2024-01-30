@@ -52,6 +52,13 @@ public final class ComponentId {
     public static final String GENERATOR_END = "GenEnd" + SUFFIX;
     public static final String GENERATOR_CANCEL = "GenCancel" + SUFFIX;
 
+    public static final String EVENT_GENERATOR_BTN_NEXT = "EventGenBtnNext" + SUFFIX;
+    public static final String EVENT_GENERATOR_BTN_BACK = "EventGenBtnBack" + SUFFIX;
+    public static final String EVENT_GENERATOR_BTN_CANCEL = "EventGenBtnCancel" + SUFFIX;
+    public static final String EVENT_GENERATOR_MODAL_TITLE = "EventGenModalTitle" + SUFFIX;
+    public static final String EVENT_GENERATOR_MODAL_TIME = "EventGenModalTime" + SUFFIX;
+    public static final String EVENT_GENERATOR_SELECT_MENU_PERM = "EventGenSelectMenuPerm" + SUFFIX;
+
     //Generator  giveaway
     public static final String GIVEAWAY_GENERATOR_BTN_BACK = "GiveGenBack" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_BTN_NEXT = "GiveGenNext" + SUFFIX;

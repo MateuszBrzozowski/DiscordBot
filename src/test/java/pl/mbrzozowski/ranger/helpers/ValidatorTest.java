@@ -14,41 +14,61 @@ import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
 class ValidatorTest {
 
     @Test
-    void checkRequest_AllParamNull_ReturnFalse() {
+    void checkRequest_AllParamNull_ThrowIllegalStateException() {
         EventRequest eventRequest = new EventRequest();
-        Assertions.assertFalse(Validator.isValidEventRequest(eventRequest));
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
     }
 
     @Test
-    void checkRequest_NameBlank_ReturnFalse() {
+    void checkRequest_NameBlank_ThrowIllegalStateException() {
         EventRequest eventRequest = new EventRequest();
         eventRequest.setName(" ");
-        Assertions.assertFalse(Validator.isValidEventRequest(eventRequest));
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
     }
 
     @Test
-    void checkRequest_OnlyNameBlank_ReturnFalse() {
+    void checkRequest_OnlyNameBlank_ThrowIllegalStateException() {
         EventRequest eventRequest = new EventRequest();
         eventRequest.setName(" ");
         LocalDateTime dateTime = LocalDateTime.of(2023, 1, 1, 0, 0);
         eventRequest.setDateTime(dateTime);
-        Assertions.assertFalse(Validator.isValidEventRequest(eventRequest));
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
     }
 
     @Test
-    void checkRequest_OnlyDateNull_ReturnFalse() {
+    void checkRequest_OnlyDateNull_ThrowIllegalStateException() {
         EventRequest eventRequest = new EventRequest();
         eventRequest.setName("Name");
-        Assertions.assertFalse(Validator.isValidEventRequest(eventRequest));
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
     }
 
     @Test
-    void checkRequest_GoodAllReqParam_ReturnTrue() {
+    void checkRequest_AuthorIdNull_ThrowIllegalStateException() {
         EventRequest eventRequest = new EventRequest();
         eventRequest.setName("Name");
-        LocalDateTime dateTime = LocalDateTime.of(2023, 1, 1, 0, 0);
+        LocalDateTime dateTime = LocalDateTime.of(LocalDateTime.MAX.getYear(), 1, 1, 0, 0);
         eventRequest.setDateTime(dateTime);
-        Assertions.assertTrue(Validator.isValidEventRequest(eventRequest));
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
+    }
+
+    @Test
+    void checkRequest_AuthorIdBlank_ThrowIllegalStateException() {
+        EventRequest eventRequest = new EventRequest();
+        eventRequest.setName("Name");
+        eventRequest.setAuthorId("  ");
+        LocalDateTime dateTime = LocalDateTime.of(LocalDateTime.MAX.getYear(), 1, 1, 0, 0);
+        eventRequest.setDateTime(dateTime);
+        Assertions.assertThrows(IllegalStateException.class, () -> Validator.isValidEventRequest(eventRequest));
+    }
+
+    @Test
+    void checkRequest_GoodAllReqParam_DoesNotThrowException() {
+        EventRequest eventRequest = new EventRequest();
+        eventRequest.setName("Name");
+        eventRequest.setAuthorId("123");
+        LocalDateTime dateTime = LocalDateTime.of(LocalDateTime.MAX.getYear(), 1, 1, 0, 0);
+        eventRequest.setDateTime(dateTime);
+        Assertions.assertDoesNotThrow(() -> Validator.isValidEventRequest(eventRequest));
     }
 
     @Test
@@ -100,14 +120,14 @@ class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"1.1.2023","1.01.2023","01.01.2023","29.02.2024","15.9.2023","31.12.2023"})
+    @ValueSource(strings = {"1.1.2023", "1.01.2023", "01.01.2023", "29.02.2024", "15.9.2023", "31.12.2023"})
     void isDateFormat_Correct_ReturnTrue(String source) {
         boolean result = Validator.isDateValid(source);
         Assertions.assertTrue(result);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"32.1.2023","29.02.2023","01.13.2023","15.9.20233","1.2023","2023","1..2023",".1.2023"})
+    @ValueSource(strings = {"32.1.2023", "29.02.2023", "01.13.2023", "15.9.20233", "1.2023", "2023", "1..2023", ".1.2023"})
     void isDateFormat_Incorrect_ReturnFalse(String source) {
         boolean result = Validator.isDateValid(source);
         Assertions.assertFalse(result);

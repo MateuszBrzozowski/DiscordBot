@@ -7,6 +7,14 @@ import pl.mbrzozowski.ranger.giveaway.GiveawayGeneratorStage;
 
 public class IllegalStageException extends RuntimeException {
 
+    public IllegalStageException() {
+        super();
+    }
+
+    public IllegalStageException(String msg) {
+        super(msg);
+    }
+
     public IllegalStageException(User user, EventGeneratorStatus stageOfGenerator) {
         super(user + " - Stage(" + stageOfGenerator + ") - Generator stage cannot be selected");
     }

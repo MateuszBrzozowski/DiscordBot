@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.helpers;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -79,10 +80,24 @@ public class Validator {
         return dateTimeNow.isAfter(eventDateTime);
     }
 
-    public static boolean isValidEventRequest(@NotNull EventRequest eventRequest) {
+    public static void isValidEventRequest(@NotNull EventRequest eventRequest) {
         if (StringUtils.isBlank(eventRequest.getName())) {
-            return false;
+            throw new IllegalStateException("Name is blank");
         }
-        return eventRequest.getDateTime() != null;
+        if (eventRequest.getName().length() > MessageEmbed.TITLE_MAX_LENGTH) {
+            throw new IllegalStateException("Name to long");
+        }
+        if (!isDateTimeAfterNow(eventRequest.getDateTime())) {
+            throw new IllegalStateException("Past date and time");
+        }
+        if (eventRequest.getEventFor() == null) {
+            throw new IllegalStateException("Event for who?");
+        }
+        if (StringUtils.isBlank(eventRequest.getAuthorId())) {
+            throw new IllegalStateException("AuthorId is blank");
+        }
+        if (StringUtils.isNotBlank(eventRequest.getDescription()) && eventRequest.getDescription().length() > MessageEmbed.DESCRIPTION_MAX_LENGTH) {
+            throw new IllegalStateException("Description to long");
+        }
     }
 }

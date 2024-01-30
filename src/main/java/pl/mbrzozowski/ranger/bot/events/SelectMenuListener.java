@@ -36,7 +36,6 @@ public class SelectMenuListener extends ListenerAdapter {
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         log.info("{} - StringSelectInteractionEvent{ComponentId={}} interaction event", event.getUser(), event.getComponentId());
-        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
         boolean isRoles = event.getComponentId().equalsIgnoreCase(ComponentId.ROLES);
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         if (isRoles) {
@@ -58,9 +57,8 @@ public class SelectMenuListener extends ListenerAdapter {
             }
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_SELECT_MENU)) {
             giveawayService.selectAnswer(event);
-        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.GENERATOR_FINISH_SELECT_MENU) && indexOfGenerator >= 0) {
-            event.getInteraction().deferEdit().queue();
-            eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENT_GENERATOR_SELECT_MENU_PERM)) {
+            eventsGeneratorService.selectAnswer(event);
         }
     }
 }

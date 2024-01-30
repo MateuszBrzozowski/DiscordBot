@@ -116,38 +116,6 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     /**
-     * Wysyła informację, że użytkownik o ID miał już otwarty generator.
-     *
-     * @param userID ID użytkownika do którego jest wysyłana informacja.
-     */
-    public static void userHaveActiveEventGenerator(String userID) {
-        User userById = DiscordBot.getJda().getUserById(userID);
-        if (userById != null) {
-            userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-                builder.setTitle("MIAŁEŚ AKTYWNY GENERATOR");
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
-        }
-    }
-
-    /**
-     * Wysyła informację do użytkownika o ID że otwierany jest dla niego nowy kanał.
-     *
-     * @param userID ID użytkownika do którego jest wysyłana informacja.
-     */
-    public static void createNewGenerator(String userID) {
-        User userById = DiscordBot.getJda().getUserById(userID);
-        if (userById != null) {
-            userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-                builder.setTitle("OTWIERAM NOWY GENERATOR");
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
-        }
-    }
-
-    /**
      * Jeżeli użytkownik nie jest botem usuwa wiadomość i wysyła informację że kanał służy do logowania i tam nie piszemy.
      *
      * @param event Wydarzenie napisania wiadomości na kanale tekstowym.
@@ -228,22 +196,6 @@ public class EmbedInfo extends EmbedCreator {
                 builder.addField("Szczegóły eventu", link + "\n:date: " + dateTime, false);
                 privateChannel.sendMessageEmbeds(builder.build()).queue();
                 log.info("USER: {} -  wysłałem powiadomienie", userID);
-            });
-        }
-    }
-
-    /**
-     * Wysyła informację że generowanie listy zostało przerwane.
-     *
-     * @param userID ID użytkownika do którego wysyłana jest informacja
-     */
-    public static void cancelEventGenerator(String userID) {
-        User userById = DiscordBot.getJda().getUserById(userID);
-        if (userById != null) {
-            userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-                builder.setTitle("GENEROWANIE LISTY ZOSTAŁO PRZERWANE");
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
             });
         }
     }

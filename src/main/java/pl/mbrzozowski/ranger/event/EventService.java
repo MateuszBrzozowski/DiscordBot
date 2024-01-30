@@ -71,13 +71,13 @@ public class EventService {
     public void deleteByMsgId(String messageId) {
         timers.cancelByMsgId(messageId);
         eventRepository.deleteByMsgId(messageId);
-        log.info("Event deleted by messageId(messageId={})",messageId);
+        log.info("Event deleted by messageId(messageId={})", messageId);
     }
 
     public void deleteByChannelId(String channelId) {
         timers.cancelByChannelId(channelId);
         eventRepository.deleteByChannelId(channelId);
-        log.info("Event deleted by channelId(channelId={})",channelId);
+        log.info("Event deleted by channelId(channelId={})", channelId);
     }
 
     void setActiveToFalse(@NotNull Event event) {
@@ -112,12 +112,7 @@ public class EventService {
 
     void createNewEvent(@NotNull final EventRequest eventRequest) {
         log.info(Users.getUserNicknameFromID(eventRequest.getAuthorId()) + " - creating new event.");
-        if (!Validator.isValidEventRequest(eventRequest)) {
-            throw new IllegalArgumentException("Nazwa, data i czas nie mogą być puste.");
-        }
-        if (!Validator.isDateTimeAfterNow(eventRequest.getDateTime())) {
-            throw new IllegalArgumentException("Niepoprawny format daty lub data jest z przeszłości: " + eventRequest.getDateTime());
-        }
+        Validator.isValidEventRequest(eventRequest);
         createEventChannel(eventRequest);
     }
 
