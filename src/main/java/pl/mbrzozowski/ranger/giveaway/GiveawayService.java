@@ -173,7 +173,7 @@ public class GiveawayService {
         giveawayRepository.save(giveaway);
     }
 
-    public void buttonClick(@NotNull ButtonInteractionEvent event) {
+    public void buttonClickSignIn(@NotNull ButtonInteractionEvent event) {
         Giveaway giveaway = getGiveaway(event);
         MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
         if (!isActive(giveaway)) {
@@ -184,16 +184,29 @@ public class GiveawayService {
         if (isUserExist(event, giveaway)) {
             return;
         }
+        if (isClanMemberExclude(event, giveaway)) {
+            return;
+        }
         saveUser(event, giveaway);
         updateEmbed(event, giveaway, messageEmbed);
         save(giveaway);
+    }
+
+    private boolean isClanMemberExclude(@NotNull ButtonInteractionEvent event, @NotNull Giveaway giveaway) {
+        boolean isClanMember = Users.hasUserRole(event.getUser().getId(), RoleID.CLAN_MEMBER_ID);
+        if (giveaway.isClanMemberExclude() && isClanMember) {
+            ResponseMessage.giveawayClanMemberExclude(event);
+            log.info("{} is clan member. Giveaway{id={}} set exclude CM", event.getUser(), giveaway.getId());
+            return true;
+        }
+        return false;
     }
 
     private boolean isUserExist(@NotNull ButtonInteractionEvent event, @NotNull Giveaway giveaway) {
         Optional<GiveawayUser> userOptional = giveaway.getGiveawayUsers().stream().filter(giveawayUser -> giveawayUser.getUserId().equalsIgnoreCase(event.getUser().getId())).findFirst();
         if (userOptional.isPresent()) {
             ResponseMessage.giveawayUserExist(event);
-            log.info("{}, {} is exist", event.getUser(), giveaway);
+            log.info("{} is exist. GiveawayId={}", event.getUser(), giveaway.getId());
             return true;
         }
         return false;

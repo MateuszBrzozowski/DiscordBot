@@ -219,6 +219,12 @@ public class ResponseMessage {
                 .queue();
     }
 
+    public static void giveawayClanMemberExclude(@NotNull ButtonInteractionEvent event) {
+        event.reply("Sorry, ale wygląda na to, że losowanie nie przyjmuje zgłoszeń od osób, których szczęście przeszło na długą kawę!")
+                .setEphemeral(true)
+                .queue();
+    }
+
     public static void noGiveaways(@NotNull SlashCommandInteractionEvent event) {
         event.reply("Brak giveawayów.").setEphemeral(true).queue();
     }

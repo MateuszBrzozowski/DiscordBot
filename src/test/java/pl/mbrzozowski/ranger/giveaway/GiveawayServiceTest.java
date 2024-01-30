@@ -48,7 +48,7 @@ class GiveawayServiceTest {
         when(giveawayRepository.findByMessageId("123")).thenReturn(Optional.empty());
         when(event.reply(Mockito.anyString())).thenReturn(reply);
         when(reply.setEphemeral(true)).thenReturn(reply);
-        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.buttonClick(event));
+        Assertions.assertThrows(IllegalStateException.class, () -> giveawayService.buttonClickSignIn(event));
     }
 
     @Test
