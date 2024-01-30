@@ -1,9 +1,11 @@
 package pl.mbrzozowski.ranger.bot.events;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -118,8 +120,10 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.cancel(event);
         } else if (name.equalsIgnoreCase(GIVEAWAY_LIST)) {
             giveawayService.showActive(event);
-        }else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
             giveawayService.reRoll(event);
+        } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
+            giveawayService.fixEmbed(event);
         }
     }
 
@@ -149,5 +153,8 @@ public class SlashCommandListener extends ListenerAdapter {
         commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze"));
         commandData.add(Commands.slash(GIVEAWAY_RE_ROLL, "Losowanie nagród dla zakończonego giveawaya")
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
+        commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED, "Przywraca embed dla eventu")
+                .addOption(OptionType.STRING, "id", "id wiadomości", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 }

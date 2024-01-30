@@ -18,4 +18,5 @@ public final class SlashCommands {
     public static final String GIVEAWAY_LIST = "glist";
     public static final String GIVEAWAY_RE_ROLL = "greroll";
     public static final String GIVEAWAY_ID = "id";
+    public static final String FIX_GIVEAWAY_EMBED = "fix-giveaway-embed";
 }

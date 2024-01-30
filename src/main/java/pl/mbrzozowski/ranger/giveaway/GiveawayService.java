@@ -238,7 +238,7 @@ public class GiveawayService {
         builder.setDescription("## :tada:  GIVEAWAY  :tada:");
         builder.addField("", getWinnersString(giveaway), false);
         builder.addField("", "Zakończony: " + Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()), false);
-        message.editMessageEmbeds(builder.build()).setComponents().queue();
+        message.editMessageEmbeds(builder.build()).setComponents().setSuppressEmbeds(false).queue();
         log.info("Embed set to end stage");
     }
 
@@ -280,8 +280,35 @@ public class GiveawayService {
         Field field = new Field("", "Liczba zapisanych: " + giveaway.getGiveawayUsers().size(), false);
         fields.add(1, field);
         event.getMessage().editMessageEmbeds(builder.build()).queue();
-
         log.info("Giveaway embed updated");
+    }
+
+    private void updateEmbed(@NotNull Giveaway giveaway) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(giveaway.getChannelId());
+        if (textChannel == null) {
+            return;
+        }
+        textChannel.retrieveMessageById(giveaway.getMessageId()).queue(message -> {
+            boolean active = isActive(giveaway);
+            if (active) {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(new Color(143, 203, 209));
+                builder.setDescription("## :tada:  GIVEAWAY  :tada:");
+                builder.addField("Nagrody", GiveawayGenerator.getPrizesDescription(giveaway.getPrizes()), false);
+                if (giveaway.getGiveawayUsers().size() > 0) {
+                    builder.addField("", "Liczba zapisanych: " + giveaway.getGiveawayUsers().size(), false);
+                }
+                builder.addBlankField(false);
+                builder.addField(EmbedSettings.WHEN_END_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()),
+                        false);
+                message.editMessageEmbeds(builder.build()).setSuppressEmbeds(false).queue();
+            } else {
+                setEndEmbed(message);
+            }
+            log.info("Giveaway embed fixed");
+        });
     }
 
     public void draw(@NotNull String messageId) {
@@ -579,5 +606,17 @@ public class GiveawayService {
                 giveaway.getChannelId() +
                 "/" +
                 giveaway.getMessageId();
+    }
+
+    public void fixEmbed(@NotNull SlashCommandInteractionEvent event) {
+        String messageId = Objects.requireNonNull(event.getOption("id")).getAsString();
+        try {
+            Giveaway giveaway = findByMessageId(messageId);
+            event.reply("Naprawiam listę").setEphemeral(true).queue();
+            updateEmbed(giveaway);
+
+        } catch (IllegalStateException e) {
+            event.reply("Event o podanym id nie istnieje").setEphemeral(true).queue();
+        }
     }
 }
