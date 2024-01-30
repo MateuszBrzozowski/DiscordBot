@@ -110,7 +110,7 @@ public class EventsGenerator {
     private MessageEmbed getEmbed() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
-        builder.setDescription("## Wydarzenia - Generator");
+        builder.setDescription("## :calendar_spiral: Wydarzenia - Generator :calendar_spiral: ");
         switch (stageOfGenerator) {
             case SET_NAME -> builder.addField("", "- Podaj nazwę\n- Podaj opis (opcjonalnie)", false);
             case SET_DATE_TIME -> {
