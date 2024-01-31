@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.event;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -61,6 +62,23 @@ public class EventsSettingsService {
             EventsSettings eventsSettings = new EventsSettings(eventService, event, this);
             this.eventsSettings.add(eventsSettings);
             log.info("{} - Created new events settings", event.getAuthor());
+        }
+    }
+
+    public void createSettings(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Sprawdź wiadomości prywatne").setEphemeral(true).queue();
+        int index = userHaveActiveSettingsPanel(event.getUser().getId());
+        if (index == -1) {
+            EventsSettings eventsSettings = new EventsSettings(eventService, event, this);
+            this.eventsSettings.add(eventsSettings);
+            log.info("{} - Created new events settings", event.getUser());
+        } else {
+            this.eventsSettings.get(index).cancel();
+            removeSettingsPanel(index);
+            log.info("{} - Cancel event settings", event.getUser());
+            EventsSettings eventsSettings = new EventsSettings(eventService, event, this);
+            this.eventsSettings.add(eventsSettings);
+            log.info("{} - Created new events settings", event.getUser());
         }
     }
 

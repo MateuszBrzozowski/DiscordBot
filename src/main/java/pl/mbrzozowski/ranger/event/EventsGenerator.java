@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -58,6 +59,16 @@ public class EventsGenerator {
         this.eventsGeneratorService = eventsGeneratorService;
         eventRequest.setAuthorId(event.getMessage().getAuthor().getId());
         eventRequest.setAuthorName(event.getMessage().getAuthor().getName());
+        start();
+    }
+
+    public EventsGenerator(@NotNull SlashCommandInteractionEvent event,
+                           EventService eventService,
+                           EventsGeneratorService eventsGeneratorService) {
+        this.eventService = eventService;
+        this.eventsGeneratorService = eventsGeneratorService;
+        eventRequest.setAuthorId(event.getUser().getId());
+        eventRequest.setAuthorName(event.getUser().getName());
         start();
     }
 

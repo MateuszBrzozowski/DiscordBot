@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -83,6 +84,15 @@ public class EventsSettings {
         } else {
             setStageOfSettings(EventSettingsStatus.START, true, true);
         }
+    }
+
+    public EventsSettings(EventService eventService,
+                          @NotNull SlashCommandInteractionEvent event,
+                          EventsSettingsService eventsSettingsService) {
+        this.eventService = eventService;
+        this.userId = event.getUser().getId();
+        this.eventsSettingsService = eventsSettingsService;
+        start();
     }
 
     private void start() {

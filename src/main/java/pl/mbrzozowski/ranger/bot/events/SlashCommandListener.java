@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
+import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
@@ -28,19 +29,15 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SlashCommandListener extends ListenerAdapter {
 
     private final RoleService roleService;
     private final ServerStats serverStats;
     private final GiveawayService giveawayService;
-
-    public SlashCommandListener(RoleService roleService,
-                                ServerStats serverStats,
-                                GiveawayService giveawayService) {
-        this.roleService = roleService;
-        this.serverStats = serverStats;
-        this.giveawayService = giveawayService;
-    }
+    private final EventService eventService;
+    private final EventsGeneratorService eventsGeneratorService;
+    private final EventsSettingsService eventsSettingsService;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -120,12 +117,16 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.cancel(event);
         } else if (name.equalsIgnoreCase(GIVEAWAY_LIST)) {
             giveawayService.showActive(event);
-        }else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
             giveawayService.reRoll(event);
         } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED)) {
             eventService.fixEmbed(event);
         } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
             giveawayService.fixEmbed(event);
+        } else if (name.equalsIgnoreCase(EVENT_CREATE)) {
+            eventsGeneratorService.createGenerator(event,eventService);
+        } else if (name.equalsIgnoreCase(EVENT_SETTINGS)) {
+            eventsSettingsService.createSettings(event);
         }
     }
 
@@ -154,11 +155,7 @@ public class SlashCommandListener extends ListenerAdapter {
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
         commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze"));
         commandData.add(Commands.slash(GIVEAWAY_RE_ROLL, "Losowanie nagród dla zakończonego giveawaya")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED, "Przywraca embed dla eventu")
-                .addOption(OptionType.STRING, "id", "id wiadomości", true)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
         commandData.add(Commands.slash(FIX_EVENT_EMBED, "Przywraca embed dla eventu")
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));

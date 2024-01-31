@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.event;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -80,5 +81,22 @@ public class EventsGeneratorService {
                 log.info(event.getAuthor() + " - Had active event generator. Created new event generator");
             }
         }
+    }
+
+    public void createGenerator(@NotNull SlashCommandInteractionEvent event, EventService eventService) {
+        event.reply("Sprawdź wiadomości  prywatne").setEphemeral(true).queue();
+        int index = userHaveActiveGenerator(event.getUser().getId());
+        if (index == -1) {
+            EventsGenerator eventsGenerator = new EventsGenerator(event, eventService, this);
+            eventsGenerators.add(eventsGenerator);
+            log.info(event.getUser() + " - Created new event generator");
+        } else {
+            eventsGenerators.get(index).cancel();
+            removeGenerator(index);
+            EventsGenerator eventsGenerator = new EventsGenerator(event, eventService, this);
+            eventsGenerators.add(eventsGenerator);
+            log.info(event.getUser() + " - Had active event generator. Created new event generator");
+        }
+
     }
 }
