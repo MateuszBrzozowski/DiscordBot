@@ -9,7 +9,9 @@ import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,7 +215,6 @@ public class EventService {
                 case SIGN_OUT -> isSuccess = signOut(buttonInteractionEvent, event, userID);
             }
         } else {
-            RangerLogger.info("[" + Users.getUserNicknameFromID(userID) + "] Kliknął w przycisk [" + event.getName() + event.getDate().toString() + "] - Event się już rozpoczął.");
             ResponseMessage.eventIsBefore(buttonInteractionEvent);
             disableButtons(event);
             setRedCircleInChannelName(event);
@@ -285,7 +286,7 @@ public class EventService {
 
     void cancelEvent(@NotNull Event event, boolean sendNotifi) {
         log.info(event.getName() + " cancel event");
-        disableButtons(event);
+        setEmbedToCancel(event);
         setRedCircleInChannelName(event);
         event.setActive(false);
         timers.cancelByMsgId(event.getMsgId());
@@ -294,6 +295,26 @@ public class EventService {
             String dateTime = Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate());
             sendInfoChanges(event, EventChanges.REMOVE, dateTime);
         }
+    }
+
+    private void setEmbedToCancel(@NotNull Event event) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
+        if (textChannel == null) {
+            return;
+        }
+        textChannel.retrieveMessageById(event.getMsgId()).queue(message -> {
+            MessageEmbed messageEmbed = message.getEmbeds().get(0);
+            String description = "## Odwołany\n";
+            if (StringUtils.isNotBlank(messageEmbed.getDescription())) {
+                description += messageEmbed.getDescription();
+            }
+            EmbedBuilder builder = new EmbedBuilder(messageEmbed);
+            builder.setDescription(description);
+            message.editMessageEmbeds(builder.build()).setComponents(ActionRow.of(
+                    Button.primary("ID", "Zapisz").asDisabled(),
+                    Button.danger("ID2", "Wypisz").asDisabled()
+            )).queue();
+        });
     }
 
     void setRedCircleInChannelName(@NotNull Event event) {
