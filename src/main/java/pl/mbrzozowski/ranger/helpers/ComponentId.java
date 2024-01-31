@@ -64,5 +64,5 @@ public final class ComponentId {
     public static final String GIVEAWAY_END_SURE_YES = "giveawayEndSure" + SUFFIX;
     public static final String GIVEAWAY_RE_ROLL_SURE_YES = "giveawayReRollSure" + SUFFIX;
     public static final String GIVEAWAY_CANCEL_SURE_YES = "giveawayCancelSure" + SUFFIX;
-
+    public static final String GIVEAWAY_GENERATOR_MODAL_RULES_LINK = "GG_101" + SUFFIX;
 }

@@ -18,7 +18,9 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.exceptions.IllegalStageException;
 import pl.mbrzozowski.ranger.exceptions.StageNoSupportedException;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 
@@ -32,8 +34,10 @@ import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 @Slf4j
 public class GiveawayGenerator {
 
-    private static final String PRIZE_NAME_ID = "prizeNameId";
-    private static final String PRIZE_QTY_ID = "prizeQtyId";
+    private static final String MODAL_INPUT_1 = "MI_01";
+    private static final String MODAL_INPUT_2 = "MI_02";
+    private static final String SELECT_MENU_OPTION_1 = "SMO_01";
+    private static final String SELECT_MENU_OPTION_2 = "SMO_02";
     private static final int MAX_NUMBER_OF_PRIZE = 25;
     private final User user;
     private final TextChannel channelToPublish;
@@ -44,6 +48,8 @@ public class GiveawayGenerator {
     private Message message;
     private String selectMenuValue;
     private GiveawayGeneratorStage stage = TIME_MODE;
+    private String rulesLink = "";
+    private boolean mentionEveryone = false;
 
     public GiveawayGenerator(User user, TextChannel channel, GiveawayService giveawayService) {
         log.info("{} - Open giveaway generator", user);
@@ -102,6 +108,26 @@ public class GiveawayGenerator {
                 builder.addField("", "- Nie wybrano odpowiedzi!", false);
                 builder.setColor(Color.RED);
             }
+            case RULES -> {
+                builder.setDescription("Regulamin");
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
+                }
+                if (StringUtils.isNotBlank(rulesLink)) {
+                    builder.addField("", "[Regulamin](" + rulesLink + ")", false);
+                }
+                builder.addField("", "- Dodaj regulamin (opcjonalnie)", false);
+            }
+            case RULES_NOT_CORRECT -> {
+                builder.setColor(Color.RED);
+                builder.setDescription("Regulamin");
+                if (!prizes.isEmpty()) {
+                    builder.addField("Nagrody:", getPrizesDescription(prizes), false);
+                }
+                builder.addField("", "- Niepoprawny link.\n" +
+                        "- Musi zaczynać się od *http://* lub *https://*", false);
+            }
+            case PING -> builder.setDescription("Czy oznaczyć **@everyone** przy publikacji giveawaya?");
             case PRIZE -> {
                 builder.setDescription("Ustaw nagrody");
                 if (!prizes.isEmpty()) {
@@ -224,6 +250,22 @@ public class GiveawayGenerator {
                         .addOptions(SelectMenuOption.getExclude())
                         .build();
             }
+            case RULES, RULES_NOT_CORRECT -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
+                        .setPlaceholder("Regulamin")
+                        .addOption("Dodaj/Edytuj", SELECT_MENU_OPTION_1)
+                        .build();
+            }
+            case PING -> {
+                return StringSelectMenu
+                        .create(GIVEAWAY_GENERATOR_SELECT_MENU)
+                        .setPlaceholder("Nie")
+                        .setDefaultValues(SELECT_MENU_OPTION_2)
+                        .addOption("Tak", SELECT_MENU_OPTION_1)
+                        .addOption("Nie", SELECT_MENU_OPTION_2)
+                        .build();
+            }
             case PRIZE, PRIZE_QTY_NOT_CORRECT, MAX_NUMBER_OF_PRIZE_STAGE, CANNOT_END -> {
                 return StringSelectMenu
                         .create(GIVEAWAY_GENERATOR_SELECT_MENU)
@@ -282,15 +324,26 @@ public class GiveawayGenerator {
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
         log.info("Selected value={}", selectMenuValue);
-        if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue()) ||
-                selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue()) ||
-                selectMenuValue.equalsIgnoreCase(SelectMenuOption.EXCLUDE_YES.getValue()) ||
-                selectMenuValue.equalsIgnoreCase(SelectMenuOption.EXCLUDE_NO.getValue())) {
-            event.getInteraction().deferEdit().queue();
+        if (selectMenuValue.equals(SelectMenuOption.DATE_TIME.getValue()) ||
+                selectMenuValue.equals(SelectMenuOption.TIME_DURATION.getValue()) ||
+                selectMenuValue.equals(SelectMenuOption.EXCLUDE_YES.getValue()) ||
+                selectMenuValue.equals(SelectMenuOption.EXCLUDE_NO.getValue())) {
+            event.deferEdit().queue();
             buttonNext();
-            return;
-        }
-        if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.ADD_PRIZE.getValue())) {
+        } else if (selectMenuValue.equals(SELECT_MENU_OPTION_1)) {
+            switch (stage) {
+                case RULES, RULES_NOT_CORRECT -> openModalRulesLink(event);
+                case PING -> {
+                    event.getInteraction().deferEdit().queue();
+                    mentionEveryone = true;
+                }
+                default -> throw new IllegalStageException(stage);
+            }
+
+        } else if (selectMenuValue.equals(SELECT_MENU_OPTION_2)) {
+            event.getInteraction().deferEdit().queue();
+            mentionEveryone = false;
+        } else if (selectMenuValue.equals(SelectMenuOption.ADD_PRIZE.getValue())) {
             if (prizes.size() < MAX_NUMBER_OF_PRIZE) {
                 showModalToAddPrize(event);
             } else {
@@ -300,30 +353,51 @@ public class GiveawayGenerator {
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 stage = PRIZE;
             }
-        } else {
-            event.getInteraction().deferEdit().queue();
-            if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.REMOVE_PRIZE.getValue())) {
-                selectMenuValue = null;
-                if (prizes.isEmpty()) {
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    return;
-                }
-                stage = PRIZE_REMOVE;
+        } else if (selectMenuValue.equals(SelectMenuOption.REMOVE_PRIZE.getValue())) {
+            event.deferEdit().queue();
+            selectMenuValue = null;
+            if (prizes.isEmpty()) {
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                return;
             }
+            stage = PRIZE_REMOVE;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        } else {
+            event.getInteraction().deferEdit().queue();
         }
     }
 
+    private void openModalRulesLink(@NotNull StringSelectInteractionEvent event) {
+        TextInput link = TextInput.create(MODAL_INPUT_1, "Link", TextInputStyle.SHORT)
+                .setPlaceholder("Link (http://example.com)")
+                .setRequired(false)
+                .setMaxLength(1024)
+                .build();
+        if (StringUtils.isNotBlank(rulesLink)) {
+            link = TextInput.create(MODAL_INPUT_1, "Link", TextInputStyle.SHORT)
+                    .setPlaceholder("Link (http://example.com)")
+                    .setValue(rulesLink)
+                    .setRequired(false)
+                    .setMaxLength(1024)
+                    .build();
+        }
+        Modal modal = Modal.create(GIVEAWAY_GENERATOR_MODAL_RULES_LINK, "Link do regulaminu")
+                .addComponents(ActionRow.of(link))
+                .build();
+        event.replyModal(modal).queue();
+        log.info("Open modal{id={}, title={}}  for {}", GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD, modal.getTitle(), user);
+    }
+
     private void showModalToAddPrize(@NotNull StringSelectInteractionEvent event) {
-        TextInput name = TextInput.create(PRIZE_NAME_ID, "Nazwa", TextInputStyle.SHORT)
+        TextInput name = TextInput.create(MODAL_INPUT_1, "Nazwa", TextInputStyle.SHORT)
                 .setPlaceholder("Podaj nazwę nagrody")
                 .setRequired(true)
                 .setRequiredRange(3, 255)
                 .build();
 
-        TextInput qty = TextInput.create(PRIZE_QTY_ID, "Ilość", TextInputStyle.SHORT)
+        TextInput qty = TextInput.create(MODAL_INPUT_2, "Ilość", TextInputStyle.SHORT)
                 .setPlaceholder("Ilość sztuk")
                 .setRequired(true)
                 .setRequiredRange(1, 3)
@@ -388,41 +462,47 @@ public class GiveawayGenerator {
         switch (stage) {
             case TIME_MODE -> message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            case TIME_DURATION, DATE_SELECT -> {
+            case TIME_DURATION, TIME_DURATION_NOT_SELECTED, DATE_SELECT, DATE_NOT_SELECTED -> {
                 stage = TIME_MODE;
-                selectMenuValue = null;
                 buttonBack();
             }
-            case TIME_SELECT -> {
+            case TIME_SELECT, TIME_NOT_SELECTED -> {
                 stage = DATE_SELECT;
-                selectMenuValue = null;
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
-            case CLAN_MEMBER_EXCLUDE -> {
+            case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
                 if (isPathSelectTimeDuration) {
                     stage = TIME_DURATION;
                 } else {
                     stage = TIME_SELECT;
                 }
-                selectMenuValue = null;
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
-            case PRIZE -> {
+            case RULES, RULES_NOT_CORRECT -> {
                 stage = CLAN_MEMBER_EXCLUDE;
-                selectMenuValue = null;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PING -> {
+                stage = RULES;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PRIZE, CANNOT_END -> {
+                stage = PING;
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
             case PRIZE_REMOVE -> {
                 stage = PRIZE;
-                selectMenuValue = null;
                 message.editMessageEmbeds(getEmbed())
                         .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
+        selectMenuValue = null;
     }
 
     private void buttonNext() {
@@ -449,12 +529,11 @@ public class GiveawayGenerator {
                     }
                 }
             }
-            case DATE_SELECT -> {
+            case DATE_SELECT, DATE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
                     stage = DATE_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = DATE_SELECT;
                 } else {
                     SelectMenuOption date = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setExactDate(date);
@@ -464,12 +543,11 @@ public class GiveawayGenerator {
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
             }
-            case TIME_SELECT -> {
+            case TIME_SELECT, TIME_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
                     stage = TIME_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = TIME_SELECT;
                 } else {
                     SelectMenuOption time = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setExactTime(time);
@@ -486,12 +564,11 @@ public class GiveawayGenerator {
                     }
                 }
             }
-            case TIME_DURATION -> {
+            case TIME_DURATION, TIME_DURATION_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
                     stage = TIME_DURATION_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = TIME_DURATION;
                 } else {
                     SelectMenuOption timeDuration = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setTimeDuration(timeDuration);
@@ -501,22 +578,31 @@ public class GiveawayGenerator {
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
             }
-            case CLAN_MEMBER_EXCLUDE -> {
+            case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
                     stage = CLAN_MEMBER_EXCLUDE_NOT_SELECTED;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = CLAN_MEMBER_EXCLUDE;
                 } else {
                     SelectMenuOption excludeClanMember = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setClanMemberExclude(excludeClanMember);
                     selectMenuValue = null;
-                    stage = PRIZE;
+                    stage = RULES;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
                 }
             }
-            case PRIZE -> {
+            case RULES, RULES_NOT_CORRECT -> {
+                stage = PING;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PING -> {
+                stage = PRIZE;
+                message.editMessageEmbeds(getEmbed())
+                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            }
+            case PRIZE, CANNOT_END -> {
                 giveawayRequest.setStartTime();
                 if (giveawayRequest.isEndTimeAfterNow()) {
                     stage = END;
@@ -527,17 +613,41 @@ public class GiveawayGenerator {
                     stage = CANNOT_END;
                     message.editMessageEmbeds(getEmbed())
                             .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = PRIZE;
                 }
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
     }
 
-    public void saveAnswer(@NotNull ModalInteractionEvent event) {
+    public void submit(@NotNull ModalInteractionEvent event) {
+        String modalId = event.getModalId();
+        switch (modalId) {
+            case GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD -> submitPrize(event);
+            case GIVEAWAY_GENERATOR_MODAL_RULES_LINK -> submitRulesLink(event);
+            default -> throw new IllegalStateException("ModalId=" + modalId);
+        }
+    }
+
+    private void submitRulesLink(@NotNull ModalInteractionEvent event) {
+        event.deferEdit().queue();
+        rulesLink = Objects.requireNonNull(event.getValue(MODAL_INPUT_1)).getAsString();
+        if (rulesLink.startsWith("http://") || rulesLink.startsWith("https://")) {
+            stage = RULES;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        } else {
+            rulesLink = "";
+            stage = RULES_NOT_CORRECT;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        }
+
+    }
+
+    private void submitPrize(@NotNull ModalInteractionEvent event) {
         boolean isCorrect = false;
-        String name = Objects.requireNonNull(event.getValue(PRIZE_NAME_ID)).getAsString();
-        String qty = Objects.requireNonNull(event.getValue(PRIZE_QTY_ID)).getAsString();
+        String name = Objects.requireNonNull(event.getValue(MODAL_INPUT_1)).getAsString();
+        String qty = Objects.requireNonNull(event.getValue(MODAL_INPUT_2)).getAsString();
         int qtyInt = 0;
         try {
             qtyInt = Integer.parseInt(qty);

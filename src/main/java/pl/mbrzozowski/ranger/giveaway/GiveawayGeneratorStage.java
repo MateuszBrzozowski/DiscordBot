@@ -10,6 +10,8 @@ public enum GiveawayGeneratorStage {
     TIME_DURATION,
     TIME_DURATION_NOT_SELECTED,
     PRIZE,
+    PING,
+    RULES,
     PRIZE_QTY_NOT_CORRECT,
     PRIZE_REMOVE,
     MAX_NUMBER_OF_PRIZE_STAGE,
@@ -17,5 +19,7 @@ public enum GiveawayGeneratorStage {
     CLAN_MEMBER_EXCLUDE_NOT_SELECTED,
     END,
     UNEXPECTED_ERROR,
-    CANNOT_END, CANCEL
+    CANNOT_END,
+    RULES_NOT_CORRECT,
+    CANCEL
 }

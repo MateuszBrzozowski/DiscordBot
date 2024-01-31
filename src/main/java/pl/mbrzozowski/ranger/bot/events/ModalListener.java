@@ -26,7 +26,8 @@ public class ModalListener extends ListenerAdapter {
             RecruitOpinions.submitOpinionAboutRecruit(event);
         } else if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_COMPLAINTS)) {
             RecruitOpinions.submitAnonymousComplaints(event);
-        } else if (event.getModalId().equalsIgnoreCase(ComponentId.GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD)) {
+        } else if (event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD) ||
+                event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_MODAL_RULES_LINK)) {
             giveawayService.generatorSaveAnswer(event);
         }
     }

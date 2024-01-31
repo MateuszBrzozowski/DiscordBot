@@ -105,7 +105,7 @@ public class GiveawayService {
     }
 
     public void generatorSaveAnswer(ModalInteractionEvent event) {
-        giveawayGenerator.saveAnswer(event);
+        giveawayGenerator.submit(event);
     }
 
     void publishOnChannel(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, List<Prize> prizes) {
