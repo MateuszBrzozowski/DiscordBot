@@ -346,8 +346,7 @@ public class EventService {
     }
 
     private void updateChannelName(@NotNull Event event, @NotNull TextChannel textChannel) {
-        String dataTime = StringProvider.getStringOfEventDateTime(event);
-        String newName = StringProvider.getChannelNameWithGreenCircle(event, dataTime);
+        String newName = StringProvider.getChannelName(event);
         textChannel.getManager().setName(newName).queue();
     }
 

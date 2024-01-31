@@ -30,7 +30,6 @@ import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 
@@ -44,7 +43,6 @@ public class EventsSettings {
     private final EventService eventService;
     private final String userId;
     private final EventsSettingsService eventsSettingsService;
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
     private Message message;
     private Event event;
     private String description = "";
@@ -171,9 +169,6 @@ public class EventsSettings {
             case END, END_NO_CHANGES -> buttons.add(Button.primary(EVENT_SETTINGS_GO_TO_START, "⮜ Do wyboru eventu"));
             default -> throw new IllegalStageException(stageOfSettings);
         }
-/*        if (isChangedName || isChangedDescription || isChangedDateTime) {
-            buttons.add(Button.success(EVENT_SETTINGS_BTN_SAVE, "Zapisz i zakończ"));
-        }*/
         buttons.add(Button.danger(EVENT_SETTINGS_BTN_CANCEL, "Wyjdź ❌"));
         return buttons;
     }

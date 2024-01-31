@@ -7,6 +7,9 @@ import pl.mbrzozowski.ranger.event.EventFor;
 import pl.mbrzozowski.ranger.event.EventRequest;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static pl.mbrzozowski.ranger.event.EventFor.*;
 import static pl.mbrzozowski.ranger.response.EmbedSettings.BRAIN_WITH_GREEN;
 import static pl.mbrzozowski.ranger.response.EmbedSettings.GREEN_CIRCLE;
@@ -53,18 +56,53 @@ public class StringProvider {
 
     @NotNull
     public static String getChannelName(@NotNull EventRequest eventRequest) {
-        String result;
-        if (eventRequest.getEventFor() == TACTICAL_GROUP) {
-            result = BRAIN_WITH_GREEN;
+        String name = validName(eventRequest.getName());
+        String dateTime = validDateTime(eventRequest.getDateTime());
+        return getChannelName(eventRequest.getEventFor(), name, dateTime);
+    }
+
+    @NotNull
+    public static String getChannelName(@NotNull Event event) {
+        String name = validName(event.getName());
+        String dateTime = validDateTime(event.getDate());
+        return getChannelName(event.getEventFor(), name, dateTime);
+    }
+
+    @NotNull
+    private static String getChannelName(@NotNull EventFor eventFor, String name, String dateTime) {
+        String channelName;
+        if (eventFor.equals(TACTICAL_GROUP)) {
+            channelName = BRAIN_WITH_GREEN;
         } else {
-            result = GREEN_CIRCLE;
+            channelName = GREEN_CIRCLE;
         }
-        result += eventRequest.getName() +
-                "-" + eventRequest.getDateShort();
-        if (result.length() >= 100) {
-            result = result.substring(0, 100);
+        channelName += name + dateTime;
+        if (channelName.length() >= 100) {
+            channelName = channelName.substring(0, 100);
         }
-        return result;
+        return channelName;
+    }
+
+    @NotNull
+    private static String validDateTime(LocalDateTime dateTime) {
+        String dateShort = getDateShort(dateTime);
+        if (StringUtils.isBlank(dateShort)) {
+            throw new IllegalArgumentException("Date of Event can not be blank");
+        }
+        return dateShort;
+    }
+
+    private static String validName(String name) {
+        if (StringUtils.isBlank(name)) {
+            throw new IllegalArgumentException("Event name can not be blank");
+        }
+        return name;
+    }
+
+    @NotNull
+    private static String getDateShort(@NotNull LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM");
+        return dateTime.format(formatter);
     }
 
     @NotNull
@@ -115,51 +153,5 @@ public class StringProvider {
             text = EmbedSettings.YELLOW_CIRCLE + text;
         }
         return text;
-    }
-
-    @NotNull
-    public static String getChannelNameWithGreenCircle(@NotNull Event event, String dataTime) {
-        String name = "";
-        if (StringUtils.isNotBlank(event.getName())) {
-            name = event.getName();
-        }
-        if (StringUtils.isBlank(dataTime)) {
-            dataTime = "";
-        }
-        String newName = EmbedSettings.GREEN_CIRCLE + name + dataTime;
-        if (newName.length() >= 100) {
-            newName = newName.substring(0, 100);
-        }
-        return newName;
-    }
-
-    @NotNull
-    public static String getStringOfEventDateTime(@NotNull Event event) {
-        if (event.getDate() == null) {
-            return "";
-        }
-        return getStringOfEventDate(event) + " " + getStringOfEventTime(event);
-    }
-
-    @NotNull
-    private static String getStringOfEventDate(@NotNull Event event) {
-        String month;
-        if (event.getDate().getMonthValue() < 10) {
-            month = "0" + event.getDate().getMonthValue();
-        } else {
-            month = String.valueOf(event.getDate().getMonthValue());
-        }
-        return event.getDate().getDayOfMonth() + "." + month + "." + event.getDate().getYear();
-    }
-
-    @NotNull
-    private static String getStringOfEventTime(@NotNull Event event) {
-        String min;
-        if (event.getDate().getMinute() < 10) {
-            min = "0" + event.getDate().getMinute();
-        } else {
-            min = String.valueOf(event.getDate().getMinute());
-        }
-        return event.getDate().getHour() + ":" + min;
     }
 }
