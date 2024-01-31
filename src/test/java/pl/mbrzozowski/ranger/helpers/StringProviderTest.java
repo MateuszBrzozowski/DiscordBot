@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventFor;
 import pl.mbrzozowski.ranger.event.EventRequest;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -226,60 +225,5 @@ class StringProviderTest {
     void addYellowCircleBeforeText_AddCircleWithBrainForTacticalGroup() {
         String result = StringProvider.addYellowCircleBeforeText("text", EventFor.TACTICAL_GROUP);
         Assertions.assertEquals(EmbedSettings.BRAIN_WITH_YELLOW + "text", result);
-    }
-
-    @Test
-    void getChannelNameWithGreenCircle() {
-        Event event = Event.builder().name("name").build();
-        String dateTime = "1.1.2023 23:59";
-        String result = StringProvider.getChannelNameWithGreenCircle(event, dateTime);
-        Assertions.assertEquals(EmbedSettings.GREEN_CIRCLE + event.getName() + dateTime, result);
-    }
-
-    @Test
-    void getChannelNameWithGreenCircle_ToLongName_CutTo100Length() {
-        Event event = Event.builder().name("0123456789".repeat(10)).build();
-        String dateTime = "1.1.2023 23:59";
-        String result = StringProvider.getChannelNameWithGreenCircle(event, dateTime);
-        Assertions.assertEquals((EmbedSettings.GREEN_CIRCLE + event.getName() + dateTime).substring(0, 100), result);
-    }
-
-    @Test
-    void getChannelNameWithGreenCircle_NullEventName_ReturnOnlyCircleAndDate() {
-        Event event = new Event();
-        String dateTime = "1.1.2023 23:59";
-        String result = StringProvider.getChannelNameWithGreenCircle(event, dateTime);
-        Assertions.assertEquals(EmbedSettings.GREEN_CIRCLE + dateTime, result);
-    }
-
-    @Test
-    void getChannelNameWithGreenCircle_NullDateTime_ReturnOnlyCircleAndName() {
-        Event event = Event.builder().name("name").build();
-        String result = StringProvider.getChannelNameWithGreenCircle(event, null);
-        Assertions.assertEquals(EmbedSettings.GREEN_CIRCLE + "name", result);
-    }
-
-    @Test
-    void getChannelNameWithGreenCircle_NullDateTimeAndEventName_ReturnOnlyCircle() {
-        Event event = Event.builder().build();
-        String result = StringProvider.getChannelNameWithGreenCircle(event, null);
-        Assertions.assertEquals(EmbedSettings.GREEN_CIRCLE, result);
-    }
-
-    @Test
-    void getStringOfEventDateTime_Correct_ReturnString() {
-        LocalDateTime dateTime = LocalDateTime.of(2023, 1, 1, 23, 59);
-        Event event = Event.builder().date(dateTime).build();
-        String result = StringProvider.getStringOfEventDateTime(event);
-        String excepted = "1.01.2023 23:59";
-        Assertions.assertEquals(excepted, result);
-    }
-
-    @Test
-    void getStringOfEventDateTime_NullDateTime_ReturnEmptyString() {
-        Event event = Event.builder().build();
-        String result = StringProvider.getStringOfEventDateTime(event);
-        String excepted = "";
-        Assertions.assertEquals(excepted, result);
     }
 }

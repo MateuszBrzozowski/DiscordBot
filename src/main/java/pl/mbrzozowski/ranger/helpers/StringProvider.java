@@ -76,7 +76,7 @@ public class StringProvider {
         } else {
             channelName = GREEN_CIRCLE;
         }
-        channelName += name + dateTime;
+        channelName += name + "-" + dateTime;
         if (channelName.length() >= 100) {
             channelName = channelName.substring(0, 100);
         }
@@ -107,6 +107,9 @@ public class StringProvider {
 
     @NotNull
     public static String getMessageForEventList(@NotNull EventRequest eventRequest) {
+        if (eventRequest.getEventFor() == null) {
+            return "";
+        }
         String result = "";
         if (eventRequest.getEventFor().equals(CLAN_MEMBER_AND_RECRUIT)) {
             result = "<@&" + RoleID.CLAN_MEMBER_ID + "> <@&" + RoleID.RECRUIT_ID + "> Zapisy!";
