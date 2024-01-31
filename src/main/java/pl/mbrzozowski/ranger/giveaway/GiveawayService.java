@@ -164,8 +164,7 @@ public class GiveawayService {
         builder.setColor(new Color(143, 203, 209));
         builder.setDescription("## :tada:  GIVEAWAY  :tada:");
         builder.addField("Nagrody", GiveawayGenerator.getPrizesDescription(prizes), false);
-        builder.addBlankField(false);
-        builder.addField(EmbedSettings.WHEN_END_DATE, Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" + EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()), false);
+        builder.addField("Koniec:", EmbedSettings.WHEN_END_DATE + Converter.LocalDateTimeToTimestampDateTimeLongFormat(giveaway.getEndTime()) + "\n" + EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(giveaway.getEndTime()), false);
         return builder;
     }
 
@@ -247,11 +246,13 @@ public class GiveawayService {
         List<GiveawayUser> giveawayUsers = giveaway.getGiveawayUsers();
         List<GiveawayUser> winners = giveawayUsers.stream().filter(giveawayUser -> giveawayUser.getPrize() != null).toList();
         StringBuilder builder = new StringBuilder();
-        if (!winners.isEmpty()) {
+        if (winners.isEmpty()) {
+            builder.append("Brak wygranych");
+        } else {
             builder.append("Wygrani:\n");
         }
         for (GiveawayUser winner : winners) {
-            builder.append("<@").append(winner.getId()).append(">\n");
+            builder.append("<@").append(winner.getUserId()).append("> - ").append(winner.getPrize().getName()).append("\n");
         }
         return builder.toString();
     }
@@ -476,10 +477,10 @@ public class GiveawayService {
         if (isActive(giveaway)) {
             giveaway.setActive(false);
             if (isEnding) {
-                event.getInteraction().getMessage().editMessage("Kończę i losuje nagrody dla giveawaya o id=" + giveawayId).queue();
+                event.editMessage("Kończę i losuje nagrody dla giveawaya o id=" + giveawayId).setComponents().queue();
                 endGiveaway(giveaway);
             } else {
-                event.getInteraction().getMessage().editMessage("Anuluje giveawaya o id=" + giveawayId).queue();
+                event.editMessage("Anuluje giveawaya o id=" + giveawayId).setComponents().queue();
                 cancelGiveaway(giveaway);
             }
             timers.remove(giveaway.getId()).cancel();
@@ -580,6 +581,7 @@ public class GiveawayService {
         save(giveaway);
         log.info("Set null prizes for users in giveaway");
         draw(giveaway.getMessageId());
+        setEndEmbed(giveaway.getChannelId(), giveaway.getMessageId());
     }
 
     private void sendInfoAboutWinners(@NotNull Giveaway giveaway) {

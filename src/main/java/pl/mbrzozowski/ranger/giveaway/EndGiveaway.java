@@ -30,8 +30,8 @@ public class EndGiveaway extends TimerTask {
                 TextChannel textChannel = jda.getTextChannelById(giveawayChannelId);
                 if (textChannel != null) {
                     textChannel.retrieveMessageById(giveawayMessageId).queue(message -> {
-                        giveawayService.setEndEmbed(message);
                         giveawayService.draw(message.getId());
+                        giveawayService.setEndEmbed(message);
                     });
                     return;
                 }

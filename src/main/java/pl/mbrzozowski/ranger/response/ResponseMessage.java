@@ -220,7 +220,7 @@ public class ResponseMessage {
     }
 
     public static void giveawayClanMemberExclude(@NotNull ButtonInteractionEvent event) {
-        event.reply("Sorry, ale wygląda na to, że losowanie nie przyjmuje zgłoszeń od osób, których szczęście przeszło na długą kawę!")
+        event.reply("Sorry, ale wygląda na to, że losowanie nie przyjmuje zgłoszeń od osób, których szczęście poszło na długą kawę!")
                 .setEphemeral(true)
                 .queue();
     }
