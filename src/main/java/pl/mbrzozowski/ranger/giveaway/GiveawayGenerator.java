@@ -345,25 +345,20 @@ public class GiveawayGenerator {
             mentionEveryone = false;
         } else if (selectMenuValue.equals(SelectMenuOption.ADD_PRIZE.getValue())) {
             if (prizes.size() < MAX_NUMBER_OF_PRIZE) {
-                showModalToAddPrize(event);
+                openModalToAddPrize(event);
             } else {
                 event.getInteraction().deferEdit().queue();
-                stage = MAX_NUMBER_OF_PRIZE_STAGE;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                setMessageEmbed(MAX_NUMBER_OF_PRIZE_STAGE, 1);
                 stage = PRIZE;
             }
         } else if (selectMenuValue.equals(SelectMenuOption.REMOVE_PRIZE.getValue())) {
             event.deferEdit().queue();
             selectMenuValue = null;
             if (prizes.isEmpty()) {
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                setMessageEmbed(stage, 1);
                 return;
             }
-            stage = PRIZE_REMOVE;
-            message.editMessageEmbeds(getEmbed())
-                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            setMessageEmbed(PRIZE_REMOVE, 1);
         } else {
             event.getInteraction().deferEdit().queue();
         }
@@ -390,7 +385,7 @@ public class GiveawayGenerator {
         log.info("Open modal{id={}, title={}}  for {}", GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD, modal.getTitle(), user);
     }
 
-    private void showModalToAddPrize(@NotNull StringSelectInteractionEvent event) {
+    private void openModalToAddPrize(@NotNull StringSelectInteractionEvent event) {
         TextInput name = TextInput.create(MODAL_INPUT_1, "Nazwa", TextInputStyle.SHORT)
                 .setPlaceholder("Podaj nazwę nagrody")
                 .setRequired(true)
@@ -407,14 +402,12 @@ public class GiveawayGenerator {
                 .addComponents(ActionRow.of(name), ActionRow.of(qty))
                 .build();
         event.replyModal(modal).queue();
-        message.editMessageEmbeds(getEmbed())
-                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        setMessageEmbed(stage, 1);
         log.info("Open modal{id={}, title={}}  for {}", GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD, modal.getTitle(), user);
     }
 
     public void cancel() {
-        stage = CANCEL;
-        message.editMessageEmbeds(getEmbed()).setComponents().queue();
+        setMessageEmbed(CANCEL, 0);
         log.info("{} - Cancel giveaway generator", user);
     }
 
@@ -446,60 +439,34 @@ public class GiveawayGenerator {
         if (prizes.isEmpty()) {
             stage = PRIZE;
         }
-        message.editMessageEmbeds(getEmbed())
-                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        setMessageEmbed(stage, 1);
     }
 
     private void buttonRemoveAllPrizes() {
         prizes.clear();
-        stage = PRIZE;
-        message.editMessageEmbeds(getEmbed())
-                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        setMessageEmbed(PRIZE, 1);
         log.info("Removed all prizes");
     }
 
     private void buttonBack() {
         switch (stage) {
-            case TIME_MODE -> message.editMessageEmbeds(getEmbed())
-                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            case TIME_MODE -> setMessageEmbed(TIME_MODE, 1);
             case TIME_DURATION, TIME_DURATION_NOT_SELECTED, DATE_SELECT, DATE_NOT_SELECTED -> {
                 stage = TIME_MODE;
                 buttonBack();
             }
-            case TIME_SELECT, TIME_NOT_SELECTED -> {
-                stage = DATE_SELECT;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
+            case TIME_SELECT, TIME_NOT_SELECTED -> setMessageEmbed(DATE_SELECT, 1);
             case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
                 if (isPathSelectTimeDuration) {
-                    stage = TIME_DURATION;
+                    setMessageEmbed(TIME_DURATION, 1);
                 } else {
-                    stage = TIME_SELECT;
+                    setMessageEmbed(TIME_SELECT, 1);
                 }
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
             }
-            case RULES, RULES_NOT_CORRECT -> {
-                stage = CLAN_MEMBER_EXCLUDE;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
-            case PING -> {
-                stage = RULES;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
-            case PRIZE, CANNOT_END -> {
-                stage = PING;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
-            case PRIZE_REMOVE -> {
-                stage = PRIZE;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
+            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
+            case PING -> setMessageEmbed(RULES, 1);
+            case PRIZE, CANNOT_END -> setMessageEmbed(PING, 1);
+            case PRIZE_REMOVE -> setMessageEmbed(PRIZE, 1);
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
         selectMenuValue = null;
@@ -507,112 +474,75 @@ public class GiveawayGenerator {
 
     private void buttonNext() {
         switch (stage) {
-            case TIME_MODE -> {
+            case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    stage = TIME_MODE_NOT_SELECTED;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                    stage = TIME_MODE;
+                    setMessageEmbed(TIME_MODE_NOT_SELECTED, 1);
                 } else {
                     if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.DATE_TIME.getValue())) {
                         selectMenuValue = null;
-                        stage = DATE_SELECT;
                         isPathSelectTimeDuration = false;
-                        message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                        setMessageEmbed(DATE_SELECT, 1);
                     } else if (selectMenuValue.equalsIgnoreCase(SelectMenuOption.TIME_DURATION.getValue())) {
                         selectMenuValue = null;
-                        stage = TIME_DURATION;
                         isPathSelectTimeDuration = true;
-                        message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                        setMessageEmbed(TIME_DURATION, 1);
                     }
                 }
             }
             case DATE_SELECT, DATE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    stage = DATE_NOT_SELECTED;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(DATE_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOption date = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setExactDate(date);
                     selectMenuValue = null;
-                    stage = TIME_SELECT;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(TIME_SELECT, 1);
                 }
             }
             case TIME_SELECT, TIME_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    stage = TIME_NOT_SELECTED;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(TIME_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOption time = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setExactTime(time);
                     if (giveawayRequest.isEndTimeAfterNow()) {
                         selectMenuValue = null;
-                        stage = CLAN_MEMBER_EXCLUDE;
-                        message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                        setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
                     } else {
-                        stage = TIME_NOT_SELECTED;
-                        message.editMessageEmbeds(getEmbed())
-                                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-                        stage = TIME_SELECT;
+                        setMessageEmbed(TIME_NOT_SELECTED, 1);
                     }
                 }
             }
             case TIME_DURATION, TIME_DURATION_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    stage = TIME_DURATION_NOT_SELECTED;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(TIME_DURATION_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOption timeDuration = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setTimeDuration(timeDuration);
                     selectMenuValue = null;
-                    stage = CLAN_MEMBER_EXCLUDE;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
                 }
             }
             case CLAN_MEMBER_EXCLUDE, CLAN_MEMBER_EXCLUDE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    stage = CLAN_MEMBER_EXCLUDE_NOT_SELECTED;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(CLAN_MEMBER_EXCLUDE_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOption excludeClanMember = SelectMenuOption.getByValue(selectMenuValue);
                     giveawayRequest.setClanMemberExclude(excludeClanMember);
                     selectMenuValue = null;
-                    stage = RULES;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(RULES, 1);
                 }
             }
-            case RULES, RULES_NOT_CORRECT -> {
-                stage = PING;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
-            case PING -> {
-                stage = PRIZE;
-                message.editMessageEmbeds(getEmbed())
-                        .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
-            }
+            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(PING, 1);
+            case PING -> setMessageEmbed(PRIZE, 1);
             case PRIZE, CANNOT_END -> {
                 giveawayRequest.setStartTime();
                 if (giveawayRequest.isEndTimeAfterNow()) {
-                    stage = END;
-                    message.editMessageEmbeds(getEmbed()).setComponents().queue();
+                    setMessageEmbed(END, 0);
                     Giveaway giveaway = giveawayRequest.getGiveaway();
                     giveawayService.publishOnChannel(channelToPublish, giveaway, prizes);
                 } else {
-                    stage = CANNOT_END;
-                    message.editMessageEmbeds(getEmbed())
-                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                    setMessageEmbed(CANNOT_END, 1);
                 }
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
@@ -668,6 +598,28 @@ public class GiveawayGenerator {
             prizes.add(prize);
             message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        }
+    }
+
+    /**
+     * Edit and updated message with selected components' via mode
+     *
+     * @param stage of giveaway generator
+     * @param mode  1 - set select menu + buttons;
+     *              2 - set only buttons;
+     *              3 - set only select menu;
+     *              0 - only embed without select menu and buttons
+     * @throws IllegalArgumentException if int mode not supported
+     */
+    private void setMessageEmbed(@NotNull GiveawayGeneratorStage stage, int mode) {
+        this.stage = stage;
+        switch (mode) {
+            case 1 -> message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            case 2 -> message.editMessageEmbeds(getEmbed()).setComponents(ActionRow.of(getButtons())).queue();
+            case 3 -> message.editMessageEmbeds(getEmbed()).setComponents(ActionRow.of(getSelectMenu())).queue();
+            case 0 -> message.editMessageEmbeds(getEmbed()).setComponents().queue();
+            default -> throw new IllegalArgumentException("Mode=" + mode + " not supported");
         }
     }
 
