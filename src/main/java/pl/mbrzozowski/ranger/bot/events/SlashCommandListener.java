@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
 import pl.mbrzozowski.ranger.event.EventService;
+import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
@@ -121,8 +124,6 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.reRoll(event);
         } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED)) {
             eventService.fixEmbed(event);
-        } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
-            giveawayService.fixEmbed(event);
         } else if (name.equalsIgnoreCase(EVENT_CREATE)) {
             eventsGeneratorService.createGenerator(event,eventService);
         } else if (name.equalsIgnoreCase(EVENT_SETTINGS)) {
@@ -159,5 +160,7 @@ public class SlashCommandListener extends ListenerAdapter {
         commandData.add(Commands.slash(FIX_EVENT_EMBED, "Przywraca embed dla eventu")
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(EVENT_CREATE, "Otwiera generator eventów"));
+        commandData.add(Commands.slash(EVENT_SETTINGS, "Otwiera ustawienia eventów"));
     }
 }
