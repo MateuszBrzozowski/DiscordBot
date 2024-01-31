@@ -36,7 +36,11 @@ public class GiveawayRequest {
         }
     }
 
-    public void setClanMemberExclude(@NotNull List<SelectOption> selectOptions, @NotNull String selectedValue) {
+    public void setClanMemberExclude(@NotNull List<SelectOption> selectOptions, String selectedValue) {
+        if (selectedValue == null) {
+            isClanMemberExclude = false;
+            return;
+        }
         if (selectedValue.equals(selectOptions.get(0).getValue())) {
             isClanMemberExclude = true;
         } else if (selectedValue.equals(selectOptions.get(1).getValue())) {

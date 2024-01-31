@@ -149,14 +149,25 @@ public class GiveawayService {
     }
 
     private void sendEmbed(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, @NotNull EmbedBuilder builder, boolean mentionEveryone) {
-        textChannel.sendMessage("@ - everyone").setEmbeds(builder.build()).queue(message -> {
-            MessageEmbed messageEmbed = message.getEmbeds().get(0);
-            message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.GIVEAWAY_SIGN_IN + message.getId(), "Zapisz się")).queue();
-            giveaway.setMessageId(message.getId());
-            log.info("{}", giveaway);
-            save(giveaway);
-            setTimerToEnding(giveaway);
-        });
+        if (mentionEveryone) {
+            textChannel.sendMessage("@everyone").setEmbeds(builder.build()).queue(message -> {
+                MessageEmbed messageEmbed = message.getEmbeds().get(0);
+                message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.GIVEAWAY_SIGN_IN + message.getId(), "Zapisz się")).queue();
+                giveaway.setMessageId(message.getId());
+                log.info("{}", giveaway);
+                save(giveaway);
+                setTimerToEnding(giveaway);
+            });
+        } else {
+            textChannel.sendMessageEmbeds(builder.build()).queue(message -> {
+                MessageEmbed messageEmbed = message.getEmbeds().get(0);
+                message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.GIVEAWAY_SIGN_IN + message.getId(), "Zapisz się")).queue();
+                giveaway.setMessageId(message.getId());
+                log.info("{}", giveaway);
+                save(giveaway);
+                setTimerToEnding(giveaway);
+            });
+        }
     }
 
     @NotNull
@@ -621,5 +632,9 @@ public class GiveawayService {
         } catch (IllegalStateException e) {
             event.reply("Event o podanym id nie istnieje").setEphemeral(true).queue();
         }
+    }
+
+    public void removeGenerator() {
+        this.giveawayGenerator = null;
     }
 }
