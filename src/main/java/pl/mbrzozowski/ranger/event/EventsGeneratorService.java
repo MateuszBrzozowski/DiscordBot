@@ -42,8 +42,12 @@ public class EventsGeneratorService {
     }
 
     public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
-        event.getInteraction().deferEdit().queue();
         int index = userHaveActiveGenerator(event.getUser().getId());
+        if (index == -1) {
+            event.deferEdit().queue();
+            event.getMessage().delete().queue();
+            return;
+        }
         eventsGenerators.get(index).selectAnswer(event);
     }
 

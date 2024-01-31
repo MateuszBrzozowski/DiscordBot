@@ -187,6 +187,11 @@ public class EventsGenerator {
     }
 
     public void buttonEvent(@NotNull ButtonInteractionEvent event) {
+        if (!event.getMessage().equals(message)) {
+            event.deferEdit().queue();
+            event.getMessage().delete().queue();
+            return;
+        }
         String componentId = event.getComponentId();
         log.info("Stage={}, buttonId={}", stageOfGenerator, componentId);
         switch (componentId) {
@@ -319,6 +324,11 @@ public class EventsGenerator {
     }
 
     public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
+        event.deferEdit().queue();
+        if (!event.getMessage().equals(message)) {
+            event.getMessage().delete().queue();
+            return;
+        }
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
         if (selectMenuValue.equalsIgnoreCase(EventFor.CLAN_MEMBER.getValue())) {
@@ -331,6 +341,8 @@ public class EventsGenerator {
             eventRequest.setEventFor(EventFor.TACTICAL_GROUP);
         } else if (selectMenuValue.equalsIgnoreCase(EventFor.SQ_EVENTS.getValue())) {
             eventRequest.setEventFor(EventFor.SQ_EVENTS);
+        } else if (selectMenuValue.equalsIgnoreCase(EventFor.CLAN_COUNCIL.getValue())) {
+            eventRequest.setEventFor(EventFor.CLAN_COUNCIL);
         } else {
             throw new IllegalStageException("Value of select menu - " + selectMenuValue);
         }

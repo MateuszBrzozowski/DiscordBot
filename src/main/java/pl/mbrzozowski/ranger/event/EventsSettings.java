@@ -294,6 +294,10 @@ public class EventsSettings {
     }
 
     public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
+        if (!event.getMessage().equals(message)) {
+            event.deferEdit().queue();
+            event.getMessage().delete().queue();
+        }
         List<SelectOption> selectedOptions = event.getSelectedOptions();
         selectMenuValue = selectedOptions.get(0).getValue();
         if (isSelectActiveEvent()) {

@@ -99,6 +99,11 @@ public class EventsSettingsService {
 
     public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
         int index = userHaveActiveSettingsPanel(event.getUser().getId());
+        if (index == -1) {
+            event.deferEdit().queue();
+            event.getMessage().delete().queue();
+            return;
+        }
         eventsSettings.get(index).selectAnswer(event);
     }
 
