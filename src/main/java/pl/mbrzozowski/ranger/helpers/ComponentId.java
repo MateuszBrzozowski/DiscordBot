@@ -34,12 +34,23 @@ public final class ComponentId {
     public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
     public static final String ROLES = "RolesMenu" + SUFFIX;
 
-    public static final String EVENT_GENERATOR_BTN_NEXT = "EventGenBtnNext" + SUFFIX;
-    public static final String EVENT_GENERATOR_BTN_BACK = "EventGenBtnBack" + SUFFIX;
-    public static final String EVENT_GENERATOR_BTN_CANCEL = "EventGenBtnCancel" + SUFFIX;
-    public static final String EVENT_GENERATOR_MODAL_TITLE = "EventGenModalTitle" + SUFFIX;
-    public static final String EVENT_GENERATOR_MODAL_TIME = "EventGenModalTime" + SUFFIX;
-    public static final String EVENT_GENERATOR_SELECT_MENU_PERM = "EventGenSelectMenuPerm" + SUFFIX;
+    //Events generator
+    public static final String EVENT_GENERATOR_BTN_NEXT = "EG_001" + SUFFIX;
+    public static final String EVENT_GENERATOR_BTN_BACK = "EG_002" + SUFFIX;
+    public static final String EVENT_GENERATOR_BTN_CANCEL = "EG_003" + SUFFIX;
+    public static final String EVENT_GENERATOR_MODAL_TITLE = "EG_004" + SUFFIX;
+    public static final String EVENT_GENERATOR_MODAL_TIME = "EG_005" + SUFFIX;
+    public static final String EVENT_GENERATOR_SELECT_MENU_PERM = "EG_006" + SUFFIX;
+
+    //Events settings
+    public static final String EVENT_SETTINGS_BTN_NEXT = "ES_001" + SUFFIX;
+    public static final String EVENT_SETTINGS_BTN_BACK = "ES_002" + SUFFIX;
+    public static final String EVENT_SETTINGS_BTN_SAVE = "ES_003" + SUFFIX;
+    public static final String EVENT_SETTINGS_BTN_CANCEL = "ES_004" + SUFFIX;
+    public static final String EVENT_SETTINGS_SELECT_MENU = "ES_005" + SUFFIX;
+    public static final String EVENT_SETTINGS_MODAL_TITLE = "ES_006" + SUFFIX;
+    public static final String EVENT_SETTINGS_MODAL_DATE_TIME = "ES_007" + SUFFIX;
+    public static final String EVENT_SETTINGS_GO_TO_START= "ES_008" + SUFFIX;
 
     //Generator  giveaway
     public static final String GIVEAWAY_GENERATOR_BTN_BACK = "GG_001" + SUFFIX;

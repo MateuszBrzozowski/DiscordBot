@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
@@ -26,18 +27,21 @@ public class ButtonClickListener extends ListenerAdapter {
     private final ServerService serverService;
     private final EventsGeneratorService eventsGeneratorService;
     private final GiveawayService giveawayService;
+    private final EventsSettingsService eventsSettingsService;
 
     @Autowired
     public ButtonClickListener(EventService events,
                                RecruitsService recruitsService,
                                ServerService serverService,
                                EventsGeneratorService eventsGeneratorService,
-                               GiveawayService giveawayService) {
+                               GiveawayService giveawayService,
+                               EventsSettingsService eventsSettingsService) {
         this.eventService = events;
         this.recruitsService = recruitsService;
         this.serverService = serverService;
         this.eventsGeneratorService = eventsGeneratorService;
         this.giveawayService = giveawayService;
+        this.eventsSettingsService = eventsSettingsService;
     }
 
     @Override
@@ -151,7 +155,7 @@ public class ButtonClickListener extends ListenerAdapter {
             giveawayService.buttonGeneratorEvent(event);
         } else if (event.getComponentId().length() > "giveaway".length() &&
                 event.getComponentId().substring(0, "giveaway".length()).equalsIgnoreCase("giveaway")) {
-            giveawayService.buttonClick(event);
+            giveawayService.buttonClickSignIn(event);
         } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_END_SURE_YES.length() &&
                 event.getComponentId().substring(0, ComponentId.GIVEAWAY_END_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_END_SURE_YES)) {
             giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_END_SURE_YES.length()), true);
