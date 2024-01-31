@@ -2,280 +2,584 @@ package pl.mbrzozowski.ranger.event;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.exceptions.IllegalStageException;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Validator;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
+
+import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 
 @Slf4j
 public class EventsSettings {
 
+    private static final String TEXT_INPUT_ID_1 = "textInputId1";
+    private static final String TEXT_INPUT_ID_2 = "textInputId2";
     private final EventService eventService;
-    private final JDA jda = DiscordBot.getJda();
-    private final String userName;
-    private final String userID;
+    private final String userId;
     private final EventsSettingsService eventsSettingsService;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("d.M.yyyy H:m");
-
+    private Message message;
     private Event event;
     private String description = "";
-    private List<Event> eventsList = new ArrayList<>();
-    private EventSettingsStatus stageOfSettings = EventSettingsStatus.CHOOSE_EVENT;
+    private List<Event> activeEvents = new ArrayList<>();
+    private EventSettingsStatus stageOfSettings = EventSettingsStatus.START;
     private boolean isChangedDateTime = false;
     private boolean isChangedName = false;
     private boolean isChangedDescription = false;
-    private boolean ifEndingEvent = false;
+    private boolean isEndingEvent = false;
     private boolean sendNotifi = false;
+    private String selectMenuValue;
+    private static final String VALUE_SELECT_MENU_OPTION_2 = "valueSelectMenuOption1";
+    private static final String VALUE_SELECT_MENU_OPTION_1 = "valueSelectMenuOption2";
+    private static final String VALUE_SELECT_MENU_OPTION_3 = "valueSelectMenuOption3";
 
 
     public EventsSettings(EventService eventService,
                           @NotNull MessageReceivedEvent privateEvent,
                           EventsSettingsService eventsSettingsService) {
         this.eventService = eventService;
-        this.userID = privateEvent.getAuthor().getId();
-        this.userName = privateEvent.getMessage().getAuthor().getName();
+        this.userId = privateEvent.getAuthor().getId();
         this.eventsSettingsService = eventsSettingsService;
-        embedStart();
+        start();
     }
 
-    private void embedStart() {
-        User user = jda.getUserById(userID);
-        if (user != null) {
-            eventsList = eventService.findByIsActive();
-            embedStart(user);
+    public EventsSettings(@NotNull EventService eventService,
+                          @NotNull ButtonInteractionEvent buttonEvent,
+                          EventsSettingsService eventsSettingsService) {
+        buttonEvent.deferEdit().queue();
+        this.eventService = eventService;
+        this.userId = buttonEvent.getUser().getId();
+        this.eventsSettingsService = eventsSettingsService;
+        this.message = buttonEvent.getMessage();
+        activeEvents = eventService.findByIsActive();
+        if (activeEvents.isEmpty()) {
+            setStageOfSettings(EventSettingsStatus.NO_EVENTS, false, false);
+        } else {
+            setStageOfSettings(EventSettingsStatus.START, true, true);
+        }
+    }
+
+    private void start() {
+        activeEvents = eventService.findByIsActive();
+        User user = getUserById(userId);
+        if (activeEvents.isEmpty()) {
+            stageOfSettings = EventSettingsStatus.NO_EVENTS;
+            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(getEmbed()).queue());
+            eventsSettingsService.removeSettingsPanel(userId);
+        } else {
+            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue(message -> this.message = message));
         }
     }
 
     @NotNull
-    private String getActiveEventsIndexAndName() {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < eventsList.size(); i++) {
-            result.append(i + 1).append(" : ").append(eventsList.get(i).getName()).append("\n");
-        }
-        return result.toString();
-    }
-
-    public String getUserID() {
-        return userID;
-    }
-
-    public void saveAnswerAndSetNextStage(@NotNull MessageReceivedEvent messageReceivedEvent) {
-        String msg = messageReceivedEvent.getMessage().getContentDisplay();
+    private StringSelectMenu getSelectMenu() {
         switch (stageOfSettings) {
-            case CHOOSE_EVENT -> {
-                int msgInteger;
-                try {
-                    msgInteger = Integer.parseInt(msg);
-                } catch (NumberFormatException ex) {
-                    messageReceivedEvent.getMessage().reply("Nieprawidłowy numer!").queue();
-                    break;
-                }
-                if (msgInteger > 0 && msgInteger <= eventsList.size()) {
-                    int selectedIndexOFEvent = msgInteger - 1;
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    event = eventsList.get(selectedIndexOFEvent);
-                    embedWhatToDo();
-                    log.info("{} - selected event({})", messageReceivedEvent.getAuthor(), eventsList.get(selectedIndexOFEvent).getName());
-                } else {
-                    messageReceivedEvent.getMessage().reply("Nieprawidłowy numer!").queue();
-                }
+            case START, EVENT_NOT_SELECTED -> {
+                return StringSelectMenu
+                        .create(EVENT_SETTINGS_SELECT_MENU)
+                        .setPlaceholder("Wybierz event")
+                        .addOptions(getAllEvents())
+                        .build();
+            }
+            case WHAT_TO_DO, DATE_TIME_TITLE_DESC_CHANGED, DATE_TIME_NOT_CORRECT -> {
+                return StringSelectMenu
+                        .create(EVENT_SETTINGS_SELECT_MENU)
+                        .setPlaceholder("Co chcesz zrobić?")
+                        .addOption("Zmień nazwę lub opis", VALUE_SELECT_MENU_OPTION_1)
+                        .addOption("Zmień date lub czas", VALUE_SELECT_MENU_OPTION_2)
+                        .addOption("Odwołaj", VALUE_SELECT_MENU_OPTION_3)
+                        .build();
+            }
+            case EVENT_CANCEL, SEND_NOTIFI, EVENT_CANCEL_NOT_SELECT, SEND_NOTIFI_NOT_SELECT -> {
+                return StringSelectMenu
+                        .create(EVENT_SETTINGS_SELECT_MENU)
+                        .setPlaceholder("Wybierz")
+                        .addOption("Tak", VALUE_SELECT_MENU_OPTION_1)
+                        .addOption("Nie", VALUE_SELECT_MENU_OPTION_2)
+                        .build();
+            }
+            default -> throw new IllegalStageException(stageOfSettings);
+        }
+    }
+
+    @NotNull
+    private Collection<? extends SelectOption> getAllEvents() {
+        List<SelectOption> selectOptions = new ArrayList<>();
+        for (Event activeEvent : activeEvents) {
+            selectOptions.add(
+                    SelectOption.of(activeEvent.getName() + " - " + activeEvent.getDate().getDayOfMonth() + "." +
+                                    String.format("%02d", activeEvent.getDate().getMonthValue()) + "." + activeEvent.getDate().getYear(),
+                            activeEvent.getMsgId()));
+        }
+        return selectOptions;
+    }
+
+    @NotNull
+    private Collection<? extends ItemComponent> getButtons() {
+        List<Button> buttons = new ArrayList<>();
+        switch (stageOfSettings) {
+            case START, EVENT_NOT_SELECTED -> {
+                buttons.add(Button.primary(EVENT_SETTINGS_BTN_BACK, "⮜ Wstecz").asDisabled());
+                buttons.add(Button.primary(EVENT_SETTINGS_BTN_NEXT, "Dalej ⮞"));
+            }
+            case WHAT_TO_DO, DATE_TIME_TITLE_DESC_CHANGED, DATE_TIME_NOT_CORRECT, EVENT_CANCEL, EVENT_CANCEL_NOT_SELECT,
+                    DATE_TIME_TITLE_DESC_NOT_CHANGED -> {
+                buttons.add(Button.primary(EVENT_SETTINGS_BTN_BACK, "⮜ Wstecz"));
+                buttons.add(Button.primary(EVENT_SETTINGS_BTN_NEXT, "Dalej ⮞"));
+            }
+            case SEND_NOTIFI, SEND_NOTIFI_NOT_SELECT -> {
+                buttons.add(Button.primary(EVENT_SETTINGS_BTN_BACK, "⮜ Wstecz"));
+                buttons.add(Button.success(EVENT_SETTINGS_BTN_NEXT, "Zapisz ⮞"));
+            }
+            case END, END_NO_CHANGES -> buttons.add(Button.primary(EVENT_SETTINGS_GO_TO_START, "⮜ Do wyboru eventu"));
+            default -> throw new IllegalStageException(stageOfSettings);
+        }
+/*        if (isChangedName || isChangedDescription || isChangedDateTime) {
+            buttons.add(Button.success(EVENT_SETTINGS_BTN_SAVE, "Zapisz i zakończ"));
+        }*/
+        buttons.add(Button.danger(EVENT_SETTINGS_BTN_CANCEL, "Wyjdź ❌"));
+        return buttons;
+    }
+
+    @NotNull
+    private MessageEmbed getEmbed() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setDescription("## :calendar_spiral: Wydarzenia - Edytor :calendar_spiral: ");
+        switch (stageOfSettings) {
+            case START -> builder.addField("", "- Wybierz event który chcesz edytować", false);
+            case NO_EVENTS -> {
+                builder.setColor(Color.DARK_GRAY);
+                builder.addField("", "Brak aktywnych eventów", false);
+            }
+            case EVENT_NOT_SELECTED -> {
+                builder.setColor(Color.RED);
+                builder.addField("Błąd", "- Nie wybrano eventu", false);
             }
             case WHAT_TO_DO -> {
-                int msgInteger;
-                try {
-                    msgInteger = Integer.parseInt(msg);
-                } catch (NumberFormatException e) {
-                    messageReceivedEvent.getMessage().reply("Nie rozumiem!").queue();
-                    break;
+                TextChannel textChannel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
+                if (textChannel == null) {
+                    throw new IllegalArgumentException("TextChannel not exist");
                 }
-                switch (msgInteger) {
-                    case 1 -> {
-                        embedGetTime();
-                        stageOfSettings = EventSettingsStatus.SET_TIME;
-                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
-                    }
-                    case 2 -> {
-                        embedGetDate();
-                        stageOfSettings = EventSettingsStatus.SET_DATE;
-                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
-                    }
-                    case 3 -> {
-                        embedGetName();
-                        stageOfSettings = EventSettingsStatus.SET_NAME;
-                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
-                    }
-                    case 4 -> {
-                        embedGetDescription();
-                        stageOfSettings = EventSettingsStatus.SET_DESCRIPTION;
-                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
-                    }
-                    case 8 -> {
-                        isChangedDateTime = true;
-                        embedCancelEvent();
-                        stageOfSettings = EventSettingsStatus.CANCEL_EVENT;
-                        log.info("{} - selected {}", messageReceivedEvent.getAuthor(), stageOfSettings);
-                    }
-                    case 9 -> {
-                        finishEditor();
-                        log.info("{} - selected cancel events settings", messageReceivedEvent.getAuthor());
-                    }
-                    case 0 -> {
-                        if (isChangedDateTime) {
-                            stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
-                            embedSendNotifi();
-                        } else {
-                            endingEditor();
-                        }
-                        log.info("{} - selected close and save events settings", messageReceivedEvent.getAuthor());
-                    }
-                    default -> {
-                        embedWrongWhatToDo();
-                        embedWhatToDo();
-                        log.info("{} - wrong answer", messageReceivedEvent.getAuthor());
-                    }
+                Message retrievedMessage = textChannel.retrieveMessageById(event.getMsgId()).complete();
+                description = retrievedMessage.getEmbeds().get(0).getDescription();
+                if (description == null) {
+                    description = "";
                 }
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
             }
-            case SET_TIME -> {
-                if (Validator.isTimeValid(msg)) {
-                    LocalDateTime newDate = LocalDateTime.parse(
-                            event.getDate().getDayOfMonth() + "." + event.getDate().getMonthValue() + "." +
-                                    event.getDate().getYear() + " " + msg,
-                            dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
-                    if (isTimeAfterNow) {
-                        isChangedDateTime = true;
-                        event.setDate(newDate);
-                        log.info("{} - set new event time", messageReceivedEvent.getAuthor());
-                    } else {
-                        embedTimeNotCorrect();
-                        log.warn("{} - time({}) after now", messageReceivedEvent.getAuthor(), msg);
-                    }
-                } else {
-                    embedTimeNotCorrect();
-                    log.warn("{} - time({}) not correct", messageReceivedEvent.getAuthor(), msg);
-                }
-                stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                embedWhatToDo();
+            case DATE_TIME_NOT_CORRECT -> {
+                builder.setColor(Color.RED);
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("===========", "- Data lub czas niepoprawny", false);
             }
-            case SET_DATE -> {
-                boolean isDateFormat = Validator.isDateValid(msg);
-                if (isDateFormat) {
-                    LocalDateTime newDate = LocalDateTime.parse(
-                            msg + " " + event.getDate().getHour() + ":" + event.getDate().getMinute(),
-                            dateTimeFormatter);
-                    boolean isTimeAfterNow = Validator.isDateTimeAfterNow(newDate);
-                    if (isTimeAfterNow) {
-                        isChangedDateTime = true;
-                        event.setDate(newDate);
-                        log.info("{} - set new event date", messageReceivedEvent.getAuthor());
-                    } else {
-                        embedDateNotCorrect();
-                        log.warn("{} - date({}) after now", messageReceivedEvent.getAuthor(), msg);
-                    }
-                } else {
-                    embedDateNotCorrect();
-                    log.warn("{} - date({}) not correct", messageReceivedEvent.getAuthor(), msg);
-                }
-                stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                embedWhatToDo();
+            case DATE_TIME_TITLE_DESC_CHANGED -> {
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
             }
-            case SET_NAME -> {
-                if (msg.length() < MessageEmbed.TITLE_MAX_LENGTH && msg.length() > 0) {
-                    event.setName(msg);
-                    isChangedName = true;
-                    log.info("{} - set new event name", messageReceivedEvent.getAuthor());
-                } else {
-                    embedGetNameCorrect();
-                    log.warn("{} - title({}, length:{}) not correct", messageReceivedEvent.getAuthor(), msg, msg.length());
-                }
-                stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                embedWhatToDo();
+            case EVENT_CANCEL -> {
+                builder.setColor(Color.ORANGE);
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("", "==========", false);
+                builder.addField("", "Czy na pewno chcesz odwołać event?", false);
             }
-            case SET_DESCRIPTION -> {
-                if (msg.length() < MessageEmbed.DESCRIPTION_MAX_LENGTH && msg.length() > 0) {
-                    description = msg;
-                    isChangedDescription = true;
-                    log.info("{} - set new event description", messageReceivedEvent.getAuthor());
-                } else {
-                    embedGetDescriptionCorrect();
-                    log.warn("{} - description({}, length:{}) not correct", messageReceivedEvent.getAuthor(), msg, msg.length());
-                }
-                stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                embedWhatToDo();
+            case EVENT_CANCEL_NOT_SELECT -> {
+                builder.setColor(Color.RED);
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("", "==========", false);
+                builder.addField("", "Czy na pewno chcesz odwołać event?", false);
             }
-            case CANCEL_EVENT -> {
-                if (msg.equalsIgnoreCase("T")) {
-                    ifEndingEvent = true;
-                    stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
-                    embedSendNotifi();
-                    log.info("{} - selected YES to canceling event {}", messageReceivedEvent.getAuthor(), event.getName());
-                } else if (msg.equalsIgnoreCase("N")) {
-                    ifEndingEvent = false;
-                    embedWhatToDo();
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    log.info("{} - selected NO to canceling event {}", messageReceivedEvent.getAuthor(), event.getName());
-                } else {
-                    embedAnswerNotCorrect();
-                    embedWhatToDo();
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    log.info("{} - Answer not correct", messageReceivedEvent.getAuthor());
-                }
+            case DATE_TIME_TITLE_DESC_NOT_CHANGED -> {
+                builder.setColor(Color.ORANGE);
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("", "==========", false);
+                builder.addField("", "- Nie wprowadzono żadnych zmian.", false);
             }
             case SEND_NOTIFI -> {
-                if (msg.equalsIgnoreCase("T")) {
-                    sendNotifi = true;
-                    endingEditor();
-                    log.info("{} - selected YES to send notifi for event {}", messageReceivedEvent.getAuthor(), event.getName());
-                } else if (msg.equalsIgnoreCase("N")) {
-                    sendNotifi = false;
-                    endingEditor();
-                    log.info("{} - selected NO to send notifi for event {}", messageReceivedEvent.getAuthor(), event.getName());
-                } else {
-                    embedAnswerNotCorrect();
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    embedWhatToDo();
-                    log.info("{} - answer not correct", messageReceivedEvent.getAuthor());
-                }
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("", "==========", false);
+                builder.addField("", "- Czy chcesz powiadomić wszystkich zapisanych?", false);
             }
-            case FINISH -> {
-                if (msg.equalsIgnoreCase("T")) {
-                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
-                    embedWhatToDo();
-                } else if (msg.equalsIgnoreCase("N")) {
-                    stageOfSettings = EventSettingsStatus.SEND_NOTIFI;
-                    embedSendNotifi();
-                } else {
-                    embedAnswerNotCorrect();
-                    embedDoYouWantAnyChange();
-                }
+            case SEND_NOTIFI_NOT_SELECT -> {
+                builder.setColor(Color.RED);
+                builder.addField(event.getName(), description, false);
+                builder.addField(EmbedSettings.WHEN_DATE,
+                        Converter.LocalDateTimeToTimestampDateTimeLongFormat(event.getDate()) + "\n" +
+                                EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(event.getDate()),
+                        true);
+                builder.addField("", "==========", false);
+                builder.addField("", "- Czy chcesz powiadomić wszystkich zapisanych?", false);
             }
-            default -> {
-                embedError();
-                removeThisEditor();
-                throw new IllegalStageException(messageReceivedEvent.getAuthor(), stageOfSettings);
+            case END_NO_CHANGES -> {
+                builder.setColor(Color.DARK_GRAY);
+                builder.addField(event.getName(), "", false);
+                builder.addField("", "Nie wprowadzono żadnych zmian", false);
             }
+            case END -> {
+                builder.setColor(Color.GREEN);
+                builder.addField(event.getName(), "", false);
+                builder.addField("", "Ustawienia zapisane.", false);
+            }
+            case CANCEL -> {
+                builder.setColor(Color.DARK_GRAY);
+                builder.addField("", "Edytor zamknięty", false);
+            }
+            default -> throw new IllegalStageException(stageOfSettings);
+        }
+        return builder.build();
+    }
+
+    public void selectAnswer(@NotNull StringSelectInteractionEvent event) {
+        List<SelectOption> selectedOptions = event.getSelectedOptions();
+        selectMenuValue = selectedOptions.get(0).getValue();
+        if (isSelectActiveEvent()) {
+            event.getInteraction().deferEdit().queue();
+            buttonNext();
+        } else {
+            whatToDoOption(event);
         }
     }
 
-    private void embedError() {
-        String t = "Błąd edytora.";
-        String d = "Zamykam edytor.";
-        embedPatternOneField(Color.RED, t, d);
+    private void whatToDoOption(StringSelectInteractionEvent event) {
+        switch (stageOfSettings) {
+            case WHAT_TO_DO, DATE_TIME_TITLE_DESC_CHANGED, DATE_TIME_NOT_CORRECT -> {
+                switch (selectMenuValue) {
+                    case VALUE_SELECT_MENU_OPTION_1 -> openModalTitleDesc(event);
+                    case VALUE_SELECT_MENU_OPTION_2 -> openModalDateTimme(event);
+                    case VALUE_SELECT_MENU_OPTION_3 -> event.getInteraction().deferEdit().queue();
+                }
+            }
+            default -> event.getInteraction().deferEdit().queue();
+        }
+    }
+
+    private void openModalTitleDesc(StringSelectInteractionEvent event) {
+        TextInput title = TextInput.create(TEXT_INPUT_ID_1, "Nazwa", TextInputStyle.SHORT)
+                .setPlaceholder("Podaj nazwę eventu")
+                .setRequiredRange(1, 256)
+                .setRequired(true)
+                .build();
+
+        if (StringUtils.isNotBlank(this.event.getName())) {
+            title = TextInput.create(TEXT_INPUT_ID_1, "Nazwa", TextInputStyle.SHORT)
+                    .setPlaceholder("Podaj nazwę eventu")
+                    .setValue(this.event.getName())
+                    .setRequiredRange(1, 256)
+                    .setRequired(true)
+                    .build();
+        }
+
+        TextInput desc = TextInput.create(TEXT_INPUT_ID_2, "Opis", TextInputStyle.PARAGRAPH)
+                .setPlaceholder("Podaj opis eventu (opcjonalnie)")
+                .setRequired(false)
+                .setMaxLength(4000)
+                .build();
+
+        if (StringUtils.isNotBlank(description)) {
+            desc = TextInput.create(TEXT_INPUT_ID_2, "Opis", TextInputStyle.PARAGRAPH)
+                    .setPlaceholder("Podaj opis eventu (opcjonalnie)")
+                    .setValue(description)
+                    .setRequired(false)
+                    .setMaxLength(4000)
+                    .build();
+        }
+
+        Modal modal = Modal.create(ComponentId.EVENT_SETTINGS_MODAL_TITLE, "Nazwa i opis")
+                .addComponents(ActionRow.of(title), ActionRow.of(desc))
+                .build();
+        event.replyModal(modal).queue();
+        log.info("Opened modal to set title");
+    }
+
+    private void openModalDateTimme(StringSelectInteractionEvent event) {
+        TextInput date = TextInput.create(TEXT_INPUT_ID_1, "Data", TextInputStyle.SHORT)
+                .setPlaceholder("DD.MM.YYYY")
+                .setRequiredRange(9, 10)
+                .setRequired(true)
+                .build();
+
+
+        TextInput time = TextInput.create(TEXT_INPUT_ID_2, "Czas", TextInputStyle.SHORT)
+                .setPlaceholder("HH:mm")
+                .setRequiredRange(4, 5)
+                .setRequired(true)
+                .build();
+
+        if (this.event.getDate() != null) {
+            date = TextInput.create(TEXT_INPUT_ID_1, "Data", TextInputStyle.SHORT)
+                    .setPlaceholder("DD.MM.YYYY")
+                    .setValue(
+                            this.event.getDate().getDayOfMonth() + "." +
+                                    String.format("%02d", this.event.getDate().getMonthValue()) + "." +
+                                    this.event.getDate().getYear())
+                    .setRequiredRange(9, 10)
+                    .setRequired(true)
+                    .build();
+
+            time = TextInput.create(TEXT_INPUT_ID_2, "Czas", TextInputStyle.SHORT)
+                    .setPlaceholder("HH:mm")
+                    .setValue(this.event.getDate().getHour() + ":" + String.format("%02d", this.event.getDate().getMinute()))
+                    .setRequiredRange(4, 5)
+                    .setRequired(true)
+                    .build();
+        }
+
+        Modal modal = Modal.create(EVENT_SETTINGS_MODAL_DATE_TIME, "Data i czas")
+                .addComponents(ActionRow.of(date), ActionRow.of(time))
+                .build();
+        event.replyModal(modal).queue();
+        log.info("Opened modal to set time");
+    }
+
+    private boolean isSelectActiveEvent() {
+        for (Event activeEvent : activeEvents) {
+            if (activeEvent.getMsgId().equals(selectMenuValue)) {
+                this.event = activeEvent;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void buttonEvent(@NotNull ButtonInteractionEvent event) {
+        event.deferEdit().queue();
+        if (!event.getMessage().equals(message)) {
+            event.getMessage().delete().queue();
+            return;
+        }
+        String componentId = event.getComponentId();
+        log.info("Stage={}, buttonId={}", stageOfSettings, componentId);
+        switch (componentId) {
+            case EVENT_SETTINGS_BTN_BACK, EVENT_SETTINGS_GO_TO_START -> buttonBack();
+            case EVENT_SETTINGS_BTN_NEXT -> buttonNext();
+            case EVENT_SETTINGS_BTN_CANCEL -> buttonCancel();
+            default -> throw new NoSuchElementException("No such button - " + event.getComponentId());
+        }
+    }
+
+    private void buttonNext() {
+        switch (stageOfSettings) {
+            case START, EVENT_NOT_SELECTED -> {
+                if (isSelectActiveEvent()) {
+                    stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                } else {
+                    stageOfSettings = EventSettingsStatus.EVENT_NOT_SELECTED;
+                    message.editMessageEmbeds(getEmbed())
+                            .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+                }
+            }
+            case WHAT_TO_DO, DATE_TIME_TITLE_DESC_CHANGED -> {
+                if (selectMenuValue == null) {
+                    selectMenuValue = "";
+                }
+                if (selectMenuValue.equals(VALUE_SELECT_MENU_OPTION_3)) {
+                    setStageOfSettings(EventSettingsStatus.EVENT_CANCEL, true, true);
+                } else {
+                    if (isChangedDateTime || isChangedName || isChangedDescription) {
+                        setStageOfSettings(EventSettingsStatus.SEND_NOTIFI, true, true);
+                    } else {
+                        setStageOfSettings(EventSettingsStatus.DATE_TIME_TITLE_DESC_NOT_CHANGED, false, true);
+                    }
+                }
+            }
+            case DATE_TIME_NOT_CORRECT -> {
+
+            }
+            case EVENT_CANCEL, EVENT_CANCEL_NOT_SELECT -> {
+                if (selectMenuValue == null) {
+                    setStageOfSettings(EventSettingsStatus.EVENT_CANCEL_NOT_SELECT, true, true);
+                } else {
+                    if (selectMenuValue.equals(VALUE_SELECT_MENU_OPTION_1)) {
+                        isEndingEvent = true;
+                        setStageOfSettings(EventSettingsStatus.SEND_NOTIFI, true, true);
+                    } else if (selectMenuValue.equals(VALUE_SELECT_MENU_OPTION_2)) {
+                        if (isChangedDateTime || isChangedName || isChangedDescription) {
+                            setStageOfSettings(EventSettingsStatus.SEND_NOTIFI, true, true);
+                        } else {
+                            setStageOfSettings(EventSettingsStatus.END_NO_CHANGES, false, true);
+                        }
+                    }
+                }
+            }
+            case SEND_NOTIFI, SEND_NOTIFI_NOT_SELECT -> {
+                if (selectMenuValue == null) {
+                    setStageOfSettings(EventSettingsStatus.SEND_NOTIFI_NOT_SELECT, true, true);
+                } else {
+                    setStageOfSettings(EventSettingsStatus.END, false, true);
+                    if (selectMenuValue.equals(VALUE_SELECT_MENU_OPTION_1)) {
+                        sendNotifi = true;
+                    } else if (selectMenuValue.equals(VALUE_SELECT_MENU_OPTION_2)) {
+                        sendNotifi = false;
+                    }
+                    endingEditor();
+                    eventsSettingsService.removeSettingsPanel(userId);
+                }
+            }
+            case DATE_TIME_TITLE_DESC_NOT_CHANGED ->
+                    setStageOfSettings(EventSettingsStatus.END_NO_CHANGES, false, true);
+            default -> throw new IllegalStageException(stageOfSettings);
+        }
+        selectMenuValue = null;
+    }
+
+    private void buttonBack() {
+        switch (stageOfSettings) {
+            case START -> {
+                message.delete().queue();
+                eventsSettingsService.removeSettingsPanel(userId);
+            }
+            case WHAT_TO_DO, DATE_TIME_NOT_CORRECT, DATE_TIME_TITLE_DESC_CHANGED, END, END_NO_CHANGES -> {
+                activeEvents = eventService.findByIsActive();
+                if (activeEvents.isEmpty()) {
+                    setStageOfSettings(EventSettingsStatus.NO_EVENTS, false, false);
+                } else {
+                    event = null;
+                    description = "";
+                    isChangedDescription = false;
+                    isChangedName = false;
+                    isChangedDateTime = false;
+                    isEndingEvent = false;
+                    sendNotifi = false;
+                    setStageOfSettings(EventSettingsStatus.START, true, true);
+                }
+
+            }
+            case SEND_NOTIFI, DATE_TIME_TITLE_DESC_NOT_CHANGED, EVENT_CANCEL, EVENT_CANCEL_NOT_SELECT -> {
+                selectMenuValue = null;
+                setStageOfSettings(EventSettingsStatus.WHAT_TO_DO, true, true);
+
+            }
+            default -> throw new IllegalStageException(stageOfSettings);
+        }
+    }
+
+    private void buttonCancel() {
+        eventsSettingsService.removeSettingsPanel(userId);
+        cancel();
+    }
+
+    private void setStageOfSettings(EventSettingsStatus stage, boolean withSelectMenu, boolean withButtons) {
+        stageOfSettings = stage;
+        if (withSelectMenu && withButtons) {
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        } else if (withSelectMenu) {
+            message.editMessageEmbeds(getEmbed()).setComponents(ActionRow.of(getSelectMenu())).queue();
+        } else if (withButtons) {
+            message.editMessageEmbeds(getEmbed()).setComponents(ActionRow.of(getButtons())).queue();
+        } else {
+            message.editMessageEmbeds(getEmbed()).setComponents().queue();
+        }
+    }
+
+    public void submit(@NotNull ModalInteractionEvent event) {
+        selectMenuValue = null;
+        String modalId = event.getModalId();
+        event.getInteraction().deferEdit().queue();
+        switch (modalId) {
+            case EVENT_SETTINGS_MODAL_TITLE -> saveTitleAndDesc(event);
+            case EVENT_SETTINGS_MODAL_DATE_TIME -> saveDateTime(event);
+            default -> throw new IllegalStateException("modalId=" + modalId);
+        }
+    }
+
+    private void saveTitleAndDesc(@NotNull ModalInteractionEvent event) {
+        String title = Objects.requireNonNull(event.getValue(TEXT_INPUT_ID_1)).getAsString();
+        String desc = Objects.requireNonNull(event.getValue(TEXT_INPUT_ID_2)).getAsString();
+        this.event.setName(title);
+        description = desc;
+        isChangedDescription = true;
+        isChangedName = true;
+        stageOfSettings = EventSettingsStatus.DATE_TIME_TITLE_DESC_CHANGED;
+        message.editMessageEmbeds(getEmbed())
+                .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+        log.info("Saved title and description");
+    }
+
+    private void saveDateTime(@NotNull ModalInteractionEvent event) {
+        String date = Objects.requireNonNull(event.getValue(TEXT_INPUT_ID_1)).getAsString();
+        String time = Objects.requireNonNull(event.getValue(TEXT_INPUT_ID_2)).getAsString();
+        LocalDateTime dateTime = Converter.stringToLocalDateTime(date + " " + time);
+
+        if (Validator.isDateTimeAfterNow(dateTime)) {
+            this.event.setDate(dateTime);
+            isChangedDateTime = true;
+            stageOfSettings = EventSettingsStatus.DATE_TIME_TITLE_DESC_CHANGED;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            log.info("Saved date time");
+        } else {
+            stageOfSettings = EventSettingsStatus.DATE_TIME_NOT_CORRECT;
+            message.editMessageEmbeds(getEmbed())
+                    .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
+            stageOfSettings = EventSettingsStatus.WHAT_TO_DO;
+            log.info("Date time not correct {}", dateTime);
+        }
+
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     private void endingEditor() {
-        if (ifEndingEvent) {
+        if (isEndingEvent) {
             eventService.cancelEvent(event, sendNotifi);
         } else {
             if (isChangedDateTime || isChangedName || isChangedDescription) {
@@ -287,154 +591,19 @@ public class EventsSettings {
                         sendNotifi);
             }
         }
-        finishEditor();
     }
 
-    private void finishEditor() {
-        embedCloseEditor();
-        removeThisEditor();
-    }
-
-    private void removeThisEditor() {
-        int index = eventsSettingsService.userHaveActiveSettingsPanel(userID);
-        if (index >= 0) {
-            eventsSettingsService.removeSettingsPanel(index);
-        }
-    }
-
-    private void embedGetNameCorrect() {
-        embedPatternOneField(Color.RED, "Nieprawidłowa nazwa eventu", "");
-    }
-
-    private void embedGetDescriptionCorrect() {
-        embedPatternOneField(Color.RED, "Nieprawidłowy opis eventu", "");
-    }
-
-    private void embedCloseEditor() {
-        String title = "Zamykam edytor eventów.";
-        embedPatternOneField(Color.RED, title, "");
-    }
-
-    private void embedDoYouWantAnyChange() {
-        String title = "Czy chcesz wprowadzić jakieś zmiany do eventu?";
-        String description = "T - Tak\nN - Nie";
-        embedPatternOneField(Color.GREEN, title, description);
-    }
-
-    private void embedAnswerNotCorrect() {
-        String title = "Odpowiedź niepoprawna.";
-        embedPatternOneField(Color.RED, title, "");
-    }
-
-    private void embedSendNotifi() {
-        String title = "Czy wysłać powiadomienia do wszystkich zapisanych?";
-        String description = "T - Tak\nN - Nie";
-        embedPatternOneField(Color.GREEN, title, description);
-    }
-
-    private void embedTimeNotCorrect() {
-        String title = "Nieprawidłowy wprowadzony czas.";
-        String description = "Format: hh:mm";
-        embedPatternOneField(Color.RED, title, description);
-    }
-
-    private void embedDateNotCorrect() {
-        String title = "Nieprawidłowa wprowadzona data.";
-        String description = "Format: dd.mm.yyyy";
-        embedPatternOneField(Color.RED, title, description);
-    }
-
-    private void embedWrongWhatToDo() {
-        String title = "Wprowadzono błędną wartość.";
-        String description = "Wprowadź cyfrę z przed opisu zadania które chcesz wykonać.";
-        embedPatternOneField(Color.RED, title, description);
-    }
-
-    private void embedCancelEvent() {
-        String title = "Czy jestś pewien że chcesz odwołać event?";
-        String description = """
-                !!!UWAGA!!! - Odwołujesz event. Nie będzie możliwości odwrotu tego polecenia.
-                Nie będzie można aktywować zamkniętego eventu i zapisów na niego. Bądź pewny tego ruchu.
-
-                T - Tak
-                N - Nie""";
-        embedPatternOneField(Color.RED, title, description);
-    }
-
-
-    private void embedGetName() {
-        String title = "Podaj nową nazwę eventu";
-        String description = "Maksymalna liczba znaków - 256";
-        embedPatternOneField(Color.YELLOW, title, description);
-    }
-
-    private void embedGetDescription() {
-        String title = "Podaj nowy opis eventu";
-        String description = "Maksymalna liczba znaków - 2048";
-        embedPatternOneField(Color.YELLOW, title, description);
-    }
-
-    private void embedGetDate() {
-        String title = "Podaj nową datę dla eventu.";
-        String description = "Format: DD.MM.YYYY";
-        embedPatternOneField(Color.YELLOW, title, description);
-    }
-
-    private void embedGetTime() {
-        String title = "Podaj nowy czas rozpoczęcia dla eventu.";
-        String description = "Format: hh:mm";
-        embedPatternOneField(Color.YELLOW, title, description);
-    }
-
-    private void embedWhatToDo() {
-        String title = "Co chcesz zrobić?";
-        String description = """
-                1 - Zmień godzinę
-                2 - Zmień datę
-                3 - Zmień nazwę
-                4 - Zmień opis
-                8 - Odwołaj event
-                9 - Anuluj zmiany i zakończ edytowanie
-                0 - Zapisz i zakończ edytowanie.""";
-        embedPatternOneField(Color.YELLOW, title, description);
-    }
-
-
-    /**
-     * @param color       Kolor Embed - RED - Bład, YELLOW - Następny krok lub informacja
-     * @param title       Tytuł pola w embed.
-     * @param description Opis pola w embed
-     */
-    private void embedPatternOneField(Color color, String title, String description) {
-        User user = jda.getUserById(userID);
+    private @NotNull User getUserById(String userId) {
+        User user = DiscordBot.getJda().getUserById(userId);
         if (user != null) {
-            user.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(color);
-                builder.addField(title, description, false);
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
+            return user;
         } else {
-            finishEditor();
-            log.info("User is not exist");
             throw new IllegalArgumentException("User is not exist");
         }
     }
 
-    private void embedStart(@NotNull User user) {
-        user.openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("MENADŻER EVENTÓW");
-            builder.setColor(Color.YELLOW);
-            builder.setThumbnail(EmbedSettings.THUMBNAIL);
-            builder.setDescription("Cześć " + userName.toUpperCase() + ".\n" +
-                    "Wybierz event który chcesz edytować.\n\n" +
-                    getActiveEventsIndexAndName());
-            privateChannel.sendMessageEmbeds(builder.build()).queue();
-        });
+    public void cancel() {
+        setStageOfSettings(EventSettingsStatus.CANCEL, false, false);
     }
 
-    public boolean isPossiblyEditing() {
-        return true;
-    }
 }

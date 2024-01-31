@@ -1,13 +1,23 @@
 package pl.mbrzozowski.ranger.event;
 
 public enum EventSettingsStatus {
-    CHOOSE_EVENT,
+    START,
+    NO_EVENTS,
+    EVENT_NOT_SELECTED,
     WHAT_TO_DO,
+    EVENT_CANCEL,
+    EVENT_CANCEL_NOT_SELECT,
+    DATE_TIME_TITLE_DESC_CHANGED,
+    DATE_TIME_TITLE_DESC_NOT_CHANGED,
     SET_TIME,
     SET_DATE,
+    DATE_TIME_NOT_CORRECT,
     CANCEL_EVENT,
     SET_NAME,
     SET_DESCRIPTION,
     SEND_NOTIFI,
-    FINISH,
+    SEND_NOTIFI_NOT_SELECT,
+    END_NO_CHANGES,
+    END,
+    CANCEL,
 }

@@ -15,8 +15,12 @@ public class IllegalStageException extends RuntimeException {
         super(msg);
     }
 
-    public IllegalStageException(User user, EventGeneratorStatus stageOfGenerator) {
-        super(user + " - Stage(" + stageOfGenerator + ") - Generator stage cannot be selected");
+    public IllegalStageException(EventSettingsStatus stage) {
+        super("Stage - " + stage);
+    }
+
+    public IllegalStageException(EventGeneratorStatus stage) {
+        super("Stage - " + stage);
     }
 
     public IllegalStageException(User user, EventSettingsStatus stageOfSettings) {

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
+import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.role.Role;
@@ -23,14 +24,17 @@ public class SelectMenuListener extends ListenerAdapter {
     private final EventsGeneratorService eventsGeneratorService;
     private final RoleService roleService;
     private final GiveawayService giveawayService;
+    private final EventsSettingsService eventsSettingsService;
 
     @Autowired
     public SelectMenuListener(EventsGeneratorService eventsGeneratorService,
                               RoleService roleService,
-                              GiveawayService giveawayService) {
+                              GiveawayService giveawayService,
+                              EventsSettingsService eventsSettingsService) {
         this.eventsGeneratorService = eventsGeneratorService;
         this.roleService = roleService;
         this.giveawayService = giveawayService;
+        this.eventsSettingsService = eventsSettingsService;
     }
 
     @Override
@@ -59,6 +63,8 @@ public class SelectMenuListener extends ListenerAdapter {
             giveawayService.selectAnswer(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENT_GENERATOR_SELECT_MENU_PERM)) {
             eventsGeneratorService.selectAnswer(event);
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.EVENT_SETTINGS_SELECT_MENU)) {
+            eventsSettingsService.selectAnswer(event);
         }
     }
 }

@@ -74,7 +74,7 @@ public class WriteListener extends ListenerAdapter {
         RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
         AdminCommands adminCommands = new AdminCommands(guildMembersService);
-        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventService, eventsSettingsService);
+        EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventsSettingsService);
         DeveloperCmd developerCmd = new DeveloperCmd(eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd();
 

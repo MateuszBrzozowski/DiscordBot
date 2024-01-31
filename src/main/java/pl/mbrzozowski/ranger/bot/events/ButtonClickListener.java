@@ -159,7 +159,7 @@ public class ButtonClickListener extends ListenerAdapter {
                 event.getComponentId().substring(0, ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_CANCEL_SURE_YES)) {
             giveawayService.end(event, event.getComponentId().substring(ComponentId.GIVEAWAY_CANCEL_SURE_YES.length()), false);
         } else if (event.getComponentId().length() > ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length() &&
-                event.getComponentId().substring(0, ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_RE_ROLL_SURE_YES)) {
+                event.getComponentId().substring(0, ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length()).equalsIgnoreCase(ComponentId.GIVEAWAY_CANCEL_SURE_YES)) {
             giveawayService.reRoll(event, event.getComponentId().substring(ComponentId.GIVEAWAY_RE_ROLL_SURE_YES.length()));
         } else {
             eventsButtons(event);
@@ -194,10 +194,25 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void eventsGenerator(@NotNull ButtonInteractionEvent event) {
-        int indexOfGenerator = eventsGeneratorService.userHaveActiveGenerator(event.getUser().getId());
-        if (indexOfGenerator >= 0) {
-            event.deferEdit().queue();
-            eventsGeneratorService.saveAnswerAndNextStage(event, indexOfGenerator);
+        if (event.getComponentId().equals(ComponentId.EVENT_GENERATOR_BTN_BACK) ||
+                event.getComponentId().equals(ComponentId.EVENT_GENERATOR_BTN_NEXT) ||
+                event.getComponentId().equals(ComponentId.EVENT_GENERATOR_BTN_CANCEL) ||
+                event.getComponentId().equals(ComponentId.EVENT_GENERATOR_MODAL_TITLE) ||
+                event.getComponentId().equals(ComponentId.EVENT_GENERATOR_MODAL_TIME)) {
+//            event.deferEdit().queue();
+            eventsGeneratorService.buttonEvent(event);
+        } else {
+            eventSettings(event);
+        }
+    }
+
+    private void eventSettings(@NotNull ButtonInteractionEvent event) {
+        if (event.getComponentId().equals(ComponentId.EVENT_SETTINGS_BTN_BACK) ||
+                event.getComponentId().equals(ComponentId.EVENT_SETTINGS_BTN_NEXT) ||
+                event.getComponentId().equals(ComponentId.EVENT_SETTINGS_BTN_CANCEL) ||
+                event.getComponentId().equals(ComponentId.EVENT_SETTINGS_BTN_SAVE) ||
+                event.getComponentId().equals(ComponentId.EVENT_SETTINGS_GO_TO_START)) {
+            eventsSettingsService.buttonEvent(event);
         }
     }
 
