@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class SelectMenuOptionToLocalDateTime {
 
-    public static LocalDateTime addTime(@NotNull SelectMenuOption option, LocalDateTime startTime) {
+    public static LocalDateTime addTime(@NotNull SelectMenuOptionTime option, LocalDateTime startTime) {
         switch (option) {
             case MINUTE_1 -> {
                 return startTime.plusMinutes(1);
@@ -79,12 +79,12 @@ public class SelectMenuOptionToLocalDateTime {
 
     }
 
-    public static LocalDateTime getDate(@NotNull SelectMenuOption exactDate) {
+    public static LocalDateTime getDate(@NotNull SelectMenuOptionTime exactDate) {
         return exactDate.getDateTime();
     }
 
     @NotNull
-    public static LocalDateTime setTime(@NotNull SelectMenuOption option, LocalDateTime endTime) {
+    public static LocalDateTime setTime(@NotNull SelectMenuOptionTime option, LocalDateTime endTime) {
         switch (option) {
             case TIME_8, TIME_9, TIME_10, TIME_11, TIME_12, TIME_13, TIME_14, TIME_15, TIME_16, TIME_17,
                     TIME_18, TIME_19, TIME_20, TIME_21, TIME_22, TIME_23 -> {

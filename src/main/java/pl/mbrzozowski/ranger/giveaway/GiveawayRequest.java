@@ -1,25 +1,27 @@
 package pl.mbrzozowski.ranger.giveaway;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.Constants;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
 public class GiveawayRequest {
 
     private LocalDateTime startTime = LocalDateTime.now().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toLocalDateTime();
     private LocalDateTime endTime;
-    private SelectMenuOption timeDuration;
-    private SelectMenuOption exactDate;
-    private SelectMenuOption exactTime;
+    private SelectMenuOptionTime timeDuration;
+    private SelectMenuOptionTime exactDate;
+    private SelectMenuOptionTime exactTime;
     private boolean isClanMemberExclude;
     private String rulesLink = "";
     private boolean mentionEveryone = false;
+    private final TextChannel channelToPublish;
 
     public void setStartTime() {
         this.startTime = LocalDateTime.now().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toLocalDateTime();
@@ -34,11 +36,13 @@ public class GiveawayRequest {
         }
     }
 
-    public void setClanMemberExclude(@NotNull SelectMenuOption excludeClanMember) {
-        switch (excludeClanMember) {
-            case EXCLUDE_YES -> isClanMemberExclude = true;
-            case EXCLUDE_NO -> isClanMemberExclude = false;
-            default -> throw new IllegalArgumentException(excludeClanMember.name());
+    public void setClanMemberExclude(@NotNull List<SelectOption> selectOptions, @NotNull String selectedValue) {
+        if (selectedValue.equals(selectOptions.get(0).getValue())) {
+            isClanMemberExclude = true;
+        } else if (selectedValue.equals(selectOptions.get(1).getValue())) {
+            isClanMemberExclude = false;
+        } else {
+            throw new IllegalArgumentException("Selected value=" + selectedValue);
         }
     }
 

@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-enum SelectMenuOption {
+enum SelectMenuOptionTime {
 
-    DATE_TIME("Określę dokładną date i godzinę", "datetime"),
-    TIME_DURATION("Określę czas trwania", "timeDuration"),
-    MINUTE_1("1 minute", "1"), //2
+    MINUTE_1("1 minute", "1"), //0
     MINUTE_2("2 minuty", "2"),
     MINUTE_3("3 minuty", "3"),
     MINUTE_4("4 minuty", "4"),
@@ -34,7 +32,7 @@ enum SelectMenuOption {
     HOUR_1("1 godzinę", "20"),
     HOUR_2("2 godziny", "21"),
     HOUR_3("3 godziny", "22"),
-    DATE_TODAY(LocalDateTime.now()),//24
+    DATE_TODAY(LocalDateTime.now()),//22
     DATE_PLUS_1(LocalDateTime.now().plusDays(1)),
     DATE_PLUS_2(LocalDateTime.now().plusDays(2)),
     DATE_PLUS_3(LocalDateTime.now().plusDays(3)),
@@ -58,8 +56,8 @@ enum SelectMenuOption {
     DATE_PLUS_21(LocalDateTime.now().plusDays(21)),
     DATE_PLUS_22(LocalDateTime.now().plusDays(22)),
     DATE_PLUS_23(LocalDateTime.now().plusDays(23)),
-    DATE_PLUS_24(LocalDateTime.now().plusDays(24)), //48
-    TIME_8(LocalDateTime.now().withHour(8).withMinute(0).withSecond(0)), //49
+    DATE_PLUS_24(LocalDateTime.now().plusDays(24)), //46
+    TIME_8(LocalDateTime.now().withHour(8).withMinute(0).withSecond(0)), //47
     TIME_9(LocalDateTime.now().withHour(9).withMinute(0).withSecond(0)),
     TIME_10(LocalDateTime.now().withHour(10).withMinute(0).withSecond(0)),
     TIME_11(LocalDateTime.now().withHour(11).withMinute(0).withSecond(0)),
@@ -74,24 +72,20 @@ enum SelectMenuOption {
     TIME_20(LocalDateTime.now().withHour(20).withMinute(0).withSecond(0)),
     TIME_21(LocalDateTime.now().withHour(21).withMinute(0).withSecond(0)),
     TIME_22(LocalDateTime.now().withHour(22).withMinute(0).withSecond(0)),
-    TIME_23(LocalDateTime.now().withHour(23).withMinute(0).withSecond(0)),
-    ADD_PRIZE("Dodaj nagrodę", "addPrize"),
-    REMOVE_PRIZE("Usuń nagrodę", "removePrize"),
-    EXCLUDE_YES("Tak", "excludeYes"),
-    EXCLUDE_NO("Nie", "excludeNo");
+    TIME_23(LocalDateTime.now().withHour(23).withMinute(0).withSecond(0));
 
     private final String label;
     private final String value;
     private final LocalDateTime dateTime;
-    private static final SelectMenuOption[] ENUMS = SelectMenuOption.values();
+    private static final SelectMenuOptionTime[] ENUMS = SelectMenuOptionTime.values();
 
-    SelectMenuOption(String label, String value) {
+    SelectMenuOptionTime(String label, String value) {
         this.label = label;
         this.value = value;
         this.dateTime = LocalDateTime.now();
     }
 
-    SelectMenuOption(@NotNull LocalDateTime dateTime) {
+    SelectMenuOptionTime(@NotNull LocalDateTime dateTime) {
         this.label = dateTime.getDayOfMonth() + "." + String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear();
         this.value = dateTime.getDayOfYear() + "H" + dateTime.hashCode();
         this.dateTime = dateTime;
@@ -110,8 +104,8 @@ enum SelectMenuOption {
     }
 
     @NotNull
-    public static SelectMenuOption getByValue(String value) {
-        for (SelectMenuOption option : ENUMS) {
+    public static SelectMenuOptionTime getByValue(String value) {
+        for (SelectMenuOptionTime option : ENUMS) {
             if (option.value.equalsIgnoreCase(value)) {
                 return option;
             }
@@ -122,7 +116,7 @@ enum SelectMenuOption {
     @NotNull
     public static Collection<? extends SelectOption> getDurationTimes() {
         List<SelectOption> selectOptions = new ArrayList<>();
-        for (int i = 2; i <= 23; i++) {
+        for (int i = 0; i <= 21; i++) {
             SelectOption of = SelectOption.of(ENUMS[i].getLabel(), ENUMS[i].getValue());
             selectOptions.add(of);
         }
@@ -132,7 +126,7 @@ enum SelectMenuOption {
     @NotNull
     public static Collection<? extends SelectOption> getDays() {
         List<SelectOption> selectOptions = new ArrayList<>();
-        for (int i = 24; i <= 48; i++) {
+        for (int i = 22; i <= 46; i++) {
             SelectOption of = SelectOption.of(ENUMS[i].getLabel(), ENUMS[i].getValue());
             selectOptions.add(of);
         }
@@ -142,7 +136,7 @@ enum SelectMenuOption {
     @NotNull
     public static Collection<? extends SelectOption> getHours() {
         List<SelectOption> selectOptions = new ArrayList<>();
-        for (int i = 49; i <= 64; i++) {
+        for (int i = 47; i <= 62; i++) {
             String hour = String.valueOf(ENUMS[i].getDateTime().getHour());
             String minute = String.format("%02d", ENUMS[i].getDateTime().getMinute());
             String label = hour + ":" + minute;
@@ -150,29 +144,5 @@ enum SelectMenuOption {
             selectOptions.add(of);
         }
         return selectOptions;
-    }
-
-    @NotNull
-    public static Collection<? extends SelectOption> getTimeMode() {
-        return new ArrayList<>
-                (List.of(SelectOption.of(DATE_TIME.getLabel(), DATE_TIME.getValue()),
-                        SelectOption.of(TIME_DURATION.getLabel(), TIME_DURATION.getValue())));
-
-    }
-
-    @NotNull
-    public static Collection<? extends SelectOption> getPrize() {
-        return new ArrayList<>(
-                List.of(SelectOption.of(ADD_PRIZE.getLabel(), ADD_PRIZE.getValue()),
-                        SelectOption.of(REMOVE_PRIZE.getLabel(), REMOVE_PRIZE.getValue()))
-        );
-    }
-
-    @NotNull
-    public static Collection<? extends SelectOption> getExclude() {
-        return new ArrayList<>(
-                List.of(SelectOption.of(EXCLUDE_YES.getLabel(), EXCLUDE_YES.getValue()),
-                        SelectOption.of(EXCLUDE_NO.getLabel(), EXCLUDE_NO.getValue()))
-        );
     }
 }
