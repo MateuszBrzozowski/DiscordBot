@@ -18,9 +18,9 @@ public class InvalidCmd extends Proccess {
                             **!event** - otwiera generator eventów.
                             **!eventsEdit** - edytowanie aktywnych eventów.
                             Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**""")
-                    .queue(message1 -> log.info("{} - misunderstood message", event.getAuthor())));
+                    .queue(message1 -> log.info("{}, {}, {} - misunderstood message", privateChannel, privateChannel.getUser(), event.getMessage().getContentRaw())));
             return;
         }
-        log.error("{} - misunderstood message or user is null", event.getAuthor());
+        log.error("{}, {}, {} - misunderstood message or user is null", event.getChannel(), event.getAuthor(), event.getMessage().getContentRaw());
     }
 }
