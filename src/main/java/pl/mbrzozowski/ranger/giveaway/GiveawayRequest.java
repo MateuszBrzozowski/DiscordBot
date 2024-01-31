@@ -18,6 +18,8 @@ public class GiveawayRequest {
     private SelectMenuOption exactDate;
     private SelectMenuOption exactTime;
     private boolean isClanMemberExclude;
+    private String rulesLink = "";
+    private boolean mentionEveryone = false;
 
     public void setStartTime() {
         this.startTime = LocalDateTime.now().atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toLocalDateTime();
@@ -53,6 +55,7 @@ public class GiveawayRequest {
         giveaway.setEndTime(endTime);
         giveaway.setClanMemberExclude(isClanMemberExclude);
         giveaway.setActive(true);
+        giveaway.setRulesLink(rulesLink);
         return giveaway;
     }
 

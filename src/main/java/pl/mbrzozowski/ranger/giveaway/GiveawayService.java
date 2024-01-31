@@ -108,7 +108,8 @@ public class GiveawayService {
         giveawayGenerator.submit(event);
     }
 
-    void publishOnChannel(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, List<Prize> prizes) {
+    void publishOnChannel(@NotNull TextChannel textChannel, @NotNull GiveawayRequest giveawayRequest, List<Prize> prizes) {
+        Giveaway giveaway = giveawayRequest.getGiveaway();
         validateGeneratorOutput(giveaway, prizes);
         for (Prize prize : prizes) {
             prize.setGiveaway(giveaway);
@@ -116,7 +117,7 @@ public class GiveawayService {
         giveaway.setPrizes(prizes);
         giveaway.setChannelId(textChannel.getId());
         EmbedBuilder builder = createEmbed(giveaway, prizes);
-        sendEmbed(textChannel, giveaway, builder);
+        sendEmbed(textChannel, giveaway, builder, giveawayRequest.isMentionEveryone());
     }
 
     private void setTimerToEnding(@NotNull Giveaway giveaway) {
@@ -147,8 +148,8 @@ public class GiveawayService {
         }
     }
 
-    private void sendEmbed(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, @NotNull EmbedBuilder builder) {
-        textChannel.sendMessageEmbeds(builder.build()).queue(message -> {
+    private void sendEmbed(@NotNull TextChannel textChannel, @NotNull Giveaway giveaway, @NotNull EmbedBuilder builder, boolean mentionEveryone) {
+        textChannel.sendMessage("@ - everyone").setEmbeds(builder.build()).queue(message -> {
             MessageEmbed messageEmbed = message.getEmbeds().get(0);
             message.editMessageEmbeds(messageEmbed).setActionRow(Button.success(ComponentId.GIVEAWAY_SIGN_IN + message.getId(), "Zapisz się")).queue();
             giveaway.setMessageId(message.getId());

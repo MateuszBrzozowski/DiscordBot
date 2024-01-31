@@ -1,6 +1,9 @@
 package pl.mbrzozowski.ranger.giveaway;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -22,6 +25,8 @@ public class Giveaway {
     private String channelId;
     private String messageId;
     private boolean isClanMemberExclude;
+    @Column(length = 1024)
+    private String rulesLink;
     @ToString.Exclude
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "giveaway", cascade = CascadeType.ALL, orphanRemoval = true)

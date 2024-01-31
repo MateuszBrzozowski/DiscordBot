@@ -48,8 +48,8 @@ public class GiveawayGenerator {
     private Message message;
     private String selectMenuValue;
     private GiveawayGeneratorStage stage = TIME_MODE;
-    private String rulesLink = "";
-    private boolean mentionEveryone = false;
+//    private String rulesLink = "";
+//    private boolean mentionEveryone = false;
 
     public GiveawayGenerator(User user, TextChannel channel, GiveawayService giveawayService) {
         log.info("{} - Open giveaway generator", user);
@@ -113,8 +113,8 @@ public class GiveawayGenerator {
                 if (!prizes.isEmpty()) {
                     builder.addField("Nagrody:", getPrizesDescription(prizes), false);
                 }
-                if (StringUtils.isNotBlank(rulesLink)) {
-                    builder.addField("", "[Regulamin](" + rulesLink + ")", false);
+                if (StringUtils.isNotBlank(giveawayRequest.getRulesLink())) {
+                    builder.addField("", "[Regulamin](" + giveawayRequest.getRulesLink() + ")", false);
                 }
                 builder.addField("", "- Dodaj regulamin (opcjonalnie)", false);
             }
@@ -335,14 +335,14 @@ public class GiveawayGenerator {
                 case RULES, RULES_NOT_CORRECT -> openModalRulesLink(event);
                 case PING -> {
                     event.getInteraction().deferEdit().queue();
-                    mentionEveryone = true;
+                    giveawayRequest.setMentionEveryone(true);
                 }
                 default -> throw new IllegalStageException(stage);
             }
 
         } else if (selectMenuValue.equals(SELECT_MENU_OPTION_2)) {
             event.getInteraction().deferEdit().queue();
-            mentionEveryone = false;
+            giveawayRequest.setMentionEveryone(false);
         } else if (selectMenuValue.equals(SelectMenuOption.ADD_PRIZE.getValue())) {
             if (prizes.size() < MAX_NUMBER_OF_PRIZE) {
                 openModalToAddPrize(event);
@@ -370,10 +370,10 @@ public class GiveawayGenerator {
                 .setRequired(false)
                 .setMaxLength(1024)
                 .build();
-        if (StringUtils.isNotBlank(rulesLink)) {
+        if (StringUtils.isNotBlank(giveawayRequest.getRulesLink())) {
             link = TextInput.create(MODAL_INPUT_1, "Link", TextInputStyle.SHORT)
                     .setPlaceholder("Link (http://example.com)")
-                    .setValue(rulesLink)
+                    .setValue(giveawayRequest.getRulesLink())
                     .setRequired(false)
                     .setMaxLength(1024)
                     .build();
@@ -540,7 +540,7 @@ public class GiveawayGenerator {
                 if (giveawayRequest.isEndTimeAfterNow()) {
                     setMessageEmbed(END, 0);
                     Giveaway giveaway = giveawayRequest.getGiveaway();
-                    giveawayService.publishOnChannel(channelToPublish, giveaway, prizes);
+                    giveawayService.publishOnChannel(channelToPublish, giveawayRequest, prizes);
                 } else {
                     setMessageEmbed(CANNOT_END, 1);
                 }
@@ -560,13 +560,13 @@ public class GiveawayGenerator {
 
     private void submitRulesLink(@NotNull ModalInteractionEvent event) {
         event.deferEdit().queue();
-        rulesLink = Objects.requireNonNull(event.getValue(MODAL_INPUT_1)).getAsString();
-        if (rulesLink.startsWith("http://") || rulesLink.startsWith("https://")) {
+        giveawayRequest.setRulesLink(Objects.requireNonNull(event.getValue(MODAL_INPUT_1)).getAsString());
+        if (giveawayRequest.getRulesLink().startsWith("http://") || giveawayRequest.getRulesLink().startsWith("https://")) {
             stage = RULES;
             message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
         } else {
-            rulesLink = "";
+            giveawayRequest.setRulesLink("");
             stage = RULES_NOT_CORRECT;
             message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
