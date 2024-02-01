@@ -5,21 +5,21 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
-import pl.mbrzozowski.ranger.helpers.RoleID;
-import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
+import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -32,6 +32,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
+import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
+import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
+
 @Service
 @Slf4j
 public class RecruitsService {
@@ -40,11 +43,15 @@ public class RecruitsService {
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RecruitRepository recruitRepository;
     private final RecruitBlackListRepository recruitBlackListRepository;
+    private final WaitingRecruitRepository waitingRecruitRepository;
     private final int MAX_CHANNELS = 50;
 
-    public RecruitsService(RecruitRepository recruitRepository, RecruitBlackListRepository recruitBlackListRepository) {
+    public RecruitsService(RecruitRepository recruitRepository,
+                           RecruitBlackListRepository recruitBlackListRepository,
+                           WaitingRecruitRepository waitingRecruitRepository) {
         this.recruitRepository = recruitRepository;
         this.recruitBlackListRepository = recruitBlackListRepository;
+        this.waitingRecruitRepository = waitingRecruitRepository;
     }
 
     /**
@@ -85,21 +92,19 @@ public class RecruitsService {
     public void sendWelcomeMessage(String userID, @NotNull TextChannel textChannel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.GREEN);
-        builder.addField("Obowiązkowo:",
-                """
-                        **1. Uzupełnij formularz rekrutacyjny:**
-                        https://forms.gle/fbTQSdxBVq3zU7FW9
+        builder.setDescription("## Obowiązkowo:");
+        builder.addField("", """
+                        **1. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
+                        > [Manual](https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view)\s
 
-                        **2. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
-                        https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view
+                        **2. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**\s
+                        > [Poradnik](https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717)
 
-                        **3. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**
-                        https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717""",
+                        **3. TeamSpeak3:**
+                        ```fix
+                         ts.rangerspolska.pl:6969
+                        ```""",
                 false);
-        builder.addField("", "", false);
-        builder.addField("TeamSpeak3:", "ts.rangerspolska.pl:6969", false);
-        builder.addField("", "Po wypełnieniu formularza skontaktuje się z Tobą <@&" + RoleID.DRILL_INSTRUCTOR_ID +
-                "> w celu umówienia terminu rozmowy rekrutacyjnej.", false);
         textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
                         "<@&" + RoleID.HEAD_DRILL_INSTRUCTOR_ID + ">\n" +
                         "<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
@@ -115,28 +120,33 @@ public class RecruitsService {
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
         log.info(event.getUser() + " - New recruit application");
-        String userID = event.getUser().getId();
-        if (Users.memberOnGuildShorterThan(userID, 10)) {
+        String userId = event.getUser().getId();
+        if (Users.memberOnGuildShorterThan(userId, 10)) {
             ResponseMessage.noReqTimeOnServer(event);
             return;
         }
-        if (hasRecruitChannel(userID)) {
-            ResponseMessage.userHaveRecruitChannel(event);
-            return;
-        }
-        if (isMaxRecruits()) {
-            ResponseMessage.maxRecruits(event);
-            return;
-        }
-        if (userBlackList(userID)) {
-            ResponseMessage.userBlackList(event);
-            return;
-        }
-        if (Users.hasUserRole(userID, RoleID.CLAN_MEMBER_ID)) {
+        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
             ResponseMessage.userIsInClanMember(event);
             return;
         }
+        if (hasRecruitChannel(userId)) {
+            ResponseMessage.userHaveRecruitChannel(event);
+            return;
+        }
+        if (userBlackList(userId)) {
+            ResponseMessage.userBlackList(event);
+            return;
+        }
+        if (isAwaitingToConfirmForm(userId)) {
+            ResponseMessage.awaitingConfirmForm(event);
+            return;
+        }
         confirmMessage(event);
+    }
+
+    private boolean isAwaitingToConfirmForm(String userId) {
+        Optional<WaitingRecruit> optionalWaitingRecruit = waitingRecruitRepository.findByUserId(userId);
+        return optionalWaitingRecruit.isPresent();
     }
 
     private boolean userBlackList(String userID) {
@@ -161,27 +171,49 @@ public class RecruitsService {
     }
 
     private void confirmMessage(@NotNull ButtonInteractionEvent event) {
-        event.reply("""
-                        **Potwierdź czy chcesz złożyć podanie?**
-
-                        Po potwierdzeniu poprosimy o wypełnienie krótkiego formularza.
-                        Następnie skontaktuję się z Tobą jeden z naszych Drillów.""")
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setDescription("## Formularz rekrutacyjny\n" +
+                "- Uzupełnij formularz rekrutacyjny z linku poniżej.\n" +
+                "- Potwierdź przesłany formularz poniższym przyciskiem.\n" +
+                "- Po zweryfikowaniu Twojego formularza zostanie utworzony kanał rekrutacyjny i skontaktuje się z Tobą jeden z naszych <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">");
+        builder.addField("", "**[Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform)**", false);
+        event.replyEmbeds(builder.build()).setComponents(
+                        ActionRow.of(Button.success(CONFIRM_FORM_SEND + event.getUser().getId(), "Potwierdzam wysłanie formularza")))
                 .setEphemeral(true)
-                .addActionRow(
-                        Button.success(ComponentId.NEW_RECRUT_CONFIRM, "Potwierdzam")
-                )
-                .queue(m -> log.info("{} - confirm message", event.getUser()));
+                .queue();
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
-        if (!hasRecruitChannel(event.getUser().getId())) {
-            String userID = event.getUser().getId();
-            String userName = Users.getUserNicknameFromID(userID);
-            createChannelForNewRecruit(userName, userID);
-            event.deferEdit().queue();
-        } else {
-            ResponseMessage.userHaveRecruitChannel(event);
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setDescription("## Formularz rekrutacyjny");
+        builder.setColor(Color.GREEN);
+        builder.addField("Dziękujemy za przesłany formularz", "Oczekuj na utworzenie kanału rekrutacyjnego i kontakt od naszego <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> ", false);
+        event.getInteraction().deferEdit().queue();
+        event.getMessage().editMessageEmbeds(builder.build()).setComponents().queue();
+        WaitingRecruit waitingRecruit = new WaitingRecruit(event.getUser().getId());
+        save(waitingRecruit);
+        sendInformationAboutNewForm(event);
+    }
+
+    private void sendInformationAboutNewForm(@NotNull ButtonInteractionEvent event) {
+        String userId = event.getComponentId().substring(CONFIRM_FORM_SEND.length());
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        if (textChannel == null) {
+            throw new IllegalStateException("Text channel not exist id=" + CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         }
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.YELLOW);
+        builder.setDescription("## Nowy formularz\n" +
+                Converter.LocalDateTimeToTimestampDateTimeLongFormat(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))));
+        builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
+                "Server nickname: " + Users.getUserNicknameFromID(userId), false);
+        builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
+        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+                .setEmbeds(builder.build())
+                .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
+                        Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
+                .queue();
     }
 
     private boolean hasRecruitChannel(String userId) {
@@ -200,6 +232,14 @@ public class RecruitsService {
 
     public List<Recruit> findAllWithChannel() {
         return recruitRepository.findAllWithChannelId();
+    }
+
+    private void save(WaitingRecruit waitingRecruit) {
+        waitingRecruitRepository.save(waitingRecruit);
+    }
+
+    private void deleteByUserId(String userId) {
+        waitingRecruitRepository.deleteByUserId(userId);
     }
 
     private void add(String userId, String userName, String channelID) {
@@ -537,4 +577,54 @@ public class RecruitsService {
         }
     }
 
+    public void confirmFormReceived(@NotNull ButtonInteractionEvent event) {
+        boolean maxRecruits = isMaxRecruits();
+        if (maxRecruits) {
+            MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
+            EmbedBuilder builder = new EmbedBuilder(messageEmbed);
+            builder.setColor(new Color(255, 116, 0));
+            List<Field> fields = builder.getFields();
+            if (fields.size() >= 3) {
+                fields.remove(2);
+            }
+            builder.addField("", "**Osiągnięto maksymalną liczbę kanałów rekrutacyjnych**", false);
+            event.editMessageEmbeds(builder.build()).queue();
+            return;
+        }
+        String userId = event.getComponentId().substring(CONFIRM_FORM_RECEIVED.length());
+        String nickname = Users.getUserNicknameFromID(userId);
+        MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
+        EmbedBuilder builder = new EmbedBuilder(messageEmbed);
+        builder.setColor(Color.GREEN);
+        List<Field> fields = builder.getFields();
+        if (fields.size() >= 2) {
+            fields.remove(1);
+            if (fields.size() >= 3) {
+                fields.remove(2);
+            }
+        }
+        builder.addField("", "**POTWIERDZONO**", false);
+        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(event.getUser().getId()));
+        event.editMessageEmbeds(builder.build()).setComponents().queue();
+        createChannelForNewRecruit(nickname, userId);
+        deleteByUserId(userId);
+    }
+
+    public void declineForm(@NotNull ButtonInteractionEvent event) {
+        MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
+        EmbedBuilder builder = new EmbedBuilder(messageEmbed);
+        builder.setColor(Color.RED);
+        List<Field> fields = builder.getFields();
+        if (fields.size() >= 2) {
+            fields.remove(1);
+            if (fields.size() >= 3) {
+                fields.remove(2);
+            }
+        }
+        builder.addField("", "**ODRZUCONO**", false);
+        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(event.getUser().getId()));
+        event.editMessageEmbeds(builder.build()).setComponents().queue();
+        String userId = event.getComponentId().substring(DECLINE_FORM_SEND.length());
+        deleteByUserId(userId);
+    }
 }

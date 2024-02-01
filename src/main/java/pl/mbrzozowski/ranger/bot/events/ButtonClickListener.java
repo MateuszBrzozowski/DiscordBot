@@ -60,6 +60,15 @@ public class ButtonClickListener extends ListenerAdapter {
             recruitsService.newPodanie(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
             recruitsService.confirm(event);
+        } else if (event.getComponentId().length() > ComponentId.CONFIRM_FORM_SEND.length() &&
+                event.getComponentId().startsWith(ComponentId.CONFIRM_FORM_SEND)) {
+            recruitsService.confirm(event);
+        } else if (event.getComponentId().length() > ComponentId.CONFIRM_FORM_RECEIVED.length() &&
+                event.getComponentId().startsWith(ComponentId.CONFIRM_FORM_RECEIVED)) {
+            recruitsService.confirmFormReceived(event);
+        } else if (event.getComponentId().length() > ComponentId.DECLINE_FORM_SEND.length() &&
+                event.getComponentId().startsWith(ComponentId.DECLINE_FORM_SEND)) {
+            recruitsService.declineForm(event);
         } else {
             recruitChannelReaction(event, isAdmin);
         }
@@ -71,9 +80,9 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
             recruitsService.recruitNotAccepted(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
-            recruitsService.positiveResult(event,isAdmin);
+            recruitsService.positiveResult(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
-            recruitsService.negativeResult(event,isAdmin);
+            recruitsService.negativeResult(event, isAdmin);
         } else {
             serverServiceReport(event, isAdmin);
         }

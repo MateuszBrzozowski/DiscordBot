@@ -22,6 +22,7 @@ import pl.mbrzozowski.ranger.giveaway.Prize;
 import pl.mbrzozowski.ranger.members.InOutGuildMembers;
 import pl.mbrzozowski.ranger.recruit.Recruit;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackList;
+import pl.mbrzozowski.ranger.recruit.WaitingRecruit;
 import pl.mbrzozowski.ranger.role.Role;
 import pl.mbrzozowski.ranger.server.service.Client;
 
@@ -70,7 +71,8 @@ public class MainDataSourceConfiguration {
                         InOutGuildMembers.class,
                         Giveaway.class,
                         GiveawayUser.class,
-                        Prize.class)
+                        Prize.class,
+                        WaitingRecruit.class)
                 .properties(properties)
                 .build();
     }

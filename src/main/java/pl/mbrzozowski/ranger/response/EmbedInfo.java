@@ -29,9 +29,9 @@ public class EmbedInfo extends EmbedCreator {
 
     public static void recruiter(@NotNull MessageReceivedEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
-        builder.setTitle("PODANIE");
-        builder.addField("", "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
-                "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością. \n", false);
+        builder.setDescription("# Podanie\n" +
+                "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
+                "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością.");
         builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
         builder.addField("Wymagamy", """
                 - podstawowa znajomość zasad rozgrywki w Squad

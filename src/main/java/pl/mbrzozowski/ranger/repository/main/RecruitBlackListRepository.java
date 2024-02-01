@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface RecruitBlackListRepository extends JpaRepository<RecruitBlackList, Long> {
 
-    Optional<RecruitBlackList> findByUserId(String userID);
+    Optional<RecruitBlackList> findByUserId(String userId);
 }

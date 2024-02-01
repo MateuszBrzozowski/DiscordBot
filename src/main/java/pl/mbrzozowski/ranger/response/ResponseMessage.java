@@ -83,21 +83,11 @@ public class ResponseMessage {
                 .queue();
     }
 
-    public static void maxRecruits(@NotNull ButtonInteractionEvent event) {
-        event.reply("**REKRUTACJA DO KLANU RANGERS POLSKA TYMCZASOWO ZAMKNIĘTA!**")
-                .setEphemeral(true)
-                .queue(m -> log.warn("{} - maximum number of channels in recruit category", event.getUser()));
-        RangerLogger.info("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
-                "Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
-                "Maksymalna liczba kanałów w kategorii StrefaRekruta.");
-    }
-
     public static void userBlackList(@NotNull ButtonInteractionEvent event) {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user on black list", event.getUser()));
-        RangerLogger.info("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> " +
-                "Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
+        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
                 "Jest na czarnej liście.");
     }
 
@@ -291,5 +281,11 @@ public class ResponseMessage {
 
     public static void giveawayNotPossibleReRoll(@NotNull ButtonInteractionEvent event) {
         event.reply("Giveaway zakończony").setEphemeral(true).queue();
+    }
+
+    public static void awaitingConfirmForm(@NotNull ButtonInteractionEvent event) {
+        event.reply("**Jeżeli wysłałeś formularz oczekuj na zatwierdzenie przez <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">**")
+                .setEphemeral(true)
+                .queue(m -> log.info("{} - user waiting to confirm form", event.getUser()));
     }
 }
