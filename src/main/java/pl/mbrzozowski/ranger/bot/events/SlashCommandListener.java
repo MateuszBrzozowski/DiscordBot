@@ -115,6 +115,8 @@ public class SlashCommandListener extends ListenerAdapter {
             giveawayService.reRoll(event);
         } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED)) {
             eventService.fixEmbed(event);
+        } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
+            giveawayService.fixEmbed(event);
         } else if (name.equalsIgnoreCase(EVENT_CREATE)) {
             eventsGeneratorService.createGenerator(event, eventService);
         } else if (name.equalsIgnoreCase(EVENT_SETTINGS)) {
@@ -139,6 +141,9 @@ public class SlashCommandListener extends ListenerAdapter {
         commandData.add(Commands.slash(GIVEAWAY_RE_ROLL, "Losowanie nagród dla zakończonego giveawaya")
                 .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
         commandData.add(Commands.slash(FIX_EVENT_EMBED, "Przywraca embed dla eventu")
+                .addOption(OptionType.STRING, "id", "id wiadomości", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED, "Przywraca embed dla giveawaya")
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(Commands.slash(EVENT_CREATE, "Otwiera generator eventów"));
