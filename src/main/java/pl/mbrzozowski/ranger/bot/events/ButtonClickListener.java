@@ -67,33 +67,13 @@ public class ButtonClickListener extends ListenerAdapter {
 
     private void recruitChannelReaction(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_ACCEPTED)) {
-            if (isAdmin) {
-                recruitsService.accepted(event);
-            } else {
-                ResponseMessage.noPermission(event);
-            }
+            recruitsService.accepted(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NOT_ACCEPTED)) {
-            if (isAdmin) {
-                recruitsService.recruitNotAccepted(event);
-            } else {
-                ResponseMessage.noPermission(event);
-            }
+            recruitsService.recruitNotAccepted(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_POSITIVE)) {
-            if (isAdmin) {
-                if (!recruitsService.positiveResult(event)) {
-                    ResponseMessage.operationNotPossible(event);
-                }
-            } else {
-                ResponseMessage.noPermission(event);
-            }
+            recruitsService.positiveResult(event,isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.RECRUIT_NEGATIVE)) {
-            if (isAdmin) {
-                if (!recruitsService.negativeResult(event)) {
-                    ResponseMessage.operationNotPossible(event);
-                }
-            } else {
-                ResponseMessage.noPermission(event);
-            }
+            recruitsService.negativeResult(event,isAdmin);
         } else {
             serverServiceReport(event, isAdmin);
         }
@@ -203,7 +183,6 @@ public class ButtonClickListener extends ListenerAdapter {
                 event.getComponentId().equals(ComponentId.EVENT_GENERATOR_BTN_CANCEL) ||
                 event.getComponentId().equals(ComponentId.EVENT_GENERATOR_MODAL_TITLE) ||
                 event.getComponentId().equals(ComponentId.EVENT_GENERATOR_MODAL_TIME)) {
-//            event.deferEdit().queue();
             eventsGeneratorService.buttonEvent(event);
         } else {
             eventSettings(event);

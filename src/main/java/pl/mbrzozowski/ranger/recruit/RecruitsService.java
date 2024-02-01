@@ -278,39 +278,66 @@ public class RecruitsService {
             return;
         }
         Recruit recruit = recruitOptional.get();
-        if (recruit.getStartRecruitment() != null) {
-            ResponseMessage.recruitHasBeenAccepted(event);
-            return;
-        } else if (recruit.getRecruitmentResult() != null) {
-            ResponseMessage.recruitHasBeenRejected(event);
+        if (validToAccept(event, recruit)) {
             return;
         }
+        event.deferEdit().queue();
         addRoleRecruit(recruit.getUserId());
         addRecruitTag(event.getGuild(), recruit.getUserId());
         setYellowCircleInChannelName(event.getChannel().asTextChannel());
         EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
         recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruitRepository.save(recruit);
-        event.deferEdit().queue();
         log.info("{} - accepted recruit (channelId={}, channelName={})",
                 event.getUser(),
                 event.getChannel().getId(),
                 event.getChannel().getName());
     }
 
-    public boolean positiveResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        boolean result = positiveResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
-        if (result) {
-            interactionEvent.deferEdit().queue();
-            log.info(interactionEvent.getUser() + " - Send positive result for recruit");
+    private boolean validToAccept(@NotNull ButtonInteractionEvent event, @NotNull Recruit recruit) {
+        if (recruit.getStartRecruitment() != null) {
+            ResponseMessage.recruitHasBeenAccepted(event);
+            return true;
+        } else if (recruit.getRecruitmentResult() != null) {
+            ResponseMessage.recruitHasBeenRejected(event);
+            return true;
         }
-        return result;
+        return false;
+    }
+
+    public void accepted(@NotNull ButtonInteractionEvent event, final boolean isAdmin) {
+        if (isAdmin) {
+            accepted(event);
+        } else {
+            ResponseMessage.noPermission(event);
+        }
+    }
+
+    public void positiveResult(@NotNull ButtonInteractionEvent event) {
+        boolean result = positiveResult(event.getUser().getId(), event.getChannel().asTextChannel());
+        if (result) {
+            event.deferEdit().queue();
+            log.info(event.getUser() + " - Send positive result for recruit");
+        } else {
+            ResponseMessage.operationNotPossible(event);
+        }
+    }
+
+    public void positiveResult(@NotNull ButtonInteractionEvent event, final boolean isAdmin) {
+        if (isAdmin) {
+            positiveResult(event);
+        } else {
+            ResponseMessage.noPermission(event);
+        }
     }
 
     public boolean positiveResult(String drillId, @NotNull TextChannel channel) {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
+            if (recruit.getStartRecruitment() == null) {
+                return false;
+            }
             if (recruit.getEndRecruitment() == null
                     && recruit.getRecruitmentResult() == null) {
                 Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
@@ -330,19 +357,31 @@ public class RecruitsService {
         return false;
     }
 
-    public boolean negativeResult(@NotNull ButtonInteractionEvent interactionEvent) {
-        boolean result = negativeResult(interactionEvent.getUser().getId(), interactionEvent.getChannel().asTextChannel());
+    public void negativeResult(@NotNull ButtonInteractionEvent event) {
+        boolean result = negativeResult(event.getUser().getId(), event.getChannel().asTextChannel());
         if (result) {
-            interactionEvent.deferEdit().queue();
-            log.info(interactionEvent.getUser() + " - Send negative result for recruit");
+            event.deferEdit().queue();
+            log.info(event.getUser() + " - Send negative result for recruit");
+        } else {
+            ResponseMessage.operationNotPossible(event);
         }
-        return result;
+    }
+
+    public void negativeResult(@NotNull ButtonInteractionEvent event, final boolean isAdmin) {
+        if (isAdmin) {
+            negativeResult(event);
+        } else {
+            ResponseMessage.noPermission(event);
+        }
     }
 
     public boolean negativeResult(String drillId, @NotNull TextChannel channel) {
         Optional<Recruit> recruitOptional = findByChannelId(channel.getId());
         if (recruitOptional.isPresent()) {
             Recruit recruit = recruitOptional.get();
+            if (recruit.getStartRecruitment() == null) {
+                return false;
+            }
             if (recruit.getEndRecruitment() == null && recruit.getRecruitmentResult() == null) {
                 Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
                 if (guild != null) {
@@ -436,36 +475,44 @@ public class RecruitsService {
 
     public void recruitNotAccepted(@NotNull ButtonInteractionEvent event) {
         log.info(event.getUser() + " - use recruit not accepted ");
-        TextChannel textChannel = event.getChannel().asTextChannel();
-        String userID = event.getUser().getId();
-        recruitNotAccepted(event, textChannel, userID);
+        Optional<Recruit> recruitOptional = findByChannelId(event.getChannel().getId());
+        if (recruitOptional.isEmpty()) {
+            ResponseMessage.operationNotPossible(event);
+            return;
+        }
+        Recruit recruit = recruitOptional.get();
+        if (validToNotAccept(event, recruit)) {
+            return;
+        }
+        event.deferEdit().queue();
+        setRedCircleInChannelName(event.getChannel().asTextChannel());
+        recruit.setIsCloseChannel(true);
+        recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
+        recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
+        recruitRepository.save(recruit);
+        EmbedInfo.recruitNotAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
         log.info("{} - not accepted recruit (channelId={}, channelName={})",
                 event.getUser(),
                 event.getChannel().getId(),
                 event.getChannel().getName());
     }
 
-    private void recruitNotAccepted(ButtonInteractionEvent event, TextChannel textChannel, String userID) {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        if (guild != null) {
-            Optional<Recruit> recruitOptional = findByChannelId(textChannel.getId());
-            if (recruitOptional.isPresent()) {
-                Recruit recruit = recruitOptional.get();
-                if (recruit.getRecruitmentResult() != null) {
-                    ResponseMessage.recruitHasBeenRejected(event);
-                    return;
-                } else if (recruit.getStartRecruitment() != null) {
-                    ResponseMessage.recruitHasBeenAccepted(event);
-                    return;
-                }
-                setRedCircleInChannelName(textChannel);
-                event.deferEdit().queue();
-                recruit.setIsCloseChannel(true);
-                recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
-                recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
-                recruitRepository.save(recruit);
-                EmbedInfo.recruitNotAccepted(Users.getUserNicknameFromID(userID), textChannel);
-            }
+    private boolean validToNotAccept(@NotNull ButtonInteractionEvent event, @NotNull Recruit recruit) {
+        if (recruit.getRecruitmentResult() != null) {
+            ResponseMessage.recruitHasBeenRejected(event);
+            return true;
+        } else if (recruit.getStartRecruitment() != null) {
+            ResponseMessage.recruitHasBeenAccepted(event);
+            return true;
+        }
+        return false;
+    }
+
+    public void recruitNotAccepted(@NotNull ButtonInteractionEvent event, final boolean isAdmin) {
+        if (isAdmin) {
+            recruitNotAccepted(event);
+        } else {
+            ResponseMessage.noPermission(event);
         }
     }
 
