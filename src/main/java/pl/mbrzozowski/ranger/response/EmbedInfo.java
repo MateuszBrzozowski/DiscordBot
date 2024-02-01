@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
@@ -21,7 +20,6 @@ import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
-import pl.mbrzozowski.ranger.role.RoleService;
 
 import java.awt.*;
 
@@ -362,18 +360,6 @@ public class EmbedInfo extends EmbedCreator {
         builder.setTitle("Podanie odrzucone");
         builder.setFooter("Podpis: " + userName);
         textChannel.sendMessageEmbeds(builder.build()).queue();
-    }
-
-    public static void sendRoles(@NotNull MessageReceivedEvent messageReceived, @NotNull RoleService roleService) {
-        SelectMenu roles = roleService.getRoleToSelectMenu();
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-        builder.setTitle("Discord role");
-        builder.setDescription("Add/Remove a role by selecting it from the list below.");
-        messageReceived
-                .getChannel()
-                .sendMessageEmbeds(builder.build())
-                .setActionRow(roles)
-                .queue();
     }
 
     public static void warningMaxRecruits() {

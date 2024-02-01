@@ -16,7 +16,6 @@ import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.members.GuildMembersService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
-import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
 @Slf4j
@@ -30,7 +29,6 @@ public class WriteListener extends ListenerAdapter {
     private final UsersReminderService usersReminderService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
-    private final RoleService roleService;
     private final DisboardService disboardService;
     private final GuildMembersService guildMembersService;
 
@@ -42,7 +40,6 @@ public class WriteListener extends ListenerAdapter {
                          UsersReminderService usersReminderService,
                          EventsGeneratorService eventsGeneratorService,
                          EventsSettingsService eventsSettingsService,
-                         RoleService roleService,
                          DisboardService disboardService,
                          GuildMembersService guildMembersService) {
         this.eventService = eventService;
@@ -52,7 +49,6 @@ public class WriteListener extends ListenerAdapter {
         this.usersReminderService = usersReminderService;
         this.eventsGeneratorService = eventsGeneratorService;
         this.eventsSettingsService = eventsSettingsService;
-        this.roleService = roleService;
         this.disboardService = disboardService;
         this.guildMembersService = guildMembersService;
     }
@@ -70,7 +66,7 @@ public class WriteListener extends ListenerAdapter {
         ServerServiceCmd serverServiceCmd = new ServerServiceCmd(serverService);
         HelpCmd helpCmd = new HelpCmd();
         AdminCheck adminCheck = new AdminCheck();
-        EmbedSender embedSender = new EmbedSender(roleService);
+        EmbedSender embedSender = new EmbedSender();
         RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
         AdminCommands adminCommands = new AdminCommands(guildMembersService);

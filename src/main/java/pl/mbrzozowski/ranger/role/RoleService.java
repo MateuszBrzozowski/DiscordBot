@@ -12,15 +12,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.RoleRepository;
 
@@ -38,25 +34,6 @@ public class RoleService {
     @Autowired
     public RoleService(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
-    }
-
-    public SelectMenu getRoleToSelectMenu() {
-        List<SelectOption> options = new ArrayList<>();
-        List<Role> roleList = findAll();
-        if (roleList.size() > 0) {
-            for (Role role : roleList) {
-                SelectOption option = SelectOption.of(role.getName(), role.getDiscordId());
-                SelectOption selectOption = option.withDescription(role.getName());
-                options.add(selectOption);
-            }
-        } else {
-            options.add(SelectOption.of("NO ROLES", "NO ROLES"));
-        }
-        return StringSelectMenu.create(ComponentId.ROLES)
-                .setPlaceholder("Choose a role")
-                .setRequiredRange(1, 1)
-                .addOptions(options)
-                .build();
     }
 
     private void save(Role role) {
