@@ -87,8 +87,6 @@ public class ResponseMessage {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user on black list", event.getUser()));
-        RangerLogger.info("Użytkownik [" + Users.getUserNicknameFromID(event.getUser().getId()) + "] chciał złożyć podanie. " +
-                "Jest na czarnej liście.");
     }
 
     /**

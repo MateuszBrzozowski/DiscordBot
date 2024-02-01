@@ -23,4 +23,7 @@ public final class SlashCommands {
     public static final String EVENT_CREATE = "event-create";
     public static final String EVENT_SETTINGS = "events-settings";
     public static final String ROLE = "role";
+    public static final String RECRUIT_BLACK_LIST_ADD = "rekrut-black-list-add";
+    public static final String RECRUIT_BLACK_LIST_REMOVE = "rekrut-black-list-remove";
+    public static final String RECRUIT_BLACK_LIST_INFO = "rekrut-black-list-info";
 }

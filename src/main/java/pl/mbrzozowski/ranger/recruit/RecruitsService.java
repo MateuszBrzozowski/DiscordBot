@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.recruit;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -17,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.*;
-import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -37,22 +37,15 @@ import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RecruitsService {
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final RecruitRepository recruitRepository;
-    private final RecruitBlackListRepository recruitBlackListRepository;
+    private final RecruitBlackListService recruitBlackListService;
     private final WaitingRecruitRepository waitingRecruitRepository;
     private final int MAX_CHANNELS = 50;
-
-    public RecruitsService(RecruitRepository recruitRepository,
-                           RecruitBlackListRepository recruitBlackListRepository,
-                           WaitingRecruitRepository waitingRecruitRepository) {
-        this.recruitRepository = recruitRepository;
-        this.recruitBlackListRepository = recruitBlackListRepository;
-        this.waitingRecruitRepository = waitingRecruitRepository;
-    }
 
     /**
      * @param userName Nazwa użytkownika
@@ -150,7 +143,7 @@ public class RecruitsService {
     }
 
     private boolean userBlackList(String userID) {
-        Optional<RecruitBlackList> recruitBlackListOptional = recruitBlackListRepository.findByUserId(userID);
+        Optional<RecruitBlackList> recruitBlackListOptional = recruitBlackListService.findByUserId(userID);
         return recruitBlackListOptional.isPresent();
     }
 

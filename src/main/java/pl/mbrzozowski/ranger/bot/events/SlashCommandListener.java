@@ -113,7 +113,7 @@ public class SlashCommandListener extends ListenerAdapter {
         }
     }
 
-    public void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
+    private void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE,
                         "Link your discord account to your steam profile if you want view stats from our server.")
                 .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
