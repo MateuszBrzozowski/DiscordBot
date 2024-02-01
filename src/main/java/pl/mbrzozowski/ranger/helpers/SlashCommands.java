@@ -6,7 +6,7 @@ public final class SlashCommands {
     public static final String REMOVE_ROLE_FROM_RANGER = "remove-role-from-ranger";
     public static final String DISCORD_ROLE_OPTION_NAME_ID = "id";
     public static final String DISCORD_ROLE_OPTION_NAME_NAME = "nazwa";
-    public static final String DISCORD_ROLE_OPTION_NAME_DESCRIPTION = "opis";
+    public static final String DISCORD_ROLE_OPTION_NAME_VALUE = "opis";
     public static final String STEAM_PROFILE = "profile";
     public static final String STATS = "stats";
     public static final String DICE = "kostka";
@@ -22,4 +22,5 @@ public final class SlashCommands {
     public static final String FIX_GIVEAWAY_EMBED = "fix-giveaway-embed";
     public static final String EVENT_CREATE = "event-create";
     public static final String EVENT_SETTINGS = "events-settings";
+    public static final String ROLE = "role";
 }

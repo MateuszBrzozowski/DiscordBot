@@ -1,54 +1,43 @@
 package pl.mbrzozowski.ranger.role;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.repository.main.RoleRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
 public class RoleService {
 
     private final RoleRepository roleRepository;
+    private static final int MAX_ROLES = 25;
 
     @Autowired
     public RoleService(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
-    }
-
-    public boolean addRole(OptionMapping id, OptionMapping name, OptionMapping description) {
-        if (id == null || name == null) {
-            return false;
-        }
-        Role role = new Role(id.getAsString(), name.getAsString());
-        if (description != null) {
-            role.setDescription(description.getAsString());
-        }
-        save(role);
-        return true;
-    }
-
-    public boolean removeRole(OptionMapping id) {
-        if (id == null) {
-            return false;
-        }
-        Optional<Role> roleOptional = findByDiscordRoleId(id.getAsString());
-        if (roleOptional.isPresent()) {
-            Role role = roleOptional.get();
-            deleteById(role.getId());
-            return true;
-        }
-        return false;
     }
 
     public SelectMenu getRoleToSelectMenu() {
@@ -57,7 +46,7 @@ public class RoleService {
         if (roleList.size() > 0) {
             for (Role role : roleList) {
                 SelectOption option = SelectOption.of(role.getName(), role.getDiscordId());
-                SelectOption selectOption = option.withDescription(role.getDescription());
+                SelectOption selectOption = option.withDescription(role.getName());
                 options.add(selectOption);
             }
         } else {
@@ -85,5 +74,199 @@ public class RoleService {
     @NotNull
     public List<Role> findAll() {
         return roleRepository.findAll();
+    }
+
+    public void addCommandsToList(@NotNull ArrayList<CommandData> commandData) {
+        addRoleCommand(commandData);
+        addAddingRoleToBot(commandData);
+        addRemoveRoleFromBot(commandData);
+    }
+
+    private void addAddingRoleToBot(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(ADD_ROLE_TO_RANGER,
+                        "Dodaje nową rolę do Ranger bota dzięki czemu użytkownicy serwera będą mogli sobie ją sami przypisać.")
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID dodawanej roli", true)
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_NAME, "Nazwa wyświetlana na liście", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+    }
+
+    private void addRemoveRoleFromBot(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(REMOVE_ROLE_FROM_RANGER,
+                        "Usuwa rolę z Ranger bota. Użytkownik serwera nie będzie mógł samemu przypisać sobie usuniętej roli.")
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID usuwanej roli", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+    }
+
+    private void addRoleCommand(@NotNull ArrayList<CommandData> commandData) {
+        List<Role> roles = findAll();
+        if (checkAmountOfRoles(roles.size())) {
+            log.info("Can not create role slash command. Roles amount={}", roles.size());
+            return;
+        }
+        CommandData command = getCommand(roles);
+        commandData.add(command);
+        log.info("Created slash command for role");
+    }
+
+    @NotNull
+    private Set<Choice> getChoices(@NotNull List<Role> roles) {
+        Set<Choice> choices = new HashSet<>();
+        for (Role role : roles) {
+            Choice choice = new Choice(role.getName(), role.getName());
+            choices.add(choice);
+            log.debug("{}", choice);
+        }
+        return choices;
+    }
+
+    /**
+     * @param amount of roles
+     * @return true if roles size is 0 or more than MAX_ROLES=25; false when 0 < roles.size <= 25
+     */
+    private boolean checkAmountOfRoles(int amount) {
+        if (amount == 0) {
+            return true;
+        } else {
+            return amount > MAX_ROLES;
+        }
+    }
+
+    public void addRole(@NotNull SlashCommandInteractionEvent event) {
+        log.info("Adding role");
+        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID);
+        OptionMapping optionName = event.getOption(DISCORD_ROLE_OPTION_NAME_NAME);
+        if (!isOptionsValidToAdd(event, optionId, optionName)) {
+            return;
+        }
+        String id = Objects.requireNonNull(optionId).getAsString();
+        String name = Objects.requireNonNull(optionName).getAsString();
+        Role role = new Role(id, name);
+        save(role);
+        event.reply("Dodano rolę.").setEphemeral(true).queue();
+        log.info("{} added", role);
+        updateRoleList();
+    }
+
+    private void updateRoleList() {
+        ArrayList<CommandData> commandData = new ArrayList<>();
+        addRoleCommand(commandData);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild != null) {
+            List<Role> roles = findAll();
+            guild.upsertCommand(getCommand(roles)).queue();
+        }
+    }
+
+    @NotNull
+    private CommandData getCommand(List<Role> roles) {
+        Set<Choice> choices = getChoices(roles);
+        return Commands.slash(ROLE, "Add/Remove a role by selecting it.")
+                .addOptions(new OptionData(OptionType.STRING, "role", "Select role")
+                        .addChoices(choices)
+                        .setRequired(true));
+    }
+
+    private boolean isOptionsValidToAdd(SlashCommandInteractionEvent event, OptionMapping optionId, OptionMapping optionName) {
+        if (optionName == null || optionId == null) {
+            event.reply("Wystąpił nieoczekiwany błąd. Skontaktuj się z <@642402714382237716>").queue();
+            log.error("Null option id={}, name={}", optionId, optionName);
+            return false;
+        }
+        if (optionName.getAsString().length() > Choice.MAX_NAME_LENGTH || optionName.getAsString().length() == 0) {
+            event.reply("Nieprawidłowa nazwa. Maksymalna ilość znaków: " + Choice.MAX_NAME_LENGTH).setEphemeral(true).queue();
+            log.info("Length of name incorrect");
+            return false;
+        }
+        if (optionId.getAsString().length() > Choice.MAX_NAME_LENGTH || optionId.getAsString().length() == 0) {
+            event.reply("Nieprawidłowe id. Maksymalna ilość znaków: " + Choice.MAX_NAME_LENGTH).setEphemeral(true).queue();
+            log.info("Length of id incorrect");
+            return false;
+        }
+        if (DiscordBot.getJda().getRoleById(optionId.getAsString()) == null) {
+            event.reply("Rola o podanym id nie istnieje!").setEphemeral(true).queue();
+            log.info("Role by id={} is not exist", optionId.getAsString());
+            return false;
+        }
+        List<Role> roles = roleRepository.findAll();
+        if (roles.size() >= MAX_ROLES) {
+            event.reply("Osiągnięto maksymalną liczbę ról które można zapisać").setEphemeral(true).queue();
+            log.info("Max count of roles. Can not add new role ({})", roles.size());
+            return false;
+        }
+        for (Role role : roles) {
+            if (optionId.getAsString().equals(role.getDiscordId()) || optionName.getAsString().equals(role.getName())) {
+                event.reply("Podana rola o id=" + optionId.getAsString() + " i nazwie=" + optionName.getAsString() +
+                        "  już istnieje").setEphemeral(true).queue();
+                log.info("Role is already exist {}", role);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void removeRole(@NotNull SlashCommandInteractionEvent event) {
+        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID);
+        isOptionsValidToRemove(event, optionId);
+        if (!isOptionsValidToRemove(event, optionId)) {
+            return;
+        }
+        Optional<Role> roleOptional = findByDiscordRoleId(Objects.requireNonNull(optionId).getAsString());
+        if (roleOptional.isPresent()) {
+            Role role = roleOptional.get();
+            deleteById(role.getId());
+            event.reply("Usunięto rolę.").setEphemeral(true).queue();
+            updateRoleList();
+            return;
+        }
+        event.reply("Rola nie istnieje").setEphemeral(true).queue();
+    }
+
+    private boolean isOptionsValidToRemove(SlashCommandInteractionEvent event, OptionMapping optionId) {
+        if (optionId == null) {
+            event.reply("Wystąpił nieoczekiwany błąd. Skontaktuj się z <@642402714382237716>").queue();
+            log.error("Null option");
+            return false;
+        }
+        return true;
+    }
+
+    public void roleEvent(@NotNull SlashCommandInteractionEvent event) {
+        OptionMapping optionRole = event.getOption("role");
+        if (optionRole == null) {
+            return;
+        }
+        String roleName = optionRole.getAsString();
+        List<Role> roles = findAll();
+        for (Role role : roles) {
+            if (role.getName().equals(roleName)) {
+                String discordRoleId = role.getDiscordId();
+                addRemoveRole(event, discordRoleId);
+                return;
+            }
+        }
+        event.reply("Error. Try again later or contact with Administrator").setEphemeral(true).queue();
+    }
+
+    public void addRemoveRole(SlashCommandInteractionEvent event, String roleId) {
+        net.dv8tion.jda.api.entities.Role role = DiscordBot.getJda().getRoleById(roleId);
+        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild == null) {
+            event.reply("Error. Try again later or contact with Administrator").setEphemeral(true).queue();
+            throw new NullPointerException("Guild by id RangersPLGuild(" + CategoryAndChannelID.RANGERSPL_GUILD_ID + ") is null");
+        }
+        if (role != null) {
+            boolean hasRole = Users.hasUserRole(event.getUser().getId(), role.getId());
+            if (!hasRole) {
+                guild.addRoleToMember(UserSnowflake.fromId(event.getUser().getId()), role).queue();
+                event.reply("**" + role.getName() + "** - Gave you the role!").queue();
+                log.info(guild.getMemberById(event.getUser().getId()) + " - gave him role " + role.getName());
+            } else {
+                guild.removeRoleFromMember(UserSnowflake.fromId(event.getUser().getId()), role).queue();
+                event.reply("**" + role.getName() + "** - Took away the role!").queue();
+                log.info(guild.getMemberById(event.getUser().getId()) + " - take away the role " + role.getName());
+            }
+            return;
+        }
+        event.reply("Error. Try again later or contact with Administrator").setEphemeral(true).queue();
     }
 }
