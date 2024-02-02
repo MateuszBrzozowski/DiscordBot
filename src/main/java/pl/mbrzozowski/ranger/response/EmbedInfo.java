@@ -363,23 +363,16 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void warningMaxRecruits() {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-        builder.setTitle("Brak wolnych miejsc. Rekrutacja zamknięta.");
-        builder.setDescription("Osiągnięto maksymalną ilość kanałów w kategorii.");
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            textChannel.sendMessage("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
-                    .setEmbeds(builder.build()).queue();
+            textChannel.sendMessage("**Brak wolnych miejsc. Rekrutacja zamknięta.**\nOsiągnięto maksymalną ilość kanałów w kategorii.").queue();
         }
     }
 
     public static void warningFewSlots() {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-        builder.setTitle("Pozostały 2 lub mniej miejsc dla rekrutów.");
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            textChannel.sendMessage("<@&" + RoleID.CLAN_COUNCIL + "> <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
-                    .setEmbeds(builder.build()).queue();
+            textChannel.sendMessage("**Pozostały 2 lub mniej miejsc dla rekrutów.**").queue();
         }
     }
 }
