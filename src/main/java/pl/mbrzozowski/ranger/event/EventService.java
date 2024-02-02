@@ -9,6 +9,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +35,8 @@ import pl.mbrzozowski.ranger.settings.SettingsService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.EVENT_DELETE_CHANNEL_DELAY;
 
 @Slf4j
 @Service
@@ -465,5 +471,11 @@ public class EventService {
     public boolean isMaxEvents() {
         List<Event> all = findAll();
         return all.size() >= MAX_EVENTS;
+    }
+
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) throws IllegalArgumentException {
+        commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_DELAY.getName(), EVENT_DELETE_CHANNEL_DELAY.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
+                .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
     }
 }

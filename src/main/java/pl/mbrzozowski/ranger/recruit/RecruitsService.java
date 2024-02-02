@@ -647,8 +647,8 @@ public class RecruitsService {
         log.info("DB check and updated");
     }
 
-    public void getCommandList(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY, "Ustawia delay po jakim kanał rekrutacyjny zostanie usunięty od wyniku rekrutacji")
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY.getName(), RECRUIT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
     }

@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.giveaway;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -10,7 +11,11 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +34,8 @@ import java.util.*;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.FIX_GIVEAWAY_EMBED;
 
 @Slf4j
 @Service
@@ -435,7 +442,7 @@ public class GiveawayService {
     }
 
     private boolean isFillId(@NotNull SlashCommandInteractionEvent event, boolean isEnd) {
-        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID);
+        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID.getName());
         if (id != null) {
             int idAsInt = id.getAsInt();
             Optional<Giveaway> giveawayOptional = findById(idAsInt);
@@ -540,7 +547,7 @@ public class GiveawayService {
     }
 
     private boolean reRollIsFillId(@NotNull SlashCommandInteractionEvent event) {
-        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID);
+        OptionMapping id = event.getOption(SlashCommands.GIVEAWAY_ID.getName());
         if (id != null) {
             int idAsInt = id.getAsInt();
             Optional<Giveaway> giveawayOptional = findById(idAsInt);
@@ -629,5 +636,19 @@ public class GiveawayService {
 
     public void removeGenerator() {
         this.giveawayGenerator = null;
+    }
+
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_CREATE.getName(), GIVEAWAY_CREATE.getDescription()));
+        commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_END.getName(), GIVEAWAY_END.getDescription())
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID.getName(), GIVEAWAY_ID.getDescription(), false));
+        commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_CANCEL.getName(), GIVEAWAY_CANCEL.getDescription())
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID.getName(), GIVEAWAY_ID.getDescription(), false));
+        commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_LIST.getName(), GIVEAWAY_LIST.getDescription()));
+        commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_RE_ROLL.getName(), GIVEAWAY_RE_ROLL.getDescription())
+                .addOption(OptionType.INTEGER, GIVEAWAY_ID.getName(), GIVEAWAY_ID.getDescription(), false));
+        commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED.getName(), FIX_GIVEAWAY_EMBED.getDescription())
+                .addOption(OptionType.STRING, "id", "id wiadomości", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 }

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
+import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
@@ -22,6 +23,7 @@ public class GuildListener extends ListenerAdapter {
     private final RecruitBlackListService recruitBlackListService;
     private final SlashCommandListener slashCommandListener;
     private final RecruitsService recruitsService;
+    private final GiveawayService giveawayService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
@@ -39,10 +41,12 @@ public class GuildListener extends ListenerAdapter {
     }
 
     private void getCommandList(ArrayList<CommandData> commandData) {
-        slashCommandListener.getCommandData(commandData);
-        roleService.getCommandsToList(commandData);
-        recruitBlackListService.getCommandList(commandData);
-        recruitsService.getCommandList(commandData);
+        recruitBlackListService.getCommandsList(commandData);
+        slashCommandListener.getCommandsData(commandData);
+        recruitsService.getCommandsList(commandData);
+        giveawayService.getCommandsList(commandData);
+        eventService.getCommandsList(commandData);
+        roleService.getCommandsList(commandData);
     }
 
 }

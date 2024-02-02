@@ -49,13 +49,13 @@ public class SlashCommandListener extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         log.info(event.getUser() + " - used slash command(command={})", event.getName());
         String name = event.getName();
-        if (name.equalsIgnoreCase(ADD_ROLE_TO_RANGER)) {
+        if (name.equalsIgnoreCase(ADD_ROLE_TO_RANGER.getName())) {
             roleService.addRole(event);
-        } else if (name.equalsIgnoreCase(REMOVE_ROLE_FROM_RANGER)) {
+        } else if (name.equalsIgnoreCase(REMOVE_ROLE_FROM_RANGER.getName())) {
             roleService.removeRole(event);
-        } else if (name.equals(ROLE)) {
+        } else if (name.equals(ROLE.getName())) {
             roleService.roleEvent(event);
-        } else if (name.equalsIgnoreCase(STEAM_PROFILE)) {
+        } else if (name.equalsIgnoreCase(STEAM_PROFILE.getName())) {
             if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
                 try {
                     OptionMapping steam64id = event.getOption("steam64id");
@@ -75,7 +75,7 @@ public class SlashCommandListener extends ListenerAdapter {
                 ResponseMessage.youCanLinkedYourProfileOnChannel(event);
 
             }
-        } else if (name.equalsIgnoreCase(STATS)) {
+        } else if (name.equalsIgnoreCase(STATS.getName())) {
             if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
                 try {
                     if (serverStats.isUserConnected(event.getUser().getId())) {
@@ -90,64 +90,54 @@ public class SlashCommandListener extends ListenerAdapter {
             } else {
                 ResponseMessage.youCanCheckStatsOnChannel(event);
             }
-        } else if (name.equalsIgnoreCase(DICE)) {
+        } else if (name.equalsIgnoreCase(DICE.getName())) {
             Dice.start(event);
-        } else if (name.equalsIgnoreCase(COIN)) {
+        } else if (name.equalsIgnoreCase(COIN.getName())) {
             Coin.start(event);
-        } else if (name.equalsIgnoreCase(ESSA)) {
+        } else if (name.equalsIgnoreCase(ESSA.getName())) {
             Essa.start(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_CREATE)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_END)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_END.getName())) {
             giveawayService.end(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_CANCEL)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_CANCEL.getName())) {
             giveawayService.cancel(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_LIST)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_LIST.getName())) {
             giveawayService.showActive(event);
-        } else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL)) {
+        } else if (name.equalsIgnoreCase(GIVEAWAY_RE_ROLL.getName())) {
             giveawayService.reRoll(event);
-        } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED)) {
+        } else if (name.equalsIgnoreCase(FIX_EVENT_EMBED.getName())) {
             eventService.fixEmbed(event);
-        } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED)) {
+        } else if (name.equalsIgnoreCase(FIX_GIVEAWAY_EMBED.getName())) {
             giveawayService.fixEmbed(event);
-        } else if (name.equalsIgnoreCase(EVENT_CREATE)) {
+        } else if (name.equalsIgnoreCase(EVENT_CREATE.getName())) {
             eventsGeneratorService.createGenerator(event, eventService);
-        } else if (name.equalsIgnoreCase(EVENT_SETTINGS)) {
+        } else if (name.equalsIgnoreCase(EVENT_SETTINGS.getName())) {
             eventsSettingsService.createSettings(event);
-        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_ADD)) {
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_ADD.getName())) {
             recruitBlackListService.addToList(event);
-        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_REMOVE)) {
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_REMOVE.getName())) {
             recruitBlackListService.removeFromList(event);
-        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_INFO)) {
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_INFO.getName())) {
             recruitBlackListService.infoAboutUser(event);
-        } else if (name.equalsIgnoreCase(RECRUIT_DELETE_CHANNEL_DELAY)) {
+        } else if (name.equalsIgnoreCase(RECRUIT_DELETE_CHANNEL_DELAY.getName())) {
+            recruitsService.setDelayToDeleteChannel(event);
+        } else if (name.equalsIgnoreCase(EVENT_DELETE_CHANNEL_DELAY.getName())) {
             recruitsService.setDelayToDeleteChannel(event);
         }
     }
 
-    public void getCommandData(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(STEAM_PROFILE,
-                        "Link your discord account to your steam profile if you want view stats from our server.")
-                .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
-        commandData.add(Commands.slash(STATS, "To view your stats from our server"));
-        commandData.add(Commands.slash(DICE, "Rzut kością do gry"));
-        commandData.add(Commands.slash(COIN, "Rzut monetą"));
-        commandData.add(Commands.slash(ESSA, "Sprawdza twój dzisiejszy poziom essy"));
-        commandData.add(Commands.slash(GIVEAWAY_CREATE, "Tworzy giveaway na tym kanale"));
-        commandData.add(Commands.slash(GIVEAWAY_END, "Kończy giveaway i losuje nagrody")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
-        commandData.add(Commands.slash(GIVEAWAY_CANCEL, "Kończy giveaway bez losowania nagród")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
-        commandData.add(Commands.slash(GIVEAWAY_LIST, "Pokazuje listę aktywnych giveawayów na serwerze"));
-        commandData.add(Commands.slash(GIVEAWAY_RE_ROLL, "Losowanie nagród dla zakończonego giveawaya")
-                .addOption(OptionType.INTEGER, GIVEAWAY_ID, "id giveawaya", false));
-        commandData.add(Commands.slash(FIX_EVENT_EMBED, "Przywraca embed dla eventu")
+    public void getCommandsData(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
+                .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));
+        commandData.add(Commands.slash(STATS.getName(), STATS.getDescription()));
+        commandData.add(Commands.slash(DICE.getName(), DICE.getDescription()));
+        commandData.add(Commands.slash(COIN.getName(), COIN.getDescription()));
+        commandData.add(Commands.slash(ESSA.getName(), ESSA.getDescription()));
+        commandData.add(Commands.slash(FIX_EVENT_EMBED.getName(), FIX_EVENT_EMBED.getDescription())
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(FIX_GIVEAWAY_EMBED, "Przywraca embed dla giveawaya")
-                .addOption(OptionType.STRING, "id", "id wiadomości", true)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(EVENT_CREATE, "Otwiera generator eventów"));
-        commandData.add(Commands.slash(EVENT_SETTINGS, "Otwiera ustawienia eventów"));
+        commandData.add(Commands.slash(EVENT_CREATE.getName(), EVENT_CREATE.getDescription()));
+        commandData.add(Commands.slash(EVENT_SETTINGS.getName(), EVENT_SETTINGS.getDescription()));
     }
 }

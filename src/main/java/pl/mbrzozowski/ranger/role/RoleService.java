@@ -53,24 +53,22 @@ public class RoleService {
         return roleRepository.findAll();
     }
 
-    public void getCommandsToList(@NotNull ArrayList<CommandData> commandData) {
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         addRoleCommand(commandData);
         addAddingRoleToBot(commandData);
         addRemoveRoleFromBot(commandData);
     }
 
     private void addAddingRoleToBot(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(ADD_ROLE_TO_RANGER,
-                        "Dodaje nową rolę do Ranger bota dzięki czemu użytkownicy serwera będą mogli sobie ją sami przypisać.")
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID dodawanej roli", true)
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_NAME, "Nazwa wyświetlana na liście", true)
+        commandData.add(Commands.slash(ADD_ROLE_TO_RANGER.getName(),ADD_ROLE_TO_RANGER.getDescription())
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID.getName(), DISCORD_ROLE_OPTION_NAME_ID.getDescription(), true)
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_NAME.getName(), DISCORD_ROLE_OPTION_NAME_NAME.getDescription(), true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
     }
 
     private void addRemoveRoleFromBot(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(REMOVE_ROLE_FROM_RANGER,
-                        "Usuwa rolę z Ranger bota. Użytkownik serwera nie będzie mógł samemu przypisać sobie usuniętej roli.")
-                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID, "Discord ID usuwanej roli", true)
+        commandData.add(Commands.slash(REMOVE_ROLE_FROM_RANGER.getName(),REMOVE_ROLE_FROM_RANGER.getDescription())
+                .addOption(OptionType.STRING, DISCORD_ROLE_OPTION_NAME_ID.getName(), "Discord ID usuwanej roli", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
     }
 
@@ -110,8 +108,8 @@ public class RoleService {
 
     public void addRole(@NotNull SlashCommandInteractionEvent event) {
         log.info("Adding role");
-        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID);
-        OptionMapping optionName = event.getOption(DISCORD_ROLE_OPTION_NAME_NAME);
+        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID.getName());
+        OptionMapping optionName = event.getOption(DISCORD_ROLE_OPTION_NAME_NAME.getName());
         if (!isOptionsValidToAdd(event, optionId, optionName)) {
             return;
         }
@@ -137,7 +135,7 @@ public class RoleService {
     @NotNull
     private CommandData getCommand(List<Role> roles) {
         Set<Choice> choices = getChoices(roles);
-        return Commands.slash(ROLE, "Add/Remove a role by selecting it.")
+        return Commands.slash(ROLE.getName(), ROLE.getDescription())
                 .addOptions(new OptionData(OptionType.STRING, "role", "Select role")
                         .addChoices(choices)
                         .setRequired(true));
@@ -182,7 +180,7 @@ public class RoleService {
     }
 
     public void removeRole(@NotNull SlashCommandInteractionEvent event) {
-        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID);
+        OptionMapping optionId = event.getOption(DISCORD_ROLE_OPTION_NAME_ID.getName());
         isOptionsValidToRemove(event, optionId);
         if (!isOptionsValidToRemove(event, optionId)) {
             return;

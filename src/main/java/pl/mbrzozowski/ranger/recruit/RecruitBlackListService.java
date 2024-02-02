@@ -55,15 +55,15 @@ public class RecruitBlackListService {
         event.reply("Użytkownik **" + nickname + "** usunięty z black listy").setEphemeral(true).queue();
     }
 
-    public void getCommandList(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD, "Dodaje osobę na czarną listę. Nie będzie mogła złożyć podania")
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD.getName(), RECRUIT_BLACK_LIST_ADD.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
                 .addOption(OptionType.STRING, "id", "User ID", true)
                 .addOption(OptionType.STRING, "reason", "Powód/opis", true));
-        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_REMOVE, "Usuwa osobę z czarnej listy.")
+        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_REMOVE.getName(), RECRUIT_BLACK_LIST_REMOVE.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
                 .addOption(OptionType.STRING, "id", "User ID", true));
-        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_INFO, "Wyświetla informacje o użytkowniku na liście")
+        commandData.add(Commands.slash(RECRUIT_BLACK_LIST_INFO.getName(), RECRUIT_BLACK_LIST_INFO.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
                 .addOption(OptionType.STRING, "id", "User ID", true));
     }
