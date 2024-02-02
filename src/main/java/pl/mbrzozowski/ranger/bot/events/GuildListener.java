@@ -32,7 +32,8 @@ public class GuildListener extends ListenerAdapter {
             ArrayList<CommandData> commandData = new ArrayList<>();
             getCommandList(commandData);
             recruitsService.cleanDB(event);
-            implCleaner.runCleaner();
+            implCleaner.autoDeleteChannels();
+            implCleaner.autoCloseChannel();
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }

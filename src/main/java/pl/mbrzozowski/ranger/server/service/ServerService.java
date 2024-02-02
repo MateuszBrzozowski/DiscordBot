@@ -153,7 +153,7 @@ public class ServerService {
     public void deleteChannelById(String channelId) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
         if (textChannel != null) {
-            textChannel.delete().reason("Uplynął termin utrzymywania kanalu").queue();
+            textChannel.delete().reason("Upłynął termin utrzymywania kanału").queue();
             log.info("Deleted server service channel by id " + channelId);
         }
         deleteByChannelId(channelId);

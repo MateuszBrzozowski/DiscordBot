@@ -7,15 +7,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-public class CleanerRecruitChannel extends CleanerChannel {
+public class RecruitChannelsAutoDelete extends CleanerChannel {
 
     private final RecruitsService recruitsService;
-    private final int delayInDays;
 
-    public CleanerRecruitChannel(RecruitsService recruitsService, int delayInDays) {
+    public RecruitChannelsAutoDelete(RecruitsService recruitsService, int delay) {
+        super(delay);
         this.recruitsService = recruitsService;
-        this.delayInDays = delayInDays;
-        log.info("Delay to delete channel for recruitment(days)={}", delayInDays);
+        log.info("Delay to delete channel for recruitment(days)={}", delay);
     }
 
     @Override
@@ -25,7 +24,7 @@ public class CleanerRecruitChannel extends CleanerChannel {
         recruits = recruits
                 .stream()
                 .filter(recruit -> recruit.getRecruitmentResult() != null && recruit.getEndRecruitment() != null)
-                .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(delayInDays)))
+                .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(delay)))
                 .toList();
         for (Recruit recruit : recruits) {
             recruitsService.deleteChannel(recruit);
