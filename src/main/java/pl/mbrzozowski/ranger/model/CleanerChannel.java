@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.model;
 
-public interface CleanerChannel {
-    void clean();
+import java.util.TimerTask;
+
+public abstract class CleanerChannel extends TimerTask {
 }

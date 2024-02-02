@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.model.AutoCloseChannel;
-import pl.mbrzozowski.ranger.model.CleanerChannel;
+import pl.mbrzozowski.ranger.model.CleanerChannelOld;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 
@@ -21,7 +21,7 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SERVER_SERVICE_DELETE_C
 
 @Slf4j
 @Service
-public class ServerServiceCleanerChannel extends TimerTask implements CleanerChannel, AutoCloseChannel {
+public class ServerServiceCleanerChannel extends TimerTask implements CleanerChannelOld, AutoCloseChannel {
 
     private final ServerService serverService;
     private final SettingsService settingsService;

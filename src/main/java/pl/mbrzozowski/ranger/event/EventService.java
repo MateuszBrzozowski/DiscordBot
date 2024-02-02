@@ -26,23 +26,29 @@ import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-@Service
 @Slf4j
+@Service
 public class EventService {
 
+    private static final int MAX_EVENTS = 25;
+    private final UsersReminderService usersReminderService;
+    private final SettingsService settingsService;
     private final EventRepository eventRepository;
     private final Timers timers;
-    private final UsersReminderService usersReminderService;
-    private static final int MAX_EVENTS = 25;
 
     @Autowired
-    public EventService(EventRepository eventRepository, Timers timers, UsersReminderService usersReminderService) {
+    public EventService(UsersReminderService usersReminderService,
+                        EventRepository eventRepository,
+                        SettingsService settingsService,
+                        Timers timers) {
         this.eventRepository = eventRepository;
+        this.settingsService = settingsService;
         this.timers = timers;
         this.usersReminderService = usersReminderService;
         setReminders();

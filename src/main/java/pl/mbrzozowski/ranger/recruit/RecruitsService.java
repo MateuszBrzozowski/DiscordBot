@@ -38,7 +38,6 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.*;
 
-import static java.time.LocalDate.now;
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.RECRUIT_DELETE_CHANNEL_DELAY;
@@ -209,7 +208,7 @@ public class RecruitsService {
         builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
                 "Server nickname: " + Users.getUserNicknameFromID(userId), false);
         builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID  + ">")
+        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
                 .setEmbeds(builder.build())
                 .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
                         Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
@@ -646,30 +645,6 @@ public class RecruitsService {
             }
         }
         log.info("DB check and updated");
-    }
-
-    public void runCleaner() {
-        Optional<String> optional = settingsService.find(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY);
-        if (optional.isEmpty()) {
-            settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, 5);
-            log.info("New settings property set - {}={}", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, 5);
-        }
-        int delay = 5;
-        try {
-            delay = Integer.parseInt(optional.orElse("5"));
-        } catch (NumberFormatException e) {
-            settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, delay);
-            log.info("Settings property \"{}\" not correct. Set to default value=5", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY.getKey());
-        }
-        CleanerRecruitChannel cleanerRecruitChannel = new CleanerRecruitChannel(this, delay);
-        Timer timer = new Timer();
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(now().getYear(), now().getMonthValue() - 1, now().getDayOfMonth(), 1, 0, 0);
-        timer.scheduleAtFixedRate(cleanerRecruitChannel, calendar.getTime(), 24 * 60 * 60 * 1000);
-        log.info("Cleaner for recruit channel active: delay(days)={}, time={}:{} every 24h",
-                delay,
-                calendar.get(Calendar.HOUR_OF_DAY),
-                String.format("%02d", calendar.get(Calendar.MINUTE)));
     }
 
     public void getCommandList(@NotNull ArrayList<CommandData> commandData) {

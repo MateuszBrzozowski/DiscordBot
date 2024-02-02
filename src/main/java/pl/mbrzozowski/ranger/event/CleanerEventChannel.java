@@ -2,47 +2,34 @@ package pl.mbrzozowski.ranger.event;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static java.time.LocalDate.now;
 
 @Slf4j
-@Service
-public class CleanerEventChannel extends TimerTask implements CleanerChannel {
+public class CleanerEventChannel extends CleanerChannel {
 
     private final EventService eventService;
-    private final int delayInDays;
     private final int delayInDaysForTactical;
+    private final int delayInDays;
 
     @Autowired
-    public CleanerEventChannel(EventService eventService,
-                               @Value("${event.channel.cleaning}") int delay,
-                               @Value("${event.tactical.channel.cleaning}") int delayForTactical) {
+    public CleanerEventChannel(EventService eventService, int delay, int delayForTactical) {
         this.eventService = eventService;
         this.delayInDays = delay;
         this.delayInDaysForTactical = delayForTactical;
-        Timer timer = new Timer();
-        Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
-        date.setHours(23);
-        date.setMinutes(59);
-        date.setSeconds(59);
-        timer.scheduleAtFixedRate(this, date, 24 * 60 * 60 * 1000);
+        log.info("Delay to delete channel for default events(days)={}", delayInDays);
+        log.info("Delay to delete channel for tactical events(days)={}", delayInDays);
     }
 
     @Override
-    public void clean() {
-        log.info("Event cleaning channels");
+    public void run() {
+        log.info("Event cleaning channels init");
         List<Event> eventList = eventService.findAll()
                 .stream()
                 .filter(event -> event.getDate().isBefore(LocalDateTime.now(ZoneId.of("Europe/Paris"))))
@@ -60,12 +47,7 @@ public class CleanerEventChannel extends TimerTask implements CleanerChannel {
         }
     }
 
-    @Override
-    public void run() {
-        clean();
-    }
-
-    private void deleteChannel(Event event) {
+    private void deleteChannel(@NotNull Event event) {
         TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
         if (channel != null) {
             channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
