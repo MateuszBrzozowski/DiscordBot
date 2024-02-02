@@ -57,14 +57,14 @@ public class RecruitBlackListService {
 
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD.getName(), RECRUIT_BLACK_LIST_ADD.getDescription())
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .addOption(OptionType.STRING, "id", "User ID", true)
                 .addOption(OptionType.STRING, "reason", "Powód/opis", true));
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_REMOVE.getName(), RECRUIT_BLACK_LIST_REMOVE.getDescription())
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .addOption(OptionType.STRING, "id", "User ID", true));
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_INFO.getName(), RECRUIT_BLACK_LIST_INFO.getDescription())
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .addOption(OptionType.STRING, "id", "User ID", true));
     }
 

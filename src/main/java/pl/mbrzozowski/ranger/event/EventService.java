@@ -480,8 +480,10 @@ public class EventService {
         commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getName(), EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
-        commandData.add(Commands.slash(EVENT_CREATE.getName(), EVENT_CREATE.getDescription()));
-        commandData.add(Commands.slash(EVENT_SETTINGS.getName(), EVENT_SETTINGS.getDescription()));
+        commandData.add(Commands.slash(EVENT_CREATE.getName(), EVENT_CREATE.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(EVENT_SETTINGS.getName(), EVENT_SETTINGS.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(Commands.slash(FIX_EVENT_EMBED.getName(), FIX_EVENT_EMBED.getDescription())
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
