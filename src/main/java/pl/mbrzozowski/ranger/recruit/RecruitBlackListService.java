@@ -55,7 +55,7 @@ public class RecruitBlackListService {
         event.reply("Użytkownik **" + nickname + "** usunięty z black listy").setEphemeral(true).queue();
     }
 
-    public void addCommandList(@NotNull ArrayList<CommandData> commandData) {
+    public void getCommandList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD, "Dodaje osobę na czarną listę. Nie będzie mogła złożyć podania")
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.NICKNAME_MANAGE))
                 .addOption(OptionType.STRING, "id", "User ID", true)

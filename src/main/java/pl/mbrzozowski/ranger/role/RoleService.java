@@ -53,7 +53,7 @@ public class RoleService {
         return roleRepository.findAll();
     }
 
-    public void addCommandsToList(@NotNull ArrayList<CommandData> commandData) {
+    public void getCommandsToList(@NotNull ArrayList<CommandData> commandData) {
         addRoleCommand(commandData);
         addAddingRoleToBot(commandData);
         addRemoveRoleFromBot(commandData);

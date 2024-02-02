@@ -26,13 +26,18 @@ public class GuildListener extends ListenerAdapter {
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         if (event.getGuild().getId().equals(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
             ArrayList<CommandData> commandData = new ArrayList<>();
-            slashCommandListener.writeCommandData(commandData);
-            roleService.addCommandsToList(commandData);
-            recruitBlackListService.addCommandList(commandData);
+            getCommandList(commandData);
             recruitsService.cleanDB(event);
             recruitsService.runCleaner();
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
+    }
+
+    private void getCommandList(ArrayList<CommandData> commandData) {
+        slashCommandListener.getCommandData(commandData);
+        roleService.getCommandsToList(commandData);
+        recruitBlackListService.getCommandList(commandData);
+        recruitsService.getCommandList(commandData);
     }
 
 }

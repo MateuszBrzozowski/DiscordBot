@@ -26,4 +26,5 @@ public final class SlashCommands {
     public static final String RECRUIT_BLACK_LIST_ADD = "rekrut-black-list-add";
     public static final String RECRUIT_BLACK_LIST_REMOVE = "rekrut-black-list-remove";
     public static final String RECRUIT_BLACK_LIST_INFO = "rekrut-black-list-info";
+    public static final String RECRUIT_DELETE_CHANNEL_DELAY = "rekrut-delete-channel";
 }

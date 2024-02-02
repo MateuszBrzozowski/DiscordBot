@@ -22,6 +22,7 @@ import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
+import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.stats.ServerStats;
@@ -35,13 +36,14 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 @RequiredArgsConstructor
 public class SlashCommandListener extends ListenerAdapter {
 
-    private final RoleService roleService;
-    private final ServerStats serverStats;
+    private final RecruitBlackListService recruitBlackListService;
+    private final EventsSettingsService eventsSettingsService;
+    private final EventsGeneratorService eventsGeneratorService;
+    private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
     private final EventService eventService;
-    private final EventsGeneratorService eventsGeneratorService;
-    private final EventsSettingsService eventsSettingsService;
-    private final RecruitBlackListService recruitBlackListService;
+    private final RoleService roleService;
+    private final ServerStats serverStats;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -118,10 +120,12 @@ public class SlashCommandListener extends ListenerAdapter {
             recruitBlackListService.removeFromList(event);
         } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_INFO)) {
             recruitBlackListService.infoAboutUser(event);
+        } else if (name.equalsIgnoreCase(RECRUIT_DELETE_CHANNEL_DELAY)) {
+            recruitsService.setDelayToDeleteChannel(event);
         }
     }
 
-    public void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
+    public void getCommandData(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE,
                         "Link your discord account to your steam profile if you want view stats from our server.")
                 .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));

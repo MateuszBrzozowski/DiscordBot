@@ -11,7 +11,12 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +41,7 @@ import java.util.*;
 import static java.time.LocalDate.now;
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.RECRUIT_DELETE_CHANNEL_DELAY;
 
 @Service
 @Slf4j
@@ -101,9 +107,7 @@ public class RecruitsService {
                          ts.rangerspolska.pl:6969
                         ```""",
                 false);
-        textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
-                        "<@&" + "RoleID.HEAD_DRILL_INSTRUCTOR_ID" + ">\n" +
-                        "<@&" + "RoleID.DRILL_INSTRUCTOR_ID" + ">")
+        textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.")
                 .setEmbeds(builder.build())
                 .setActionRow(
                         Button.primary(ComponentId.RECRUIT_ACCEPTED, "\u200E"),
@@ -121,10 +125,10 @@ public class RecruitsService {
             ResponseMessage.noReqTimeOnServer(event);
             return;
         }
-/*        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
+        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
             ResponseMessage.userIsInClanMember(event);
             return;
-        }*/
+        }
         if (hasRecruitChannel(userId)) {
             ResponseMessage.userHaveRecruitChannel(event);
             return;
@@ -205,7 +209,7 @@ public class RecruitsService {
         builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
                 "Server nickname: " + Users.getUserNicknameFromID(userId), false);
         builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + "RoleID.DRILL_INSTRUCTOR_ID " + ">")
+        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID  + ">")
                 .setEmbeds(builder.build())
                 .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
                         Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
@@ -224,10 +228,6 @@ public class RecruitsService {
 
     private Optional<Recruit> findByChannelId(String channelId) {
         return recruitRepository.findByChannelId(channelId);
-    }
-
-    public List<Recruit> findAllWithChannel() {
-        return recruitRepository.findAllWithChannelId();
     }
 
     private void save(WaitingRecruit waitingRecruit) {
@@ -670,5 +670,24 @@ public class RecruitsService {
                 delay,
                 calendar.get(Calendar.HOUR_OF_DAY),
                 String.format("%02d", calendar.get(Calendar.MINUTE)));
+    }
+
+    public void getCommandList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY, "Ustawia delay po jakim kanał rekrutacyjny zostanie usunięty od wyniku rekrutacji")
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
+                .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
+    }
+
+    public void setDelayToDeleteChannel(@NotNull SlashCommandInteractionEvent event) {
+        int days = Objects.requireNonNull(event.getOption("days")).getAsInt();
+        if (days > 100 || days <= 0) {
+            event.reply("**Niepoprawna wartość!**\n*0< ILOŚĆ DNI <=100*")
+                    .setEphemeral(true)
+                    .queue();
+            return;
+        }
+        settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, days);
+        event.reply("Ustawiono " + days + " dni po którym będą usuwane kanały rekrutacyjne").setEphemeral(true).queue();
+        log.info("Set settings property - {}={}", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY.getKey(), days);
     }
 }
