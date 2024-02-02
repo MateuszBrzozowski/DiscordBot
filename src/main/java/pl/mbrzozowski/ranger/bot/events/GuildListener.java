@@ -13,6 +13,7 @@ import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
+import pl.mbrzozowski.ranger.server.service.ServerService;
 
 import java.util.ArrayList;
 
@@ -24,6 +25,7 @@ public class GuildListener extends ListenerAdapter {
     private final SlashCommandListener slashCommandListener;
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
+    private final ServerService serverService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
@@ -45,6 +47,7 @@ public class GuildListener extends ListenerAdapter {
         slashCommandListener.getCommandsData(commandData);
         recruitsService.getCommandsList(commandData);
         giveawayService.getCommandsList(commandData);
+        serverService.getCommandsList(commandData);
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
     }

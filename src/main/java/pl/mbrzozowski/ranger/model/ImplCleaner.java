@@ -44,14 +44,14 @@ public class ImplCleaner implements Cleaner {
     }
 
     private void server() {
-        int delay = getDelay(3, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL_AFTER_DAYS);
+        int delay = getDelay(3, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL);
         CleanerChannel serverServiceAutoDelete = new ServerServiceAutoDelete(serverService, delay);
         setTimers(SERVER, serverServiceAutoDelete, 1);
     }
 
     private void event() {
-        int delay = getDelay(28, SettingsKey.EVENT_CHANNEL_DELETE_DELAY);
-        int delayTactical = getDelay(1, SettingsKey.EVENT_CHANNEL_TACTICAL_DELETE_DELAY);
+        int delay = getDelay(28, SettingsKey.EVENT_DELETE_CHANNEL_DELAY);
+        int delayTactical = getDelay(1, SettingsKey.EVENT_DELETE_CHANNEL_TACTICAL_DELAY);
         CleanerChannel eventChannelsAutoDelete = new EventChannelsAutoDelete(eventService, delay, delayTactical);
         setTimers(EVENT, eventChannelsAutoDelete, 22);
     }
@@ -89,7 +89,7 @@ public class ImplCleaner implements Cleaner {
     }
 
     private void closeServerService() {
-        int delay = getDelay(3, SettingsKey.SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS);
+        int delay = getDelay(3, SettingsKey.SERVER_SERVICE_CLOSE_CHANNEL);
         CleanerChannel serverServiceAutoClose = new ServerServiceAutoClose(serverService, delay);
         setTimers(SERVER_CLOSE, serverServiceAutoClose, 1);
     }

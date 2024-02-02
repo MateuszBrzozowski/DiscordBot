@@ -30,13 +30,15 @@ import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.EVENT_DELETE_CHANNEL_DELAY;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.EVENT_SETTINGS;
 
 @Slf4j
 @Service
@@ -477,5 +479,26 @@ public class EventService {
         commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_DELAY.getName(), EVENT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
+        commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getName(), EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
+                .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
+        commandData.add(Commands.slash(EVENT_CREATE.getName(), EVENT_CREATE.getDescription()));
+        commandData.add(Commands.slash(EVENT_SETTINGS.getName(), EVENT_SETTINGS.getDescription()));
+        commandData.add(Commands.slash(FIX_EVENT_EMBED.getName(), FIX_EVENT_EMBED.getDescription())
+                .addOption(OptionType.STRING, "id", "id wiadomości", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+    }
+
+    public void setDelayToDeleteChannel(@NotNull SlashCommandInteractionEvent event, SettingsKey settingsKey) {
+        int days = Objects.requireNonNull(event.getOption("days")).getAsInt();
+        if (days > 200 || days <= 0) {
+            event.reply("**Niepoprawna wartość!**\n*0< ILOŚĆ DNI <=200*")
+                    .setEphemeral(true)
+                    .queue();
+            return;
+        }
+        settingsService.save(settingsKey, days);
+        event.reply("Ustawiono " + days + " dni po którym będą usuwane kanały rekrutacyjne").setEphemeral(true).queue();
+        log.info("Set settings property - {}={}", settingsKey.getKey(), days);
     }
 }

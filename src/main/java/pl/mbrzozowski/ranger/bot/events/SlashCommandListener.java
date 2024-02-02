@@ -2,10 +2,8 @@ package pl.mbrzozowski.ranger.bot.events;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -25,6 +23,8 @@ import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
+import pl.mbrzozowski.ranger.server.service.ServerService;
+import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventsGeneratorService eventsGeneratorService;
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
+    private final ServerService serverService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ServerStats serverStats;
@@ -123,7 +124,13 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equalsIgnoreCase(RECRUIT_DELETE_CHANNEL_DELAY.getName())) {
             recruitsService.setDelayToDeleteChannel(event);
         } else if (name.equalsIgnoreCase(EVENT_DELETE_CHANNEL_DELAY.getName())) {
-            recruitsService.setDelayToDeleteChannel(event);
+            eventService.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_DELAY);
+        } else if (name.equalsIgnoreCase(EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getName())) {
+            eventService.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_TACTICAL_DELAY);
+        } else if (name.equalsIgnoreCase(SERVER_SERVICE_DELETE_CHANNEL.getName())) {
+            serverService.setDelayChannel(event, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL);
+        } else if (name.equalsIgnoreCase(SERVER_SERVICE_CLOSE_CHANNEL.getName())) {
+            serverService.setDelayChannel(event, SettingsKey.SERVER_SERVICE_CLOSE_CHANNEL);
         }
     }
 
@@ -134,10 +141,5 @@ public class SlashCommandListener extends ListenerAdapter {
         commandData.add(Commands.slash(DICE.getName(), DICE.getDescription()));
         commandData.add(Commands.slash(COIN.getName(), COIN.getDescription()));
         commandData.add(Commands.slash(ESSA.getName(), ESSA.getDescription()));
-        commandData.add(Commands.slash(FIX_EVENT_EMBED.getName(), FIX_EVENT_EMBED.getDescription())
-                .addOption(OptionType.STRING, "id", "id wiadomości", true)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(EVENT_CREATE.getName(), EVENT_CREATE.getDescription()));
-        commandData.add(Commands.slash(EVENT_SETTINGS.getName(), EVENT_SETTINGS.getDescription()));
     }
 }
