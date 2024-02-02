@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.role.RoleService;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class GuildListener extends ListenerAdapter {
 
     private final RoleService roleService;
     private final SlashCommandListener slashCommandListener;
+    private final RecruitBlackListService recruitBlackListService;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -24,6 +26,7 @@ public class GuildListener extends ListenerAdapter {
             ArrayList<CommandData> commandData = new ArrayList<>();
             slashCommandListener.writeCommandData(commandData);
             roleService.addCommandsToList(commandData);
+            recruitBlackListService.addCommandList(commandData);
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }

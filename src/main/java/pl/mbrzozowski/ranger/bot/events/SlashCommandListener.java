@@ -21,6 +21,7 @@ import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.stats.ServerStats;
@@ -40,6 +41,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventService eventService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
+    private final RecruitBlackListService recruitBlackListService;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -110,6 +112,12 @@ public class SlashCommandListener extends ListenerAdapter {
             eventsGeneratorService.createGenerator(event, eventService);
         } else if (name.equalsIgnoreCase(EVENT_SETTINGS)) {
             eventsSettingsService.createSettings(event);
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_ADD)) {
+            recruitBlackListService.addToList(event);
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_REMOVE)) {
+            recruitBlackListService.removeFromList(event);
+        } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_INFO)) {
+            recruitBlackListService.infoAboutUser(event);
         }
     }
 
