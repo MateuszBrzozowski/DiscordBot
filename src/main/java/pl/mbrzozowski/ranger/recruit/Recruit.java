@@ -23,6 +23,7 @@ public class Recruit {
     @Column(nullable = false, updatable = false)
     private String userId;
     @NotNull
+    @Column(nullable = false)
     private String channelId;
     @Column(nullable = false)
     private LocalDateTime toApply;

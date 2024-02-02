@@ -30,6 +30,7 @@ public class GuildListener extends ListenerAdapter {
             roleService.addCommandsToList(commandData);
             recruitBlackListService.addCommandList(commandData);
             recruitsService.cleanDB(event);
+            recruitsService.runCleaner();
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }

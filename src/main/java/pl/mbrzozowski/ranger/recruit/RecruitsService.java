@@ -24,15 +24,16 @@ import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.settings.SettingsKey;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static java.time.LocalDate.now;
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
 
@@ -46,6 +47,7 @@ public class RecruitsService {
     private final RecruitRepository recruitRepository;
     private final RecruitBlackListService recruitBlackListService;
     private final WaitingRecruitRepository waitingRecruitRepository;
+    private final SettingsService settingsService;
     private final int MAX_CHANNELS = 50;
 
     /**
@@ -237,7 +239,7 @@ public class RecruitsService {
     }
 
     @NotNull
-    private List<Recruit> findAll() {
+    public List<Recruit> findAll() {
         return recruitRepository.findAll();
     }
 
@@ -309,7 +311,7 @@ public class RecruitsService {
         if (textChannel != null) {
             textChannel.delete().reason("Rekrutacja zakończona.").queue();
             recruitRepository.delete(recruit);
-            log.info(textChannel.getId() + " - channel deleted");
+            log.info("{} - channel deleted", recruit);
         }
     }
 
@@ -644,5 +646,29 @@ public class RecruitsService {
             }
         }
         log.info("DB check and updated");
+    }
+
+    public void runCleaner() {
+        Optional<String> optional = settingsService.find(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY);
+        if (optional.isEmpty()) {
+            settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, 5);
+            log.info("New settings property set - {}={}", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, 5);
+        }
+        int delay = 5;
+        try {
+            delay = Integer.parseInt(optional.orElse("5"));
+        } catch (NumberFormatException e) {
+            settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, delay);
+            log.info("Settings property \"{}\" not correct. Set to default value=5", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY.getKey());
+        }
+        CleanerRecruitChannel cleanerRecruitChannel = new CleanerRecruitChannel(this, delay);
+        Timer timer = new Timer();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(now().getYear(), now().getMonthValue() - 1, now().getDayOfMonth(), 1, 0, 0);
+        timer.scheduleAtFixedRate(cleanerRecruitChannel, calendar.getTime(), 24 * 60 * 60 * 1000);
+        log.info("Cleaner for recruit channel active: delay(days)={}, time={}:{} every 24h",
+                delay,
+                calendar.get(Calendar.HOUR_OF_DAY),
+                String.format("%02d", calendar.get(Calendar.MINUTE)));
     }
 }
