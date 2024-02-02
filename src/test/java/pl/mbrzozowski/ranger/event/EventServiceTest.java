@@ -7,6 +7,7 @@ import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,10 +21,11 @@ class EventServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        EventRepository eventRepository = mock(EventRepository.class);
-        Timers timers = mock(Timers.class);
         UsersReminderService usersReminderService = mock(UsersReminderService.class);
-        eventService = new EventService(eventRepository, timers, usersReminderService);
+        EventRepository eventRepository = mock(EventRepository.class);
+        SettingsService settingsService = mock(SettingsService.class);
+        Timers timers = mock(Timers.class);
+        eventService = new EventService(usersReminderService, eventRepository, settingsService, timers);
     }
 
     @Test

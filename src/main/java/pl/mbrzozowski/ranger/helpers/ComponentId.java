@@ -32,7 +32,6 @@ public final class ComponentId {
     public static final String RECRUIT_NOT_ACCEPTED = "recruitNotAccepted" + SUFFIX;
     public static final String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
     public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
-    public static final String ROLES = "RolesMenu" + SUFFIX;
     public static final String CONFIRM_FORM_SEND = "CFS_001" + SUFFIX;
     public static final String CONFIRM_FORM_RECEIVED = "CFS_002" + SUFFIX;
     public static final String DECLINE_FORM_SEND = "CFS_003" + SUFFIX;

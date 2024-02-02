@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -29,7 +28,6 @@ import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
-import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.awt.*;
@@ -651,18 +649,5 @@ public class RecruitsService {
         commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY.getName(), RECRUIT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
-    }
-
-    public void setDelayToDeleteChannel(@NotNull SlashCommandInteractionEvent event) {
-        int days = Objects.requireNonNull(event.getOption("days")).getAsInt();
-        if (days > 100 || days <= 0) {
-            event.reply("**Niepoprawna wartość!**\n*0< ILOŚĆ DNI <=100*")
-                    .setEphemeral(true)
-                    .queue();
-            return;
-        }
-        settingsService.save(SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY, days);
-        event.reply("Ustawiono " + days + " dni po którym będą usuwane kanały rekrutacyjne").setEphemeral(true).queue();
-        log.info("Set settings property - {}={}", SettingsKey.RECRUIT_CHANNEL_DELETE_DELAY.getKey(), days);
     }
 }

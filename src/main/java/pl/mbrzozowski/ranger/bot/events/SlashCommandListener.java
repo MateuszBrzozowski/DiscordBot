@@ -19,6 +19,7 @@ import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -45,6 +46,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventService eventService;
     private final RoleService roleService;
     private final ServerStats serverStats;
+    private final ImplCleaner implCleaner;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -122,15 +124,15 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equalsIgnoreCase(RECRUIT_BLACK_LIST_INFO.getName())) {
             recruitBlackListService.infoAboutUser(event);
         } else if (name.equalsIgnoreCase(RECRUIT_DELETE_CHANNEL_DELAY.getName())) {
-            recruitsService.setDelayToDeleteChannel(event);
+            implCleaner.setDelayToDeleteChannel(event, SettingsKey.RECRUIT_DELETE_CHANNEL_DELAY);
         } else if (name.equalsIgnoreCase(EVENT_DELETE_CHANNEL_DELAY.getName())) {
-            eventService.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_DELAY);
+            implCleaner.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_DELAY);
         } else if (name.equalsIgnoreCase(EVENT_DELETE_CHANNEL_TACTICAL_DELAY.getName())) {
-            eventService.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_TACTICAL_DELAY);
+            implCleaner.setDelayToDeleteChannel(event, SettingsKey.EVENT_DELETE_CHANNEL_TACTICAL_DELAY);
         } else if (name.equalsIgnoreCase(SERVER_SERVICE_DELETE_CHANNEL.getName())) {
-            serverService.setDelayChannel(event, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL);
+            implCleaner.setDelayToDeleteChannel(event, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL);
         } else if (name.equalsIgnoreCase(SERVER_SERVICE_CLOSE_CHANNEL.getName())) {
-            serverService.setDelayChannel(event, SettingsKey.SERVER_SERVICE_CLOSE_CHANNEL);
+            implCleaner.setDelayToDeleteChannel(event, SettingsKey.SERVER_SERVICE_CLOSE_CHANNEL);
         }
     }
 

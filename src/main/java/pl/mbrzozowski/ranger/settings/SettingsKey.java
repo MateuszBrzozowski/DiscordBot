@@ -8,7 +8,7 @@ public enum SettingsKey {
     DISBOARD_REMINDER_COUNT_FOR_DAY("disboard.reminder.count"),
     SERVER_SERVICE_DELETE_CHANNEL("server.service.delete.channel.after"),
     SERVER_SERVICE_CLOSE_CHANNEL("server.service.close.channel.after"),
-    RECRUIT_CHANNEL_DELETE_DELAY("recruit.channel.delete.after"),
+    RECRUIT_DELETE_CHANNEL_DELAY("recruit.channel.delete.after"),
     EVENT_DELETE_CHANNEL_DELAY("event.channel.delete.after"),
     EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after");
 
