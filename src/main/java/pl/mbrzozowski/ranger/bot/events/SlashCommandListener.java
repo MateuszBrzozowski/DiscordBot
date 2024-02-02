@@ -3,7 +3,6 @@ package pl.mbrzozowski.ranger.bot.events;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -41,16 +40,6 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventService eventService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
-
-    @Override
-    public void onGuildReady(@NotNull GuildReadyEvent event) {
-        if (event.getGuild().getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-            ArrayList<CommandData> commandData = new ArrayList<>();
-            writeCommandData(commandData);
-            roleService.addCommandsToList(commandData);
-            event.getGuild().updateCommands().addCommands(commandData).queue();
-        }
-    }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -124,7 +113,7 @@ public class SlashCommandListener extends ListenerAdapter {
         }
     }
 
-    private void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
+    public void writeCommandData(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE,
                         "Link your discord account to your steam profile if you want view stats from our server.")
                 .addOption(OptionType.STRING, "steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/", true));
