@@ -47,18 +47,14 @@ public class SettingsRepository {
         }
     }
 
-    public void save(@NotNull SettingsKey key, String value) {
+    void save(@NotNull SettingsKey key, String value) {
         loadProperties();
         properties.setProperty(key.getKey(), value);
         log.info("Saved settings({}={})", key.getKey(), value);
         storeProperties();
     }
 
-    public void save(@NotNull SettingsKey key, int value) {
-        save(key, String.valueOf(value));
-    }
-
-    public Optional<String> find(@NotNull SettingsKey key) {
+    Optional<String> find(@NotNull SettingsKey key) {
         loadProperties();
         Object o = properties.get(key.getKey());
         if (o == null) {

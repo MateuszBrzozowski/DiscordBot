@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.settings.SettingsRepository;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -19,14 +19,14 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.*;
 @Service
 public class DisboardService {
 
-    private final SettingsRepository settingsRepository;
-    private Timer timer;
-    private Message reqMessage;
+    private final SettingsService settingsService;
     private Message disboardMessage;
+    private Message reqMessage;
+    private Timer timer;
 
     @Autowired
-    public DisboardService(SettingsRepository settingsRepository) {
-        this.settingsRepository = settingsRepository;
+    public DisboardService(SettingsService settingsService) {
+        this.settingsService = settingsService;
         setNextReminder();
     }
 
@@ -90,62 +90,62 @@ public class DisboardService {
     }
 
     private ReminderMode getReminderMode() {
-        Optional<String> modeOptional = settingsRepository.find(DISBOARD_REMINDER_MODE);
+        Optional<String> modeOptional = settingsService.find(DISBOARD_REMINDER_MODE);
         if (modeOptional.isPresent()) {
             try {
                 return ReminderMode.of(Integer.parseInt(modeOptional.get()));
             } catch (NumberFormatException e) {
-                settingsRepository.save(DISBOARD_REMINDER_MODE, ReminderMode.DISABLE.getMode());
+                settingsService.save(DISBOARD_REMINDER_MODE, ReminderMode.DISABLE.getMode());
                 return ReminderMode.DISABLE;
             }
         } else {
-            settingsRepository.save(DISBOARD_REMINDER_MODE, ReminderMode.DISABLE.getMode());
+            settingsService.save(DISBOARD_REMINDER_MODE, ReminderMode.DISABLE.getMode());
             return ReminderMode.DISABLE;
         }
     }
 
     private int getReminderCounter() {
-        Optional<String> optionalCount = settingsRepository.find(DISBOARD_REMINDER_COUNT_FOR_DAY);
+        Optional<String> optionalCount = settingsService.find(DISBOARD_REMINDER_COUNT_FOR_DAY);
         if (optionalCount.isPresent()) {
             try {
                 return Integer.parseInt(optionalCount.get());
             } catch (NumberFormatException e) {
-                settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
+                settingsService.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
                 return 0;
             }
         } else {
-            settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
+            settingsService.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
             return 0;
         }
     }
 
     @NotNull
     private LocalDateTime getLastReminderDate() {
-        Optional<String> optionalDate = settingsRepository.find(DISBOARD_REMINDER_DATE);
+        Optional<String> optionalDate = settingsService.find(DISBOARD_REMINDER_DATE);
         if (optionalDate.isPresent()) {
             try {
                 return LocalDateTime.parse(optionalDate.get());
             } catch (DateTimeParseException e) {
-                settingsRepository.save(DISBOARD_REMINDER_DATE, LocalDateTime.MIN.toString());
+                settingsService.save(DISBOARD_REMINDER_DATE, LocalDateTime.MIN.toString());
                 return LocalDateTime.MIN;
             }
         } else {
-            settingsRepository.save(DISBOARD_REMINDER_DATE, LocalDateTime.MIN.toString());
+            settingsService.save(DISBOARD_REMINDER_DATE, LocalDateTime.MIN.toString());
             return LocalDateTime.MIN;
         }
     }
 
     private LocalDateTime getLastDisboardAnswer() {
-        Optional<String> dateOptional = settingsRepository.find(DISBOARD_REMINDER_DATE_ANSWER);
+        Optional<String> dateOptional = settingsService.find(DISBOARD_REMINDER_DATE_ANSWER);
         if (dateOptional.isPresent()) {
             try {
                 return LocalDateTime.parse(dateOptional.get());
             } catch (DateTimeParseException e) {
-                settingsRepository.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().minusMinutes(110).toString());
+                settingsService.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().minusMinutes(110).toString());
                 return LocalDateTime.now().minusMinutes(110);
             }
         } else {
-            settingsRepository.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().minusMinutes(110).toString());
+            settingsService.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().minusMinutes(110).toString());
             return LocalDateTime.now().minusMinutes(110);
         }
     }
@@ -155,17 +155,17 @@ public class DisboardService {
         LocalDateTime lastReminderDate = getLastReminderDate();
         if (dateTimeNow.getDayOfYear() != lastReminderDate.getDayOfYear()
                 || dateTimeNow.getYear() != lastReminderDate.getYear()) {
-            settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
+            settingsService.save(DISBOARD_REMINDER_COUNT_FOR_DAY, 0);
         }
     }
 
     public void saveAnswerTime() {
-        settingsRepository.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().toString());
+        settingsService.save(DISBOARD_REMINDER_DATE_ANSWER, LocalDateTime.now().toString());
     }
 
     protected void sentBumpReminder() {
-        settingsRepository.save(DISBOARD_REMINDER_COUNT_FOR_DAY, getReminderCounter() + 1);
-        settingsRepository.save(DISBOARD_REMINDER_DATE, LocalDateTime.now().toString());
+        settingsService.save(DISBOARD_REMINDER_COUNT_FOR_DAY, getReminderCounter() + 1);
+        settingsService.save(DISBOARD_REMINDER_DATE, LocalDateTime.now().toString());
         timer = null;
         log.info("Reminder sent");
     }

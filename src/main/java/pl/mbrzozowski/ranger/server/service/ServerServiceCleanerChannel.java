@@ -10,7 +10,7 @@ import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.model.AutoCloseChannel;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
-import pl.mbrzozowski.ranger.settings.SettingsRepository;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -24,13 +24,13 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SERVER_SERVICE_DELETE_C
 public class ServerServiceCleanerChannel extends TimerTask implements CleanerChannel, AutoCloseChannel {
 
     private final ServerService serverService;
-    private final SettingsRepository settingsRepository;
+    private final SettingsService settingsService;
 
     @Autowired
     public ServerServiceCleanerChannel(ServerService serverService,
-                                       SettingsRepository settingsRepository) {
+                                       SettingsService settingsService) {
         this.serverService = serverService;
-        this.settingsRepository = settingsRepository;
+        this.settingsService = settingsService;
         checkSettings();
         Timer timer = new Timer();
         Date date = new Date(now().getYear() - 1900, now().getMonthValue() - 1, now().getDayOfMonth());
@@ -90,7 +90,7 @@ public class ServerServiceCleanerChannel extends TimerTask implements CleanerCha
                 !settingsKey.equals(SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS)) {
             throw new IllegalArgumentException("Settings key(" + settingsKey.getKey() + ") not correct");
         }
-        Optional<String> optional = settingsRepository.find(settingsKey);
+        Optional<String> optional = settingsService.find(settingsKey);
         if (optional.isPresent()) {
             try {
                 int days = Integer.parseInt(optional.get());
@@ -111,12 +111,12 @@ public class ServerServiceCleanerChannel extends TimerTask implements CleanerCha
     private int getDefaultDelayInDay(@NotNull SettingsKey settingsKey) {
         switch (settingsKey) {
             case SERVER_SERVICE_DELETE_CHANNEL_AFTER_DAYS -> {
-                settingsRepository.save(SERVER_SERVICE_DELETE_CHANNEL_AFTER_DAYS, 2);
+                settingsService.save(SERVER_SERVICE_DELETE_CHANNEL_AFTER_DAYS, 2);
                 log.info("Default value: delay 2 days for {}", settingsKey.getKey());
                 return 2;
             }
             case SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS -> {
-                settingsRepository.save(SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS, 3);
+                settingsService.save(SERVER_SERVICE_CLOSE_CHANNEL_AFTER_DAYS, 3);
                 log.info("Default value: delay 3 days for {}", settingsKey.getKey());
                 return 3;
             }
