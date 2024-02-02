@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
+import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 
 import java.util.ArrayList;
@@ -19,14 +20,16 @@ public class GuildListener extends ListenerAdapter {
     private final RoleService roleService;
     private final SlashCommandListener slashCommandListener;
     private final RecruitBlackListService recruitBlackListService;
+    private final RecruitsService recruitsService;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
-        if (event.getGuild().getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
+        if (event.getGuild().getId().equals(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
             ArrayList<CommandData> commandData = new ArrayList<>();
             slashCommandListener.writeCommandData(commandData);
             roleService.addCommandsToList(commandData);
             recruitBlackListService.addCommandList(commandData);
+            recruitsService.cleanDB(event);
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }

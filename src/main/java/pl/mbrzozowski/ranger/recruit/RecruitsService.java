@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -99,8 +100,8 @@ public class RecruitsService {
                         ```""",
                 false);
         textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.\n" +
-                        "<@&" + RoleID.HEAD_DRILL_INSTRUCTOR_ID + ">\n" +
-                        "<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+                        "<@&" + "RoleID.HEAD_DRILL_INSTRUCTOR_ID" + ">\n" +
+                        "<@&" + "RoleID.DRILL_INSTRUCTOR_ID" + ">")
                 .setEmbeds(builder.build())
                 .setActionRow(
                         Button.primary(ComponentId.RECRUIT_ACCEPTED, "\u200E"),
@@ -118,10 +119,10 @@ public class RecruitsService {
             ResponseMessage.noReqTimeOnServer(event);
             return;
         }
-        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
+/*        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
             ResponseMessage.userIsInClanMember(event);
             return;
-        }
+        }*/
         if (hasRecruitChannel(userId)) {
             ResponseMessage.userHaveRecruitChannel(event);
             return;
@@ -202,7 +203,7 @@ public class RecruitsService {
         builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
                 "Server nickname: " + Users.getUserNicknameFromID(userId), false);
         builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+        textChannel.sendMessage("<@&" + "RoleID.DRILL_INSTRUCTOR_ID " + ">")
                 .setEmbeds(builder.build())
                 .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
                         Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
@@ -233,6 +234,15 @@ public class RecruitsService {
 
     private void deleteByUserId(String userId) {
         waitingRecruitRepository.deleteByUserId(userId);
+    }
+
+    @NotNull
+    private List<Recruit> findAll() {
+        return recruitRepository.findAll();
+    }
+
+    private void delete(Recruit recruit) {
+        recruitRepository.delete(recruit);
     }
 
     private void add(String userId, String userName, String channelID) {
@@ -619,5 +629,20 @@ public class RecruitsService {
         event.editMessageEmbeds(builder.build()).setComponents().queue();
         String userId = event.getComponentId().substring(DECLINE_FORM_SEND.length());
         deleteByUserId(userId);
+    }
+
+    public void cleanDB(@NotNull GuildReadyEvent event) {
+        log.info("DB - cleaning");
+        List<Recruit> recruits = findAll();
+        Guild guild = event.getGuild();
+        for (Recruit recruit : recruits) {
+            recruit.getChannelId();
+            TextChannel textChannel = guild.getTextChannelById(recruit.getChannelId());
+            if (textChannel == null) {
+                delete(recruit);
+                log.info("{} deleted from DB - No channel on server", recruit);
+            }
+        }
+        log.info("DB check and updated");
     }
 }
