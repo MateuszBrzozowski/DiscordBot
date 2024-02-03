@@ -23,9 +23,8 @@ class EventServiceTest {
     void beforeEach() {
         UsersReminderService usersReminderService = mock(UsersReminderService.class);
         EventRepository eventRepository = mock(EventRepository.class);
-        SettingsService settingsService = mock(SettingsService.class);
         Timers timers = mock(Timers.class);
-        eventService = new EventService(usersReminderService, eventRepository, settingsService, timers);
+        eventService = new EventService(usersReminderService, eventRepository, timers);
     }
 
     @Test

@@ -1,11 +1,11 @@
 package pl.mbrzozowski.ranger.bot.events;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
 import pl.mbrzozowski.ranger.disboard.DisboardService;
@@ -14,44 +14,26 @@ import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.members.GuildMembersService;
+import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class WriteListener extends ListenerAdapter {
 
-    private final EventService eventService;
-    private final RecruitsService recruitsService;
-    private final BotWriter botWriter;
-    private final ServerService serverService;
-    private final UsersReminderService usersReminderService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
-    private final DisboardService disboardService;
+    private final UsersReminderService usersReminderService;
     private final GuildMembersService guildMembersService;
-
-    @Autowired
-    public WriteListener(EventService eventService,
-                         RecruitsService recruitsService,
-                         BotWriter botWriter,
-                         ServerService serverService,
-                         UsersReminderService usersReminderService,
-                         EventsGeneratorService eventsGeneratorService,
-                         EventsSettingsService eventsSettingsService,
-                         DisboardService disboardService,
-                         GuildMembersService guildMembersService) {
-        this.eventService = eventService;
-        this.recruitsService = recruitsService;
-        this.botWriter = botWriter;
-        this.serverService = serverService;
-        this.usersReminderService = usersReminderService;
-        this.eventsGeneratorService = eventsGeneratorService;
-        this.eventsSettingsService = eventsSettingsService;
-        this.disboardService = disboardService;
-        this.guildMembersService = guildMembersService;
-    }
+    private final RecruitsService recruitsService;
+    private final DisboardService disboardService;
+    private final ServerService serverService;
+    private final EventService eventService;
+    private final RankService rankService;
+    private final BotWriter botWriter;
 
 
     @Override
@@ -69,7 +51,7 @@ public class WriteListener extends ListenerAdapter {
         EmbedSender embedSender = new EmbedSender();
         RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
-        AdminCommands adminCommands = new AdminCommands(guildMembersService);
+        AdminCommands adminCommands = new AdminCommands(guildMembersService, rankService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventsSettingsService);
         DeveloperCmd developerCmd = new DeveloperCmd(eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd();

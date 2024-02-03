@@ -20,6 +20,8 @@ import pl.mbrzozowski.ranger.giveaway.Giveaway;
 import pl.mbrzozowski.ranger.giveaway.GiveawayUser;
 import pl.mbrzozowski.ranger.giveaway.Prize;
 import pl.mbrzozowski.ranger.members.InOutGuildMembers;
+import pl.mbrzozowski.ranger.members.clan.ClanMember;
+import pl.mbrzozowski.ranger.members.clan.rank.Rank;
 import pl.mbrzozowski.ranger.recruit.Recruit;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackList;
 import pl.mbrzozowski.ranger.recruit.WaitingRecruit;
@@ -72,7 +74,9 @@ public class MainDataSourceConfiguration {
                         Giveaway.class,
                         GiveawayUser.class,
                         Prize.class,
-                        WaitingRecruit.class)
+                        WaitingRecruit.class,
+                        ClanMember.class,
+                        Rank.class)
                 .properties(properties)
                 .build();
     }
