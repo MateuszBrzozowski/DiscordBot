@@ -2,14 +2,20 @@ package pl.mbrzozowski.ranger.members.clan.rank;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.AttachmentProxy;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
@@ -18,6 +24,7 @@ import pl.mbrzozowski.ranger.members.clan.ClanMemberService;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.model.TempFiles;
 import pl.mbrzozowski.ranger.repository.main.RankRepository;
+import pl.mbrzozowski.ranger.response.ResponseMessage;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,6 +33,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
@@ -43,6 +52,19 @@ public class RankService implements SlashCommand {
     private List<Rank> findAll() {
         return rankRepository.findAll();
     }
+
+    private Optional<Rank> findByDiscordId(String discordId) {
+        return rankRepository.findByDiscordId(discordId);
+    }
+
+    private Optional<Rank> findByName(String name) {
+        return rankRepository.findByName(name);
+    }
+
+    private void deleteByDiscordId(String discordId) {
+        rankRepository.deleteByDiscordId(discordId);
+    }
+
 
     /**
      * @param event message with file *.csv
@@ -270,9 +292,95 @@ public class RankService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(ArrayList<CommandData> commandData) {
-        //TODO napisać komendy to usuwania i dodawania rank roli
-        // squashowac commity
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(RANK_ROLE_ADD.getName(), RANK_ROLE_ADD.getDescription())
+                .addOption(OptionType.STRING, "nazwa", "Nazwa stopnia", true)
+                .addOption(OptionType.STRING, "discord-id", "Discord ID stopnia", true)
+                .addOption(OptionType.STRING, "skrót", "Skrót stopnia", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+        commandData.add(Commands.slash(RANK_ROLE_FIND_BY_DISCORD_ID.getName(), RANK_ROLE_FIND_BY_DISCORD_ID.getDescription())
+                .addOption(OptionType.STRING, "discord-id", "Discord ID stopnia", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+        commandData.add(Commands.slash(RANK_ROLE_FIND_BY_NAME.getName(), RANK_ROLE_FIND_BY_NAME.getDescription())
+                .addOption(OptionType.STRING, "nazwa", "Nazwa stopnia", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+        commandData.add(Commands.slash(RANK_ROLE_REMOVE.getName(), RANK_ROLE_REMOVE.getDescription())
+                .addOption(OptionType.STRING, "discord-id", "Discord ID stopnia", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)));
+    }
+
+    public void addRole(@NotNull SlashCommandInteractionEvent event) {
+        String name = Objects.requireNonNull(event.getOption("nazwa")).getAsString();
+        String discordId = Objects.requireNonNull(event.getOption("discord-id")).getAsString();
+        String shortcut = Objects.requireNonNull(event.getOption("skrót")).getAsString();
+        if (!validRank(event, name, discordId)) {
+            ResponseMessage.cannotAddRankRole(event);
+            return;
+        }
+        Rank rank = new Rank(name, discordId, shortcut);
+        rankRepository.save(rank);
+        ResponseMessage.rankRoleAdded(event, rank);
+        log.info("Rank role saved");
+    }
+
+    public void deleteByDiscordId(@NotNull SlashCommandInteractionEvent event) {
+        String discordId = Objects.requireNonNull(event.getOption("discord-id")).getAsString();
+        event.reply("Jeśli istnieje usuwam rolę stopnia dla discord ID = " + discordId).setEphemeral(true).queue();
+        deleteByDiscordId(discordId);
+        log.info("Request to delete rank role by discord ID={}", discordId);
+    }
+
+    public void findByName(@NotNull SlashCommandInteractionEvent event) {
+        String name = Objects.requireNonNull(event.getOption("nazwa")).getAsString();
+        Optional<Rank> rank = findByName(name);
+        if (rank.isPresent()) {
+            ResponseMessage.writeRankRole(event, rank.get());
+            log.info("Rank role {}", rank.get());
+        } else {
+            event.reply("Rola stopnia nie istniej w bazie").setEphemeral(true).queue();
+            log.info("Rank role by name={} is not exists.", name);
+        }
+    }
+
+    public void findByDiscordId(@NotNull SlashCommandInteractionEvent event) {
+        String discordId = Objects.requireNonNull(event.getOption("discord-id")).getAsString();
+        Optional<Rank> rank = findByDiscordId(discordId);
+        if (rank.isPresent()) {
+            ResponseMessage.writeRankRole(event, rank.get());
+            log.info("Rank role {}", rank.get());
+        } else {
+            event.reply("Rola stopnia nie istniej w bazie").setEphemeral(true).queue();
+            log.info("Rank role by discordId={} is not exists.", discordId);
+        }
+    }
+
+    private boolean validRank(SlashCommandInteractionEvent event, String name, String discordId) {
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(discordId)) {
+            log.info("Name or discord ID can not be blank");
+            return false;
+        }
+        List<Rank> ranks = findAll();
+        for (Rank rank : ranks) {
+            if (name.equalsIgnoreCase(rank.getName()) || discordId.equalsIgnoreCase(rank.getDiscordId().orElse(""))) {
+                log.info("Name or discord ID is exist. {} - name={}, discordId={}", rank, name, discordId);
+                return false;
+            }
+        }
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            log.error("Guild is null");
+            return false;
+        }
+        if (!discordId.chars().allMatch(Character::isDigit)) {
+            log.info("Discord ID is not a number");
+            return false;
+        }
+        Role role = guild.getRoleById(discordId);
+        if (role == null) {
+            log.info("Role not exist on discord");
+            return false;
+        }
+        return true;
     }
 }
 

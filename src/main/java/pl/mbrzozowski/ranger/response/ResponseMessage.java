@@ -9,6 +9,7 @@ import pl.mbrzozowski.ranger.giveaway.Giveaway;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.members.clan.rank.Rank;
 
 import java.util.List;
 
@@ -148,9 +149,9 @@ public class ResponseMessage {
 
     public static void connectSuccessfully(@NotNull SlashCommandInteractionEvent event) {
         event.getHook().editOriginal("""
-                        **Successfully**
-                        Your discord account is linked to your Steam profile.
-                        Now, You can use command **/stats**""").queue();
+                **Successfully**
+                Your discord account is linked to your Steam profile.
+                Now, You can use command **/stats**""").queue();
     }
 
     public static void connectUnSuccessfully(@NotNull SlashCommandInteractionEvent event) {
@@ -272,5 +273,30 @@ public class ResponseMessage {
         event.reply("**Jeżeli wysłałeś formularz oczekuj na zatwierdzenie przez <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user waiting to confirm form", event.getUser()));
+    }
+
+    public static void cannotAddRankRole(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("""
+                **Nie można dodać roli stopnia. Możliwe błędy:**
+                - Nazwa lub discord ID są puste
+                - Nazwa lub discord ID są już w bazie.
+                - Discord ID nie jest numerem
+                - Rola o podanym discord ID nie istnieje.""").setEphemeral(true).queue();
+    }
+
+    public static void writeRankRole(@NotNull SlashCommandInteractionEvent event, @NotNull Rank rank) {
+        event.reply("Nazwa: **" + rank.getName() + "**\n" +
+                        "Discord ID: **" + rank.getDiscordId().orElse("") + "**\n" +
+                        "Skrót: **" + rank.getShortcut() + "**\n")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    public static void rankRoleAdded(@NotNull SlashCommandInteractionEvent event, @NotNull Rank rank) {
+        event.reply("Nazwa: **" + rank.getName() + "**\n" +
+                        "Discord ID: **" + rank.getDiscordId().orElse("") + "**\n" +
+                        "Skrót: **" + rank.getShortcut() + "**\n")
+                .setEphemeral(true)
+                .queue();
     }
 }

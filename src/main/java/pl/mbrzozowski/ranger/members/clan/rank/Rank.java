@@ -18,9 +18,15 @@ public class Rank {
     @NonNull
     @Column(nullable = false, unique = true)
     private String name;
-    private String shortcut;
     @Column(unique = true, length = 100)
     private String discordId;
+    private String shortcut;
+
+    public Rank(@NonNull String name, String discordId, String shortcut) {
+        this.name = name;
+        this.discordId = discordId;
+        this.shortcut = shortcut;
+    }
 
     public Optional<String> getDiscordId() {
         if (discordId == null) {
