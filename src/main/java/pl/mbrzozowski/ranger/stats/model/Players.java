@@ -11,11 +11,15 @@ import javax.persistence.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "dblog_steamusers")
-public class SteamUsers {
+@Entity(name = "dblog_players")
+public class Players {
     @Id
     @Column(name = "steamID")
     private String steamID;
     @Column(name = "lastName")
     private String lastName;
+    @Column(name = "eosID")
+    private String eosID;
+    @Column(name = "lastIP")
+    private String lastIP;
 }

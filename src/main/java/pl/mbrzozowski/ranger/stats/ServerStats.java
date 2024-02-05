@@ -33,21 +33,21 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 @Slf4j
 public class ServerStats {
 
-    private final DeathsService deathsService;
     private final DiscordUserService discordUserService;
+    private final PlayersService playersService;
     private final RevivesService revivesService;
-    private final SteamUsersService steamUsersService;
+    private final DeathsService deathsService;
     private final WoundsService woundsService;
 
     public ServerStats(DeathsService deathsService,
                        DiscordUserService discordUserService,
                        RevivesService revivesService,
-                       SteamUsersService steamUsersService,
+                       PlayersService playersService,
                        WoundsService woundsService) {
         this.deathsService = deathsService;
         this.discordUserService = discordUserService;
         this.revivesService = revivesService;
-        this.steamUsersService = steamUsersService;
+        this.playersService = playersService;
         this.woundsService = woundsService;
     }
 
@@ -181,7 +181,7 @@ public class ServerStats {
             playerStats.setSteamID(discordUser.getSteamID());
             playerStats.setUserDiscordID(discordUser.getUserID());
 
-            Optional<SteamUsers> steamUsersOptional = steamUsersService.findBySteamId(discordUser.getSteamID());
+            Optional<Players> steamUsersOptional = playersService.findBySteamId(discordUser.getSteamID());
             if (steamUsersOptional.isPresent()) {
                 playerStats.setProfileName(steamUsersOptional.get().getLastName());
             } else {

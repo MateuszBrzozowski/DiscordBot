@@ -47,7 +47,7 @@ public class StatsDataSourceConfiguration {
                         Deaths.class,
                         DiscordUser.class,
                         Revives.class,
-                        SteamUsers.class,
+                        Players.class,
                         Wounds.class)
                 .properties(properties)
                 .build();
