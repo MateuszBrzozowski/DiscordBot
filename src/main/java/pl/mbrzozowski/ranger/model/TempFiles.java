@@ -19,7 +19,7 @@ public class TempFiles {
         return file;
     }
 
-    public void writeToFile(String message, boolean append) {
+    public void writeLineToFile(String message, boolean append) {
         if (file == null) {
             throw new NullPointerException("Log file is null");
         }
@@ -30,13 +30,13 @@ public class TempFiles {
         }
     }
 
-    public void writeToFile(String message) {
-        writeToFile(message, true);
+    public void writeLineToFile(String message) {
+        writeLineToFile(message, true);
     }
 
     public void writeSeparatorToLogFile() {
-        writeToFile("------------");
-        writeToFile("");
+        writeLineToFile("------------");
+        writeLineToFile("");
     }
 
     public void clear() {

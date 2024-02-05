@@ -24,4 +24,5 @@ public final class Commands {
     public static final String RECRUIT_OPINIONS = PREFIX + "rekrutopinia" + SUFFIX;
     public static final String UPDATE_WL = PREFIX + "updateWL" + SUFFIX;
     public static final String DISCORD_MEMBERS = PREFIX + "discord members" + SUFFIX;
+    public static final String STEAM_HOURS = PREFIX + "godziny" + SUFFIX;
 }

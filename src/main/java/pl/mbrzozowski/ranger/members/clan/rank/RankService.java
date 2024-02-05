@@ -68,13 +68,13 @@ public class RankService {
 
     private void createLogFile() {
         logFiles = new TempFiles("log-rank-roles.txt");
-        logFiles.writeToFile("Time: " + LocalDateTime.now(), false);
+        logFiles.writeLineToFile("Time: " + LocalDateTime.now(), false);
         logFiles.writeSeparatorToLogFile();
     }
 
 
     private void changeRoles(@NotNull Set<ClanMember> clanMembersToChange, List<Rank> ranks, Guild guild) {
-        logFiles.writeToFile("Ustawiam role dla " + clanMembersToChange.size() + " użytkowników\n");
+        logFiles.writeLineToFile("Ustawiam role dla " + clanMembersToChange.size() + " użytkowników\n");
         for (ClanMember clanMember : clanMembersToChange) {
             Optional<String> discordIdRank = getDiscordIdRank(ranks, clanMember.getRank());
             Role role = guild.getRoleById(discordIdRank.orElse("0"));
@@ -88,7 +88,7 @@ public class RankService {
             if (memberById != null) {
                 guild.modifyMemberRoles(memberById, rolesToAdd, rolesToRemove).queue();
                 log.info("Rank role set for {}", memberById);
-                logFiles.writeToFile(clanMember.getNick() + " :: " + clanMember.getRank());
+                logFiles.writeLineToFile(clanMember.getNick() + " :: " + clanMember.getRank());
             }
         }
         logFiles.writeSeparatorToLogFile();
@@ -148,12 +148,12 @@ public class RankService {
                         .build();
                 clanMemberService.save(clanMember);
                 clanMembersToChange.add(clanMember);
-                logFiles.writeToFile(clanMember.getNick() + " - Zapisano nowego użytkownika.");
+                logFiles.writeLineToFile(clanMember.getNick() + " - Zapisano nowego użytkownika.");
                 log.info("User not exists. Create new record {}", clanMember);
             }
         }
         if (clanMembersToChange.size() == 0) {
-            logFiles.writeToFile("Nie wykryto żadnych zmian");
+            logFiles.writeLineToFile("Nie wykryto żadnych zmian");
         }
         logFiles.writeSeparatorToLogFile();
     }
@@ -198,7 +198,7 @@ public class RankService {
     }
 
     private void readFile(List<Rank> ranks) {
-        logFiles.writeToFile("Odczytuje plik.");
+        logFiles.writeLineToFile("Odczytuje plik.");
         if (rankRoleFile.getFile() == null) {
             throw new NullPointerException("File is null");
         }
@@ -210,7 +210,7 @@ public class RankService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logFiles.writeToFile("Wczytano poprawnie: " + fileClanMembers.size() + " pozycji.");
+        logFiles.writeLineToFile("Wczytano poprawnie: " + fileClanMembers.size() + " pozycji.");
         logFiles.writeSeparatorToLogFile();
         log.info("Read file. Imported data");
     }
@@ -219,7 +219,7 @@ public class RankService {
         String[] columns = line.split(",");
         if (columns.length < 4) {
             log.info("Skip line: {}", line);
-            logFiles.writeToFile("Pominięto linie - " + line);
+            logFiles.writeLineToFile("Pominięto linie - " + line);
             return;
         }
         ClanMember clanMember = ClanMember.builder()
@@ -230,7 +230,7 @@ public class RankService {
                 .build();
         if (!clanMemberService.valid(clanMember, ranks)) {
             log.info("Skip line: {}", line);
-            logFiles.writeToFile("Pominięto linie - " + line);
+            logFiles.writeLineToFile("Pominięto linie - " + line);
             return;
         }
         fileClanMembers.add(clanMember);
@@ -262,7 +262,7 @@ public class RankService {
             log.error("Can not download file", e);
             return false;
         }
-        logFiles.writeToFile("Plik pobrany - " + event.getMessage().getAttachments().get(0).getFileName());
+        logFiles.writeLineToFile("Plik pobrany - " + event.getMessage().getAttachments().get(0).getFileName());
         logFiles.writeSeparatorToLogFile();
         return true;
     }

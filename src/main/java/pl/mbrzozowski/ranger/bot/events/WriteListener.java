@@ -14,6 +14,7 @@ import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.members.GuildMembersService;
+import pl.mbrzozowski.ranger.members.clan.hours.HoursService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -32,6 +33,7 @@ public class WriteListener extends ListenerAdapter {
     private final DisboardService disboardService;
     private final ServerService serverService;
     private final EventService eventService;
+    private final HoursService hoursService;
     private final RankService rankService;
     private final BotWriter botWriter;
 
@@ -51,7 +53,7 @@ public class WriteListener extends ListenerAdapter {
         EmbedSender embedSender = new EmbedSender();
         RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
-        AdminCommands adminCommands = new AdminCommands(guildMembersService, rankService);
+        AdminCommands adminCommands = new AdminCommands(guildMembersService, hoursService, rankService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventsSettingsService);
         DeveloperCmd developerCmd = new DeveloperCmd(eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd();
