@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.utils.AttachmentProxy;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.members.clan.ClanMember;
 import pl.mbrzozowski.ranger.members.clan.ClanMemberService;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.model.TempFiles;
 import pl.mbrzozowski.ranger.repository.main.RankRepository;
 
@@ -28,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RankService {
+public class RankService implements SlashCommand {
 
     private Set<ClanMember> fileClanMembers = new HashSet<>();
     private final ClanMemberService clanMemberService;
@@ -265,6 +267,12 @@ public class RankService {
         logFiles.writeLineToFile("Plik pobrany - " + event.getMessage().getAttachments().get(0).getFileName());
         logFiles.writeSeparatorToLogFile();
         return true;
+    }
+
+    @Override
+    public void getCommandsList(ArrayList<CommandData> commandData) {
+        //TODO napisać komendy to usuwania i dodawania rank roli
+        // squashowac commity
     }
 }
 

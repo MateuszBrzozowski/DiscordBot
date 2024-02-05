@@ -15,6 +15,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CannotCreateTransactionException;
 import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.stats.model.*;
@@ -31,7 +32,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Service
 @Slf4j
-public class ServerStats {
+public class ServerStats implements SlashCommand {
 
     private final DiscordUserService discordUserService;
     private final PlayersService playersService;
@@ -389,6 +390,7 @@ public class ServerStats {
                 .toList().size();
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
                 .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.RecruitBlackListRepository;
 
 import java.awt.*;
@@ -23,7 +24,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Service
 @RequiredArgsConstructor
-public class RecruitBlackListService {
+public class RecruitBlackListService implements SlashCommand {
 
     private final RecruitBlackListRepository recruitBlackListRepository;
 
@@ -55,6 +56,7 @@ public class RecruitBlackListService {
         event.reply("Użytkownik **" + nickname + "** usunięty z black listy").setEphemeral(true).queue();
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD.getName(), RECRUIT_BLACK_LIST_ADD.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))

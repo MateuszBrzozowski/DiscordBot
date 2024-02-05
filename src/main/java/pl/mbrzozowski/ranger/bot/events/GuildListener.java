@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -31,6 +32,7 @@ public class GuildListener extends ListenerAdapter {
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
     private final ServerStats serverStats;
+    private final RankService rankService;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -53,6 +55,7 @@ public class GuildListener extends ListenerAdapter {
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
         serverStats.getCommandsList(commandData);
+        rankService.getCommandsList(commandData);
     }
 
 }

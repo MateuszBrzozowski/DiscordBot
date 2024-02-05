@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -21,11 +20,11 @@ import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
-import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
@@ -38,7 +37,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.SERVER_SERVICE_DELETE_
 
 @Slf4j
 @Service
-public class ServerService {
+public class ServerService implements SlashCommand {
 
     private final ClientRepository clientRepository;
     private final SettingsService settingsService;
@@ -181,6 +180,7 @@ public class ServerService {
         return clientRepository.findAll();
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(SERVER_SERVICE_DELETE_CHANNEL.getName(), SERVER_SERVICE_DELETE_CHANNEL.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
@@ -188,18 +188,5 @@ public class ServerService {
         commandData.add(Commands.slash(SERVER_SERVICE_CLOSE_CHANNEL.getName(), SERVER_SERVICE_CLOSE_CHANNEL.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
-    }
-
-    public void setDelayChannel(@NotNull SlashCommandInteractionEvent event, SettingsKey settingsKey) {
-        int days = Objects.requireNonNull(event.getOption("days")).getAsInt();
-        if (days > 200 || days <= 0) {
-            event.reply("**Niepoprawna wartość!**\n*0< ILOŚĆ DNI <=200*")
-                    .setEphemeral(true)
-                    .queue();
-            return;
-        }
-        settingsService.save(settingsKey, days);
-        event.reply("Ustawiono " + days + " dni po którym będą usuwane kanały rekrutacyjne").setEphemeral(true).queue();
-        log.info("Set settings property - {}={}", settingsKey.getKey(), days);
     }
 }

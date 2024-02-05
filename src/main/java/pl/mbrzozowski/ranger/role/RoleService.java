@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.Users;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.RoleRepository;
 
 import java.util.*;
@@ -26,7 +27,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
-public class RoleService {
+public class RoleService implements SlashCommand {
 
     private final RoleRepository roleRepository;
     private static final int MAX_ROLES = 25;
@@ -53,6 +54,7 @@ public class RoleService {
         return roleRepository.findAll();
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         addRoleCommand(commandData);
         addAddingRoleToBot(commandData);

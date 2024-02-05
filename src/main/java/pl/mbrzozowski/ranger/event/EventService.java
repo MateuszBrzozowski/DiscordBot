@@ -26,6 +26,7 @@ import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -39,7 +40,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
-public class EventService {
+public class EventService implements SlashCommand {
 
     private static final int MAX_EVENTS = 25;
     private final UsersReminderService usersReminderService;
@@ -469,6 +470,7 @@ public class EventService {
         return all.size() >= MAX_EVENTS;
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) throws IllegalArgumentException {
         commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_DELAY.getName(), EVENT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))

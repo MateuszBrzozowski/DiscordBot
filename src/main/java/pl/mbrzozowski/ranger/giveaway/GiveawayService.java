@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -38,7 +39,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Slf4j
 @Service
-public class GiveawayService {
+public class GiveawayService implements SlashCommand {
 
     private GiveawayGenerator giveawayGenerator;
     private final GiveawayRepository giveawayRepository;
@@ -637,6 +638,7 @@ public class GiveawayService {
         this.giveawayGenerator = null;
     }
 
+    @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_CREATE.getName(), GIVEAWAY_CREATE.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
