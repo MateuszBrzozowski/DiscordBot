@@ -4,9 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.hibernate.exception.SQLGrammarException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.CannotCreateTransactionException;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
@@ -14,10 +21,13 @@ import pl.mbrzozowski.ranger.stats.model.*;
 import pl.mbrzozowski.ranger.stats.service.*;
 
 import java.awt.*;
+import java.sql.SQLSyntaxErrorException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Service
 @Slf4j
@@ -41,6 +51,41 @@ public class ServerStats {
         this.woundsService = woundsService;
     }
 
+    public void stats(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
+        try {
+            if (isUserConnected(event.getUser().getId())) {
+                viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
+            } else {
+                ResponseMessage.notConnectedAccount(event);
+            }
+        } catch (CannotCreateTransactionException | SQLGrammarException | InvalidDataAccessResourceUsageException |
+                 SQLSyntaxErrorException exception) {
+            log.error("Database Error: " + exception.getMessage());
+            ResponseMessage.cannotConnectStatsDB(event);
+        }
+    }
+
+    public void profile(@NotNull SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
+        try {
+            OptionMapping steam64id = event.getOption(STEAM_PROFILE_64.getName());
+            if (steam64id == null) {
+                event.getHook().deleteOriginal().queue();
+                return;
+            }
+            if (connectUserToSteam(event.getUser().getId(), steam64id.getAsString())) {
+                ResponseMessage.connectSuccessfully(event);
+            } else {
+                ResponseMessage.connectUnSuccessfully(event);
+            }
+        } catch (CannotCreateTransactionException | SQLGrammarException | InvalidDataAccessResourceUsageException |
+                 SQLSyntaxErrorException exception) {
+            log.error("Database Error: " + exception.getMessage());
+            ResponseMessage.cannotConnectStatsDB(event);
+        }
+    }
+
     public void viewStatsForUser(SlashCommandInteractionEvent event, String userId, TextChannel channel) {
         log.info("UserId: " + userId + " - stats");
         PlayerStats playerStats = pullStatsFromDB(userId);
@@ -59,12 +104,12 @@ public class ServerStats {
         return playerStats.getKills() != 0 || playerStats.getDeaths() != 0 || playerStats.getWounds() != 0;
     }
 
-    public boolean isUserConnected(String userID) {
+    public boolean isUserConnected(String userID) throws SQLSyntaxErrorException {
         Optional<DiscordUser> discordUser = discordUserService.findByUserId(userID);
         return discordUser.isPresent();
     }
 
-    public boolean connectUserToSteam(String userID, String steamID) {
+    public boolean connectUserToSteam(String userID, String steamID) throws SQLSyntaxErrorException {
         if (steamID != null && steamID.length() == 17 && userID != null) {
             DiscordUser discordUser = new DiscordUser(userID, steamID);
             discordUserService.save(discordUser);
@@ -97,7 +142,7 @@ public class ServerStats {
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
-        event.reply("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        event.getHook().editOriginal("<@" + userID + ">").setEmbeds(builder.build()).queue();
         log.info("Embed with stats sent for user(id=" + userID + ")");
     }
 
@@ -124,7 +169,7 @@ public class ServerStats {
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
         builder.setFooter("Data from 8.04.2022r.");
-        event.reply("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        event.getHook().editOriginal("<@" + userID + ">").setEmbeds(builder.build()).queue();
         log.info("Embed with no stats sent for user(id=" + userID + ")");
     }
 
@@ -342,5 +387,11 @@ public class ServerStats {
                     return true;
                 })
                 .toList().size();
+    }
+
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
+                .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));
+        commandData.add(Commands.slash(STATS.getName(), STATS.getDescription()));
     }
 }

@@ -1,15 +1,15 @@
 package pl.mbrzozowski.ranger.response;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.giveaway.Giveaway;
-import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.helpers.RoleID;
 
-import java.awt.*;
 import java.util.List;
 
 @Slf4j
@@ -120,64 +120,51 @@ public class ResponseMessage {
                 .queue();
     }
 
-    public static void youCanCheckStatsOnChannel(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
-                .setEphemeral(true)
-                .queue();
-    }
+//    public static void youCanCheckStatsOnChannel(@NotNull SlashCommandInteractionEvent event) {
+//        event.reply("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
+//                .setEphemeral(true)
+//                .queue();
+//    }
 
-    public static void youCanLinkedYourProfileOnChannel(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("Use command /profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
-                .setEphemeral(true)
-                .queue();
-    }
+//    public static void youCanLinkedYourProfileOnChannel(@NotNull SlashCommandInteractionEvent event) {
+//        event.reply("Use command /profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
+//                .setEphemeral(true)
+//                .queue();
+//    }
 
-    public static void notConnectedAccount(SlashCommandInteractionEvent event) {
-        EmbedBuilder builder = new EmbedBuilder().setColor(Color.BLACK);
-        builder.setTitle("Your discord account isn't linked to your Steam profile.");
-        builder.setDescription("""
-                Link your discord account to your steam profile if you want view stats from our server via command **/profile**.
-
+    public static void notConnectedAccount(@NotNull SlashCommandInteractionEvent event) {
+        event.getHook().editOriginal("""
+                **If you want check stats you have to link discord account to steam profile via command /profile**
                 Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
 
-                e.g.\s
-                */profile 76561197990543288*""");
-
-        event.reply("").setEmbeds(builder.build()).setEphemeral(false).queue();
+                e.g.
+                */profile 76561197990543288*""").setSuppressEmbeds(true).queue();
     }
 
     public static void cannotConnectStatsDB(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("Can not connect to Stats database.\n" +
-                "Please try again later.").setEphemeral(false).queue();
+        event.getHook().editOriginal("Can not connect to Stats database.\n" +
+                "Please try again later.").queue();
     }
 
     public static void connectSuccessfully(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("""
+        event.getHook().editOriginal("""
                         **Successfully**
                         Your discord account is linked to your Steam profile.
-                        Now, You can use command **/stats**""")
-                .setEphemeral(false)
-                .queue();
+                        Now, You can use command **/stats**""").queue();
     }
 
     public static void connectUnSuccessfully(@NotNull SlashCommandInteractionEvent event) {
-        EmbedBuilder builder = new EmbedBuilder().setColor(Color.RED);
-        builder.setTitle("Steam64ID is not valid");
-        builder.setDescription("""
+        event.getHook().editOriginal("""
+                **Steam64ID is not valid**
                 Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
 
-                e.g.\s
-                */profile 76561197990543288*""");
-
-        event.reply("")
-                .setEmbeds(builder.build())
-                .setEphemeral(false)
-                .queue();
+                e.g.
+                */profile 76561197990543288*""").setSuppressEmbeds(true).queue();
     }
 
     public static void playerStatsIsNull(@NotNull SlashCommandInteractionEvent event) {
         log.warn("User can not be found in the database");
-        event.reply("User can not be found in the database").queue();
+        event.getHook().editOriginal("User can not be found in the database").queue();
     }
 
     public static void giveawayUnexpectedException(@NotNull ButtonInteractionEvent event) {

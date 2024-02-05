@@ -14,6 +14,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
+import pl.mbrzozowski.ranger.stats.ServerStats;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class GuildListener extends ListenerAdapter {
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
+    private final ServerStats serverStats;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -50,6 +52,7 @@ public class GuildListener extends ListenerAdapter {
         serverService.getCommandsList(commandData);
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
+        serverStats.getCommandsList(commandData);
     }
 
 }

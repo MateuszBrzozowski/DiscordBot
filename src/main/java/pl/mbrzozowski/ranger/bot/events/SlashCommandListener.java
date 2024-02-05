@@ -4,13 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.CannotCreateTransactionException;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
@@ -18,11 +15,9 @@ import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
-import pl.mbrzozowski.ranger.response.ResponseMessage;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
@@ -59,40 +54,9 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(ROLE.getName())) {
             roleService.roleEvent(event);
         } else if (name.equalsIgnoreCase(STEAM_PROFILE.getName())) {
-            if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
-                try {
-                    OptionMapping steam64id = event.getOption("steam64id");
-                    if (steam64id == null) {
-                        return;
-                    }
-                    if (serverStats.connectUserToSteam(event.getUser().getId(), steam64id.getAsString())) {
-                        ResponseMessage.connectSuccessfully(event);
-                    } else {
-                        ResponseMessage.connectUnSuccessfully(event);
-                    }
-                } catch (CannotCreateTransactionException exception) {
-                    log.error("Cannot create transaction exception. " + exception.getMessage());
-                    ResponseMessage.cannotConnectStatsDB(event);
-                }
-            } else {
-                ResponseMessage.youCanLinkedYourProfileOnChannel(event);
-
-            }
+            serverStats.profile(event);
         } else if (name.equalsIgnoreCase(STATS.getName())) {
-            if (event.getChannel().getId().equalsIgnoreCase(CategoryAndChannelID.CHANNEL_STATS)) {
-                try {
-                    if (serverStats.isUserConnected(event.getUser().getId())) {
-                        serverStats.viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
-                    } else {
-                        ResponseMessage.notConnectedAccount(event);
-                    }
-                } catch (CannotCreateTransactionException exception) {
-                    log.error("Cannot create transaction exception. " + exception.getMessage());
-                    ResponseMessage.cannotConnectStatsDB(event);
-                }
-            } else {
-                ResponseMessage.youCanCheckStatsOnChannel(event);
-            }
+            serverStats.stats(event);
         } else if (name.equalsIgnoreCase(DICE.getName())) {
             Dice.start(event);
         } else if (name.equalsIgnoreCase(COIN.getName())) {
@@ -137,9 +101,6 @@ public class SlashCommandListener extends ListenerAdapter {
     }
 
     public void getCommandsData(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
-                .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));
-        commandData.add(Commands.slash(STATS.getName(), STATS.getDescription()));
         commandData.add(Commands.slash(DICE.getName(), DICE.getDescription()));
         commandData.add(Commands.slash(COIN.getName(), COIN.getDescription()));
         commandData.add(Commands.slash(ESSA.getName(), ESSA.getDescription()));
