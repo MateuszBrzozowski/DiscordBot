@@ -12,7 +12,8 @@ public enum SettingsKey {
     EVENT_DELETE_CHANNEL_DELAY("event.channel.delete.after"),
     EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after"),
     SEED_CALL_LIVE_AMOUNT("seed.call.live.amount"),
-    SEED_CALL_SQUAD_AMOUNT("seed.call.squad.amount");
+    SEED_CALL_SQUAD_AMOUNT("seed.call.squad.amount"),
+    SEED_CALL("seed.call.enable");
 
     private final String key;
 

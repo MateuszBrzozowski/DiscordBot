@@ -16,7 +16,6 @@ public class SquadMentionMessage extends MessageCall {
     protected SquadMentionMessage(SettingsService settingsService) {
         super(5, settingsService, SettingsKey.SEED_CALL_SQUAD_AMOUNT);
         setMessages();
-        setMessagePerDay();
     }
 
     @Override

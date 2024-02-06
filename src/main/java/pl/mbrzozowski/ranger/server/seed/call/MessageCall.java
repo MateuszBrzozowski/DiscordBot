@@ -52,10 +52,12 @@ public abstract class MessageCall implements SlashCommand {
         }
         try {
             this.messagePerDay = Integer.parseInt(optional.get());
-        } catch (NumberFormatException e) {
+            if (messagePerDay < 0 || messagePerDay > MAX_PER_DAY) {
+                throw new IllegalArgumentException("Message per day " + messagePerDay);
+            }
+        } catch (IllegalArgumentException e) {
             log.warn("Settings property \"{}\" incorrect. Set default value={}", settingsKeyPerDay, 0);
             settingsService.save(settingsKeyPerDay, 0);
-            throw new RuntimeException(e);
         }
     }
 

@@ -36,7 +36,8 @@ public enum SlashCommands {
     RANK_ROLE_ADD("rank-role-add", "Dodaje rolę stopnia do bota. Umożliwia automatyczne nadawanie ról."),
     RANK_ROLE_REMOVE("rank-role-remove", "Usuwa rolę stopnia z bota."),
     SEED_CALL_LIVE_AMOUNT("seed-call-live-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
-    SEED_CALL_SQUAD_AMOUNT("seed-call-squad-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza.");
+    SEED_CALL_SQUAD_AMOUNT("seed-call-squad-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
+    SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service");
 
     private final String name;
     private final String description;

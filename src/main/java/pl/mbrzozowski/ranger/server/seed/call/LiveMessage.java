@@ -16,7 +16,6 @@ public class LiveMessage extends MessageCall {
     protected LiveMessage(SettingsService settingsService) {
         super(1, settingsService, SettingsKey.SEED_CALL_LIVE_AMOUNT);
         setMessages();
-        setMessagePerDay();
     }
 
     @Override
