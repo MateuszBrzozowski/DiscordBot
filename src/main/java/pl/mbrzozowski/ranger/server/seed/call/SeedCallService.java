@@ -15,9 +15,9 @@ import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_CONDITIONS_INFO;
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_ENABLE;
@@ -28,8 +28,8 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL;
 public class SeedCallService implements SlashCommand {
 
     private final SettingsService settingsService;
-    private final MessageCall liveMessage;
     private final MessageCall squadMentionMessage;
+    private final MessageCall liveMessage;
     private boolean isEnable = false;
 
     public SeedCallService(SettingsService settingsService) {
@@ -37,6 +37,26 @@ public class SeedCallService implements SlashCommand {
         this.liveMessage = new LiveMessage(settingsService);
         this.squadMentionMessage = new SquadMentionMessage(settingsService);
         setOnOff();
+    }
+
+    public void run() {
+        if (!isEnable) {
+            log.info("Seed call service disable");
+            return;
+        }
+        log.info("Seed call service enable");
+        Timer timer = new Timer();
+        SeedCallExecute seedCallExecute = new SeedCallExecute();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth());
+        LocalDateTime dateTime2200 = LocalDateTime.now().withHour(22).withMinute(0);
+        if (LocalDateTime.now().isAfter(dateTime2200)) {
+            calendar.add(Calendar.DATE, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 12);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+        }
+        timer.scheduleAtFixedRate(seedCallExecute, calendar.getTime(), 5 * 60 * 1000);
     }
 
     @Override
