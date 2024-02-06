@@ -19,8 +19,7 @@ import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.role.RoleService;
-import pl.mbrzozowski.ranger.server.seed.call.LiveMessage;
-import pl.mbrzozowski.ranger.server.seed.call.SquadMentionMessage;
+import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
@@ -36,14 +35,13 @@ public class SlashCommandListener extends ListenerAdapter {
     private final RecruitBlackListService recruitBlackListService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
-    private final SquadMentionMessage squadMentionMessage;
     private final GiveawayService giveawayService;
+    private final SeedCallService seedCallService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ServerStats serverStats;
     private final ImplCleaner implCleaner;
     private final RankService rankService;
-    private final LiveMessage liveMessage;
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -108,9 +106,9 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(RANK_ROLE_REMOVE.getName())) {
             rankService.deleteByDiscordId(event);
         } else if (name.equals(SEED_CALL_LIVE_AMOUNT.getName())) {
-            liveMessage.setMaxAmount(event);
+            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_LIVE_AMOUNT);
         } else if (name.equals(SEED_CALL_SQUAD_AMOUNT.getName())) {
-            squadMentionMessage.setMaxAmount(event);
+            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_SQUAD_AMOUNT);
         }
     }
 

@@ -28,28 +28,33 @@ public abstract class MessageCall implements SlashCommand {
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
     private final SettingsService settingsService;
+    private final SettingsKey settingsKeyPerDay;
 
-    protected MessageCall(int maxPerDay, SettingsService settingsService) {
+    protected MessageCall(int maxPerDay, SettingsService settingsService, SettingsKey settingsKeyPerDay) {
         this.settingsService = settingsService;
         MAX_PER_DAY = maxPerDay;
+        this.settingsKeyPerDay = settingsKeyPerDay;
+        setMessagePerDay();
     }
 
     abstract void setMessages();
 
-    abstract void setMessagePerDay();
+    public SettingsKey getSettingsKeyPerDay() {
+        return settingsKeyPerDay;
+    }
 
-    protected void setMessagePerDay(SettingsKey settingsKey) {
-        Optional<String> optional = settingsService.find(settingsKey);
+    protected void setMessagePerDay() {
+        Optional<String> optional = settingsService.find(settingsKeyPerDay);
         if (optional.isEmpty()) {
-            log.info("New settings property set {}={}", settingsKey, 0);
-            settingsService.save(settingsKey, 0);
+            log.info("New settings property set {}={}", settingsKeyPerDay, 0);
+            settingsService.save(settingsKeyPerDay, 0);
             return;
         }
         try {
             this.messagePerDay = Integer.parseInt(optional.get());
         } catch (NumberFormatException e) {
-            log.warn("Settings property \"{}\" incorrect. Set default value={}", settingsKey, 0);
-            settingsService.save(settingsKey, 0);
+            log.warn("Settings property \"{}\" incorrect. Set default value={}", settingsKeyPerDay, 0);
+            settingsService.save(settingsKeyPerDay, 0);
             throw new RuntimeException(e);
         }
     }
@@ -70,15 +75,15 @@ public abstract class MessageCall implements SlashCommand {
                         .setRequired(true));
     }
 
-    void setMaxAmount(@NotNull SlashCommandInteractionEvent event, SettingsKey settingsKey) {
+    void setMaxAmount(@NotNull SlashCommandInteractionEvent event) {
         int count = Objects.requireNonNull(event.getOption("count")).getAsInt();
         if (count < 0 || count > MAX_PER_DAY) {
             event.reply("Niepoprawna wartość!").setEphemeral(true).queue();
             log.error("Option incorrect - {}", count);
             return;
         }
-        settingsService.save(settingsKey, count);
+        settingsService.save(settingsKeyPerDay, count);
         event.reply("Ustawiono maksymalną ilość wiadomości - " + count).setEphemeral(true).queue();
-        log.info("Set setting property - {}={}", settingsKey, count);
+        log.info("Set setting property - {}={}", settingsKeyPerDay, count);
     }
 }

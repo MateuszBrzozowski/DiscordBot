@@ -14,8 +14,7 @@ import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
-import pl.mbrzozowski.ranger.server.seed.call.LiveMessage;
-import pl.mbrzozowski.ranger.server.seed.call.SquadMentionMessage;
+import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 import pl.mbrzozowski.ranger.stats.ServerStats;
 
@@ -27,16 +26,15 @@ public class GuildListener extends ListenerAdapter {
 
     private final RecruitBlackListService recruitBlackListService;
     private final SlashCommandListener slashCommandListener;
-    private final SquadMentionMessage squadMentionMessage;
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
+    private final SeedCallService seedCallService;
     private final ServerService serverService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
     private final ServerStats serverStats;
     private final RankService rankService;
-    private final LiveMessage liveMessage;
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -53,15 +51,14 @@ public class GuildListener extends ListenerAdapter {
     private void getCommandList(ArrayList<CommandData> commandData) {
         recruitBlackListService.getCommandsList(commandData);
         slashCommandListener.getCommandsData(commandData);
-        squadMentionMessage.getCommandsList(commandData);
         recruitsService.getCommandsList(commandData);
         giveawayService.getCommandsList(commandData);
+        seedCallService.getCommandsList(commandData);
         serverService.getCommandsList(commandData);
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
         serverStats.getCommandsList(commandData);
         rankService.getCommandsList(commandData);
-        liveMessage.getCommandsList(commandData);
     }
 
 }
