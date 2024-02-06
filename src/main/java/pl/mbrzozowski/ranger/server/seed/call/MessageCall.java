@@ -132,7 +132,8 @@ public abstract class MessageCall implements SlashCommand {
         OptionMapping idOption = event.getOption("id");
         if (idOption == null) {
             if (conditions.size() == 1) {
-                replySuccessfully(event, conditions.get(0));
+                Conditions remove = conditions.remove(0);
+                replySuccessfully(event, remove);
             } else {
                 StringBuilder builder = new StringBuilder();
                 builder.append("**Więcej niż jeden warunek!** Wybierz ID. Wywołaj ponownie komendę z wybranym ID\n");
@@ -207,6 +208,24 @@ public abstract class MessageCall implements SlashCommand {
         settingsService.save(settingsKeyPerDay, count);
         event.reply("Ustawiono maksymalną ilość wiadomości - " + count).setEphemeral(true).queue();
         log.info("Set setting property - {}={}", settingsKeyPerDay, count);
+    }
+
+    public String getConditions() {
+        StringBuilder builder = new StringBuilder();
+        if (type.equals(Type.LIVE)) {
+            builder.append("Warunki dla wiadomości LIVE\n");
+        } else if (type.equals(Type.SQUAD_MENTION)) {
+            builder.append("Warunki dla wiadomości zo oznaczeniem roli Squad\n");
+        }
+        if (conditions.size() == 0) {
+            builder.append("Brak warunków\n");
+            return builder.toString();
+        }
+        for (Conditions condition : conditions) {
+            builder.append("Jeżeli ").append(condition.getPlayersCount()).append(" graczy przez ").append(condition.getWithinMinutes())
+                    .append(" minut\n");
+        }
+        return builder.toString();
     }
 
     enum Type {

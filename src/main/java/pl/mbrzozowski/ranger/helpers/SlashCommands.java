@@ -41,7 +41,8 @@ public enum SlashCommands {
     SEED_CALL_SQUAD_AMOUNT("seed-call-squad-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
     SEED_CALL_SQUAD_OPTION("seed-call-squad-opcja", "Jeżeli liczba graczy była większa od [] przez ostatnie [] minut. Offset(5)"),
     SEED_CALL_SQUAD_OPTION_REMOVE("seed-call-squad-opcja-usuń", "Usuwa warunek"),
-    SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service");
+    SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service"),
+    SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki");
 
     private final String name;
     private final String description;

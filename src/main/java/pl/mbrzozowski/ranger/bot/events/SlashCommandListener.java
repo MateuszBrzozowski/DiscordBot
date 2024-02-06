@@ -115,6 +115,8 @@ public class SlashCommandListener extends ListenerAdapter {
             seedCallService.addOption(event);
         } else if (name.equals(SEED_CALL_LIVE_OPTION_REMOVE.getName()) || name.equals(SEED_CALL_SQUAD_OPTION_REMOVE.getName())) {
             seedCallService.removeOption(event);
+        } else if (name.equals(SEED_CALL_CONDITIONS_INFO.getName())) {
+            seedCallService.conditionsInfo(event);
         }
     }
 

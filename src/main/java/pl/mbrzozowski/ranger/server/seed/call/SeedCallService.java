@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_CONDITIONS_INFO;
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_ENABLE;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL;
 
@@ -44,7 +45,8 @@ public class SeedCallService implements SlashCommand {
         squadMentionMessage.getCommandsList(commandData);
         commandData.add(Commands.slash(SEED_CALL_ENABLE.getName(), SEED_CALL_ENABLE.getDescription())
                 .addOptions(new OptionData(OptionType.BOOLEAN, "enable", SEED_CALL_ENABLE.getDescription())
-                        .setRequired(true)));
+                        .setRequired(true))
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(
                 Commands.slash(SlashCommands.SEED_CALL_SQUAD_OPTION.getName(), SlashCommands.SEED_CALL_SQUAD_OPTION.getDescription())
                         .addOption(OptionType.INTEGER, "players", "Ilość graczy", true)
@@ -63,6 +65,8 @@ public class SeedCallService implements SlashCommand {
                 Commands.slash(SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getName(), SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getDescription())
                         .addOption(OptionType.INTEGER, "id", "ID warunku", false)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(SEED_CALL_CONDITIONS_INFO.getName(), SEED_CALL_CONDITIONS_INFO.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
     public void setMaxAmount(SlashCommandInteractionEvent event, @NotNull SettingsKey settingsKey) {
@@ -104,6 +108,12 @@ public class SeedCallService implements SlashCommand {
         } else if (event.getName().equals(SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getName())) {
             squadMentionMessage.removeOption(event);
         }
+    }
+
+    public void conditionsInfo(@NotNull SlashCommandInteractionEvent event) {
+        String liveConditions = liveMessage.getConditions();
+        String squadConditions = squadMentionMessage.getConditions();
+        event.reply(liveConditions + squadConditions).setEphemeral(true).queue();
     }
 }
 
