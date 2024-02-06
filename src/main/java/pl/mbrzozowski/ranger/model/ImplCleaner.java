@@ -76,15 +76,15 @@ public class ImplCleaner implements Cleaner {
     private int getDelay(int defaultValue, SettingsKey settingsKey) {
         Optional<String> optional = settingsService.find(settingsKey);
         if (optional.isEmpty()) {
-            settingsService.save(settingsKey, defaultValue);
             log.info("New settings property set - {}={}", settingsKey, defaultValue);
+            settingsService.save(settingsKey, defaultValue);
         }
         int delay = defaultValue;
         try {
             delay = Integer.parseInt(optional.orElse(String.valueOf(delay)));
         } catch (NumberFormatException e) {
-            settingsService.save(settingsKey, delay);
             log.info("Settings property \"{}\" not correct. Set to default value={}", settingsKey.getKey(), defaultValue);
+            settingsService.save(settingsKey, delay);
         }
         return delay;
     }

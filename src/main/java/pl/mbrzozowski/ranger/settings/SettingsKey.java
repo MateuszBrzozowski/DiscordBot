@@ -10,7 +10,9 @@ public enum SettingsKey {
     SERVER_SERVICE_CLOSE_CHANNEL("server.service.close.channel.after"),
     RECRUIT_DELETE_CHANNEL_DELAY("recruit.channel.delete.after"),
     EVENT_DELETE_CHANNEL_DELAY("event.channel.delete.after"),
-    EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after");
+    EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after"),
+    SEED_CALL_LIVE_AMOUNT("seed.call.live.amount"),
+    SEED_CALL_SQUAD_AMOUNT("seed.call.squad.amount");
 
     private final String key;
 
