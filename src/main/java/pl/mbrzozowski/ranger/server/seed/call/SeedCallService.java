@@ -14,6 +14,7 @@ import pl.mbrzozowski.ranger.helpers.SlashCommands;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
+import pl.mbrzozowski.ranger.stats.service.PlayerCountsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,12 +28,14 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL;
 @Service
 public class SeedCallService implements SlashCommand {
 
+    private final PlayerCountsService playerCountsService;
     private final SettingsService settingsService;
     private final MessageCall squadMentionMessage;
     private final MessageCall liveMessage;
     private boolean isEnable = false;
 
-    public SeedCallService(SettingsService settingsService) {
+    public SeedCallService(SettingsService settingsService, PlayerCountsService playerCountsService) {
+        this.playerCountsService = playerCountsService;
         this.settingsService = settingsService;
         this.liveMessage = new LiveMessage(settingsService);
         this.squadMentionMessage = new SquadMentionMessage(settingsService);
@@ -46,7 +49,7 @@ public class SeedCallService implements SlashCommand {
         }
         log.info("Seed call service enable");
         Timer timer = new Timer();
-        SeedCallExecute seedCallExecute = new SeedCallExecute();
+        SeedCallExecute seedCallExecute = new SeedCallExecute(playerCountsService);
         Calendar calendar = Calendar.getInstance();
         calendar.set(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth());
         LocalDateTime dateTime2200 = LocalDateTime.now().withHour(22).withMinute(0);
