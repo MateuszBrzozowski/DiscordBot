@@ -16,6 +16,6 @@ public class PlayerCountsService {
     private final PlayerCountsRepository playerCountsRepository;
 
     public List<PlayerCounts> findLastTwoHours() {
-        return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusHours(2));
+        return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(150));
     }
 }

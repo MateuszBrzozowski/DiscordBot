@@ -106,9 +106,9 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(RANK_ROLE_REMOVE.getName())) {
             rankService.deleteByDiscordId(event);
         } else if (name.equals(SEED_CALL_LIVE_AMOUNT.getName())) {
-            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_LIVE_AMOUNT);
+            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_LIVE);
         } else if (name.equals(SEED_CALL_SQUAD_AMOUNT.getName())) {
-            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_SQUAD_AMOUNT);
+            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_SQUAD);
         } else if (name.equals(SEED_CALL_ENABLE.getName())) {
             seedCallService.switchOnOff(event);
         } else if (name.equals(SEED_CALL_LIVE_OPTION.getName()) || name.equals(SEED_CALL_SQUAD_OPTION.getName())) {

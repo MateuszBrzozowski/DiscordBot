@@ -40,7 +40,7 @@ public class GuildListener extends ListenerAdapter {
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         if (event.getGuild().getId().equals(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
             ArrayList<CommandData> commandData = new ArrayList<>();
-//            getCommandList(commandData);
+            getCommandList(commandData);
             recruitsService.cleanDB(event);
             implCleaner.autoDeleteChannels();
             implCleaner.autoCloseChannel();

@@ -16,7 +16,7 @@ import static net.dv8tion.jda.api.interactions.commands.Command.Choice;
 public class LiveMessage extends MessageCall {
 
     protected LiveMessage(SettingsService settingsService) {
-        super(1, settingsService, SettingsKey.SEED_CALL_LIVE_AMOUNT, Type.LIVE);
+        super(1, settingsService, SettingsKey.SEED_CALL_LIVE, Type.LIVE);
         setMessages();
     }
 

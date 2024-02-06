@@ -11,11 +11,15 @@ public enum SettingsKey {
     RECRUIT_DELETE_CHANNEL_DELAY("recruit.channel.delete.after"),
     EVENT_DELETE_CHANNEL_DELAY("event.channel.delete.after"),
     EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after"),
-    SEED_CALL_LIVE_AMOUNT("seed.call.live.amount"),
-    SEED_CALL_SQUAD_AMOUNT("seed.call.squad.amount"),
+    SEED_CALL_LIVE("seed.call.live"),
+    SEED_CALL_LIVE_COUNT("seed.call.live.count"),
+    SEED_CALL_SQUAD("seed.call.squad"),
+    SEED_CALL_SQUAD_COUNT("seed.call.squad.count"),
     SEED_CALL("seed.call.enable"),
     SEED_CALL_LIVE_CONDITIONS("seed.call.live.conditions"),
-    SEED_CALL_SQUAD_CONDITIONS("seed.call.squad.conditions");
+    SEED_CALL_SQUAD_CONDITIONS("seed.call.squad.conditions"),
+    SEED_CALL_LAST("seed.call.last"),
+    SEED_CALL_MODE("seed.call.mode");
 
     private final String key;
 
