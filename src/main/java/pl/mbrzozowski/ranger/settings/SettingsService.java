@@ -20,8 +20,15 @@ public class SettingsService {
         save(key, String.valueOf(value));
     }
 
+    public void save(String key, int value) {
+        settingsRepository.save(key, String.valueOf(value));
+    }
+
     public Optional<String> find(@NotNull SettingsKey key) {
         return settingsRepository.find(key);
     }
 
+    public Optional<String> find(String key) {
+        return settingsRepository.find(key);
+    }
 }

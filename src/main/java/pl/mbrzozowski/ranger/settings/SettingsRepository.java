@@ -48,9 +48,13 @@ public class SettingsRepository {
     }
 
     void save(@NotNull SettingsKey key, String value) {
+        save(key.getKey(), value);
+    }
+
+    void save(String key, String value) {
         loadProperties();
-        properties.setProperty(key.getKey(), value);
-        log.info("Saved settings({}={})", key.getKey(), value);
+        properties.setProperty(key, value);
+        log.info("Saved settings({}={})", key, value);
         storeProperties();
     }
 
@@ -61,5 +65,14 @@ public class SettingsRepository {
             return Optional.empty();
         }
         return Optional.ofNullable(properties.get(key.getKey()).toString());
+    }
+
+    Optional<String> find(@NotNull String key) {
+       loadProperties();
+        Object o = properties.get(key);
+        if (o == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(properties.get(key).toString());
     }
 }

@@ -14,7 +14,7 @@ import static net.dv8tion.jda.api.interactions.commands.Command.Choice;
 public class SquadMentionMessage extends MessageCall {
 
     protected SquadMentionMessage(SettingsService settingsService) {
-        super(5, settingsService, SettingsKey.SEED_CALL_SQUAD_AMOUNT);
+        super(5, settingsService, SettingsKey.SEED_CALL_SQUAD_AMOUNT, Type.SQUAD_MENTION);
         setMessages();
     }
 

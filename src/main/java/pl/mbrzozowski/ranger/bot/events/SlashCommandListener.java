@@ -111,6 +111,10 @@ public class SlashCommandListener extends ListenerAdapter {
             seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_SQUAD_AMOUNT);
         } else if (name.equals(SEED_CALL_ENABLE.getName())) {
             seedCallService.switchOnOff(event);
+        } else if (name.equals(SEED_CALL_LIVE_OPTION.getName()) || name.equals(SEED_CALL_SQUAD_OPTION.getName())) {
+            seedCallService.addOption(event);
+        } else if (name.equals(SEED_CALL_LIVE_OPTION_REMOVE.getName()) || name.equals(SEED_CALL_SQUAD_OPTION_REMOVE.getName())) {
+            seedCallService.removeOption(event);
         }
     }
 
