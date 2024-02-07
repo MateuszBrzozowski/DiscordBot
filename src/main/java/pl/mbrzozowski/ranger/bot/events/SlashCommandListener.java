@@ -105,15 +105,13 @@ public class SlashCommandListener extends ListenerAdapter {
             rankService.findByDiscordId(event);
         } else if (name.equals(RANK_ROLE_REMOVE.getName())) {
             rankService.deleteByDiscordId(event);
-        } else if (name.equals(SEED_CALL_LIVE_AMOUNT.getName())) {
+        } else if (name.equals(SEED_CALL_AMOUNT.getName())) {
             seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_LIVE);
-        } else if (name.equals(SEED_CALL_SQUAD_AMOUNT.getName())) {
-            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_SQUAD);
         } else if (name.equals(SEED_CALL_ENABLE.getName())) {
             seedCallService.switchOnOff(event);
-        } else if (name.equals(SEED_CALL_LIVE_OPTION.getName()) || name.equals(SEED_CALL_SQUAD_OPTION.getName())) {
+        } else if (name.equals(SEED_CALL_CONDITIONS.getName())) {
             seedCallService.addOption(event);
-        } else if (name.equals(SEED_CALL_LIVE_OPTION_REMOVE.getName()) || name.equals(SEED_CALL_SQUAD_OPTION_REMOVE.getName())) {
+        } else if (name.equals(SEED_CALL_CONDITIONS_REMOVE.getName())) {
             seedCallService.removeOption(event);
         } else if (name.equals(SEED_CALL_CONDITIONS_INFO.getName())) {
             seedCallService.conditionsInfo(event);

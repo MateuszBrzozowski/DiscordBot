@@ -25,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.dv8tion.jda.api.interactions.commands.Command.Choice;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_AMOUNT;
 
 @Slf4j
 public abstract class MessageCall implements SlashCommand {
@@ -71,6 +72,13 @@ public abstract class MessageCall implements SlashCommand {
         } else if (type.equals(Type.SQUAD_MENTION)) {
             setConditions(SettingsKey.SEED_CALL_SQUAD_CONDITIONS, "seed.call.squad.");
         }
+    }
+
+    @Override
+    public void getCommandsList(ArrayList<CommandData> commandData) {
+        Set<Choice> choiceList = getChoices();
+        commandData.add(getCommand(choiceList)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
     private void setConditions(SettingsKey settingsKey, String keyPrefix) {
@@ -213,18 +221,23 @@ public abstract class MessageCall implements SlashCommand {
         this.messagePerDayCount = Integer.parseInt(optional.get());
     }
 
-    protected Set<Choice> getChoices() {
+    @NotNull
+    private Set<Choice> getChoices() {
         Set<Choice> choices = new HashSet<>();
-        for (int i = 0; i <= MAX_PER_DAY; i++) {
+        for (int i = 0; i <= 5; i++) {
             Choice choice = new Choice(String.valueOf(i), i);
             choices.add(choice);
         }
         return choices;
     }
 
-    protected CommandData getCommand(@NotNull SlashCommands command, Set<Choice> choiceList) {
-        return Commands.slash(command.getName(), command.getDescription())
-                .addOptions(new OptionData(OptionType.INTEGER, "count", "Ile razy na dzień. 0 - OFF")
+    protected CommandData getCommand(Set<Choice> choiceList) {
+        return Commands.slash(SEED_CALL_AMOUNT.getName(), SEED_CALL_AMOUNT.getDescription())
+                .addOptions(new OptionData(OptionType.STRING, SlashCommands.TYPE.getName(), "Do którego typu chcesz zmienić liczbę wiadomości")
+                        .addChoice("Live", SlashCommands.LIVE.getName())
+                        .addChoice("Ping Squad", SlashCommands.PING_SQUAD.getName())
+                        .setRequired(true))
+                .addOptions(new OptionData(OptionType.INTEGER, SlashCommands.COUNT.getName(), "Ile razy na dzień. 0 - OFF")
                         .addChoices(choiceList)
                         .setRequired(true))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL));
@@ -233,7 +246,7 @@ public abstract class MessageCall implements SlashCommand {
     void setMaxAmount(@NotNull SlashCommandInteractionEvent event) {
         int count = Objects.requireNonNull(event.getOption("count")).getAsInt();
         if (count < 0 || count > MAX_PER_DAY) {
-            event.reply("Niepoprawna wartość!").setEphemeral(true).queue();
+            event.reply("Niepoprawna wartość! Maksymalna - " + MAX_PER_DAY).setEphemeral(true).queue();
             log.error("Option incorrect - {}", count);
             return;
         }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -20,8 +21,7 @@ import pl.mbrzozowski.ranger.stats.service.PlayerCountsService;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_CONDITIONS_INFO;
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_ENABLE;
+import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL_MODE;
 
@@ -77,38 +77,37 @@ public class SeedCallService implements SlashCommand {
 
     @Override
     public void getCommandsList(ArrayList<CommandData> commandData) {
-        liveMessage.getCommandsList(commandData);
         squadMentionMessage.getCommandsList(commandData);
         commandData.add(Commands.slash(SEED_CALL_ENABLE.getName(), SEED_CALL_ENABLE.getDescription())
                 .addOptions(new OptionData(OptionType.BOOLEAN, "enable", SEED_CALL_ENABLE.getDescription())
                         .setRequired(true))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_SQUAD_OPTION.getName(), SlashCommands.SEED_CALL_SQUAD_OPTION.getDescription())
+                Commands.slash(SlashCommands.SEED_CALL_CONDITIONS.getName(), SlashCommands.SEED_CALL_CONDITIONS.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, SlashCommands.TYPE.getName(), "Do którego typu chcesz dodać warunek")
+                                .addChoice("Live", SlashCommands.LIVE.getName())
+                                .addChoice("Ping Squad", SlashCommands.PING_SQUAD.getName())
+                                .setRequired(true))
                         .addOption(OptionType.INTEGER, "players", "Ilość graczy", true)
                         .addOption(OptionType.INTEGER, "minutes", "Minuty przez jaki okres", true)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_LIVE_OPTION.getName(), SlashCommands.SEED_CALL_LIVE_OPTION.getDescription())
-                        .addOption(OptionType.INTEGER, "players", "Ilość graczy", true)
-                        .addOption(OptionType.INTEGER, "minutes", "Minuty przez jaki okres", true)
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_LIVE_OPTION_REMOVE.getName(), SlashCommands.SEED_CALL_LIVE_OPTION_REMOVE.getDescription())
-                        .addOption(OptionType.INTEGER, "id", "ID warunku", false)
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getName(), SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getDescription())
+                Commands.slash(SlashCommands.SEED_CALL_CONDITIONS_REMOVE.getName(), SlashCommands.SEED_CALL_CONDITIONS_REMOVE.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, SlashCommands.TYPE.getName(), "Z którego typu chcesz usunąć warunek")
+                                .addChoice("Live", SlashCommands.LIVE.getName())
+                                .addChoice("Ping Squad", SlashCommands.PING_SQUAD.getName())
+                                .setRequired(true))
                         .addOption(OptionType.INTEGER, "id", "ID warunku", false)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(Commands.slash(SEED_CALL_CONDITIONS_INFO.getName(), SEED_CALL_CONDITIONS_INFO.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
-    public void setMaxAmount(SlashCommandInteractionEvent event, @NotNull SettingsKey settingsKey) {
-        if (settingsKey.equals(liveMessage.getSettingsKeyPerDay())) {
+    public void setMaxAmount(@NotNull SlashCommandInteractionEvent event, @NotNull SettingsKey settingsKey) {
+        String type = getTypeAsString(event).orElse("");
+        if (type.equalsIgnoreCase(SlashCommands.LIVE.getName())) {
             liveMessage.setMaxAmount(event);
-        } else if (settingsKey.equals(squadMentionMessage.getSettingsKeyPerDay())) {
+        } else if (type.equalsIgnoreCase(SlashCommands.PING_SQUAD.getName())) {
             squadMentionMessage.setMaxAmount(event);
         }
     }
@@ -146,19 +145,32 @@ public class SeedCallService implements SlashCommand {
     }
 
     public void addOption(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getName().equals(SlashCommands.SEED_CALL_LIVE_OPTION.getName())) {
+        String type = getTypeAsString(event).orElse("");
+        if (type.equalsIgnoreCase(LIVE.getName())) {
             liveMessage.addOption(event);
-        } else if (event.getName().equals(SlashCommands.SEED_CALL_SQUAD_OPTION.getName())) {
+        } else if (type.equalsIgnoreCase(PING_SQUAD.getName())) {
             squadMentionMessage.addOption(event);
         }
     }
 
     public void removeOption(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getName().equals(SlashCommands.SEED_CALL_LIVE_OPTION_REMOVE.getName())) {
+        String type = getTypeAsString(event).orElse("");
+        if (type.equalsIgnoreCase(LIVE.getName())) {
             liveMessage.removeOption(event);
-        } else if (event.getName().equals(SlashCommands.SEED_CALL_SQUAD_OPTION_REMOVE.getName())) {
+        } else if (type.equalsIgnoreCase(PING_SQUAD.getName())) {
             squadMentionMessage.removeOption(event);
         }
+    }
+
+    private Optional<String> getTypeAsString(@NotNull SlashCommandInteractionEvent event) {
+        OptionMapping option = event.getOption(TYPE.getName());
+        if (option == null) {
+            event.reply("Nieprawidłowy typ").setEphemeral(true).queue();
+            log.error("Null option");
+            return Optional.empty();
+        }
+        String type = option.getAsString();
+        return Optional.of(type);
     }
 
     public void conditionsInfo(@NotNull SlashCommandInteractionEvent event) {

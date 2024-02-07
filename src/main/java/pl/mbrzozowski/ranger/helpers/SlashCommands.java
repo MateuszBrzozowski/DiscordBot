@@ -35,14 +35,15 @@ public enum SlashCommands {
     RANK_ROLE_FIND_BY_DISCORD_ID("rank-role-find-by-id", "Wyszukuję nazwę roli po discord id"),
     RANK_ROLE_ADD("rank-role-add", "Dodaje rolę stopnia do bota. Umożliwia automatyczne nadawanie ról."),
     RANK_ROLE_REMOVE("rank-role-remove", "Usuwa rolę stopnia z bota."),
-    SEED_CALL_LIVE_AMOUNT("seed-call-live-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
-    SEED_CALL_LIVE_OPTION("seed-call-live-opcja", "Jeżeli liczba graczy była większa od [] przez ostatnie [] minut. Offset(5)"),
-    SEED_CALL_LIVE_OPTION_REMOVE("seed-call-live-opcja-usuń", "Usuwa warunek"),
-    SEED_CALL_SQUAD_AMOUNT("seed-call-squad-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
-    SEED_CALL_SQUAD_OPTION("seed-call-squad-opcja", "Jeżeli liczba graczy była większa od [] przez ostatnie [] minut. Offset(5)"),
-    SEED_CALL_SQUAD_OPTION_REMOVE("seed-call-squad-opcja-usuń", "Usuwa warunek"),
+    SEED_CALL_CONDITIONS("seed-call-warunek-dodaj", "Jeżeli liczba graczy była większa od [] przez ostatnie [] minut. Offset(5)"),
+    SEED_CALL_CONDITIONS_REMOVE("seed-call-warunek-usuń", "Usuwa warunek"),
+    SEED_CALL_AMOUNT("seed-call-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
     SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service"),
-    SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki");
+    SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki"),
+    TYPE("type", "Typ"),
+    COUNT("count", "Ilość"),
+    LIVE("live", "Ilość"),
+    PING_SQUAD("ping-squad", "Ilość");
 
     private final String name;
     private final String description;
