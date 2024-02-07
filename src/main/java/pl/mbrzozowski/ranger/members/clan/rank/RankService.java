@@ -254,7 +254,7 @@ public class RankService implements SlashCommand {
                 .build();
         if (!clanMemberService.valid(clanMember, ranks)) {
             log.info("Skip line: {}", line);
-            logFiles.writeLineToFile("Pominięto linie - " + line);
+            logFiles.writeLineToFile("Pominięto linie - " + line + " - Pole puste, Nieprawidłowe SteamID lub DiscordID");
             return;
         }
         fileClanMembers.add(clanMember);
