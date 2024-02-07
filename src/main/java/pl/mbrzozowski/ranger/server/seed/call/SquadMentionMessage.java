@@ -15,10 +15,4 @@ public class SquadMentionMessage extends MessageCall {
         messages.add("@ Squad Zapraszmy na seed");
     }
 
-/*    @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
-//        Set<Choice> choiceList = getChoices();
-//        commandData.add(getCommand(SlashCommands.SEED_CALL_SQUAD_AMOUNT, choiceList)
-//                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-    }*/
 }

@@ -14,11 +14,4 @@ public class LiveMessage extends MessageCall {
     void setMessages() {
         messages.add("Mamy LIVE na serwerze.");
     }
-
-/*    @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
-//        Set<Choice> choiceList = getChoices();
-//        commandData.add(getCommand(SlashCommands.SEED_CALL_LIVE_AMOUNT, choiceList)
-//                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-    }*/
 }

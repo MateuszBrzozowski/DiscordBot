@@ -42,10 +42,9 @@ public class SeedCallService implements SlashCommand {
         this.settingsService = settingsService;
         this.liveMessage = new LiveMessage(settingsService);
         this.squadMentionMessage = new SquadMentionMessage(settingsService);
-        setOnOff();
-        setMode();
-        setLast();
-
+        pullOnOff();
+        pullMode();
+        pullLast();
     }
 
     public void run() {
@@ -57,22 +56,49 @@ public class SeedCallService implements SlashCommand {
         timer = new Timer();
         SeedCallExecute seedCallExecute = new SeedCallExecute(this);
         Calendar calendar = Calendar.getInstance();
-        timer.scheduleAtFixedRate(seedCallExecute, calendar.getTime(), 5 * 60 * 1000);
+        timer.scheduleAtFixedRate(seedCallExecute, calendar.getTime(), 60 * 1000);
     }
 
-    private void setMode() {
+    private void pullMode() {
         Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_MODE);
         if (optional.isEmpty()) {
-            settingsService.save(SEED_CALL_MODE, Mode.SQUAD.getMode());
-            mode = Mode.SQUAD;
+            log.info("No settings property");
+            setMode(Mode.SQUAD);
             return;
         }
         if (!optional.get().chars().allMatch(Character::isDigit)) {
-            settingsService.save(SEED_CALL_MODE, Mode.SQUAD.getMode());
-            mode = Mode.SQUAD;
+            log.info("Settings property incorrect");
+            setMode(Mode.SQUAD);
             return;
         }
         mode = Mode.getMode(Integer.parseInt(optional.get()));
+        log.info("Mode set from settings: {}", mode);
+    }
+
+    private void pullOnOff() {
+        Optional<String> optional = settingsService.find(SEED_CALL);
+        if (optional.isEmpty()) {
+            log.info("No settings property. Seed call service disable");
+            settingsService.save(SEED_CALL, "false");
+            return;
+        }
+        this.isEnable = Boolean.parseBoolean(optional.get());
+        log.info("Seed call service property from settings: {}", this.isEnable);
+    }
+
+    private void pullLast() {
+        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LAST);
+        if (optional.isEmpty()) {
+            setMode(Mode.SQUAD);
+            log.info("No settings property. {}", SettingsKey.SEED_CALL_LAST);
+            settingsService.save(SettingsKey.SEED_CALL_LAST, LocalDateTime.now().getDayOfYear());
+        }
+    }
+
+    private void setMode(@NotNull Mode mode) {
+        this.mode = mode;
+        log.info("Mode set: " + mode);
+        settingsService.save(SEED_CALL_MODE, mode.getMode());
     }
 
     @Override
@@ -103,63 +129,73 @@ public class SeedCallService implements SlashCommand {
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
-    public void setMaxAmount(@NotNull SlashCommandInteractionEvent event, @NotNull SettingsKey settingsKey) {
+    /**
+     * @param event    of {@link SlashCommandInteractionEvent}
+     * @param whatToDo 0 - Set max amount; 1 - Add Conditions; 2 - Remove Conditions
+     */
+    private void setAttributes(@NotNull SlashCommandInteractionEvent event, int whatToDo) {
         String type = getTypeAsString(event).orElse("");
-        if (type.equalsIgnoreCase(SlashCommands.LIVE.getName())) {
-            liveMessage.setMaxAmount(event);
-        } else if (type.equalsIgnoreCase(SlashCommands.PING_SQUAD.getName())) {
-            squadMentionMessage.setMaxAmount(event);
+        if (type.equalsIgnoreCase(LIVE.getName())) {
+            switch (whatToDo) {
+                case 0 -> {
+                    log.info("Set max amount for {}", type);
+                    liveMessage.setMaxAmount(event);
+                }
+                case 1 -> {
+                    log.info("Add conditions for {}", type);
+                    liveMessage.addConditions(event);
+                }
+                case 2 -> {
+                    log.info("Remove conditions for {}", type);
+                    liveMessage.removeOption(event);
+                }
+                default -> throw new IllegalArgumentException("Operation not supported");
+            }
+
+        } else if (type.equalsIgnoreCase(PING_SQUAD.getName())) {
+            switch (whatToDo) {
+                case 0 -> {
+                    log.info("Set max amount for {}", type);
+                    squadMentionMessage.setMaxAmount(event);
+                }
+                case 1 -> {
+                    log.info("Add conditions for {}", type);
+                    squadMentionMessage.addConditions(event);
+                }
+                case 2 -> {
+                    log.info("Remove conditions for {}", type);
+                    squadMentionMessage.removeOption(event);
+                }
+                default -> throw new IllegalArgumentException("Operation not supported");
+            }
+
+        } else {
+            throw new IllegalArgumentException("Type not supported: " + type);
         }
+    }
+
+    public void setMaxAmount(@NotNull SlashCommandInteractionEvent event) {
+        setAttributes(event, 0);
+    }
+
+    public void addConditions(@NotNull SlashCommandInteractionEvent event) {
+        setAttributes(event, 1);
+    }
+
+    public void removeConditions(@NotNull SlashCommandInteractionEvent event) {
+        setAttributes(event, 2);
     }
 
     public void switchOnOff(@NotNull SlashCommandInteractionEvent event) {
         if (timer != null) {
             timer.cancel();
+            log.info("Timer cancel");
+            timer = null;
         }
         this.isEnable = Objects.requireNonNull(event.getOption("enable")).getAsBoolean();
         settingsService.save(SEED_CALL, String.valueOf(this.isEnable));
         event.reply("Seed call service enable: " + this.isEnable).setEphemeral(true).queue();
-        if (isEnable) {
-            run();
-        }
-    }
-
-    private void setOnOff() {
-        Optional<String> optional = settingsService.find(SEED_CALL);
-        if (optional.isEmpty()) {
-            log.info("New settings property set {}={}", SEED_CALL, this.isEnable);
-            settingsService.save(SEED_CALL, "false");
-            return;
-        }
-        this.isEnable = Boolean.parseBoolean(optional.get());
-        log.info("Seed call service: {}", this.isEnable);
-    }
-
-    private void setLast() {
-        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LAST);
-        if (optional.isEmpty()) {
-            mode = Mode.SQUAD;
-            settingsService.save(SEED_CALL_MODE, mode.getMode());
-            settingsService.save(SettingsKey.SEED_CALL_LAST, LocalDateTime.now().getDayOfYear());
-        }
-    }
-
-    public void addOption(@NotNull SlashCommandInteractionEvent event) {
-        String type = getTypeAsString(event).orElse("");
-        if (type.equalsIgnoreCase(LIVE.getName())) {
-            liveMessage.addOption(event);
-        } else if (type.equalsIgnoreCase(PING_SQUAD.getName())) {
-            squadMentionMessage.addOption(event);
-        }
-    }
-
-    public void removeOption(@NotNull SlashCommandInteractionEvent event) {
-        String type = getTypeAsString(event).orElse("");
-        if (type.equalsIgnoreCase(LIVE.getName())) {
-            liveMessage.removeOption(event);
-        } else if (type.equalsIgnoreCase(PING_SQUAD.getName())) {
-            squadMentionMessage.removeOption(event);
-        }
+        run();
     }
 
     private Optional<String> getTypeAsString(@NotNull SlashCommandInteractionEvent event) {
@@ -177,16 +213,17 @@ public class SeedCallService implements SlashCommand {
         String liveConditions = liveMessage.getConditions();
         String squadConditions = squadMentionMessage.getConditions();
         event.reply(liveConditions + squadConditions).setEphemeral(true).queue();
+        log.info("Conditions info sent");
     }
 
-    PlayerCountsService getPlayerCountsService() {
+    protected PlayerCountsService getPlayerCountsService() {
         return playerCountsService;
     }
 
-    void analyze(List<PlayerCounts> players) {
+    protected void analyze(List<PlayerCounts> players) {
         switch (mode) {
             case SQUAD -> {
-                if (!checkConditionsAndMsgPerDay(squadMentionMessage, Mode.LIVE)) {
+                if (checkConditionsAndMsgPerDay(squadMentionMessage, Mode.LIVE)) {
                     analyze(players);
                     return;
                 }
@@ -194,7 +231,7 @@ public class SeedCallService implements SlashCommand {
                 verifyMessageCount(squadMentionMessage, Mode.LIVE);
             }
             case LIVE -> {
-                if (!checkConditionsAndMsgPerDay(liveMessage, Mode.END)) {
+                if (checkConditionsAndMsgPerDay(liveMessage, Mode.END)) {
                     analyze(players);
                     return;
                 }
@@ -214,17 +251,15 @@ public class SeedCallService implements SlashCommand {
     protected void checkDay() {
         Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LAST);
         if (optional.isEmpty()) {
-            mode = Mode.SQUAD;
-            settingsService.save(SEED_CALL_MODE, mode.getMode());
+            setMode(Mode.SQUAD);
             return;
         }
         if (!optional.get().chars().allMatch(Character::isDigit)) {
-            mode = Mode.SQUAD;
-            settingsService.save(SEED_CALL_MODE, mode.getMode());
+            setMode(Mode.SQUAD);
             return;
         }
         if (Integer.parseInt(optional.get()) != LocalDateTime.now().getDayOfYear()) {
-            mode = Mode.SQUAD;
+            setMode(Mode.SQUAD);
             resetMode();
         }
     }
@@ -233,13 +268,15 @@ public class SeedCallService implements SlashCommand {
         if (messageCall.analyzeConditions(players)) {
             messageCall.sendMessage();
             messageCall.addMessagePerDayCount();
+            log.info("Seed call message sent");
+        } else {
+            log.info("Any conditions not fulfilled");
         }
     }
 
     private void verifyMessageCount(@NotNull MessageCall messageCall, Mode mode) {
         if (messageCall.getMessagePerDay() == messageCall.getMessagePerDayCount()) {
-            this.mode = mode;
-            settingsService.save(SEED_CALL_MODE, mode.getMode());
+            setMode(mode);
         }
     }
 
@@ -248,8 +285,7 @@ public class SeedCallService implements SlashCommand {
                 (liveMessage.getConditionsSize() == 0 || liveMessage.getMessagePerDay() == 0)) {
             isEnable = false;
             timer.cancel();
-            mode = Mode.SQUAD;
-            settingsService.save(SEED_CALL_MODE, Mode.SQUAD.getMode());
+            setMode(Mode.SQUAD);
             settingsService.save(SEED_CALL, "false");
             return false;
         }
@@ -259,18 +295,16 @@ public class SeedCallService implements SlashCommand {
     private boolean checkConditionsAndMsgPerDay(@NotNull MessageCall messageCall, Mode mode) {
         if (messageCall.getConditionsSize() == 0 || messageCall.getMessagePerDay() == 0 ||
                 messageCall.getMessagePerDayCount() >= messageCall.MAX_PER_DAY) {
-            settingsService.save(SEED_CALL_MODE, mode.getMode());
-            this.mode = mode;
-            return false;
+            setMode(mode);
+            return true;
         }
-        return true;
+        return false;
     }
 
     public void resetMode() {
         liveMessage.resetMessageCount();
         squadMentionMessage.resetMessageCount();
-        this.mode = Mode.SQUAD;
-        settingsService.save(SEED_CALL_MODE, this.mode.getMode());
+        setMode(Mode.SQUAD);
     }
 
     enum Mode {

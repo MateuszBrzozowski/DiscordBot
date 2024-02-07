@@ -106,13 +106,13 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(RANK_ROLE_REMOVE.getName())) {
             rankService.deleteByDiscordId(event);
         } else if (name.equals(SEED_CALL_AMOUNT.getName())) {
-            seedCallService.setMaxAmount(event, SettingsKey.SEED_CALL_LIVE);
+            seedCallService.setMaxAmount(event);
         } else if (name.equals(SEED_CALL_ENABLE.getName())) {
             seedCallService.switchOnOff(event);
         } else if (name.equals(SEED_CALL_CONDITIONS.getName())) {
-            seedCallService.addOption(event);
+            seedCallService.addConditions(event);
         } else if (name.equals(SEED_CALL_CONDITIONS_REMOVE.getName())) {
-            seedCallService.removeOption(event);
+            seedCallService.removeConditions(event);
         } else if (name.equals(SEED_CALL_CONDITIONS_INFO.getName())) {
             seedCallService.conditionsInfo(event);
         }

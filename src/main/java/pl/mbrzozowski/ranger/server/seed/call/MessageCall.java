@@ -20,8 +20,6 @@ import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.dv8tion.jda.api.interactions.commands.Command.Choice;
@@ -32,7 +30,6 @@ public abstract class MessageCall implements SlashCommand {
 
     private final static String CHANNEL_ID = "1204551588925018112";
     private final static int MAX_CONDITIONS = 3;
-    private static final int OFFSET = 3;
     private final List<Conditions> conditions = new ArrayList<>();
     private final SettingsService settingsService;
     private final SettingsKey settingsKeyPerDay;
@@ -47,16 +44,13 @@ public abstract class MessageCall implements SlashCommand {
         this.settingsService = settingsService;
         this.settingsKeyPerDay = settingsKeyPerDay;
         this.type = type;
-        setMessagePerDayCount();
-        setMessagePerDay();
-        setConditions();
+        pullMessagePerDayCount();
+        pullMessagePerDay();
+        pullConditions();
+        log.debug("MessageCall created. {}", this);
     }
 
     abstract void setMessages();
-
-    public SettingsKey getSettingsKeyPerDay() {
-        return settingsKeyPerDay;
-    }
 
     public int getMessagePerDay() {
         return messagePerDay;
@@ -66,7 +60,7 @@ public abstract class MessageCall implements SlashCommand {
         return messagePerDayCount;
     }
 
-    private void setConditions() {
+    private void pullConditions() {
         if (type.equals(Type.LIVE)) {
             setConditions(SettingsKey.SEED_CALL_LIVE_CONDITIONS, "seed.call.live.");
         } else if (type.equals(Type.SQUAD_MENTION)) {
@@ -75,7 +69,7 @@ public abstract class MessageCall implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(ArrayList<CommandData> commandData) {
+    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         Set<Choice> choiceList = getChoices();
         commandData.add(getCommand(choiceList)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
@@ -109,19 +103,16 @@ public abstract class MessageCall implements SlashCommand {
         }
     }
 
-    protected void addOption(@NotNull SlashCommandInteractionEvent event) {
+    protected void addConditions(@NotNull SlashCommandInteractionEvent event) {
         if (conditions.size() >= MAX_CONDITIONS) {
             event.reply("Możesz ustawić maksymalnie 3 warunki.").setEphemeral(true).queue();
             return;
         }
         int players = Objects.requireNonNull(event.getOption("players")).getAsInt();
         int minutes = Objects.requireNonNull(event.getOption("minutes")).getAsInt();
-        if (players < 0 || players > 100) {
-            event.reply("Ilość graczy musi być z przedziału od 0 do 100").setEphemeral(true).queue();
-            return;
-        }
-        if (minutes < 1 || minutes > 120) {
-            event.reply("Minuty muszą być z przedziału od 1 do 120.").setEphemeral(true).queue();
+        if (!new Analyzer().analyzeConditions(players, minutes)) {
+            event.reply("- Ilość graczy musi być z przedziału od 1 do 100 włącznie\n" +
+                    "- Minuty muszą być z przedziału od 1 do 120 włącznie.").setEphemeral(true).queue();
             return;
         }
         Conditions condition = new Conditions(players, minutes);
@@ -188,7 +179,7 @@ public abstract class MessageCall implements SlashCommand {
         log.info("Condition {} removed", settings);
     }
 
-    protected void setMessagePerDay() {
+    protected void pullMessagePerDay() {
         Optional<String> optional = settingsService.find(settingsKeyPerDay);
         if (optional.isEmpty()) {
             log.info("New settings property set {}={}", settingsKeyPerDay, 0);
@@ -206,7 +197,7 @@ public abstract class MessageCall implements SlashCommand {
         }
     }
 
-    private void setMessagePerDayCount() {
+    private void pullMessagePerDayCount() {
         Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LIVE_COUNT);
         if (optional.isEmpty()) {
             settingsService.save(SettingsKey.SEED_CALL_LIVE_COUNT, 0);
@@ -278,20 +269,7 @@ public abstract class MessageCall implements SlashCommand {
     }
 
     public boolean analyzeConditions(List<PlayerCounts> players) {
-        for (Conditions condition : conditions) {
-            LocalDateTime dateTime = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(condition.getWithinMinutes());
-            players.removeIf(playerCounts -> playerCounts.getTime().isBefore(dateTime));
-            if (players.size() == 0) {
-                continue;
-            }
-            players.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
-            List<PlayerCounts> playersAfterFilter = players.stream()
-                    .filter(playerCounts -> playerCounts.getPlayers() < condition.getPlayersCount() - OFFSET).toList();
-            if (playersAfterFilter.size() <= 0 || playersAfterFilter.size() <= players.size() / 10) {
-                return true;
-            }
-        }
-        return false;
+        return new Analyzer().analyzeConditionsWithPlayerCount(players, conditions);
     }
 
     public void addMessagePerDayCount() {
@@ -327,6 +305,18 @@ public abstract class MessageCall implements SlashCommand {
         } else if (type.equals(Type.SQUAD_MENTION)) {
             settingsService.save(SettingsKey.SEED_CALL_SQUAD_COUNT, 0);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "MessageCall{" +
+                "conditions=" + conditions +
+                ", settingsKeyPerDay=" + settingsKeyPerDay +
+                ", type=" + type +
+                ", MAX_PER_DAY=" + MAX_PER_DAY +
+                ", messagePerDayCount=" + messagePerDayCount +
+                ", messagePerDay=" + messagePerDay +
+                '}';
     }
 
     enum Type {

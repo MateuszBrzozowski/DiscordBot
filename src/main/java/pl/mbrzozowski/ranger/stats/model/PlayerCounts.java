@@ -29,5 +29,4 @@ public class PlayerCounts {
     private Integer server;
     @Column(name = "match")
     private Integer match;
-
 }

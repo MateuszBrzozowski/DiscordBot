@@ -54,7 +54,7 @@ public class SettingsRepository {
     void save(String key, String value) {
         loadProperties();
         properties.setProperty(key, value);
-        log.info("Saved settings({}={})", key, value);
+        log.debug("Saved settings({}={})", key, value);
         storeProperties();
     }
 
