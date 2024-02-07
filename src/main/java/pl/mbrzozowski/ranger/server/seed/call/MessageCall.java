@@ -272,6 +272,10 @@ public abstract class MessageCall implements SlashCommand {
         return new Analyzer().analyzeConditionsWithPlayerCount(players, conditions);
     }
 
+    public boolean analyzeConditionsWhileStart(List<PlayerCounts> players) {
+        return new Analyzer().analyzeConditionsWhileStart(players, conditions);
+    }
+
     public void addMessagePerDayCount() {
         this.messagePerDayCount++;
         if (type.equals(Type.LIVE)) {

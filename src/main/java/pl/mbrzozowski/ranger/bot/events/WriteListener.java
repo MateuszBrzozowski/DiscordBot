@@ -40,7 +40,7 @@ public class WriteListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        log.info(event.getAuthor() + " - send message");
+        log.info(event.getAuthor() + " - send message on channel {}", event.getChannel());
 
         DisboardBot disboardBot = new DisboardBot(disboardService);
         ReminderCmd reminderCmd = new ReminderCmd(usersReminderService);

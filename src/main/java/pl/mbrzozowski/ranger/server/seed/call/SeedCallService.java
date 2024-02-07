@@ -36,6 +36,7 @@ public class SeedCallService implements SlashCommand {
     private boolean isEnable = false;
     private Mode mode;
     private Timer timer;
+    private boolean isStarting = true;
 
     public SeedCallService(SettingsService settingsService, PlayerCountsService playerCountsService) {
         this.playerCountsService = playerCountsService;
@@ -52,6 +53,34 @@ public class SeedCallService implements SlashCommand {
             log.info("Seed call service disable");
             return;
         }
+        List<PlayerCounts> players = playerCountsService.findLastDay();
+        checkSquad(players);
+    }
+
+    private void checkSquad(List<PlayerCounts> players) {
+        if (mode.equals(Mode.SQUAD)) {
+            if (squadMentionMessage.analyzeConditionsWhileStart(players)) {
+                setMode(Mode.LIVE);
+                checkLive(players);
+            }
+        } else {
+            checkLive(players);
+        }
+    }
+
+    private void checkLive(List<PlayerCounts> players) {
+        if (mode.equals(Mode.LIVE)) {
+            if (liveMessage.analyzeConditionsWhileStart(players)) {
+                setMode(Mode.END);
+                start();
+            }
+        } else {
+            start();
+        }
+    }
+
+
+    private void start() {
         log.info("Seed call service enable");
         timer = new Timer();
         SeedCallExecute seedCallExecute = new SeedCallExecute(this);
@@ -195,7 +224,9 @@ public class SeedCallService implements SlashCommand {
         this.isEnable = Objects.requireNonNull(event.getOption("enable")).getAsBoolean();
         settingsService.save(SEED_CALL, String.valueOf(this.isEnable));
         event.reply("Seed call service enable: " + this.isEnable).setEphemeral(true).queue();
-        run();
+        if (isEnable) {
+            start();
+        }
     }
 
     private Optional<String> getTypeAsString(@NotNull SlashCommandInteractionEvent event) {
@@ -258,10 +289,10 @@ public class SeedCallService implements SlashCommand {
             setMode(Mode.SQUAD);
             return;
         }
-        if (Integer.parseInt(optional.get()) != LocalDateTime.now().getDayOfYear()) {
-            setMode(Mode.SQUAD);
+        if (!isStarting && Integer.parseInt(optional.get()) != LocalDateTime.now().getDayOfYear()) {
             resetMode();
         }
+        isStarting = false;
     }
 
     private void analyzeConditions(@NotNull MessageCall messageCall, List<PlayerCounts> players) {

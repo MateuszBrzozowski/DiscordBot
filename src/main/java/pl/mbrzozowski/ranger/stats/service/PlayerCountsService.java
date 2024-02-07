@@ -18,4 +18,8 @@ public class PlayerCountsService {
     public List<PlayerCounts> findLastTwoHours() {
         return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(150));
     }
+
+    public List<PlayerCounts> findLastDay() {
+        return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
+    }
 }
