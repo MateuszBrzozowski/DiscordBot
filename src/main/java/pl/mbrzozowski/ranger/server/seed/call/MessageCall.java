@@ -279,6 +279,10 @@ public class MessageCall {
     }
 
     public void sendMessage() {
+        if (messagePerDayCount >= messagePerDay) {
+            log.info("Max message per day on this level");
+            return;
+        }
         Random random = new Random();
         int nextInt = random.nextInt(messages.size());
         Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
@@ -298,6 +302,7 @@ public class MessageCall {
                 builder.append(role.getAsMention());
             }
         }
+        addMessagePerDayCount();
         textChannel.sendMessage(builder.append(" ").append(messages.get(nextInt).getMessage())).queue();
         log.info("Sent seed call message");
     }

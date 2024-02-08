@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 public enum Levels {
 
-    ONE(1), //ZMIENIONY z squad
-    TWO(2), // zmieniony z live
+    ONE(1),
+    TWO(2),
     THREE(3),
     FOUR(4),
     END(0);

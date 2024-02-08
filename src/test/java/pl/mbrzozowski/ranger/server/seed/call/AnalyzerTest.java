@@ -150,43 +150,24 @@ class AnalyzerTest {
     }
 
     @Test
-    void analyzeConditionsWhileStart_ConditionsApproved_ReturnTrue() {
-        List<PlayerCounts> players = new ArrayList<>(List.of(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41, null, null, null, null)));
+    void analyzeConditionsWhileStart_ConditionsApprovedByAnyRecords_ReturnTrue() {
+        List<PlayerCounts> players = new ArrayList<>();
+        for (int i = 0; i < 21; i++) {
+            players.add(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41 + Analyzer.OFFSET, null, null, null, null));
+        }
         List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
         Assertions.assertTrue(new Analyzer().analyzeConditionsWhileStart(players, conditions));
     }
 
     @Test
-    void analyzeConditionsWhileStart_ConditionsApprovedByAnyRecordFirst_ReturnTrue() {
-        List<PlayerCounts> players = new ArrayList<>(List.of(
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null)
-        ));
+    void analyzeConditionsWhileStart_ConditionsNotApprovedByAllRecords_ReturnFalse() {
+        List<PlayerCounts> players = new ArrayList<>();
+        players.add(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40 + Analyzer.OFFSET, null, null, null, null));
+        for (int i = 0; i < 20; i++) {
+            players.add(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41 + Analyzer.OFFSET, null, null, null, null));
+        }
         List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
-        Assertions.assertTrue(new Analyzer().analyzeConditionsWhileStart(players, conditions));
-    }
-
-    @Test
-    void analyzeConditionsWhileStart_ConditionsApprovedByAnyRecordMid_ReturnTrue() {
-        List<PlayerCounts> players = new ArrayList<>(List.of(
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null)
-        ));
-        List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
-        Assertions.assertTrue(new Analyzer().analyzeConditionsWhileStart(players, conditions));
-    }
-
-    @Test
-    void analyzeConditionsWhileStart_ConditionsApprovedByAnyRecordLast_ReturnTrue() {
-        List<PlayerCounts> players = new ArrayList<>(List.of(
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 40, null, null, null, null),
-                new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 41, null, null, null, null)
-        ));
-        List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
-        Assertions.assertTrue(new Analyzer().analyzeConditionsWhileStart(players, conditions));
+        Assertions.assertFalse(new Analyzer().analyzeConditionsWhileStart(players, conditions));
     }
 
     @Test
@@ -213,7 +194,7 @@ class AnalyzerTest {
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 30, null, null, null, null),
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 39, null, null, null, null),
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 38, null, null, null, null)
-                ));
+        ));
         List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
         Assertions.assertFalse(new Analyzer().analyzeConditionsWhileStart(players, conditions));
     }
@@ -224,7 +205,7 @@ class AnalyzerTest {
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 10, null, null, null, null),
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 20, null, null, null, null),
                 new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC), 39, null, null, null, null)
-                ));
+        ));
         List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
         Assertions.assertFalse(new Analyzer().analyzeConditionsWhileStart(players, conditions));
     }

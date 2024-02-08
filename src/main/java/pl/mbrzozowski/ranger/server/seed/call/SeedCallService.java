@@ -59,24 +59,34 @@ public class SeedCallService implements SlashCommand {
         checkLevel(Levels.ONE, players);
     }
 
-    private void checkLevel(@NotNull Levels level, List<PlayerCounts> players) {
+    private void checkLevel(@NotNull Levels level, @NotNull List<PlayerCounts> players) {
+        if (players.size() != 0 && players.get(players.size() - 1).getPlayers() == 0) {
+            start();
+            return;
+        }
         switch (level) {
             case ONE -> {
                 if (messageCalls[0].analyzeConditionsWhileStart(players)) {
                     setLevel(Levels.TWO);
                     checkLevel(Levels.TWO, players);
+                } else {
+                    start();
                 }
             }
             case TWO -> {
                 if (messageCalls[1].analyzeConditionsWhileStart(players)) {
                     setLevel(Levels.THREE);
                     checkLevel(Levels.THREE, players);
+                } else {
+                    start();
                 }
             }
             case THREE -> {
                 if (messageCalls[2].analyzeConditionsWhileStart(players)) {
                     setLevel(Levels.FOUR);
                     checkLevel(Levels.FOUR, players);
+                } else {
+                    start();
                 }
             }
             case FOUR -> {
@@ -334,7 +344,7 @@ public class SeedCallService implements SlashCommand {
     protected void analyze(List<PlayerCounts> players) {
         switch (level) {
             case ONE -> {
-                if (checkConditionsAndMsgPerDay(messageCalls[0], Levels.TWO)) {
+                if (hasNotRequiredParam(messageCalls[0], Levels.TWO)) {
                     analyze(players);
                     return;
                 }
@@ -342,7 +352,7 @@ public class SeedCallService implements SlashCommand {
                 verifyMessageCount(messageCalls[0], Levels.TWO);
             }
             case TWO -> {
-                if (checkConditionsAndMsgPerDay(messageCalls[1], Levels.THREE)) {
+                if (hasNotRequiredParam(messageCalls[1], Levels.THREE)) {
                     analyze(players);
                     return;
                 }
@@ -350,7 +360,7 @@ public class SeedCallService implements SlashCommand {
                 verifyMessageCount(messageCalls[1], Levels.THREE);
             }
             case THREE -> {
-                if (checkConditionsAndMsgPerDay(messageCalls[2], Levels.FOUR)) {
+                if (hasNotRequiredParam(messageCalls[2], Levels.FOUR)) {
                     analyze(players);
                     return;
                 }
@@ -358,7 +368,7 @@ public class SeedCallService implements SlashCommand {
                 verifyMessageCount(messageCalls[2], Levels.FOUR);
             }
             case FOUR -> {
-                if (checkConditionsAndMsgPerDay(messageCalls[3], Levels.END)) {
+                if (hasNotRequiredParam(messageCalls[3], Levels.END)) {
                     analyze(players);
                     return;
                 }
@@ -366,7 +376,7 @@ public class SeedCallService implements SlashCommand {
                 verifyMessageCount(messageCalls[3], Levels.END);
             }
             case END -> {
-                if (!checkConditionsAndMsgPerDay()) {
+                if (!hasNotRequiredParam()) {
                     return;
                 }
             }
@@ -378,8 +388,6 @@ public class SeedCallService implements SlashCommand {
     private void analyzeConditions(@NotNull MessageCall messageCall, List<PlayerCounts> players) {
         if (messageCall.analyzeConditions(players)) {
             messageCall.sendMessage();
-            messageCall.addMessagePerDayCount();
-            log.info("Seed call message sent");
         } else {
             log.info("Any conditions not fulfilled");
         }
@@ -391,12 +399,13 @@ public class SeedCallService implements SlashCommand {
         }
     }
 
-    private boolean checkConditionsAndMsgPerDay() {
+    private boolean hasNotRequiredParam() {
         if (checkAllConditions()) {
             isEnable = false;
             timer.cancel();
             setLevel(Levels.ONE);
             settingsService.save(SEED_CALL, "false");
+            log.info("Seed call service disable");
             return false;
         }
         return true;
@@ -416,7 +425,7 @@ public class SeedCallService implements SlashCommand {
                 messageCalls[index].getMessageSize() == 0;
     }
 
-    private boolean checkConditionsAndMsgPerDay(@NotNull MessageCall messageCall, Levels level) {
+    private boolean hasNotRequiredParam(@NotNull MessageCall messageCall, Levels level) {
         if (messageCall.getConditionsSize() == 0 || messageCall.getMessagePerDay() == 0 ||
                 messageCall.getMessagePerDayCount() >= MessageCall.MAX_PER_DAY || messageCall.getMessageSize() == 0) {
             setLevel(level);

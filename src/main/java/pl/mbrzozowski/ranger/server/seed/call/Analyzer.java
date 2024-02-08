@@ -40,7 +40,12 @@ public class Analyzer {
     }
 
     public boolean analyzeConditionsWhileStart(List<PlayerCounts> players, List<Conditions> conditions) {
-        if (players == null || players.isEmpty() || conditions == null || conditions.isEmpty()) {
+        if (players == null) {
+            log.debug("Null player list");
+            return true;
+        }
+        List<PlayerCounts> tempPlayerList = new ArrayList<>(players);
+        if (tempPlayerList.isEmpty() || conditions == null || conditions.isEmpty()) {
             log.debug("Null or empty {}, {}", players, conditions);
             return true;
         }
@@ -52,19 +57,22 @@ public class Analyzer {
         }
         log.debug("Max Player in conditions: {}", maxPlayersInAnyCondition);
         try {
-            players.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
+            tempPlayerList.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
         } catch (NullPointerException e) {
             return true;
         }
-        int index = getIndexOfFirstEmptyServer(players);
-        players = removeEverythingAfterIndex(players, index);
+        int index = getIndexOfFirstEmptyServer(tempPlayerList);
+        tempPlayerList = removeEverythingAfterIndex(tempPlayerList, index);
+        if (tempPlayerList.isEmpty()) {
+            return true;
+        }
         final int finalMaxPlayersInAnyCondition = maxPlayersInAnyCondition;
-        List<PlayerCounts> recordsWithPlayersAboveConditions = new ArrayList<>(players
+        List<PlayerCounts> recordsWithPlayersAboveConditions = new ArrayList<>(tempPlayerList
                 .stream()
                 .filter(playerCounts -> playerCounts.getPlayers() != null &&
                         playerCounts.getPlayers() >= finalMaxPlayersInAnyCondition).toList());
-        recordsWithPlayersAboveConditions.addAll(players.stream().filter(playerCounts -> playerCounts.getPlayers() == null).toList());
-        if (recordsWithPlayersAboveConditions.size() > 0) {
+        recordsWithPlayersAboveConditions.addAll(tempPlayerList.stream().filter(playerCounts -> playerCounts.getPlayers() == null).toList());
+        if (recordsWithPlayersAboveConditions.size() > 20 && tempPlayerList.get(0).getPlayers() > finalMaxPlayersInAnyCondition + OFFSET) {
             log.debug("PLayers count more than max player from conditions");
             return true;
         }
@@ -73,7 +81,11 @@ public class Analyzer {
 
     @NotNull
     private List<PlayerCounts> removeEverythingAfterIndex(@NotNull List<PlayerCounts> players, int index) {
-        if (players.size() == index + 1) {
+        if (players.size() == index - 1) {
+            players.clear();
+            return players;
+        }
+        if (players.size() == index) {
             return players;
         }
         List<PlayerCounts> newPlayers = new ArrayList<>();
@@ -85,11 +97,11 @@ public class Analyzer {
 
     private int getIndexOfFirstEmptyServer(@NotNull List<PlayerCounts> players) {
         for (int i = 0; i < players.size(); i++) {
-            if (players.get(i).getPlayers() != null && players.get(i).getPlayers() == 0) {
+            if (players.get(i).getPlayers() == null || players.get(i).getPlayers() == 0) {
                 return i;
             }
         }
-        return players.size() - 1;
+        return players.size();
     }
 
     public boolean analyzeConditions(int players, int minutes) {
