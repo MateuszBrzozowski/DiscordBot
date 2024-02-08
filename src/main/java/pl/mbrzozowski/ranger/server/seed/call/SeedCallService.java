@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.server.seed.call;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -12,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.helpers.SlashCommands;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
@@ -31,13 +31,15 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL_LEVEL;
 public class SeedCallService implements SlashCommand {
 
     private final PlayerCountsService playerCountsService;
+    private final MessageService messageService;
     private final SettingsService settingsService;
     private final MessageCall[] messageCalls = new MessageCall[4];
     private boolean isEnable = false;
     private Levels level;
     private Timer timer;
 
-    public SeedCallService(SettingsService settingsService, PlayerCountsService playerCountsService) {
+    public SeedCallService(MessageService messageService, SettingsService settingsService, PlayerCountsService playerCountsService) {
+        this.messageService = messageService;
         this.playerCountsService = playerCountsService;
         this.settingsService = settingsService;
         createLevels();
@@ -98,7 +100,7 @@ public class SeedCallService implements SlashCommand {
         LevelFactory levelFactory = new LevelFactory();
         Levels[] levels = Levels.values();
         for (int i = 0; i < messageCalls.length; i++) {
-            messageCalls[i] = levelFactory.getLevelOfMessageCall(levels[i], settingsService);
+            messageCalls[i] = levelFactory.getLevelOfMessageCall(messageService, levels[i], settingsService);
         }
     }
 
@@ -147,35 +149,56 @@ public class SeedCallService implements SlashCommand {
     @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         Set<Command.Choice> choiceList = getChoices();
+        DefaultMemberPermissions defaultMemberPermissions = DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL);
         commandData.add(Commands.slash(SEED_CALL_AMOUNT.getName(), SEED_CALL_AMOUNT.getDescription())
-                .addOptions(new OptionData(OptionType.STRING, SlashCommands.LEVEL.getName(), "Do którego typu chcesz zmienić liczbę wiadomości")
+                .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Do którego typu chcesz zmienić liczbę wiadomości")
                         .addChoices(getChoicesForLevels())
                         .setRequired(true))
-                .addOptions(new OptionData(OptionType.INTEGER, SlashCommands.COUNT.getName(), "Ile razy na dzień. 0 - OFF")
+                .addOptions(new OptionData(OptionType.INTEGER, COUNT.getName(), "Ile razy na dzień. 0 - OFF")
                         .addChoices(choiceList)
                         .setRequired(true))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .setDefaultPermissions(defaultMemberPermissions));
         commandData.add(Commands.slash(SEED_CALL_ENABLE.getName(), SEED_CALL_ENABLE.getDescription())
                 .addOptions(new OptionData(OptionType.BOOLEAN, "enable", SEED_CALL_ENABLE.getDescription())
                         .setRequired(true))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .setDefaultPermissions(defaultMemberPermissions));
         commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_CONDITIONS.getName(), SlashCommands.SEED_CALL_CONDITIONS.getDescription())
-                        .addOptions(new OptionData(OptionType.STRING, SlashCommands.LEVEL.getName(), "Do którego levelu chcesz dodać warunek")
+                Commands.slash(SEED_CALL_MESSAGE.getName(), SEED_CALL_MESSAGE.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Do którego levelu chcesz dodać wiadomość?")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .addOption(OptionType.STRING, "wiadomość", "Wiadomość", true)
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_MESSAGE_REMOVE.getName(), SEED_CALL_MESSAGE_REMOVE.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Z którego levelu chcesz usunąć wiadomość?")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .addOption(OptionType.INTEGER, "id", "ID wiadomości", false)
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_CONDITIONS.getName(), SEED_CALL_CONDITIONS.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Do którego levelu chcesz dodać warunek?")
                                 .addChoices(getChoicesForLevels())
                                 .setRequired(true))
                         .addOption(OptionType.INTEGER, "players", "Ilość graczy", true)
                         .addOption(OptionType.INTEGER, "minutes", "Minuty przez jaki okres", true)
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                        .setDefaultPermissions(defaultMemberPermissions));
         commandData.add(
-                Commands.slash(SlashCommands.SEED_CALL_CONDITIONS_REMOVE.getName(), SlashCommands.SEED_CALL_CONDITIONS_REMOVE.getDescription())
-                        .addOptions(new OptionData(OptionType.STRING, SlashCommands.LEVEL.getName(), "Z którego typu chcesz usunąć warunek")
+                Commands.slash(SEED_CALL_CONDITIONS_REMOVE.getName(), SEED_CALL_CONDITIONS_REMOVE.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Z którego typu chcesz usunąć warunek")
                                 .addChoices(getChoicesForLevels())
                                 .setRequired(true))
                         .addOption(OptionType.INTEGER, "id", "ID warunku", false)
-                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_MESSAGE_INFO.getName(), SEED_CALL_MESSAGE_INFO.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Dla którego levelu chcesz wyświetlić ustawione wiadomości.")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .setDefaultPermissions(defaultMemberPermissions));
         commandData.add(Commands.slash(SEED_CALL_CONDITIONS_INFO.getName(), SEED_CALL_CONDITIONS_INFO.getDescription())
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+                .setDefaultPermissions(defaultMemberPermissions));
     }
 
     @NotNull
@@ -200,23 +223,36 @@ public class SeedCallService implements SlashCommand {
 
     /**
      * @param event    of {@link SlashCommandInteractionEvent}
-     * @param whatToDo 0 - Set max amount; 1 - Add Conditions; 2 - Remove Conditions
+     * @param whatToDo 0 - Set max amount;
+     *                 1 - Add Conditions;
+     *                 2 - Remove Conditions;
+     *                 3 - Add message;
+     *                 4 - Remove message;
+     *                 5 - Show info about all messages
      * @param index    of {@link MessageCall} where MIN 0 - level 1 | MAX 3 - level 4
      * @throws IndexOutOfBoundsException     when index is less than 0, or greater than 3
-     * @throws UnsupportedOperationException when whatToDo is not 0,1 or 2
+     * @throws UnsupportedOperationException when whatToDo is not 0,1,2,3
      */
     private void setAttributes(@NotNull SlashCommandInteractionEvent event, int whatToDo, int index) {
         switch (whatToDo) {
             case 0 -> messageCalls[index].setMaxAmount(event);
             case 1 -> messageCalls[index].addConditions(event);
-            case 2 -> messageCalls[index].removeOption(event);
+            case 2 -> messageCalls[index].removeConditions(event);
+            case 3 -> messageCalls[index].addMessage(event);
+            case 4 -> messageCalls[index].removeMessage(event);
+            case 5 -> messageCalls[index].showAllMessages(event);
             default -> throw new UnsupportedOperationException(String.valueOf(whatToDo));
         }
     }
 
     /**
      * @param event    of {@link SlashCommandInteractionEvent}
-     * @param whatToDo 0 - Set max amount; 1 - Add Conditions; 2 - Remove Conditions
+     * @param whatToDo 0 - Set max amount;
+     *                 1 - Add Conditions;
+     *                 2 - Remove Conditions;
+     *                 3 - Add message
+     *                 4 - Remove message;
+     *                 5 - Show info about all messages
      * @throws UnsupportedOperationException when selected level by event is less than 0, or greater than 3
      */
     private void setAttributes(@NotNull SlashCommandInteractionEvent event, int whatToDo) {
@@ -360,12 +396,14 @@ public class SeedCallService implements SlashCommand {
     }
 
     private boolean checkAllConditions(int index) {
-        return messageCalls[index].getConditionsSize() == 0 || messageCalls[index].getMessagePerDay() == 0;
+        return messageCalls[index].getConditionsSize() == 0 ||
+                messageCalls[index].getMessagePerDay() == 0 ||
+                messageCalls[index].getMessageSize() == 0;
     }
 
     private boolean checkConditionsAndMsgPerDay(@NotNull MessageCall messageCall, Levels level) {
         if (messageCall.getConditionsSize() == 0 || messageCall.getMessagePerDay() == 0 ||
-                messageCall.getMessagePerDayCount() >= MessageCall.MAX_PER_DAY) {
+                messageCall.getMessagePerDayCount() >= MessageCall.MAX_PER_DAY || messageCall.getMessageSize() == 0) {
             setLevel(level);
             return true;
         }
@@ -377,6 +415,27 @@ public class SeedCallService implements SlashCommand {
             messageCall.resetMessageCount();
         }
         setLevel(Levels.ONE);
+    }
+
+    public void addMessage(SlashCommandInteractionEvent event) {
+        setAttributes(event, 3);
+    }
+
+    public void removeMessage(SlashCommandInteractionEvent event) {
+        setAttributes(event, 4);
+    }
+
+    public void messagesInfo(SlashCommandInteractionEvent event) {
+        setAttributes(event, 5);
+    }
+
+    public void buttonClickMMessage(@NotNull ButtonInteractionEvent event) {
+        String levelAsString = event.getMessage().getEmbeds().get(0).getDescription();
+        levelAsString = Objects.requireNonNull(levelAsString).substring("## Wiadomości na levelu ".length(), "## Wiadomości na levelu ".length() + 1);
+        int level = Integer.parseInt(levelAsString);
+        event.deferEdit().queue();
+        messageCalls[level - 1].buttonClick(event);
+
     }
 }
 

@@ -26,6 +26,7 @@ import pl.mbrzozowski.ranger.recruit.Recruit;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackList;
 import pl.mbrzozowski.ranger.recruit.WaitingRecruit;
 import pl.mbrzozowski.ranger.role.Role;
+import pl.mbrzozowski.ranger.server.seed.call.Message;
 import pl.mbrzozowski.ranger.server.service.Client;
 
 import javax.sql.DataSource;
@@ -76,7 +77,8 @@ public class MainDataSourceConfiguration {
                         Prize.class,
                         WaitingRecruit.class,
                         ClanMember.class,
-                        Rank.class)
+                        Rank.class,
+                        Message.class)
                 .properties(properties)
                 .build();
     }

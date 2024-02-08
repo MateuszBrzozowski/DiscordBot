@@ -1,13 +1,19 @@
 package pl.mbrzozowski.ranger.server.seed.call;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.helpers.ComponentId;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
@@ -20,21 +26,26 @@ public class MessageCall {
     public static final int MAX_PER_DAY = 4;
     private final static String CHANNEL_ID = "1204551588925018112";
     private final static int MAX_CONDITIONS = 3;
+    private final static int MAX_MESSAGES = 50;
+    private final static int LENGTH_MESSAGE = 400;
     private final List<Conditions> conditions = new ArrayList<>();
     private final SettingsService settingsService;
     private final SettingsKey settingsKeyPerDay;
     private final Levels level;
-    protected final List<String> messages = new ArrayList<>();
+    private final MessageService messageService;
+    protected List<Message> messages = new ArrayList<>();
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
 
-    protected MessageCall(SettingsService settingsService, SettingsKey settingsKeyPerDay, Levels level) {
+    protected MessageCall(SettingsService settingsService, MessageService messageService, SettingsKey settingsKeyPerDay, Levels level) {
+        this.messageService = messageService;
         this.settingsService = settingsService;
         this.settingsKeyPerDay = settingsKeyPerDay;
         this.level = level;
         pullMessagePerDayCount();
         pullMessagePerDay();
         pullConditions();
+        pullMessages();
         log.info("MessageCall created. {}", this);
     }
 
@@ -128,7 +139,7 @@ public class MessageCall {
         }
     }
 
-    public void removeOption(SlashCommandInteractionEvent event) {
+    public void removeConditions(SlashCommandInteractionEvent event) {
         if (conditions.size() == 0) {
             event.reply("Brak warunków").setEphemeral(true).queue();
             return;
@@ -165,6 +176,10 @@ public class MessageCall {
                 .queue();
         saveSettings();
         log.info("Remove conditions {} for level: {}", conditions, level);
+    }
+
+    private void pullMessages() {
+        messages = messageService.findByLevel(level);
     }
 
     protected void pullMessagePerDay() {
@@ -266,7 +281,7 @@ public class MessageCall {
             log.warn("Null channel");
             return;
         }
-        textChannel.sendMessage(messages.get(nextInt)).queue();
+        textChannel.sendMessage(messages.get(nextInt).getMessage()).queue();
         log.info("Sent seed call message");
     }
 
@@ -293,5 +308,130 @@ public class MessageCall {
                 ", messagePerDayCount=" + messagePerDayCount +
                 ", messagePerDay=" + messagePerDay +
                 '}';
+    }
+
+    public void addMessage(SlashCommandInteractionEvent event) {
+        if (messages.size() >= MAX_MESSAGES) {
+            log.info("No space to new message");
+            event.reply("Osiągnięto maksymalną ilość wiadomości").setEphemeral(true).queue();
+            return;
+        }
+        OptionMapping messageOption = event.getOption("wiadomość");
+        if (messageOption == null) {
+            log.error("Null message");
+            event.reply("Wystąpił nieoczekiwany błąd.").setEphemeral(true).queue();
+            return;
+        }
+        String message = messageOption.getAsString();
+        if (message.length() > LENGTH_MESSAGE || message.length() == 0) {
+            log.info("Message empty or to long");
+            event.reply("Zbyt długa wiadomości. Maksymalna ilość znaków: " + LENGTH_MESSAGE).setEphemeral(true).queue();
+            return;
+        }
+        Message newMessage = new Message(null, message, level);
+        messages.add(newMessage);
+        event.reply("**Wiadomość dodana.**\n" + message).setEphemeral(true).queue();
+        log.info("Message added");
+        messageService.save(newMessage);
+    }
+
+    public void removeMessage(SlashCommandInteractionEvent event) {
+        if (messages.size() == 0) {
+            event.reply("Brak wiadomości na tym levelu").setEphemeral(true).queue();
+            return;
+        }
+        OptionMapping idOption = event.getOption("id");
+        if (idOption == null) {
+            if (messages.size() == 1) {
+                messages.clear();
+                messageService.deleteByLevel(level);
+                event.reply("Wiadomość usunięta. Brak więcej wiadomości na tym levelu").setEphemeral(true).queue();
+            } else {
+                event.reply("""
+                        **Więcej niż jedna wiadomość na tym levelu.**
+                        - Sprawdź id przy pomocy komendy /seed-call-wiadomości
+                        - Wywołaj ponownie to polecenie wpisując wybrane id""").setEphemeral(true).queue();
+            }
+        } else {
+            long id = idOption.getAsLong();
+            boolean isRemoved = messages.removeIf(message -> message.getId().equals(id));
+            if (isRemoved) {
+                messageService.deleteById(id);
+                event.reply("Wiadomość usunięta.").setEphemeral(true).queue();
+            } else {
+                event.reply("Brak wiadomości o tym id na tym levelu.").setEphemeral(true).queue();
+            }
+        }
+    }
+
+    public void showAllMessages(SlashCommandInteractionEvent event) {
+        if (messages.size() == 0) {
+            event.reply("Brak wiadomości na tym levelu").setEphemeral(true).queue();
+            return;
+        }
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setDescription(getMessagesAsDescription());
+        if (messages.size() > 10) {
+            builder.setFooter("Strona 1");
+            event.replyEmbeds(builder.build()).setComponents(ActionRow.of(getButtons())).setEphemeral(true).queue();
+            return;
+        }
+        event.replyEmbeds(builder.build()).setComponents().setEphemeral(true).queue();
+    }
+
+    @NotNull
+    private Collection<? extends ItemComponent> getButtons() {
+        List<Button> buttons = new ArrayList<>();
+        if (messages.size() > 10) {
+            buttons.add(Button.primary(ComponentId.SEED_CALL_BACK, "⮜"));
+            buttons.add(Button.primary(ComponentId.SEED_CALL_NEXT, "⮞"));
+        }
+        return buttons;
+    }
+
+    @NotNull
+    private String getMessagesAsDescription() {
+        StringBuilder builder = new StringBuilder("## Wiadomości na levelu ").append(level.getLevel()).append("\n");
+        for (int i = 0; i < messages.size() && i < 10; i++) {
+            builder.append("ID: ").append(messages.get(i).getId()).append(" - ").append(messages.get(i).getMessage()).append("\n");
+        }
+        return builder.toString();
+    }
+
+    public int getMessageSize() {
+        return messages.size();
+    }
+
+    public void buttonClick(@NotNull ButtonInteractionEvent event) {
+        String pageAsString = Objects.requireNonNull(event.getMessage().getEmbeds().get(0).getFooter()).getText();
+        pageAsString = Objects.requireNonNull(pageAsString).substring("Strona ".length(), "Strona ".length() + 1);
+        int page = Integer.parseInt(pageAsString);
+        EmbedBuilder builder = new EmbedBuilder();
+        if (event.getComponentId().equals(ComponentId.SEED_CALL_NEXT)) {
+            if (page == 5 || messages.size() < page * 10) {
+                return;
+            } else {
+                page++;
+            }
+
+        } else if (event.getComponentId().equals(ComponentId.SEED_CALL_BACK)) {
+            if (page == 1) {
+                return;
+            } else {
+                page--;
+            }
+        }
+        builder.setDescription(getMessagesAsDescription(page));
+        builder.setFooter("Strona " + page);
+        event.getMessage().editMessageEmbeds(builder.build()).queue();
+    }
+
+    @NotNull
+    private String getMessagesAsDescription(int page) {
+        StringBuilder builder = new StringBuilder("## Wiadomości na levelu ").append(level.getLevel()).append("\n");
+        for (int i = (page - 1) * 10; i < messages.size() && i < (page - 1) * 10 + 10; i++) {
+            builder.append("ID: ").append(messages.get(i).getId()).append(" - ").append(messages.get(i).getMessage()).append("\n");
+        }
+        return builder.toString();
     }
 }

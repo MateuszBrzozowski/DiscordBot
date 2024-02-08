@@ -1,10 +1,10 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.event.EventService;
@@ -16,33 +16,21 @@ import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ButtonClickListener extends ListenerAdapter {
 
-    private final EventService eventService;
-    private final RecruitsService recruitsService;
-    private final ServerService serverService;
     private final EventsGeneratorService eventsGeneratorService;
-    private final GiveawayService giveawayService;
     private final EventsSettingsService eventsSettingsService;
-
-    @Autowired
-    public ButtonClickListener(EventService events,
-                               RecruitsService recruitsService,
-                               ServerService serverService,
-                               EventsGeneratorService eventsGeneratorService,
-                               GiveawayService giveawayService,
-                               EventsSettingsService eventsSettingsService) {
-        this.eventService = events;
-        this.recruitsService = recruitsService;
-        this.serverService = serverService;
-        this.eventsGeneratorService = eventsGeneratorService;
-        this.giveawayService = giveawayService;
-        this.eventsSettingsService = eventsSettingsService;
-    }
+    private final GiveawayService giveawayService;
+    private final RecruitsService recruitsService;
+    private final SeedCallService seedCallService;
+    private final ServerService serverService;
+    private final EventService eventService;
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
@@ -205,7 +193,17 @@ public class ButtonClickListener extends ListenerAdapter {
                 event.getComponentId().equals(ComponentId.EVENT_SETTINGS_BTN_SAVE) ||
                 event.getComponentId().equals(ComponentId.EVENT_SETTINGS_GO_TO_START)) {
             eventsSettingsService.buttonEvent(event);
+        } else {
+            seedCall(event);
         }
+    }
+
+    private void seedCall(@NotNull ButtonInteractionEvent event) {
+        if (event.getComponentId().equals(ComponentId.SEED_CALL_BACK) ||
+                event.getComponentId().equals(ComponentId.SEED_CALL_NEXT)) {
+            seedCallService.buttonClickMMessage(event);
+        }
+
     }
 
     private void removeChannelDB(@NotNull ButtonInteractionEvent event, boolean isAdmin) {

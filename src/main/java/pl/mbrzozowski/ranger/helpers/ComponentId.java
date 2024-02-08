@@ -68,4 +68,6 @@ public final class ComponentId {
     public static final String GIVEAWAY_SIGN_IN = "GG_011" + SUFFIX;
     public static final String GIVEAWAY_GENERATOR_MODAL_RULES_LINK = "GG_012" + SUFFIX;
 
+    public static final String SEED_CALL_BACK = "SC_01" + SUFFIX;
+    public static final String SEED_CALL_NEXT = "SC_02" + SUFFIX;
 }

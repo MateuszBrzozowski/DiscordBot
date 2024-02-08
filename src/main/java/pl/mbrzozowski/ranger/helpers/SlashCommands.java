@@ -37,6 +37,9 @@ public enum SlashCommands {
     RANK_ROLE_REMOVE("rank-role-remove", "Usuwa rolę stopnia z bota."),
     SEED_CALL_CONDITIONS("seed-call-warunek-dodaj", "Jeżeli liczba graczy była większa od [] przez ostatnie [] minut. Offset(5)"),
     SEED_CALL_CONDITIONS_REMOVE("seed-call-warunek-usuń", "Usuwa warunek"),
+    SEED_CALL_MESSAGE("seed-call-wiadomość-dodaj", "Dodaje wiadomość do levelu"),
+    SEED_CALL_MESSAGE_REMOVE("seed-call-wiadomość-usuń", "Usuwa wiadomość do levelu"),
+    SEED_CALL_MESSAGE_INFO("seed-call-wiadomości", "Wyświetla ustawione wiadomości dla levelu"),
     SEED_CALL_AMOUNT("seed-call-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
     SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service"),
     SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki"),
@@ -58,4 +61,4 @@ public enum SlashCommands {
     public String getDescription() {
         return description;
     }
-    }
+}
