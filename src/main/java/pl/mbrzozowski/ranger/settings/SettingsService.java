@@ -39,4 +39,8 @@ public class SettingsService {
     public void deleteByKey(String key) {
         settingsRepository.deleteByKey(key);
     }
+
+    public void deleteByKey(@NotNull SettingsKey key) {
+        deleteByKey(key.getKey());
+    }
 }

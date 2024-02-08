@@ -21,7 +21,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
-import pl.mbrzozowski.ranger.stats.ServerStats;
+import pl.mbrzozowski.ranger.stats.ServerStatsService;
 
 import java.util.ArrayList;
 
@@ -35,11 +35,11 @@ public class SlashCommandListener extends ListenerAdapter {
     private final RecruitBlackListService recruitBlackListService;
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
+    private final ServerStatsService serverStatsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
     private final EventService eventService;
     private final RoleService roleService;
-    private final ServerStats serverStats;
     private final ImplCleaner implCleaner;
     private final RankService rankService;
 
@@ -54,9 +54,11 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(ROLE.getName())) {
             roleService.roleEvent(event);
         } else if (name.equals(STEAM_PROFILE.getName())) {
-            serverStats.profile(event);
+            serverStatsService.profile(event);
         } else if (name.equals(STATS.getName())) {
-            serverStats.stats(event);
+            serverStatsService.stats(event);
+        } else if (name.equals(STATS_DATE.getName())) {
+            serverStatsService.setDate(event);
         } else if (name.equals(DICE.getName())) {
             Dice.start(event);
         } else if (name.equals(COIN.getName())) {

@@ -121,18 +121,6 @@ public class ResponseMessage {
                 .queue();
     }
 
-//    public static void youCanCheckStatsOnChannel(@NotNull SlashCommandInteractionEvent event) {
-//        event.reply("You can check your stats on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
-//                .setEphemeral(true)
-//                .queue();
-//    }
-
-//    public static void youCanLinkedYourProfileOnChannel(@NotNull SlashCommandInteractionEvent event) {
-//        event.reply("Use command /profile on channel <#" + CategoryAndChannelID.CHANNEL_STATS + ">")
-//                .setEphemeral(true)
-//                .queue();
-//    }
-
     public static void notConnectedAccount(@NotNull SlashCommandInteractionEvent event) {
         event.getHook().editOriginal("""
                 **If you want check stats you have to link discord account to steam profile via command /profile**

@@ -16,7 +16,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
-import pl.mbrzozowski.ranger.stats.ServerStats;
+import pl.mbrzozowski.ranger.stats.ServerStatsService;
 
 import java.util.ArrayList;
 
@@ -26,6 +26,7 @@ public class GuildListener extends ListenerAdapter {
 
     private final RecruitBlackListService recruitBlackListService;
     private final SlashCommandListener slashCommandListener;
+    private final ServerStatsService serverStatsService;
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
@@ -33,7 +34,6 @@ public class GuildListener extends ListenerAdapter {
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
-    private final ServerStats serverStats;
     private final RankService rankService;
 
     @Override
@@ -52,13 +52,13 @@ public class GuildListener extends ListenerAdapter {
     private void getCommandList(ArrayList<CommandData> commandData) {
         recruitBlackListService.getCommandsList(commandData);
         slashCommandListener.getCommandsData(commandData);
+        serverStatsService.getCommandsList(commandData);
         recruitsService.getCommandsList(commandData);
         giveawayService.getCommandsList(commandData);
         seedCallService.getCommandsList(commandData);
         serverService.getCommandsList(commandData);
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
-        serverStats.getCommandsList(commandData);
         rankService.getCommandsList(commandData);
     }
 

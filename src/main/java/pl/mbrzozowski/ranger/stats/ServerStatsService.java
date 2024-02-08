@@ -2,8 +2,10 @@ package pl.mbrzozowski.ranger.stats;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -18,38 +20,60 @@ import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.settings.SettingsKey;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.*;
 import pl.mbrzozowski.ranger.stats.service.*;
 
 import java.awt.*;
 import java.sql.SQLSyntaxErrorException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 
 @Service
 @Slf4j
-public class ServerStats implements SlashCommand {
+public class ServerStatsService implements SlashCommand {
 
     private final DiscordUserService discordUserService;
+    private final SettingsService settingsService;
     private final PlayersService playersService;
     private final RevivesService revivesService;
     private final DeathsService deathsService;
     private final WoundsService woundsService;
+    private LocalDateTime dateTime;
 
-    public ServerStats(DeathsService deathsService,
-                       DiscordUserService discordUserService,
-                       RevivesService revivesService,
-                       PlayersService playersService,
-                       WoundsService woundsService) {
+    public ServerStatsService(DeathsService deathsService,
+                              DiscordUserService discordUserService,
+                              SettingsService settingsService,
+                              RevivesService revivesService,
+                              PlayersService playersService,
+                              WoundsService woundsService) {
         this.deathsService = deathsService;
         this.discordUserService = discordUserService;
+        this.settingsService = settingsService;
         this.revivesService = revivesService;
         this.playersService = playersService;
         this.woundsService = woundsService;
+        pullDateTime();
+    }
+
+    private void pullDateTime() {
+        Optional<String> optional = settingsService.find(SettingsKey.STATS_DATE_FROM);
+        if (optional.isPresent()) {
+            try {
+                dateTime = LocalDateTime.parse(optional.get());
+            } catch (Exception e) {
+                settingsService.deleteByKey(SettingsKey.STATS_DATE_FROM);
+            }
+
+        }
     }
 
     public void stats(@NotNull SlashCommandInteractionEvent event) {
@@ -94,7 +118,7 @@ public class ServerStats implements SlashCommand {
             if (hasPlayerData(playerStats)) {
                 sendEmbedWithStats(event, userId, playerStats);
             } else {
-                sendEmbedWithNoStats(event, userId, playerStats);
+                ResponseMessage.playerStatsIsNull(event);
             }
         } else {
             ResponseMessage.playerStatsIsNull(event);
@@ -126,91 +150,112 @@ public class ServerStats implements SlashCommand {
         builder.setColor(Color.BLACK);
         builder.setThumbnail(EmbedSettings.THUMBNAIL);
         builder.setTitle(Users.getUserNicknameFromID(userID) + " profile");
-        builder.setDescription("**Profile info:**```yaml\n" + playerStats.getProfileName() + "\n```");
-        builder.addBlankField(false);
+        builder.setDescription("## **Profile info:**\n```yaml\n" + playerStats.getProfileName() + "\n```");
         builder.addField("⚔ K/D", "**" + df.format(playerStats.getKd()) + "**", true);
-        builder.addField("⚔ Kills/Wounds", "**" + df.format(playerStats.getEffectiveness()) + "** effectiveness", true);
+        builder.addField("⚔ K/D " + LocalDateTime.now().withYear(LocalDateTime.now().getYear() - 1).getYear() + "r.",
+                "**" + (playerStats.getKdLastYear() > 0.01 ? df.format(playerStats.getKdLastYear()) : "-") + "**", true);
+        builder.addField("⚔ K/D " + LocalDateTime.now().getYear() + "r.",
+                "**" + (playerStats.getKdCurrentYear() > 0.01 ? df.format(playerStats.getKdCurrentYear()) : "-") + "**", true);
+        builder.addField("⚔ K/D last 7 days", "**" + df.format(playerStats.getKdLast7Days()) + "**", true);
+        builder.addField("⚔ K/D last 30 days", "**" + df.format(playerStats.getKdLast30Days()) + "**", true);
+        builder.addField("⚔ K/D last 90 days", "**" + df.format(playerStats.getKdLast90Days()) + "**", true);
+        builder.addBlankField(false);
         builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
         builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
         builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);
+        builder.addField("⚔ Kills/Wounds", "**" + df.format(playerStats.getEffectiveness()) + "** effectiveness", true);
         builder.addField("⚕ Revives", "**" + playerStats.getRevives() + "** revive(s)", true);
         builder.addField("⚕ Revived", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
-        builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
         builder.addField("\uD83D\uDC9E Weapon", playerStats.getWeapon(), true);
+        builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamKills() + "** teamkill(s)", true);
+        builder.addBlankField(true);
         builder.addBlankField(false);
         builder.addField("Most kills", playerStats.getMostKills(), true);
         builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
-        builder.setFooter("Data from 8.04.2022r.");
+        builder.setFooter("Data from " + getDate());
         event.getHook().editOriginal("<@" + userID + ">").setEmbeds(builder.build()).queue();
         log.info("Embed with stats sent for user(id=" + userID + ")");
     }
 
-    private void sendEmbedWithNoStats(@NotNull SlashCommandInteractionEvent event, String userID, @NotNull PlayerStats playerStats) {
-        DecimalFormat df = new DecimalFormat("0.00");
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.BLACK);
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setTitle(Users.getUserNicknameFromID(userID) + " profile");
-        builder.setDescription("**Profile info:**```yaml\n" + playerStats.getProfileName() + "\n```");
-        builder.addBlankField(false);
-        builder.addField("⚔ K/D", "**0**", true);
-        builder.addField("⚔ Kills/Wounds", "**0** effectiveness", true);
-        builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
-        builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);
-        builder.addField("\uD83E\uDE78 Wounds", "**" + playerStats.getWounds() + "** wound(s)", true);
-        builder.addField("⚕ Revives", "**" + playerStats.getRevives() + "** revive(s)", true);
-        builder.addField("⚕ Revived", "**" + playerStats.getRevivesYou() + "** revive(s)", true);
-        builder.addField("\uD83D\uDEAB TeamKills", "**" + playerStats.getTeamkills() + "** teamkill(s)", true);
-        builder.addField("\uD83D\uDC9E Weapon", playerStats.getWeapon(), true);
-        builder.addBlankField(false);
-        builder.addField("Most kills", "-", true);
-        builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
-        builder.addField("Most revives", playerStats.getMostRevives(), true);
-        builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
-        builder.setFooter("Data from 8.04.2022r.");
-        event.getHook().editOriginal("<@" + userID + ">").setEmbeds(builder.build()).queue();
-        log.info("Embed with no stats sent for user(id=" + userID + ")");
+    @NotNull
+    private String getDate() {
+        return dateTime.getDayOfMonth() + "." + String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear() + "r.";
     }
 
     private @Nullable PlayerStats pullStatsFromDB(String userId) {
         Optional<DiscordUser> userOptional = discordUserService.findByUserId(userId);
         if (userOptional.isPresent()) {
             DiscordUser discordUser = userOptional.get();
-            PlayerStats playerStats = new PlayerStats();
-            playerStats.setSteamID(discordUser.getSteamID());
-            playerStats.setUserDiscordID(discordUser.getUserID());
-
             Optional<Players> steamUsersOptional = playersService.findBySteamId(discordUser.getSteamID());
-            if (steamUsersOptional.isPresent()) {
-                playerStats.setProfileName(steamUsersOptional.get().getLastName());
-            } else {
+            if (steamUsersOptional.isEmpty()) {
                 return null;
             }
-            List<Deaths> deathsList = deathsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
-            List<Revives> revivesList = revivesService.findByReviverOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
-            List<Wounds> woundsList = woundsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
-
-            playerStats.setKills(getKills(deathsList, discordUser.getSteamID()))
-                    .setDeaths(getDeaths(deathsList, discordUser.getSteamID()))
-                    .setWounds(getWounds(woundsList, discordUser.getSteamID()))
-                    .setRevives(getRevives(revivesList, discordUser.getSteamID()))
-                    .setRevivesYou(getRevivesYou(revivesList, discordUser.getSteamID()))
-                    .setTeamkills(getTeamKills(woundsList, discordUser.getSteamID()))
-                    .setWeapon(getWeapons(woundsList, discordUser.getSteamID()))
-                    .setMostKills(getMostKills(deathsList, discordUser.getSteamID()))
-                    .setMostKilledBy(getMostKilledBy(deathsList, discordUser.getSteamID()))
-                    .setMostRevives(getMostRevives(revivesList, discordUser.getSteamID()))
-                    .setMostRevivedBy(getMOstRevivedBy(revivesList, discordUser.getSteamID()))
-                    .setKd()
-                    .setEffectiveness();
-            return playerStats;
+            List<Deaths> deathsList = getDeaths(discordUser);
+            List<Revives> revivesList = getRevives(discordUser);
+            List<Wounds> woundsList = getWounds(discordUser);
+            if (dateTime == null && deathsList.size() > 0) {
+                dateTime = deathsList.get(0).getTime();
+            }
+            return PlayerStats.builder()
+                    .profileName(steamUsersOptional.get().getLastName())
+                    .kills(getKills(deathsList, discordUser.getSteamID()))
+                    .deaths(getDeaths(deathsList, discordUser.getSteamID()))
+                    .wounds(getWounds(woundsList, discordUser.getSteamID()))
+                    .revives(getRevives(revivesList, discordUser.getSteamID()))
+                    .revivesYou(getRevivesYou(revivesList, discordUser.getSteamID()))
+                    .teamKills(getTeamKills(woundsList, discordUser.getSteamID()))
+                    .weapon(getWeapons(woundsList, discordUser.getSteamID()))
+                    .mostKills(getMostKills(deathsList, discordUser.getSteamID()))
+                    .mostKilledBy(getMostKilledBy(deathsList, discordUser.getSteamID()))
+                    .mostRevives(getMostRevives(revivesList, discordUser.getSteamID()))
+                    .mostRevivedBy(getMOstRevivedBy(revivesList, discordUser.getSteamID()))
+                    .kdLast7Days(getKDLast7Days(deathsList, discordUser.getSteamID()))
+                    .kdLast30Days(getKDLast30Days(deathsList, discordUser.getSteamID()))
+                    .kdLast90Days(getKDLast90Days(deathsList, discordUser.getSteamID()))
+                    .kdLastYear(getKDLastYear(deathsList, discordUser.getSteamID()))
+                    .kdCurrentYear(getKDCurrentYear(deathsList, discordUser.getSteamID()))
+                    .build();
         } else {
             return null;
         }
     }
 
+    @NotNull
+    private List<Wounds> getWounds(@NotNull DiscordUser discordUser) {
+        List<Wounds> woundsList;
+        if (dateTime == null) {
+            woundsList = woundsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+        } else {
+            woundsList = woundsService.findByAttackerOrVictimAndTimeAfter(discordUser.getSteamID(), dateTime);
+        }
+        return woundsList;
+    }
+
+    @NotNull
+    private List<Revives> getRevives(@NotNull DiscordUser discordUser) {
+        List<Revives> revivesList;
+        if (dateTime == null) {
+            revivesList = revivesService.findByReviverOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+        } else {
+            revivesList = revivesService.findByReviverOrVictimAndTimeAfter(discordUser.getSteamID(), dateTime);
+        }
+        return revivesList;
+    }
+
+    @NotNull
+    private List<Deaths> getDeaths(@NotNull DiscordUser discordUser) {
+        List<Deaths> deathsList;
+        if (dateTime == null) {
+            deathsList = deathsService.findByAttackerOrVictim(discordUser.getSteamID(), discordUser.getSteamID());
+        } else {
+            deathsList = deathsService.findByAttackerOrVictimAndTimeAfter(discordUser.getSteamID(), dateTime);
+        }
+        return deathsList;
+    }
+
+    @NotNull
     private ArrayList<PlayerCount> getMOstRevivedBy(@NotNull List<Revives> revivesList, String steamID) {
         ArrayList<PlayerCount> playerCounts = new ArrayList<>();
         List<Revives> revivesByVictim = revivesList.stream()
@@ -229,6 +274,7 @@ public class ServerStats implements SlashCommand {
         return playerCounts;
     }
 
+    @NotNull
     private ArrayList<PlayerCount> getMostRevives(@NotNull List<Revives> revivesList, String steamID) {
         ArrayList<PlayerCount> playerCounts = new ArrayList<>();
         List<Revives> revivesByReviver = revivesList.stream()
@@ -247,6 +293,7 @@ public class ServerStats implements SlashCommand {
         return playerCounts;
     }
 
+    @NotNull
     private ArrayList<PlayerCount> getMostKilledBy(@NotNull List<Deaths> deathsList, String steamID) {
         ArrayList<PlayerCount> playerCounts = new ArrayList<>();
         List<Deaths> deathsByVictim = deathsList.stream()
@@ -271,6 +318,7 @@ public class ServerStats implements SlashCommand {
         return playerCounts;
     }
 
+    @NotNull
     private ArrayList<PlayerCount> getMostKills(@NotNull List<Deaths> deathsList, String steamID) {
         ArrayList<PlayerCount> playerCounts = new ArrayList<>();
         List<Deaths> deathsByAttacker = deathsList.stream()
@@ -380,20 +428,126 @@ public class ServerStats implements SlashCommand {
     private int getKills(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
         return deathsList.stream()
                 .filter(deaths -> deaths.getAttacker() != null)
-                .filter(deaths -> deaths.getAttacker().equalsIgnoreCase(steamID))
+                .filter(deaths -> deaths.getAttacker().equals(steamID))
                 .filter(deaths -> {
                     if (deaths.getVictim() != null) {
-                        return !deaths.getAttacker().equalsIgnoreCase(deaths.getVictim());
+                        return !deaths.getAttacker().equals(deaths.getVictim());
                     }
                     return true;
                 })
                 .toList().size();
     }
 
+    private double getKDLastYear(List<Deaths> deathsList, String steamID) {
+        return getKDFromYear(deathsList, steamID, LocalDateTime.now().withYear(LocalDateTime.now().getYear() - 1).getYear());
+    }
+
+    private double getKDCurrentYear(List<Deaths> deathsList, String steamID) {
+        return getKDFromYear(deathsList, steamID, LocalDateTime.now().getYear());
+    }
+
+    private double getKDFromYear(@NotNull List<Deaths> deathsList, String steamID, int year) {
+        double kills = deathsList.stream()
+                .filter(deaths -> deaths.getAttacker() != null)
+                .filter(deaths -> deaths.getAttacker().equals(steamID))
+                .filter(deaths -> {
+                    if (deaths.getVictim() != null) {
+                        return !deaths.getAttacker().equals(deaths.getVictim());
+                    }
+                    return true;
+                })
+                .filter(deaths -> deaths.getTime().isAfter(LocalDateTime.now(ZoneOffset.UTC).withDayOfYear(LocalDateTime.MIN.getDayOfYear()).withYear(year)))
+                .filter(deaths -> deaths.getTime().isBefore(LocalDateTime.now(ZoneOffset.UTC).withDayOfYear(LocalDateTime.MAX.getDayOfYear()).withYear(year)))
+                .toList().size();
+        double death = deathsList.stream()
+                .filter(deaths -> deaths.getVictim() != null)
+                .filter(deaths -> deaths.getVictim().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getAttacker() != null) {
+                        return !deaths.getVictim().equalsIgnoreCase(deaths.getAttacker());
+                    }
+                    return true;
+                })
+                .filter(deaths -> deaths.getTime().isAfter(LocalDateTime.now(ZoneOffset.UTC).withDayOfYear(LocalDateTime.MIN.getDayOfYear()).withYear(year)))
+                .filter(deaths -> deaths.getTime().isBefore(LocalDateTime.now(ZoneOffset.UTC).withDayOfYear(LocalDateTime.MAX.getDayOfYear()).withYear(year)))
+                .toList().size();
+        if (death != 0) {
+            return kills / death;
+        }
+        return 0;
+    }
+
+    private double getKDLast7Days(List<Deaths> deathsList, String steamID) {
+        return getKDLastDays(deathsList, steamID, 7);
+    }
+
+    private double getKDLast30Days(List<Deaths> deathsList, String steamID) {
+        return getKDLastDays(deathsList, steamID, 30);
+    }
+
+    private double getKDLast90Days(List<Deaths> deathsList, String steamID) {
+        return getKDLastDays(deathsList, steamID, 90);
+    }
+
+    private double getKDLastDays(@NotNull List<Deaths> deathsList, String steamID, int days) {
+        double kills = deathsList.stream()
+                .filter(deaths -> deaths.getAttacker() != null)
+                .filter(deaths -> deaths.getAttacker().equals(steamID))
+                .filter(deaths -> {
+                    if (deaths.getVictim() != null) {
+                        return !deaths.getAttacker().equals(deaths.getVictim());
+                    }
+                    return true;
+                })
+                .filter(deaths -> deaths.getTime().isAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(days)))
+                .toList().size();
+        double death = deathsList.stream()
+                .filter(deaths -> deaths.getVictim() != null)
+                .filter(deaths -> deaths.getVictim().equalsIgnoreCase(steamID))
+                .filter(deaths -> {
+                    if (deaths.getAttacker() != null) {
+                        return !deaths.getVictim().equalsIgnoreCase(deaths.getAttacker());
+                    }
+                    return true;
+                })
+                .filter(deaths -> deaths.getTime().isAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(days)))
+                .toList().size();
+        if (death != 0) {
+            return kills / death;
+        }
+        return 0;
+    }
+
+
     @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
                 .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));
         commandData.add(Commands.slash(STATS.getName(), STATS.getDescription()));
+        commandData.add(Commands.slash(STATS_DATE.getName(), STATS_DATE.getDescription())
+                .addOption(OptionType.INTEGER, "day", "Dzień", true)
+                .addOption(OptionType.INTEGER, "month", "Miesiąc", true)
+                .addOption(OptionType.INTEGER, "year", "Rok", true)
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+    }
+
+    public void setDate(@NotNull SlashCommandInteractionEvent event) {
+        int day = Objects.requireNonNull(event.getOption("day")).getAsInt();
+        int month = Objects.requireNonNull(event.getOption("month")).getAsInt();
+        int year = Objects.requireNonNull(event.getOption("year")).getAsInt();
+        try {
+            dateTime = LocalDateTime.now().withDayOfMonth(day).withMonth(month).withYear(year).withHour(0).withMinute(1);
+            if (dateTime.isAfter(LocalDateTime.now().minusDays(7))) {
+                event.reply("Minimum 7 dni!").setEphemeral(true).queue();
+                return;
+            }
+            event.reply("Ustawiona data: " + dateTime.getDayOfMonth() + "." +
+                            String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear())
+                    .setEphemeral(true)
+                    .queue();
+            settingsService.save(SettingsKey.STATS_DATE_FROM, dateTime.toString());
+        } catch (Exception e) {
+            event.reply("Data nieprawidłowa!").setEphemeral(true).queue();
+        }
     }
 }
