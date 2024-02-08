@@ -26,10 +26,10 @@ public class SeedCallExecute extends TimerTask {
         }
         if (players.get(players.size() - 1).getPlayers() == 0) {
             log.debug("No players on server");
+            seedCallService.resetLevels();
             return;
         }
         players.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
-        seedCallService.checkDay();
         seedCallService.analyze(players);
     }
 }

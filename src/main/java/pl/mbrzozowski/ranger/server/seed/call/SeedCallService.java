@@ -36,7 +36,6 @@ public class SeedCallService implements SlashCommand {
     private boolean isEnable = false;
     private Levels level;
     private Timer timer;
-    private boolean isStarting = true;
 
     public SeedCallService(SettingsService settingsService, PlayerCountsService playerCountsService) {
         this.playerCountsService = playerCountsService;
@@ -323,22 +322,6 @@ public class SeedCallService implements SlashCommand {
             default -> throw new UnsupportedOperationException(level + " Not supported");
         }
         settingsService.save(SettingsKey.SEED_CALL_LAST, LocalDateTime.now().getDayOfYear());
-    }
-
-    protected void checkDay() {
-        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LAST);
-        if (optional.isEmpty()) {
-            setLevel(Levels.ONE);
-            return;
-        }
-        if (!optional.get().chars().allMatch(Character::isDigit)) {
-            setLevel(Levels.ONE);
-            return;
-        }
-        if (!isStarting && Integer.parseInt(optional.get()) != LocalDateTime.now().getDayOfYear()) {
-            resetLevels();
-        }
-        isStarting = false;
     }
 
     private void analyzeConditions(@NotNull MessageCall messageCall, List<PlayerCounts> players) {
