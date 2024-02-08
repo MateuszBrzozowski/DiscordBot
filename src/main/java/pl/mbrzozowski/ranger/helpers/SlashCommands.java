@@ -40,10 +40,8 @@ public enum SlashCommands {
     SEED_CALL_AMOUNT("seed-call-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
     SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service"),
     SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki"),
-    TYPE("type", "Typ"),
-    COUNT("count", "Ilość"),
-    LIVE("live", "Ilość"),
-    PING_SQUAD("ping-squad", "Ilość");
+    LEVEL("level", "Level"),
+    COUNT("count", "Ilość");
 
     private final String name;
     private final String description;
@@ -60,4 +58,4 @@ public enum SlashCommands {
     public String getDescription() {
         return description;
     }
-}
+    }

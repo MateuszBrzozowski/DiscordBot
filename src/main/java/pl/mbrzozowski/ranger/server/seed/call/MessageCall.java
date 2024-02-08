@@ -1,56 +1,42 @@
 package pl.mbrzozowski.ranger.server.seed.call;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.SlashCommands;
-import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
 
 import java.util.*;
 
-import static net.dv8tion.jda.api.interactions.commands.Command.Choice;
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.SEED_CALL_AMOUNT;
-
 @Slf4j
-public abstract class MessageCall implements SlashCommand {
+public class MessageCall {
 
+    public static final int MAX_PER_DAY = 4;
     private final static String CHANNEL_ID = "1204551588925018112";
     private final static int MAX_CONDITIONS = 3;
     private final List<Conditions> conditions = new ArrayList<>();
     private final SettingsService settingsService;
     private final SettingsKey settingsKeyPerDay;
-    private final Type type;
-    protected final int MAX_PER_DAY;
+    private final Levels level;
     protected final List<String> messages = new ArrayList<>();
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
 
-    protected MessageCall(int maxPerDay, SettingsService settingsService, SettingsKey settingsKeyPerDay, Type type) {
-        MAX_PER_DAY = maxPerDay;
+    protected MessageCall(SettingsService settingsService, SettingsKey settingsKeyPerDay, Levels level) {
         this.settingsService = settingsService;
         this.settingsKeyPerDay = settingsKeyPerDay;
-        this.type = type;
+        this.level = level;
         pullMessagePerDayCount();
         pullMessagePerDay();
         pullConditions();
-        log.debug("MessageCall created. {}", this);
+        log.info("MessageCall created. {}", this);
     }
-
-    abstract void setMessages();
 
     public int getMessagePerDay() {
         return messagePerDay;
@@ -61,18 +47,15 @@ public abstract class MessageCall implements SlashCommand {
     }
 
     private void pullConditions() {
-        if (type.equals(Type.LIVE)) {
-            setConditions(SettingsKey.SEED_CALL_LIVE_CONDITIONS, "seed.call.live.");
-        } else if (type.equals(Type.SQUAD_MENTION)) {
-            setConditions(SettingsKey.SEED_CALL_SQUAD_CONDITIONS, "seed.call.squad.");
+        if (level.equals(Levels.ONE)) {
+            setConditions(SettingsKey.SEED_CALL_LEVEL_ONE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_ONE.getKey() + ".");
+        } else if (level.equals(Levels.TWO)) {
+            setConditions(SettingsKey.SEED_CALL_LEVEL_TWO_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_TWO.getKey() + ".");
+        } else if (level.equals(Levels.THREE)) {
+            setConditions(SettingsKey.SEED_CALL_LEVEL_THREE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_THREE.getKey() + ".");
+        } else if (level.equals(Levels.FOUR)) {
+            setConditions(SettingsKey.SEED_CALL_LEVEL_FOUR_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_FOUR.getKey() + ".");
         }
-    }
-
-    @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
-        Set<Choice> choiceList = getChoices();
-        commandData.add(getCommand(choiceList)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
     private void setConditions(SettingsKey settingsKey, String keyPrefix) {
@@ -119,14 +102,19 @@ public abstract class MessageCall implements SlashCommand {
         this.conditions.add(condition);
         event.reply("Warunek dodany. Jeżeli " + condition.getPlayersCount() + " graczy przez " +
                 condition.getWithinMinutes() + " minut").setEphemeral(true).queue();
+        log.info("Add conditions {} for level: {}", condition, level.getLevel());
         saveSettings();
     }
 
     private void saveSettings() {
-        if (type.equals(Type.LIVE)) {
-            saveSettings(SettingsKey.SEED_CALL_LIVE_CONDITIONS, "seed.call.live.");
-        } else if (type.equals(Type.SQUAD_MENTION)) {
-            saveSettings(SettingsKey.SEED_CALL_SQUAD_CONDITIONS, "seed.call.squad.");
+        if (level.equals(Levels.ONE)) {
+            saveSettings(SettingsKey.SEED_CALL_LEVEL_ONE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_ONE.getKey() + ".");
+        } else if (level.equals(Levels.TWO)) {
+            saveSettings(SettingsKey.SEED_CALL_LEVEL_TWO_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_TWO.getKey() + ".");
+        } else if (level.equals(Levels.THREE)) {
+            saveSettings(SettingsKey.SEED_CALL_LEVEL_THREE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_THREE.getKey() + ".");
+        } else if (level.equals(Levels.FOUR)) {
+            saveSettings(SettingsKey.SEED_CALL_LEVEL_FOUR_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_FOUR.getKey() + ".");
         }
     }
 
@@ -170,13 +158,13 @@ public abstract class MessageCall implements SlashCommand {
         }
     }
 
-    private void replySuccessfully(@NotNull SlashCommandInteractionEvent event, @NotNull Conditions settings) {
-        event.reply("Usunięto warunek: Jeżeli " + settings.getPlayersCount() +
-                        " graczy przez " + settings.getWithinMinutes() + " minut")
+    private void replySuccessfully(@NotNull SlashCommandInteractionEvent event, @NotNull Conditions conditions) {
+        event.reply("Usunięto warunek: Jeżeli " + conditions.getPlayersCount() +
+                        " graczy przez " + conditions.getWithinMinutes() + " minut")
                 .setEphemeral(true)
                 .queue();
         saveSettings();
-        log.info("Condition {} removed", settings);
+        log.info("Remove conditions {} for level: {}", conditions, level);
     }
 
     protected void pullMessagePerDay() {
@@ -198,41 +186,20 @@ public abstract class MessageCall implements SlashCommand {
     }
 
     private void pullMessagePerDayCount() {
-        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LIVE_COUNT);
+        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT);
         if (optional.isEmpty()) {
-            settingsService.save(SettingsKey.SEED_CALL_LIVE_COUNT, 0);
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, 0);
             this.messagePerDayCount = 0;
             return;
         }
         if (!optional.get().chars().allMatch(Character::isDigit)) {
-            settingsService.save(SettingsKey.SEED_CALL_LIVE_COUNT, 0);
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, 0);
             this.messagePerDayCount = 0;
             return;
         }
         this.messagePerDayCount = Integer.parseInt(optional.get());
     }
 
-    @NotNull
-    private Set<Choice> getChoices() {
-        Set<Choice> choices = new HashSet<>();
-        for (int i = 0; i <= 5; i++) {
-            Choice choice = new Choice(String.valueOf(i), i);
-            choices.add(choice);
-        }
-        return choices;
-    }
-
-    protected CommandData getCommand(Set<Choice> choiceList) {
-        return Commands.slash(SEED_CALL_AMOUNT.getName(), SEED_CALL_AMOUNT.getDescription())
-                .addOptions(new OptionData(OptionType.STRING, SlashCommands.TYPE.getName(), "Do którego typu chcesz zmienić liczbę wiadomości")
-                        .addChoice("Live", SlashCommands.LIVE.getName())
-                        .addChoice("Ping Squad", SlashCommands.PING_SQUAD.getName())
-                        .setRequired(true))
-                .addOptions(new OptionData(OptionType.INTEGER, SlashCommands.COUNT.getName(), "Ile razy na dzień. 0 - OFF")
-                        .addChoices(choiceList)
-                        .setRequired(true))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL));
-    }
 
     void setMaxAmount(@NotNull SlashCommandInteractionEvent event) {
         int count = Objects.requireNonNull(event.getOption("count")).getAsInt();
@@ -241,24 +208,21 @@ public abstract class MessageCall implements SlashCommand {
             log.error("Option incorrect - {}", count);
             return;
         }
+        messagePerDay = count;
         settingsService.save(settingsKeyPerDay, count);
         event.reply("Ustawiono maksymalną ilość wiadomości - " + count).setEphemeral(true).queue();
-        log.info("Set setting property - {}={}", settingsKeyPerDay, count);
+        log.info("Set max amount {} for level: {}", count, level.getLevel());
     }
 
     public String getConditions() {
         StringBuilder builder = new StringBuilder();
-        if (type.equals(Type.LIVE)) {
-            builder.append("Warunki dla wiadomości LIVE\n");
-        } else if (type.equals(Type.SQUAD_MENTION)) {
-            builder.append("Warunki dla wiadomości zo oznaczeniem roli Squad\n");
-        }
+        builder.append("**Warunki dla levelu ").append(level.getLevel()).append(":**\n");
         if (conditions.size() == 0) {
-            builder.append("Brak warunków\n");
+            builder.append("> Brak warunków\n");
             return builder.toString();
         }
         for (Conditions condition : conditions) {
-            builder.append("Jeżeli ").append(condition.getPlayersCount()).append(" graczy przez ").append(condition.getWithinMinutes())
+            builder.append("- Jeżeli ").append(condition.getPlayersCount()).append(" graczy przez ").append(condition.getWithinMinutes())
                     .append(" minut\n");
         }
         return builder.toString();
@@ -278,10 +242,14 @@ public abstract class MessageCall implements SlashCommand {
 
     public void addMessagePerDayCount() {
         this.messagePerDayCount++;
-        if (type.equals(Type.LIVE)) {
-            settingsService.save(SettingsKey.SEED_CALL_LIVE_COUNT, this.messagePerDayCount);
-        } else if (type.equals(Type.SQUAD_MENTION)) {
-            settingsService.save(SettingsKey.SEED_CALL_SQUAD_COUNT, this.messagePerDayCount);
+        if (level.equals(Levels.ONE)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, this.messagePerDayCount);
+        } else if (level.equals(Levels.TWO)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_TWO_COUNT, this.messagePerDayCount);
+        } else if (level.equals(Levels.THREE)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_THREE_COUNT, this.messagePerDayCount);
+        } else if (level.equals(Levels.FOUR)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_FOUR_COUNT, this.messagePerDayCount);
         }
     }
 
@@ -304,10 +272,14 @@ public abstract class MessageCall implements SlashCommand {
 
     public void resetMessageCount() {
         messagePerDayCount = 0;
-        if (type.equals(Type.LIVE)) {
-            settingsService.save(SettingsKey.SEED_CALL_LIVE_COUNT, 0);
-        } else if (type.equals(Type.SQUAD_MENTION)) {
-            settingsService.save(SettingsKey.SEED_CALL_SQUAD_COUNT, 0);
+        if (level.equals(Levels.ONE)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, 0);
+        } else if (level.equals(Levels.TWO)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_TWO_COUNT, 0);
+        } else if (level.equals(Levels.THREE)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_THREE_COUNT, 0);
+        } else if (level.equals(Levels.FOUR)) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL_FOUR_COUNT, 0);
         }
     }
 
@@ -316,15 +288,10 @@ public abstract class MessageCall implements SlashCommand {
         return "MessageCall{" +
                 "conditions=" + conditions +
                 ", settingsKeyPerDay=" + settingsKeyPerDay +
-                ", type=" + type +
+                ", type=" + level +
                 ", MAX_PER_DAY=" + MAX_PER_DAY +
                 ", messagePerDayCount=" + messagePerDayCount +
                 ", messagePerDay=" + messagePerDay +
                 '}';
-    }
-
-    enum Type {
-        SQUAD_MENTION,
-        LIVE
     }
 }

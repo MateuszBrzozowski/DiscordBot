@@ -11,15 +11,21 @@ public enum SettingsKey {
     RECRUIT_DELETE_CHANNEL_DELAY("recruit.channel.delete.after"),
     EVENT_DELETE_CHANNEL_DELAY("event.channel.delete.after"),
     EVENT_DELETE_CHANNEL_TACTICAL_DELAY("event.channel.tactical.delete.after"),
-    SEED_CALL_LIVE("seed.call.live"),
-    SEED_CALL_LIVE_COUNT("seed.call.live.count"),
-    SEED_CALL_SQUAD("seed.call.squad"),
-    SEED_CALL_SQUAD_COUNT("seed.call.squad.count"),
+    SEED_CALL_LEVEL_ONE("seed.call.level.1"),
+    SEED_CALL_LEVEL_TWO("seed.call.level.2"),
+    SEED_CALL_LEVEL_THREE("seed.call.level.3"),
+    SEED_CALL_LEVEL_FOUR("seed.call.level.4"),
+    SEED_CALL_LEVEL_ONE_COUNT("seed.call.level.1.count"),
+    SEED_CALL_LEVEL_TWO_COUNT("seed.call.level.2.count"),
+    SEED_CALL_LEVEL_THREE_COUNT("seed.call.level.3.count"),
+    SEED_CALL_LEVEL_FOUR_COUNT("seed.call.level.4.count"),
     SEED_CALL("seed.call.enable"),
-    SEED_CALL_LIVE_CONDITIONS("seed.call.live.conditions"),
-    SEED_CALL_SQUAD_CONDITIONS("seed.call.squad.conditions"),
+    SEED_CALL_LEVEL_ONE_CONDITIONS("seed.call.level.1.conditions"),
+    SEED_CALL_LEVEL_TWO_CONDITIONS("seed.call.level.2.conditions"),
+    SEED_CALL_LEVEL_THREE_CONDITIONS("seed.call.level.3.conditions"),
+    SEED_CALL_LEVEL_FOUR_CONDITIONS("seed.call.level.4.conditions"),
     SEED_CALL_LAST("seed.call.last"),
-    SEED_CALL_MODE("seed.call.mode");
+    SEED_CALL_LEVEL("seed.call.level");
 
     private final String key;
 
