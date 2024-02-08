@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.server.seed.call;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
 import pl.mbrzozowski.ranger.helpers.ComponentId;
@@ -36,6 +38,8 @@ public class MessageCall {
     protected List<Message> messages = new ArrayList<>();
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
+    @Nullable
+    private String roleId;
 
     protected MessageCall(SettingsService settingsService, MessageService messageService, SettingsKey settingsKeyPerDay, Levels level) {
         this.messageService = messageService;
@@ -46,6 +50,7 @@ public class MessageCall {
         pullMessagePerDay();
         pullConditions();
         pullMessages();
+        pullRoleId();
         log.info("MessageCall created. {}", this);
     }
 
@@ -176,6 +181,11 @@ public class MessageCall {
                 .queue();
         saveSettings();
         log.info("Remove conditions {} for level: {}", conditions, level);
+    }
+
+    private void pullRoleId() {
+        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role");
+        optional.ifPresent(s -> this.roleId = s);
     }
 
     private void pullMessages() {
@@ -371,6 +381,12 @@ public class MessageCall {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setDescription(getMessagesAsDescription());
+        if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
+            Role role = DiscordBot.getJda().getRoleById(roleId);
+            if (role != null) {
+                builder.addField("", role.getAsMention(), false);
+            }
+        }
         if (messages.size() > 10) {
             builder.setFooter("Strona 1");
             event.replyEmbeds(builder.build()).setComponents(ActionRow.of(getButtons())).setEphemeral(true).queue();
@@ -422,6 +438,12 @@ public class MessageCall {
             }
         }
         builder.setDescription(getMessagesAsDescription(page));
+        if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
+            Role role = DiscordBot.getJda().getRoleById(roleId);
+            if (role != null) {
+                builder.addField("", role.getAsMention(), false);
+            }
+        }
         builder.setFooter("Strona " + page);
         event.getMessage().editMessageEmbeds(builder.build()).queue();
     }
@@ -433,5 +455,15 @@ public class MessageCall {
             builder.append("ID: ").append(messages.get(i).getId()).append(" - ").append(messages.get(i).getMessage()).append("\n");
         }
         return builder.toString();
+    }
+
+    public void setRole(String roleId) {
+        this.roleId = roleId;
+        settingsService.save(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role", roleId);
+    }
+
+    public void deleteRole() {
+        this.roleId = null;
+        settingsService.deleteByKey(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role");
     }
 }

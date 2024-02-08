@@ -12,8 +12,8 @@ public class SettingsService {
 
     private final SettingsRepository settingsRepository;
 
-    public void save(SettingsKey key, String value) {
-        settingsRepository.save(key, value);
+    public void save(@NotNull SettingsKey key, String value) {
+        save(key.getKey(), value);
     }
 
     public void save(@NotNull SettingsKey key, int value) {
@@ -21,7 +21,11 @@ public class SettingsService {
     }
 
     public void save(String key, int value) {
-        settingsRepository.save(key, String.valueOf(value));
+        save(key, String.valueOf(value));
+    }
+
+    public void save(String key, String value) {
+        settingsRepository.save(key, value);
     }
 
     public Optional<String> find(@NotNull SettingsKey key) {
@@ -30,5 +34,9 @@ public class SettingsService {
 
     public Optional<String> find(String key) {
         return settingsRepository.find(key);
+    }
+
+    public void deleteByKey(String key) {
+        settingsRepository.deleteByKey(key);
     }
 }

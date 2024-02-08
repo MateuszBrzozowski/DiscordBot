@@ -43,6 +43,9 @@ public enum SlashCommands {
     SEED_CALL_AMOUNT("seed-call-ilość", "Maksymalna ilość wiadomości na dzień o Live. 0 - wyłącza."),
     SEED_CALL_ENABLE("seed-call", "Włącza lub wyłącza seed call service"),
     SEED_CALL_CONDITIONS_INFO("seed-call-warunki", "Wyświetla istniejące warunki"),
+    SEED_CALL_ROLE_ADD("seed-call-ustaw-role", "Dodaj role ID dla levelu którą mam oznaczyć"),
+    SEED_CALL_ROLE_REMOVE("seed-call-usuń-role", "Usuwa role z levelu"),
+    ROLE_ID("role-id", "ID Roli"),
     LEVEL("level", "Level"),
     COUNT("count", "Ilość");
 

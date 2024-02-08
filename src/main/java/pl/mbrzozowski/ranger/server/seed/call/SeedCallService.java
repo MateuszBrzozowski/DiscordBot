@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.server.seed.call;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
@@ -194,6 +196,19 @@ public class SeedCallService implements SlashCommand {
         commandData.add(
                 Commands.slash(SEED_CALL_MESSAGE_INFO.getName(), SEED_CALL_MESSAGE_INFO.getDescription())
                         .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Dla którego levelu chcesz wyświetlić ustawione wiadomości.")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_ROLE_ADD.getName(), SEED_CALL_ROLE_ADD.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), SEED_CALL_ROLE_ADD.getDescription())
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .addOption(OptionType.STRING, ROLE_ID.getName(), ROLE_ID.getDescription(), true)
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_ROLE_REMOVE.getName(), SEED_CALL_ROLE_REMOVE.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), SEED_CALL_ROLE_REMOVE.getDescription())
                                 .addChoices(getChoicesForLevels())
                                 .setRequired(true))
                         .setDefaultPermissions(defaultMemberPermissions));
@@ -436,6 +451,24 @@ public class SeedCallService implements SlashCommand {
         event.deferEdit().queue();
         messageCalls[level - 1].buttonClick(event);
 
+    }
+
+    public void setRole(@NotNull SlashCommandInteractionEvent event) {
+        String roleId = Objects.requireNonNull(event.getOption(ROLE_ID.getName())).getAsString();
+        Role role = DiscordBot.getJda().getRoleById(roleId);
+        if (role == null) {
+            event.reply("Podana rola nie istnieje").setEphemeral(true).queue();
+            return;
+        }
+        int level = Objects.requireNonNull(event.getOption(LEVEL.getName())).getAsInt();
+        messageCalls[level - 1].setRole(roleId);
+        event.reply("Rola ustawiona dla levelu " + level).setEphemeral(true).queue();
+    }
+
+    public void deleteRole(@NotNull SlashCommandInteractionEvent event) {
+        int level = Objects.requireNonNull(event.getOption(LEVEL.getName())).getAsInt();
+        messageCalls[level - 1].deleteRole();
+        event.reply("Rola usunięta dla levelu " + level).setEphemeral(true).queue();
     }
 }
 
