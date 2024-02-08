@@ -26,7 +26,6 @@ import java.util.*;
 public class MessageCall {
 
     public static final int MAX_PER_DAY = 4;
-    private final static String CHANNEL_ID = "1204551588925018112";
     private final static int MAX_CONDITIONS = 3;
     private final static int MAX_MESSAGES = 50;
     private final static int LENGTH_MESSAGE = 400;
@@ -51,7 +50,7 @@ public class MessageCall {
         pullConditions();
         pullMessages();
         pullRoleId();
-        log.info("MessageCall created. {}", this);
+        log.debug("MessageCall created. {}", this);
     }
 
     public int getMessagePerDay() {
@@ -278,7 +277,7 @@ public class MessageCall {
         }
     }
 
-    public void sendMessage() {
+    public void sendMessage(String channelId) {
         if (messagePerDayCount >= messagePerDay) {
             log.info("Max message per day on this level");
             return;
@@ -290,7 +289,7 @@ public class MessageCall {
             log.warn("Null guild");
             return;
         }
-        TextChannel textChannel = guild.getTextChannelById(CHANNEL_ID);
+        TextChannel textChannel = guild.getTextChannelById(channelId);
         if (textChannel == null) {
             log.warn("Null channel");
             return;

@@ -25,7 +25,8 @@ public enum SettingsKey {
     SEED_CALL_LEVEL_THREE_CONDITIONS("seed.call.level.3.conditions"),
     SEED_CALL_LEVEL_FOUR_CONDITIONS("seed.call.level.4.conditions"),
     SEED_CALL_LAST("seed.call.last"),
-    SEED_CALL_LEVEL("seed.call.level");
+    SEED_CALL_LEVEL("seed.call.level"),
+    SEED_CALL_CHANNEL_ID("seed.call.channel");
 
     private final String key;
 

@@ -3,6 +3,7 @@ package pl.mbrzozowski.ranger.server.seed.call;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -32,11 +33,12 @@ import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL_LEVEL;
 @Service
 public class SeedCallService implements SlashCommand {
 
-    private final PlayerCountsService playerCountsService;
-    private final MessageService messageService;
-    private final SettingsService settingsService;
     private final MessageCall[] messageCalls = new MessageCall[4];
+    private final PlayerCountsService playerCountsService;
+    private final SettingsService settingsService;
+    private final MessageService messageService;
     private boolean isEnable = false;
+    private String channelId = "";
     private Levels level;
     private Timer timer;
 
@@ -48,6 +50,7 @@ public class SeedCallService implements SlashCommand {
         pullOnOff();
         pullLevels();
         pullLast();
+        pullChannelId();
     }
 
     public void run() {
@@ -114,6 +117,14 @@ public class SeedCallService implements SlashCommand {
         for (int i = 0; i < messageCalls.length; i++) {
             messageCalls[i] = levelFactory.getLevelOfMessageCall(messageService, levels[i], settingsService);
         }
+    }
+
+    private void pullChannelId() {
+        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_CHANNEL_ID);
+        optional.ifPresent(s -> {
+            this.channelId = s;
+            log.info("Seed call service: Channel ID set {}", s);
+        });
     }
 
     private void pullLevels() {
@@ -223,6 +234,9 @@ public class SeedCallService implements SlashCommand {
                                 .setRequired(true))
                         .setDefaultPermissions(defaultMemberPermissions));
         commandData.add(Commands.slash(SEED_CALL_CONDITIONS_INFO.getName(), SEED_CALL_CONDITIONS_INFO.getDescription())
+                .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(Commands.slash(SEED_CALL_CHANNEL.getName(), SEED_CALL_CHANNEL.getDescription())
+                .addOption(OptionType.STRING, "id", "Channel ID", true)
                 .setDefaultPermissions(defaultMemberPermissions));
     }
 
@@ -387,7 +401,7 @@ public class SeedCallService implements SlashCommand {
 
     private void analyzeConditions(@NotNull MessageCall messageCall, List<PlayerCounts> players) {
         if (messageCall.analyzeConditions(players)) {
-            messageCall.sendMessage();
+            messageCall.sendMessage(channelId);
         } else {
             log.info("Any conditions not fulfilled");
         }
@@ -478,6 +492,20 @@ public class SeedCallService implements SlashCommand {
         int level = Objects.requireNonNull(event.getOption(LEVEL.getName())).getAsInt();
         messageCalls[level - 1].deleteRole();
         event.reply("Rola usunięta dla levelu " + level).setEphemeral(true).queue();
+    }
+
+    public void setChannel(@NotNull SlashCommandInteractionEvent event) {
+        String channelId = Objects.requireNonNull(event.getOption("id")).getAsString();
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
+        if (textChannel == null) {
+            event.reply("Taki kanał nie istnieje.").setEphemeral(true).queue();
+            log.info("Text channel not exists {}", channelId);
+            return;
+        }
+        this.channelId = channelId;
+        settingsService.save(SettingsKey.SEED_CALL_CHANNEL_ID, channelId);
+        event.reply("Kanał *" + textChannel.getName() + "* ustawiony.").setEphemeral(true).queue();
+        log.info("Text channel set: {}", textChannel);
     }
 }
 
