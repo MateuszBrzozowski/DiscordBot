@@ -291,7 +291,14 @@ public class MessageCall {
             log.warn("Null channel");
             return;
         }
-        textChannel.sendMessage(messages.get(nextInt).getMessage()).queue();
+        StringBuilder builder = new StringBuilder();
+        if (roleId != null) {
+            Role role = guild.getRoleById(roleId);
+            if (role != null) {
+                builder.append(role.getAsMention());
+            }
+        }
+        textChannel.sendMessage(builder.append(" ").append(messages.get(nextInt).getMessage())).queue();
         log.info("Sent seed call message");
     }
 
