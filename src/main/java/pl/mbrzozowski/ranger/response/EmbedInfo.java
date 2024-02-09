@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,8 @@ import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class EmbedInfo extends EmbedCreator {
@@ -53,8 +56,19 @@ public class EmbedInfo extends EmbedCreator {
         builder.setTitle("Kanał zamknięty");
         builder.setDescription("Kanał zamknięty przez " + signature + ".");
         channel.sendMessageEmbeds(builder.build())
-                .setActionRow(Button.danger(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL, "Usuń kanał"))
+                .setComponents(ActionRow.of(getButtons(signature)))
+                .setActionRow()
                 .queue();
+    }
+
+    @NotNull
+    private static List<Button> getButtons(@NotNull String signature) {
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(Button.danger(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL, "Usuń kanał"));
+        if (signature.equalsIgnoreCase("Ranger - brak aktywności")) {
+            buttons.add(Button.success(ComponentId.SERVER_SERVICE_OPEN_NO_CLOSE, "Otwórz i nie zamykaj automatycznie"));
+        }
+        return buttons;
     }
 
     public static void confirmCloseChannel(@NotNull ButtonInteractionEvent event) {

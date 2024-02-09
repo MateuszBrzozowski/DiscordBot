@@ -11,7 +11,8 @@ public final class ComponentId {
     public static final String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
     public static final String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;
     public static final String REMOVE_RECRUIT_CHANNEL = "removeRecruitChannel" + SUFFIX;
-    public static final String REMOVE_SERVER_SERVICE_CHANNEL = "removeServerServiceChannel" + SUFFIX;
+    public static final String REMOVE_SERVER_SERVICE_CHANNEL = "SS_001" + SUFFIX;
+    public static final String SERVER_SERVICE_OPEN_NO_CLOSE = "SS_002" + SUFFIX;
     public static final String REMOVE_YES = "removeChannelYes" + SUFFIX;
     public static final String REMOVE_NO = "removeChannelNo" + SUFFIX;
     public static final String SEED_ROLE = "seedrole" + SUFFIX;

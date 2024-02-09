@@ -25,7 +25,6 @@ import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
-import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,12 +39,10 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.SERVER_SERVICE_DELETE_
 public class ServerService implements SlashCommand {
 
     private final ClientRepository clientRepository;
-    private final SettingsService settingsService;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
 
-    public ServerService(ClientRepository clientRepository, SettingsService settingsService) {
+    public ServerService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
-        this.settingsService = settingsService;
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, @NotNull ButtonClickType buttonType) {
@@ -88,6 +85,32 @@ public class ServerService implements SlashCommand {
                 clientCloseChannelSave(client);
             }
         }
+    }
+
+    public void openChannel(Client client) {
+        JDA jda = DiscordBot.getJda();
+        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        if (guild != null) {
+            TextChannel textChannel = guild.getTextChannelById(client.getChannelId());
+            Member member = guild.getMemberById(client.getUserId());
+            if (textChannel != null) {
+                if (member != null) {
+                    textChannel
+                            .getManager()
+                            .putPermissionOverride(member, permissions, null)
+                            .queue(unused -> log.info("{} - Open channel - permission override for member:{}", textChannel, member));
+                }
+                clientOpenChannelSave(client);
+            }
+        }
+    }
+
+    private void clientOpenChannelSave(@NotNull Client client) {
+        client.setAutoClose(false);
+        client.setIsClose(false);
+        client.setCloseTimestamp(null);
+        clientRepository.save(client);
+        log.info("Client=({}) channel opened", client);
     }
 
     private void clientCloseChannelSave(@NotNull Client client) {
@@ -188,5 +211,17 @@ public class ServerService implements SlashCommand {
         commandData.add(Commands.slash(SERVER_SERVICE_CLOSE_CHANNEL.getName(), SERVER_SERVICE_CLOSE_CHANNEL.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
+    }
+
+    public void openNoClose(@NotNull ButtonInteractionEvent event) {
+        String channelId = event.getChannel().getId();
+        Optional<Client> clientOptional = findByChannelId(channelId);
+        if (clientOptional.isEmpty()) {
+            event.deferEdit().queue();
+            return;
+        }
+        openChannel(clientOptional.get());
+        event.deferEdit().queue();
+        event.getMessage().delete().queue();
     }
 }

@@ -113,6 +113,8 @@ public class ButtonClickListener extends ListenerAdapter {
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
             deleteMessageAfterButtonInteraction(event);
             EmbedInfo.confirmRemoveChannel(event.getChannel().asTextChannel());
+        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_SERVER_SERVICE_CHANNEL)) {
+            serverService.openNoClose(event);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_YES)) {
             removeChannelDB(event, isAdmin);
         } else if (event.getComponentId().equalsIgnoreCase(ComponentId.REMOVE_NO)) {

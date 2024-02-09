@@ -28,6 +28,7 @@ public class ServerServiceAutoClose extends CleanerChannel {
         log.info("Auto close channels server service init");
         List<Client> clients = serverService.findAll();
         clients = clients.stream()
+                .filter(Client::getAutoClose)
                 .filter(client -> !client.getIsClose() && client.getCloseTimestamp() == null)
                 .toList();
         for (Client client : clients) {

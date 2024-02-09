@@ -156,9 +156,12 @@ public class ServerStatsService implements SlashCommand {
                 "**" + (playerStats.getKdLastYear() > 0.01 ? df.format(playerStats.getKdLastYear()) : "-") + "**", true);
         builder.addField("⚔ K/D " + LocalDateTime.now().getYear() + "r.",
                 "**" + (playerStats.getKdCurrentYear() > 0.01 ? df.format(playerStats.getKdCurrentYear()) : "-") + "**", true);
-        builder.addField("⚔ K/D last 7 days", "**" + df.format(playerStats.getKdLast7Days()) + "**", true);
-        builder.addField("⚔ K/D last 30 days", "**" + df.format(playerStats.getKdLast30Days()) + "**", true);
-        builder.addField("⚔ K/D last 90 days", "**" + df.format(playerStats.getKdLast90Days()) + "**", true);
+        builder.addField("⚔ K/D last 7 days",
+                "**" + (playerStats.getKdLast7Days() > 0.01 ? df.format(playerStats.getKdLast7Days()) : "-") + "**", true);
+        builder.addField("⚔ K/D last 30 days",
+                "**" + (playerStats.getKdLast30Days() > 0.01 ? df.format(playerStats.getKdLast30Days()) : "-") + "**", true);
+        builder.addField("⚔ K/D last 90 days",
+                "**" + (playerStats.getKdLast90Days() > 0.01 ? df.format(playerStats.getKdLast90Days()) : "-") + "**", true);
         builder.addBlankField(false);
         builder.addField("\uD83D\uDDE1 Kills", "**" + playerStats.getKills() + "** kill(s)", true);
         builder.addField("⚰ Deaths", "**" + playerStats.getDeaths() + "** death(s)", true);

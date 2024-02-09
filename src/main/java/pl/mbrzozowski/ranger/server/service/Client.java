@@ -23,6 +23,8 @@ public class Client {
     @Column(length = 1000)
     private String userName;
     private Boolean isClose = false;
+    @Column(columnDefinition = "tinyint(1) default 1")
+    private Boolean autoClose = true;
     @Nullable
     private LocalDateTime closeTimestamp;
 }
