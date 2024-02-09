@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
-import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.util.ArrayList;
 
@@ -17,8 +16,7 @@ class ServerServiceTest {
     @BeforeEach
     void beforeEach() {
         clientRepository = Mockito.mock(ClientRepository.class);
-        SettingsService settingsService = Mockito.mock(SettingsService.class);
-        serverService = new ServerService(clientRepository, settingsService);
+        serverService = new ServerService(clientRepository);
     }
 
     @Test
@@ -31,7 +29,7 @@ class ServerServiceTest {
     @Test
     void userHasActiveReport_UserHasCloseChannel_ReturnFalse() {
         ArrayList<Client> clients = new ArrayList<>();
-        clients.add(new Client(null, "123", null, null, true, null));
+        clients.add(new Client(null, "123", null, null, true, true, null));
         Mockito.when(clientRepository.findByUserId("123")).thenReturn(clients);
         Assertions.assertFalse(serverService.userHasActiveReport("123"));
     }
@@ -39,7 +37,7 @@ class ServerServiceTest {
     @Test
     void userHasActiveReport_UserHasOpenChannel_ReturnTrue() {
         ArrayList<Client> clients = new ArrayList<>();
-        clients.add(new Client(null, "123", null, null, false, null));
+        clients.add(new Client(null, "123", null, null, false, true, null));
         Mockito.when(clientRepository.findByUserId("123")).thenReturn(clients);
         Assertions.assertTrue(serverService.userHasActiveReport("123"));
     }
@@ -47,8 +45,8 @@ class ServerServiceTest {
     @Test
     void userHasActiveReport_UserHasOpenAndCloseChannel_ReturnTrue() {
         ArrayList<Client> clients = new ArrayList<>();
-        clients.add(new Client(null, "123", null, null, false, null));
-        clients.add(new Client(null, "123", null, null, true, null));
+        clients.add(new Client(null, "123", null, null, false, true, null));
+        clients.add(new Client(null, "123", null, null, true, true, null));
         Mockito.when(clientRepository.findByUserId("123")).thenReturn(clients);
         Assertions.assertTrue(serverService.userHasActiveReport("123"));
     }
