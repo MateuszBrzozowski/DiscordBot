@@ -25,6 +25,7 @@ import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
@@ -42,7 +43,7 @@ import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
 @Service
 public class EventService implements SlashCommand {
 
-    private static final int MAX_EVENTS = 25;
+    private static final int MAX_ACTIVE_EVENTS = 25;
     private final UsersReminderService usersReminderService;
     private final EventRepository eventRepository;
     private final Timers timers;
@@ -131,11 +132,11 @@ public class EventService implements SlashCommand {
 
     private void createEventChannel(final EventRequest eventRequest) {
         log.info("Creating new channel");
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             throw new NullPointerException("Guild by RangersPL is null");
         }
-        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_EVENT_ID);
+        Category category = RangersGuild.getCategory(RangersGuild.CategoryId.EVENT);
         if (category == null) {
             throw new NullPointerException("Category by Event Id is null");
         }
@@ -465,9 +466,13 @@ public class EventService implements SlashCommand {
         }
     }
 
-    public boolean isMaxEvents() {
-        List<Event> all = findAll();
-        return all.size() >= MAX_EVENTS;
+    public boolean isMaxActiveEvents() {
+        List<Event> all = findByIsActive();
+        return all.size() >= MAX_ACTIVE_EVENTS;
+    }
+
+    public boolean isSpaceInCategory() {
+        return RangersGuild.isSpaceInCategory(RangersGuild.CategoryId.EVENT);
     }
 
     @Override

@@ -3,8 +3,7 @@ package pl.mbrzozowski.ranger.model;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 
 @Service
 public class BotWriter {
@@ -14,7 +13,7 @@ public class BotWriter {
 
     public void sendMsg(String msg) {
         isActive = false;
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             TextChannel textChannel = guild.getTextChannelById(channelID);
             if (textChannel != null) {

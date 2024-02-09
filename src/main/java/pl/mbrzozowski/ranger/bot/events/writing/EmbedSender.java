@@ -3,7 +3,7 @@ package pl.mbrzozowski.ranger.bot.events.writing;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.helpers.Commands;
+import pl.mbrzozowski.ranger.guild.Commands;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 
 @Slf4j

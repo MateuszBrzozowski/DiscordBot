@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.Commands;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.Commands;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.server.service.ServerService;
@@ -49,7 +49,7 @@ public class ServerServiceCmd extends Proccess {
         if (textChannel != null) {
             Category parentCategory = textChannel.getParentCategory();
             if (parentCategory != null) {
-                return parentCategory.getId().equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER);
+                return RangersGuild.compareCategoryId(parentCategory.getId(), RangersGuild.CategoryId.SERVER);
             }
         }
         return false;

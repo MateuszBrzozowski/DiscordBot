@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.StringProvider;
 import pl.mbrzozowski.ranger.helpers.Users;

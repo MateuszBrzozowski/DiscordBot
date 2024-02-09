@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
@@ -614,12 +616,7 @@ public class GiveawayService implements SlashCommand {
 
     @NotNull
     private static String getLinkToGiveaway(@NotNull Giveaway giveaway) {
-        return "https://discord.com/channels/" +
-                CategoryAndChannelID.RANGERSPL_GUILD_ID +
-                "/" +
-                giveaway.getChannelId() +
-                "/" +
-                giveaway.getMessageId();
+        return RangersGuild.getLinkToMessage(giveaway.getChannelId(), giveaway.getMessageId());
     }
 
     public void fixEmbed(@NotNull SlashCommandInteractionEvent event) {

@@ -1,12 +1,12 @@
-package pl.mbrzozowski.ranger.helpers;
+package pl.mbrzozowski.ranger.guild;
 
 public final class ComponentId {
 
     public static final String SUFFIX = "test";
 
     //ButtonClick
-    public static final String NEW_RECRUT = "newRecrut" + SUFFIX;
-    public static final String NEW_RECRUT_CONFIRM = "recrutY" + SUFFIX;
+    public static final String NEW_RECRUIT = "newRecrut" + SUFFIX;
+    public static final String NEW_RECRUIT_CONFIRM = "recrutY" + SUFFIX;
     public static final String SERVER_SERVICE_REPORT = "Report" + SUFFIX;
     public static final String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
     public static final String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;

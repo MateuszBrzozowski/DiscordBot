@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.helpers;
+package pl.mbrzozowski.ranger.guild;
 
 public final class Commands {
 

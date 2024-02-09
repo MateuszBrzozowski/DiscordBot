@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 
 @Slf4j
 @Service

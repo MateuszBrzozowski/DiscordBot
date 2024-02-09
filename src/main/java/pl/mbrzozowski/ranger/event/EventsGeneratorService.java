@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,10 @@ public class EventsGeneratorService {
         eventsGenerators.get(index).submit(event);
     }
 
-    public void createGenerator(@NotNull MessageReceivedEvent event, EventService eventService) {
+    public void createGenerator(@NotNull MessageReceivedEvent event, @NotNull EventService eventService) {
+        if (!isPossibleForMessage(event, eventService)) {
+            return;
+        }
         int index = userHaveActiveGenerator(event.getAuthor().getId());
         if (event.isFromType(ChannelType.PRIVATE)) {
             if (index == -1) {
@@ -87,7 +91,10 @@ public class EventsGeneratorService {
         }
     }
 
-    public void createGenerator(@NotNull SlashCommandInteractionEvent event, EventService eventService) {
+    public void createGenerator(@NotNull SlashCommandInteractionEvent event, @NotNull EventService eventService) {
+        if (!isPossibleForSlash(event, eventService)) {
+            return;
+        }
         event.reply("Sprawdź wiadomości  prywatne").setEphemeral(true).queue();
         int index = userHaveActiveGenerator(event.getUser().getId());
         if (index == -1) {
@@ -102,5 +109,41 @@ public class EventsGeneratorService {
             log.info(event.getUser() + " - Had active event generator. Created new event generator");
         }
 
+    }
+
+    private boolean isPossibleForMessage(@NotNull MessageReceivedEvent event, @NotNull EventService eventService) {
+        if (eventService.isMaxActiveEvents()) {
+            event.getMessage().reply("Osiągnięto maksymalną liczbę aktywnych eventów!").queue();
+            log.info("Max active events");
+            return false;
+        } else if (!eventService.isSpaceInCategory()) {
+            event.getMessage().reply("Osiągnięto maksymalną liczbę kanałów w kategorii!").queue();
+            log.info("Max channels in category");
+            return false;
+        } else if (RangersGuild.isNoSpaceOnGuild()) {
+            event.getMessage().reply("Osiągnięto maksymalną liczbę kanałów na serwerze!").queue();
+            log.info("Max channels on Guild");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isPossibleForSlash(@NotNull SlashCommandInteractionEvent event, @NotNull EventService eventService) {
+        if (eventService.isMaxActiveEvents()) {
+            event.reply("Osiągnięto maksymalną liczbę aktywnych eventów!").setEphemeral(true).queue();
+            log.info("Max active events");
+            return false;
+        }
+        if (!eventService.isSpaceInCategory()) {
+            event.reply("Osiągnięto maksymalną liczbę kanałów w kategorii!").setEphemeral(true).queue();
+            log.info("Max channels in category");
+            return false;
+        }
+        if (RangersGuild.isNoSpaceOnGuild()) {
+            event.reply("Osiągnięto maksymalną liczbę kanałów na serwerze!").setEphemeral(true).queue();
+            log.info("Max channels on Guild");
+            return false;
+        }
+        return true;
     }
 }

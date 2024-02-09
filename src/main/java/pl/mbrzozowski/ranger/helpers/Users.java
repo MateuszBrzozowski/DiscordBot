@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -21,10 +22,9 @@ public class Users {
      * @return Zwraca nick z konkretnego discorda lub ogólny nick użytkownika.
      */
     public static String getUserNicknameFromID(String userID) {
-        JDA jda = DiscordBot.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
-            throw new NullPointerException("Guild by RangersPL(" + CategoryAndChannelID.RANGERSPL_GUILD_ID + ") id is null");
+            throw new NullPointerException("Null Guild");
         }
         Member member = guild.getMemberById(userID);
         if (member != null) {
@@ -51,17 +51,14 @@ public class Users {
      * @return Zwraca true jeśli użytkownik o ID userID ma role o ID roleID. W innym przypadku zwraca false.
      */
     public static boolean hasUserRole(String userID, String roleID) {
-        JDA jda = DiscordBot.getJda();
-        List<Guild> guilds = jda.getGuilds();
-        for (Guild guild : guilds) {
-            if (guild.getId().equalsIgnoreCase(CategoryAndChannelID.RANGERSPL_GUILD_ID)) {
-                Member memberById = guild.getMemberById(userID);
-                if (memberById != null) {
-                    List<Role> userRoles = memberById.getRoles();
-                    for (Role role : userRoles) {
-                        if (role.getId().equalsIgnoreCase(roleID)) {
-                            return true;
-                        }
+        Guild guild = RangersGuild.getGuild();
+        if (guild != null) {
+            Member memberById = guild.getMemberById(userID);
+            if (memberById != null) {
+                List<Role> userRoles = memberById.getRoles();
+                for (Role role : userRoles) {
+                    if (role.getId().equalsIgnoreCase(roleID)) {
+                        return true;
                     }
                 }
             }
@@ -78,8 +75,7 @@ public class Users {
     }
 
     public static boolean memberOnGuildShorterThan(String userId, int minutes) {
-        JDA jda = DiscordBot.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             return false;
         }

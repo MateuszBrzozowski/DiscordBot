@@ -17,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
@@ -42,7 +42,7 @@ public class EmbedInfo extends EmbedCreator {
                 - kultura osobista
                 - duża ilość wolnego czasu
                 - brak VAC bana w ciągu 2 ostatnich lat""", false);
-        event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUT, "Podanie")).queue();
+        event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUIT, "Podanie")).queue();
     }
 
     /**
@@ -196,7 +196,7 @@ public class EmbedInfo extends EmbedCreator {
         } else if (whatChange.equals(EventChanges.REMOVE)) {
             description = "Wydarzenie zostaje odwołane.";
         }
-        String link = "[" + event.getName() + "](https://discord.com/channels/" + CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + event.getMsgId() + ")";
+        String link = "[" + event.getName() + "](" + RangersGuild.getLinkToMessage(event.getChannelId(), event.getMsgId()) + ")";
         User userById = DiscordBot.getJda().getUserById(userID);
         String finalDescription = description + " Sprawdź szczegóły!";
         if (userById != null) {
@@ -377,14 +377,14 @@ public class EmbedInfo extends EmbedCreator {
     }
 
     public static void warningMaxRecruits() {
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
             textChannel.sendMessage("**Brak wolnych miejsc. Rekrutacja zamknięta.**\nOsiągnięto maksymalną ilość kanałów w kategorii.").queue();
         }
     }
 
     public static void warningFewSlots() {
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
             textChannel.sendMessage("**Pozostały 2 lub mniej miejsc dla rekrutów.**").queue();
         }

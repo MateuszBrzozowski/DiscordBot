@@ -1,7 +1,6 @@
 package pl.mbrzozowski.ranger.server.service;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
@@ -69,8 +68,7 @@ public class ServerService implements SlashCommand {
     }
 
     public void closeChannel(Client client, String whoClose) {
-        JDA jda = DiscordBot.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             TextChannel textChannel = guild.getTextChannelById(client.getChannelId());
             Member member = guild.getMemberById(client.getUserId());
@@ -88,8 +86,7 @@ public class ServerService implements SlashCommand {
     }
 
     public void openChannel(Client client) {
-        JDA jda = DiscordBot.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             TextChannel textChannel = guild.getTextChannelById(client.getChannelId());
             Member member = guild.getMemberById(client.getUserId());
@@ -127,9 +124,9 @@ public class ServerService implements SlashCommand {
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
         String userName = event.getUser().getName();
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
-            Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_SERVER);
+            Category category = RangersGuild.getCategory(RangersGuild.CategoryId.SERVER);
             String channelName = channelNamePrefix(buttonType) + userName;
             if (category != null) {
                 guild.createTextChannel(channelName, category)

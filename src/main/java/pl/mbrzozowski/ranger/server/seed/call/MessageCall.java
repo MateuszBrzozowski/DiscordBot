@@ -14,8 +14,8 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
@@ -284,7 +284,7 @@ public class MessageCall {
         }
         Random random = new Random();
         int nextInt = random.nextInt(messages.size());
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             log.warn("Null guild");
             return;

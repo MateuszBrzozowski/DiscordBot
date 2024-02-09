@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,8 +9,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.members.GuildMembersService;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
@@ -43,7 +42,7 @@ public class GuildMemberListener extends ListenerAdapter {
 
     private void addRole(String userID) {
         log.info("Assigning a role to a user");
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             Role role = guild.getRoleById(RoleID.SQUAD);
             if (role != null) {

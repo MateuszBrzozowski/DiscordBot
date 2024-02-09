@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
-import pl.mbrzozowski.ranger.helpers.Commands;
+import pl.mbrzozowski.ranger.guild.Commands;
 import pl.mbrzozowski.ranger.response.EmbedHelp;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 

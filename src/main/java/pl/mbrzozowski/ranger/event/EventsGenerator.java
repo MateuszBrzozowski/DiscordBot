@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.exceptions.IllegalStageException;
 import pl.mbrzozowski.ranger.exceptions.StageNoSupportedException;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Constants;
 import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.Validator;
@@ -37,7 +37,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.*;
 
-import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
+import static pl.mbrzozowski.ranger.guild.ComponentId.*;
 
 @Slf4j
 public class EventsGenerator {

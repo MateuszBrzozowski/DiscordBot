@@ -22,7 +22,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.helpers.Constants;
+import pl.mbrzozowski.ranger.helpers.Converter;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
@@ -38,7 +43,7 @@ import java.util.List;
 import java.util.*;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
-import static pl.mbrzozowski.ranger.helpers.ComponentId.*;
+import static pl.mbrzozowski.ranger.guild.ComponentId.*;
 import static pl.mbrzozowski.ranger.helpers.SlashCommands.RECRUIT_DELETE_CHANNEL_DELAY;
 
 @Service
@@ -52,18 +57,18 @@ public class RecruitsService implements SlashCommand {
     private final RecruitBlackListService recruitBlackListService;
     private final WaitingRecruitRepository waitingRecruitRepository;
     private final SettingsService settingsService;
-    private final int MAX_CHANNELS = 50;
+//    private final int MAX_CHANNELS = 50;
 
     /**
      * @param userName Nazwa użytkownika
      * @param userID   ID użytkownika
      */
     public void createChannelForNewRecruit(String userName, String userID) {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             throw new NullPointerException("Guild by RangersPL id is null");
         }
-        Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RECRUT_ID);
+        Category category = RangersGuild.getCategory(RangersGuild.CategoryId.RECRUIT);
         guild.createTextChannel("rekrut-" + userName, category)
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
@@ -79,11 +84,11 @@ public class RecruitsService implements SlashCommand {
     }
 
     private void checkCountOfRecruitChannels() {
-        int channelsInCategory = howManyChannelsInCategory();
-        if (channelsInCategory == MAX_CHANNELS) {
+        int channelsInCategory = RangersGuild.howManyChannelsInCategory(RangersGuild.CategoryId.RECRUIT);
+        if (channelsInCategory == RangersGuild.MAX_CATEGORY_CHANNELS) {
             EmbedInfo.warningMaxRecruits();
             log.info("Maximum number of recruitment channels achieved. Warning sent.");
-        } else if (channelsInCategory >= MAX_CHANNELS - 2) {
+        } else if (channelsInCategory >= RangersGuild.MAX_CATEGORY_CHANNELS - 2) {
             EmbedInfo.warningFewSlots();
             log.info("Low number of recruitment channels. Warning sent.");
         }
@@ -152,22 +157,6 @@ public class RecruitsService implements SlashCommand {
         return recruitBlackListOptional.isPresent();
     }
 
-    private boolean isMaxRecruits() {
-        int howManyChannelsNow = howManyChannelsInCategory();
-        return howManyChannelsNow >= MAX_CHANNELS;
-    }
-
-    private int howManyChannelsInCategory() {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
-        if (guild != null) {
-            Category category = guild.getCategoryById(CategoryAndChannelID.CATEGORY_RECRUT_ID);
-            if (category != null) {
-                return category.getChannels().size();
-            }
-        }
-        return MAX_CHANNELS + 1;
-    }
-
     private void confirmMessage(@NotNull ButtonInteractionEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -196,9 +185,9 @@ public class RecruitsService implements SlashCommand {
 
     private void sendInformationAboutNewForm(@NotNull ButtonInteractionEvent event) {
         String userId = event.getComponentId().substring(CONFIRM_FORM_SEND.length());
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ);
         if (textChannel == null) {
-            throw new IllegalStateException("Text channel not exist id=" + CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+            throw new IllegalStateException(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ.toString());
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
@@ -268,7 +257,7 @@ public class RecruitsService implements SlashCommand {
     }
 
     private void addRoleRecruit(String userId) {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             Member member = guild.getMemberById(userId);
             Role roleRecruit = guild.getRoleById(RoleID.RECRUIT_ID);
@@ -281,7 +270,7 @@ public class RecruitsService implements SlashCommand {
     }
 
     public void removeRecruitRoleFromUserID(String userID) {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             Member member = guild.getMemberById(userID);
             Role roleRecruit = guild.getRoleById(RoleID.RECRUIT_ID);
@@ -293,7 +282,7 @@ public class RecruitsService implements SlashCommand {
     }
 
     private void addClanMemberRoleFromUserId(String userId) {
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             Member member = guild.getMemberById(userId);
             Role roleClanMember = guild.getRoleById(RoleID.CLAN_MEMBER_ID);
@@ -383,7 +372,7 @@ public class RecruitsService implements SlashCommand {
             }
             if (recruit.getEndRecruitment() == null
                     && recruit.getRecruitmentResult() == null) {
-                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                Guild guild = RangersGuild.getGuild();
                 if (guild != null) {
                     removeSmallRInTag(recruit.getUserId(), guild);
                     removeRecruitRoleFromUserID(recruit.getUserId());
@@ -426,7 +415,7 @@ public class RecruitsService implements SlashCommand {
                 return false;
             }
             if (recruit.getEndRecruitment() == null && recruit.getRecruitmentResult() == null) {
-                Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+                Guild guild = RangersGuild.getGuild();
                 if (guild != null) {
                     removeTagFromNick(recruit.getUserId(), guild);
                     removeRecruitRoleFromUserID(recruit.getUserId());
@@ -567,7 +556,7 @@ public class RecruitsService implements SlashCommand {
         Recruit recruit = recruitOptional.get();
         if (!recruit.getIsCloseChannel()) {
             Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
-            Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+            Guild guild = RangersGuild.getGuild();
             if (guild != null) {
                 Member member = guild.getMemberById(recruit.getUserId());
                 TextChannel channel = guild.getTextChannelById(recruit.getChannelId());
@@ -581,8 +570,7 @@ public class RecruitsService implements SlashCommand {
     }
 
     public void confirmFormReceived(@NotNull ButtonInteractionEvent event) {
-        boolean maxRecruits = isMaxRecruits();
-        if (maxRecruits) {
+        if (!RangersGuild.isSpaceInCategory(RangersGuild.CategoryId.RECRUIT)) {
             MessageEmbed messageEmbed = event.getMessage().getEmbeds().get(0);
             EmbedBuilder builder = new EmbedBuilder(messageEmbed);
             builder.setColor(new Color(255, 116, 0));

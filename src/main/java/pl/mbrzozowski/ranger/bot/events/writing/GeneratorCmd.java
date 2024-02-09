@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
-import pl.mbrzozowski.ranger.helpers.Commands;
+import pl.mbrzozowski.ranger.guild.Commands;
 
 @Slf4j
 public class GeneratorCmd extends Proccess {
@@ -24,11 +24,7 @@ public class GeneratorCmd extends Proccess {
     @Override
     public void proccessMessage(@NotNull MessageReceivedEvent event) {
         if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EVENT)) {
-            if (eventService.isMaxEvents()) {
-                event.getMessage().reply("Osiągnięto maksymalną liczbę eventów").queue();
-            } else {
-                eventsGeneratorService.createGenerator(event, eventService);
-            }
+            eventsGeneratorService.createGenerator(event, eventService);
         } else {
             getNextProccess().proccessMessage(event);
         }

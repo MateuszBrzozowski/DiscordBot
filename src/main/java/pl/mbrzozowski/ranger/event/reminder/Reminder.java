@@ -8,7 +8,7 @@ import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.Player;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
@@ -44,8 +44,7 @@ public class Reminder extends TimerTask {
             }
             List<Player> mainList = eventService.getMainList(event);
             List<UsersReminder> usersReminderList = usersReminderService.findAll();
-            String linkToEvent = "[" + event.getName() + "](https://discord.com/channels/" +
-                    CategoryAndChannelID.RANGERSPL_GUILD_ID + "/" + event.getChannelId() + "/" + eventID + ")";
+            String linkToEvent = "[" + event.getName() + "](" + RangersGuild.getLinkToMessage(event.getChannelId(), eventID) + ")";
             DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.MM.yyyy HH:mm");
             String dateTimeEvent = event.getDate().format(dateFormat);
             for (Player player : mainList) {

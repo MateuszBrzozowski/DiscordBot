@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.RoleRepository;
@@ -127,7 +127,7 @@ public class RoleService implements SlashCommand {
     private void updateRoleList() {
         ArrayList<CommandData> commandData = new ArrayList<>();
         addRoleCommand(commandData);
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             List<Role> roles = findAll();
             guild.upsertCommand(getCommand(roles)).queue();
@@ -226,10 +226,10 @@ public class RoleService implements SlashCommand {
 
     public void addRemoveRole(SlashCommandInteractionEvent event, String roleId) {
         net.dv8tion.jda.api.entities.Role role = DiscordBot.getJda().getRoleById(roleId);
-        Guild guild = DiscordBot.getJda().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             event.reply("Error. Try again later or contact with Administrator").setEphemeral(true).queue();
-            throw new NullPointerException("Guild by id RangersPLGuild(" + CategoryAndChannelID.RANGERSPL_GUILD_ID + ") is null");
+            throw new NullPointerException("Null Guild");
         }
         if (role != null) {
             boolean hasRole = Users.hasUserRole(event.getUser().getId(), role.getId());

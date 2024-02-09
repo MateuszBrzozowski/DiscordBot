@@ -12,9 +12,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -36,7 +35,7 @@ public class RecruitOpinions {
                 .setPlaceholder("Opinia")
                 .build();
         Modal modal = Modal.create(ComponentId.MODAL_RECRUIT_OPINION, "Rekrut opinie")
-                .addActionRows(ActionRow.of(recruitName), ActionRow.of(opinion))
+                .addComponents(ActionRow.of(recruitName), ActionRow.of(opinion))
                 .build();
         event.replyModal(modal).queue();
     }
@@ -45,7 +44,7 @@ public class RecruitOpinions {
         String recruitName = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_NAME)).getAsString();
         String opinion = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_OPINION_TEXT)).getAsString();
         String userNameWhoSendingOpinion = Users.getUserNicknameFromID(event.getUser().getId());
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_RECRUITS_OPINIONS);
+        TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RECRUIT_OPINIONS);
         if (textChannel != null) {
             sendOpinionToChannel(textChannel, userNameWhoSendingOpinion, recruitName, opinion);
         }
@@ -67,7 +66,7 @@ public class RecruitOpinions {
 
     public static void submitAnonymousComplaints(@NotNull ModalInteractionEvent event) {
         String text = Objects.requireNonNull(event.getValue(ComponentId.MODAL_COMPLAINT_TEXT)).getAsString();
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(CategoryAndChannelID.CHANNEL_DRILL_INSTRUCTOR_HQ);
+        TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
             sendMessage(textChannel, event.getUser(), text);
         }

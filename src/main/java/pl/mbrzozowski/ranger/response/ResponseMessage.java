@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.giveaway.Giveaway;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
-import pl.mbrzozowski.ranger.helpers.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.members.clan.rank.Rank;
 
@@ -208,12 +208,7 @@ public class ResponseMessage {
                     .append("**ID=")
                     .append(giveaway.getId())
                     .append("** - ")
-                    .append("https://discord.com/channels/")
-                    .append(CategoryAndChannelID.RANGERSPL_GUILD_ID)
-                    .append("/")
-                    .append(giveaway.getChannelId())
-                    .append("/")
-                    .append(giveaway.getMessageId())
+                    .append(RangersGuild.getLinkToMessage(giveaway.getChannelId(), giveaway.getMessageId()))
                     .append("\n");
         }
         return builder.toString();

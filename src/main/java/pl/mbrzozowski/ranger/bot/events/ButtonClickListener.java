@@ -11,7 +11,11 @@ import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.giveaway.GiveawayService;
-import pl.mbrzozowski.ranger.helpers.*;
+import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.helpers.ComponentService;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -44,10 +48,8 @@ public class ButtonClickListener extends ListenerAdapter {
     }
 
     private void newRecruit(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
-        if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT)) {
+        if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUIT)) {
             recruitsService.newPodanie(event);
-        } else if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUT_CONFIRM)) {
-            recruitsService.confirm(event);
         } else if (event.getComponentId().length() > ComponentId.CONFIRM_FORM_SEND.length() &&
                 event.getComponentId().startsWith(ComponentId.CONFIRM_FORM_SEND)) {
             recruitsService.confirm(event);
@@ -211,10 +213,10 @@ public class ButtonClickListener extends ListenerAdapter {
     private void removeChannelDB(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         String parentCategoryId = event.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
-            if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_RECRUT_ID) && isAdmin) {
+            if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.RECRUIT) && isAdmin) {
                 recruitsService.deleteChannelByID(event.getChannel().getId());
                 ComponentService.removeChannel(event);
-            } else if (parentCategoryId.equalsIgnoreCase(CategoryAndChannelID.CATEGORY_SERVER)) {
+            } else if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.SERVER)) {
                 serverService.removeChannel(event);
                 ComponentService.removeChannel(event);
             } else {

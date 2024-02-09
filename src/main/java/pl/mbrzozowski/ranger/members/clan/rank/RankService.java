@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.members.clan.ClanMember;
 import pl.mbrzozowski.ranger.members.clan.ClanMemberService;
 import pl.mbrzozowski.ranger.model.SlashCommand;
@@ -120,10 +120,10 @@ public class RankService implements SlashCommand {
 
     @NotNull
     private Guild getGuild(@NotNull MessageReceivedEvent event) {
-        Guild guild = event.getJDA().getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild == null) {
             event.getMessage().reply("Error. Try again later or contact with Developers").queue();
-            throw new NullPointerException("Guild by id RangersPLGuild(" + CategoryAndChannelID.RANGERSPL_GUILD_ID + ") is null");
+            throw new NullPointerException("Null Guild");
         }
         return guild;
     }

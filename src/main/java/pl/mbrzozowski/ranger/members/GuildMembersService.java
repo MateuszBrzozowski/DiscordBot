@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.helpers.CategoryAndChannelID;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.repository.main.InOutGuildMembersRepository;
 
 import java.io.BufferedWriter;
@@ -42,7 +42,7 @@ public class GuildMembersService {
 
     public int getMemberCount() {
         JDA jda = DiscordBot.getJda();
-        Guild guild = jda.getGuildById(CategoryAndChannelID.RANGERSPL_GUILD_ID);
+        Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             return guild.getMemberCount();
         }
