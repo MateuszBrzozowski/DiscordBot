@@ -297,24 +297,24 @@ public class GiveawayGenerator {
             case PRIZE_REMOVE -> {
                 buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_REMOVE, "Usuń zaznaczony"));
                 buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_REMOVE_ALL, "Usuń wszystkie"));
-                buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_BACK, "Powrót"));
+                buttons.add(Button.primary(GIVEAWAY_GENERATOR_BTN_BACK, "⮜ Powrót"));
             }
             case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
-                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz").asDisabled());
-                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "⮜ Wstecz").asDisabled());
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej ⮞"));
             }
             case PRIZE -> {
                 if (prizes.isEmpty()) {
-                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
-                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ").asDisabled());
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "⮜ Wstecz"));
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ ⮞").asDisabled());
                 } else {
-                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
-                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ"));
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "⮜ Wstecz"));
+                    buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Zakończ ⮞"));
                 }
             }
             default -> {
-                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "Wstecz"));
-                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej"));
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_BACK, "⮜ Wstecz"));
+                buttons.add(Button.success(GIVEAWAY_GENERATOR_BTN_NEXT, "Dalej ⮞"));
             }
         }
         buttons.add(Button.danger(GIVEAWAY_GENERATOR_BTN_CANCEL, "Przerwij"));
