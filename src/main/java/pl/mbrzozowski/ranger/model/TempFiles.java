@@ -13,6 +13,9 @@ public class TempFiles {
         new File(System.getProperty("java.io.tmpdir") + "Rangerbot").mkdirs();
         String tempLogFilePath = System.getProperty("java.io.tmpdir") + "Rangerbot\\" + fileName;
         file = new File(tempLogFilePath);
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     public File getFile() {

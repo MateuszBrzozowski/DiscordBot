@@ -45,11 +45,16 @@ public class HoursService {
 
     public void getUserHoursAndExportToFile(@NotNull MessageReceivedEvent event) {
         log.info("Download hours for clan members");
-        event.getMessage().reply("Pobieram godziny. Za chwilę wyślę plik csv").queue();
         createLogFile();
         createCSVFile();
         try {
             setUsersList();
+            if (users.isEmpty()) {
+                event.getMessage().reply("Brak zapisanych użytkowników.").queue();
+                log.info("No users to download");
+                return;
+            }
+            event.getMessage().reply("Pobieram godziny. Za chwilę wyślę plik csv").queue();
             getUsersHours();
             saveDataToFile();
             sendResultCSV(event);
@@ -73,7 +78,7 @@ public class HoursService {
 
     private void sendLogFile(@NotNull MessageReceivedEvent event) {
         FileUpload fileUpload = FileUpload.fromData(logFiles.getFile());
-        event.getMessage().reply("Wystąpił nieoczekiwany błą").addFiles(fileUpload).queue();
+        event.getMessage().reply("Wystąpił nieoczekiwany błąd").addFiles(fileUpload).queue();
     }
 
     private void sendResultCSV(@NotNull MessageReceivedEvent event) {

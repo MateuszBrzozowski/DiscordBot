@@ -7,7 +7,6 @@ import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
-import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
