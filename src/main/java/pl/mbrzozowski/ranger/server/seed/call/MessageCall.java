@@ -33,7 +33,6 @@ public class MessageCall {
     private final SettingsKey settingsKeyPerDay;
     private final Levels level;
     private final MessageService messageService;
-    protected List<Message> messages = new ArrayList<>();
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
     @Nullable
@@ -47,7 +46,6 @@ public class MessageCall {
         pullMessagePerDayCount();
         pullMessagePerDay();
         pullConditions();
-        pullMessages();
         pullRoleId();
         log.debug("MessageCall created. {}", this);
     }
@@ -186,8 +184,8 @@ public class MessageCall {
         optional.ifPresent(s -> this.roleId = s);
     }
 
-    private void pullMessages() {
-        messages = messageService.findByLevel(level);
+    private List<Message> pullMessages() {
+        return messageService.findByLevel(level);
     }
 
     protected void pullMessagePerDay() {
@@ -299,6 +297,7 @@ public class MessageCall {
     }
 
     private String getRandomMessage() {
+        List<Message> messages = pullMessages();
         Random random = new Random();
         int nextInt = random.nextInt(messages.size());
         return messages.get(nextInt).getMessage();
@@ -330,6 +329,7 @@ public class MessageCall {
     }
 
     public void addMessage(SlashCommandInteractionEvent event) {
+        List<Message> messages = pullMessages();
         if (messages.size() >= MAX_MESSAGES) {
             log.info("No space to new message");
             event.reply("Osiągnięto maksymalną ilość wiadomości").setEphemeral(true).queue();
@@ -348,13 +348,13 @@ public class MessageCall {
             return;
         }
         Message newMessage = new Message(null, message, level);
-        messages.add(newMessage);
         event.reply("**Wiadomość dodana.**\n" + message).setEphemeral(true).queue();
         log.info("Message added");
         messageService.save(newMessage);
     }
 
     public void removeMessage(SlashCommandInteractionEvent event) {
+        List<Message> messages = pullMessages();
         if (messages.size() == 0) {
             event.reply("Brak wiadomości na tym levelu").setEphemeral(true).queue();
             return;
@@ -384,12 +384,13 @@ public class MessageCall {
     }
 
     public void showAllMessages(SlashCommandInteractionEvent event) {
+        List<Message> messages = pullMessages();
         if (messages.size() == 0) {
             event.reply("Brak wiadomości na tym levelu").setEphemeral(true).queue();
             return;
         }
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setDescription(getMessagesAsDescription());
+        builder.setDescription(getMessagesAsDescription(messages));
         if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
             Role role = DiscordBot.getJda().getRoleById(roleId);
             if (role != null) {
@@ -398,14 +399,14 @@ public class MessageCall {
         }
         if (messages.size() > 10) {
             builder.setFooter("Strona 1");
-            event.replyEmbeds(builder.build()).setComponents(ActionRow.of(getButtons())).setEphemeral(true).queue();
+            event.replyEmbeds(builder.build()).setComponents(ActionRow.of(getButtons(messages))).setEphemeral(true).queue();
             return;
         }
         event.replyEmbeds(builder.build()).setComponents().setEphemeral(true).queue();
     }
 
     @NotNull
-    private Collection<? extends ItemComponent> getButtons() {
+    private Collection<? extends ItemComponent> getButtons(@NotNull List<Message> messages) {
         List<Button> buttons = new ArrayList<>();
         if (messages.size() > 10) {
             buttons.add(Button.primary(ComponentId.SEED_CALL_BACK, "⮜"));
@@ -415,7 +416,7 @@ public class MessageCall {
     }
 
     @NotNull
-    private String getMessagesAsDescription() {
+    private String getMessagesAsDescription(@NotNull List<Message> messages) {
         StringBuilder builder = new StringBuilder("## Wiadomości na levelu ").append(level.getLevel()).append("\n");
         for (int i = 0; i < messages.size() && i < 10; i++) {
             builder.append("ID: ").append(messages.get(i).getId()).append(" - ").append(messages.get(i).getMessage()).append("\n");
@@ -424,10 +425,12 @@ public class MessageCall {
     }
 
     public int getMessageSize() {
+        List<Message> messages = pullMessages();
         return messages.size();
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event) {
+        List<Message> messages = pullMessages();
         String pageAsString = Objects.requireNonNull(event.getMessage().getEmbeds().get(0).getFooter()).getText();
         pageAsString = Objects.requireNonNull(pageAsString).substring("Strona ".length(), "Strona ".length() + 1);
         int page = Integer.parseInt(pageAsString);
@@ -446,7 +449,7 @@ public class MessageCall {
                 page--;
             }
         }
-        builder.setDescription(getMessagesAsDescription(page));
+        builder.setDescription(getMessagesAsDescription(messages, page));
         if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
             Role role = DiscordBot.getJda().getRoleById(roleId);
             if (role != null) {
@@ -458,7 +461,7 @@ public class MessageCall {
     }
 
     @NotNull
-    private String getMessagesAsDescription(int page) {
+    private String getMessagesAsDescription(@NotNull List<Message> messages, int page) {
         StringBuilder builder = new StringBuilder("## Wiadomości na levelu ").append(level.getLevel()).append("\n");
         for (int i = (page - 1) * 10; i < messages.size() && i < (page - 1) * 10 + 10; i++) {
             builder.append("ID: ").append(messages.get(i).getId()).append(" - ").append(messages.get(i).getMessage()).append("\n");
