@@ -401,7 +401,7 @@ public class SeedCallService implements SlashCommand {
 
     private void analyzeConditions(@NotNull MessageCall messageCall, List<PlayerCounts> players) {
         if (messageCall.analyzeConditions(players)) {
-            messageCall.sendMessage(channelId);
+            messageCall.sendMessage(players, channelId);
         } else {
             log.info("Any conditions not fulfilled");
         }

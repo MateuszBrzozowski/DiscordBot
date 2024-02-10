@@ -29,7 +29,6 @@ public class SeedCallExecute extends TimerTask {
             seedCallService.resetLevels();
             return;
         }
-        players.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
         seedCallService.analyze(players);
     }
 }

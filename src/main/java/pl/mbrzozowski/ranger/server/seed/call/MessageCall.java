@@ -2,7 +2,6 @@ package pl.mbrzozowski.ranger.server.seed.call;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,8 +13,8 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
@@ -277,33 +276,32 @@ public class MessageCall {
         }
     }
 
-    public void sendMessage(String channelId) {
+    public void sendMessage(@NotNull List<PlayerCounts> players, String channelId) {
         if (messagePerDayCount >= messagePerDay) {
             log.info("Max message per day on this level");
             return;
         }
-        Random random = new Random();
-        int nextInt = random.nextInt(messages.size());
-        Guild guild = RangersGuild.getGuild();
-        if (guild == null) {
-            log.warn("Null guild");
-            return;
-        }
-        TextChannel textChannel = guild.getTextChannelById(channelId);
+        TextChannel textChannel = RangersGuild.getTextChannel(channelId);
         if (textChannel == null) {
-            log.warn("Null channel");
+            log.warn("Channel not found");
             return;
         }
         StringBuilder builder = new StringBuilder();
-        if (roleId != null) {
-            Role role = guild.getRoleById(roleId);
-            if (role != null) {
-                builder.append(role.getAsMention());
-            }
-        }
+        MessageModifier.addRole(builder, roleId);
+        builder.append(" ");
+        players.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
+        int currentPlayerCount = players.get(0).getPlayers();
+        String message = getRandomMessage();
+        MessageModifier.addPLayersCount(builder, message, currentPlayerCount);
         addMessagePerDayCount();
-        textChannel.sendMessage(builder.append(" ").append(messages.get(nextInt).getMessage())).queue();
+        textChannel.sendMessage(builder.toString()).queue();
         log.info("Sent seed call message");
+    }
+
+    private String getRandomMessage() {
+        Random random = new Random();
+        int nextInt = random.nextInt(messages.size());
+        return messages.get(nextInt).getMessage();
     }
 
     public void resetMessageCount() {

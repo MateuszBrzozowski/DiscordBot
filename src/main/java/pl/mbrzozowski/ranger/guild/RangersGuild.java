@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.guild;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
@@ -68,6 +69,24 @@ public class RangersGuild {
             return true;
         }
         return guild.getTextChannels().size() >= MAX_GUILD_CHANNELS;
+    }
+
+    @Nullable
+    public static TextChannel getTextChannel(String channelId) {
+        Guild guild = getGuild();
+        if (guild == null) {
+            return null;
+        }
+        return guild.getTextChannelById(channelId);
+    }
+
+    @Nullable
+    public static Role getRoleById(String roleId) {
+        Guild guild = getGuild();
+        if (guild == null) {
+            return null;
+        }
+        return guild.getRoleById(roleId);
     }
 
     public enum CategoryId {
