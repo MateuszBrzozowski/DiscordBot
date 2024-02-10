@@ -28,7 +28,7 @@ public class Analyzer {
                 continue;
             }
             int sizeListAfterFilter = players.stream()
-                    .filter(playerCounts -> playerCounts.getPlayers() >= condition.getPlayersCount() - OFFSET).toList().size();
+                    .filter(playerCounts -> playerCounts.getPlayers() >= condition.getPlayersCount()).toList().size();
             log.debug("Size of list after filter players counts={}, Original size={}", sizeListAfterFilter, players.size());
             if (sizeListAfterFilter == players.size()) {
                 log.debug("All record is accepted");
