@@ -19,9 +19,8 @@ public class Dice {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
-        builder.setTitle("Wylosowana liczba:");
-        builder.addField(String.valueOf(number), "", false);
-        event.reply("<@" + event.getUser().getId() + ">").setEmbeds(builder.build()).queue();
+        builder.setDescription("# Wynik: " + number);
+        event.reply(event.getUser().getAsMention()).setEmbeds(builder.build()).queue();
     }
 
     private static int drawNumber() {
