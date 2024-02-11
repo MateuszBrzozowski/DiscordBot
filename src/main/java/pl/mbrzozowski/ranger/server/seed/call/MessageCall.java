@@ -30,18 +30,16 @@ public class MessageCall {
     private final static int LENGTH_MESSAGE = 400;
     private final List<Conditions> conditions = new ArrayList<>();
     private final SettingsService settingsService;
-    private final SettingsKey settingsKeyPerDay;
-    private final Levels level;
+    private final Levels level; //TODO czy ten level jest tu potrzebny?
     private final MessageService messageService;
     protected int messagePerDayCount = 0;
     protected int messagePerDay = 0;
     @Nullable
     private String roleId;
 
-    protected MessageCall(SettingsService settingsService, MessageService messageService, SettingsKey settingsKeyPerDay, Levels level) {
+    protected MessageCall(SettingsService settingsService, MessageService messageService, Levels level) {
         this.messageService = messageService;
         this.settingsService = settingsService;
-        this.settingsKeyPerDay = settingsKeyPerDay;
         this.level = level;
         pullMessagePerDayCount();
         pullMessagePerDay();
@@ -56,6 +54,15 @@ public class MessageCall {
 
     public int getMessagePerDayCount() {
         return messagePerDayCount;
+    }
+
+    @Nullable
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public List<Conditions> getConditions() {
+        return conditions;
     }
 
     private void pullConditions() {
@@ -115,22 +122,22 @@ public class MessageCall {
         event.reply("Warunek dodany. Jeżeli " + condition.getPlayersCount() + " graczy przez " +
                 condition.getWithinMinutes() + " minut").setEphemeral(true).queue();
         log.info("Add conditions {} for level: {}", condition, level.getLevel());
-        saveSettings();
+        saveConditions();
     }
 
-    private void saveSettings() {
+    private void saveConditions() {
         if (level.equals(Levels.ONE)) {
-            saveSettings(SettingsKey.SEED_CALL_LEVEL_ONE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_ONE.getKey() + ".");
+            saveConditions(SettingsKey.SEED_CALL_LEVEL_ONE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_ONE.getKey() + ".");
         } else if (level.equals(Levels.TWO)) {
-            saveSettings(SettingsKey.SEED_CALL_LEVEL_TWO_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_TWO.getKey() + ".");
+            saveConditions(SettingsKey.SEED_CALL_LEVEL_TWO_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_TWO.getKey() + ".");
         } else if (level.equals(Levels.THREE)) {
-            saveSettings(SettingsKey.SEED_CALL_LEVEL_THREE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_THREE.getKey() + ".");
+            saveConditions(SettingsKey.SEED_CALL_LEVEL_THREE_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_THREE.getKey() + ".");
         } else if (level.equals(Levels.FOUR)) {
-            saveSettings(SettingsKey.SEED_CALL_LEVEL_FOUR_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_FOUR.getKey() + ".");
+            saveConditions(SettingsKey.SEED_CALL_LEVEL_FOUR_CONDITIONS, SettingsKey.SEED_CALL_LEVEL_FOUR.getKey() + ".");
         }
     }
 
-    private void saveSettings(SettingsKey settingsKey, String keyPrefix) {
+    private void saveConditions(SettingsKey settingsKey, String keyPrefix) {
         settingsService.save(settingsKey, conditions.size());
         for (int i = 0; i < conditions.size(); i++) {
             String keyPlayers = keyPrefix + i + ".players";
@@ -148,8 +155,7 @@ public class MessageCall {
         OptionMapping idOption = event.getOption("id");
         if (idOption == null) {
             if (conditions.size() == 1) {
-                Conditions remove = conditions.remove(0);
-                replySuccessfully(event, remove);
+                removeConditionsOnIndex(event, 0);
             } else {
                 StringBuilder builder = new StringBuilder();
                 builder.append("**Więcej niż jeden warunek!** Wybierz ID. Wywołaj ponownie komendę z wybranym ID\n");
@@ -160,22 +166,44 @@ public class MessageCall {
                 event.reply(builder.toString()).setEphemeral(true).queue();
             }
         } else {
-            int id = idOption.getAsInt() - 1;
-            if (id < 0 || id >= conditions.size()) {
+            int index = idOption.getAsInt() - 1;
+            if (index < 0 || index >= conditions.size()) {
                 event.reply("Niepoprawne ID").setEphemeral(true).queue();
                 return;
             }
-            Conditions remove = conditions.remove(id);
-            replySuccessfully(event, remove);
+            removeConditionsOnIndex(event, index);
         }
     }
+
+    private void removeConditionsOnIndex(SlashCommandInteractionEvent event, int index) {
+        removeAllConditionsFromSettings();
+        Conditions remove = conditions.remove(index);
+        saveConditions();
+        replySuccessfully(event, remove);
+    }
+
+    void removeAllConditionsFromSettings() {
+        String keyPrefix;
+        switch (level) {
+            case ONE -> keyPrefix = SettingsKey.SEED_CALL_LEVEL_ONE.getKey() + ".";
+            case TWO -> keyPrefix = SettingsKey.SEED_CALL_LEVEL_TWO.getKey() + ".";
+            case THREE -> keyPrefix = SettingsKey.SEED_CALL_LEVEL_THREE.getKey() + ".";
+            case FOUR -> keyPrefix = SettingsKey.SEED_CALL_LEVEL_FOUR.getKey() + ".";
+            default -> throw new UnsupportedOperationException(String.valueOf(level));
+        }
+        for (int i = 0; i < conditions.size(); i++) {
+            settingsService.deleteByKey(keyPrefix + i + ".time");
+            settingsService.deleteByKey(keyPrefix + i + ".players");
+        }
+    }
+
 
     private void replySuccessfully(@NotNull SlashCommandInteractionEvent event, @NotNull Conditions conditions) {
         event.reply("Usunięto warunek: Jeżeli " + conditions.getPlayersCount() +
                         " graczy przez " + conditions.getWithinMinutes() + " minut")
                 .setEphemeral(true)
                 .queue();
-        saveSettings();
+        saveConditions();
         log.info("Remove conditions {} for level: {}", conditions, level);
     }
 
@@ -189,10 +217,11 @@ public class MessageCall {
     }
 
     protected void pullMessagePerDay() {
-        Optional<String> optional = settingsService.find(settingsKeyPerDay);
+        SettingsKey key = getSettingsKeyMessagePerDay();
+        Optional<String> optional = settingsService.find(key);
         if (optional.isEmpty()) {
-            log.info("New settings property set {}={}", settingsKeyPerDay, 0);
-            settingsService.save(settingsKeyPerDay, 0);
+            log.info("New settings property set {}={}", key, 0);
+            settingsService.save(key, 0);
             return;
         }
         try {
@@ -201,24 +230,51 @@ public class MessageCall {
                 throw new IllegalArgumentException("Message per day " + messagePerDay);
             }
         } catch (IllegalArgumentException e) {
-            log.warn("Settings property \"{}\" incorrect. Set default value={}", settingsKeyPerDay, 0);
-            settingsService.save(settingsKeyPerDay, 0);
+            log.warn("Settings property \"{}\" incorrect. Set default value={}", key, 0);
+            settingsService.save(key, 0);
         }
     }
 
+    @NotNull
+    private SettingsKey getSettingsKeyMessagePerDay() {
+        SettingsKey key;
+        switch (level) {
+            case ONE -> key = SettingsKey.SEED_CALL_LEVEL_ONE;
+            case TWO -> key = SettingsKey.SEED_CALL_LEVEL_TWO;
+            case THREE -> key = SettingsKey.SEED_CALL_LEVEL_THREE;
+            case FOUR -> key = SettingsKey.SEED_CALL_LEVEL_FOUR;
+            default -> throw new UnsupportedOperationException(String.valueOf(level));
+        }
+        return key;
+    }
+
     private void pullMessagePerDayCount() {
-        Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT);
+        SettingsKey key = getSettingsKeyMessagePerDayCount();
+        Optional<String> optional = settingsService.find(key);
         if (optional.isEmpty()) {
-            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, 0);
+            settingsService.save(key, 0);
             this.messagePerDayCount = 0;
             return;
         }
         if (!optional.get().chars().allMatch(Character::isDigit)) {
-            settingsService.save(SettingsKey.SEED_CALL_LEVEL_ONE_COUNT, 0);
+            settingsService.save(key, 0);
             this.messagePerDayCount = 0;
             return;
         }
         this.messagePerDayCount = Integer.parseInt(optional.get());
+    }
+
+    @NotNull
+    private SettingsKey getSettingsKeyMessagePerDayCount() {
+        SettingsKey key;
+        switch (level) {
+            case ONE -> key = SettingsKey.SEED_CALL_LEVEL_ONE_COUNT;
+            case TWO -> key = SettingsKey.SEED_CALL_LEVEL_TWO_COUNT;
+            case THREE -> key = SettingsKey.SEED_CALL_LEVEL_THREE_COUNT;
+            case FOUR -> key = SettingsKey.SEED_CALL_LEVEL_FOUR_COUNT;
+            default -> throw new UnsupportedOperationException(String.valueOf(level));
+        }
+        return key;
     }
 
 
@@ -230,12 +286,12 @@ public class MessageCall {
             return;
         }
         messagePerDay = count;
-        settingsService.save(settingsKeyPerDay, count);
+        settingsService.save(getSettingsKeyMessagePerDay(), count);
         event.reply("Ustawiono maksymalną ilość wiadomości - " + count).setEphemeral(true).queue();
         log.info("Set max amount {} for level: {}", count, level.getLevel());
     }
 
-    public String getConditions() {
+    public String getConditionsAsString() {
         StringBuilder builder = new StringBuilder();
         builder.append("**Warunki dla levelu ").append(level.getLevel()).append(":**\n");
         if (conditions.size() == 0) {
@@ -320,7 +376,6 @@ public class MessageCall {
     public String toString() {
         return "MessageCall{" +
                 "conditions=" + conditions +
-                ", settingsKeyPerDay=" + settingsKeyPerDay +
                 ", type=" + level +
                 ", MAX_PER_DAY=" + MAX_PER_DAY +
                 ", messagePerDayCount=" + messagePerDayCount +
@@ -394,9 +449,11 @@ public class MessageCall {
         if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
             Role role = DiscordBot.getJda().getRoleById(roleId);
             if (role != null) {
-                builder.addField("", role.getAsMention(), false);
+                builder.addField("Pinguj role:", role.getAsMention(), false);
             }
         }
+        builder.addField("", getConditionsAsString(), false);
+        builder.addField("Ilość wiadomości:", String.valueOf(this.messagePerDay), false);
         if (messages.size() > 10) {
             builder.setFooter("Strona 1");
             event.replyEmbeds(builder.build()).setComponents(ActionRow.of(getButtons(messages))).setEphemeral(true).queue();
@@ -453,9 +510,11 @@ public class MessageCall {
         if (roleId != null && DiscordBot.getJda().getRoleById(roleId) != null) {
             Role role = DiscordBot.getJda().getRoleById(roleId);
             if (role != null) {
-                builder.addField("", role.getAsMention(), false);
+                builder.addField("Pinguj role:", role.getAsMention(), false);
             }
         }
+        builder.addField("", getConditionsAsString(), false);
+        builder.addField("Ilość wiadomości:", String.valueOf(this.messagePerDay), false);
         builder.setFooter("Strona " + page);
         event.getMessage().editMessageEmbeds(builder.build()).queue();
     }
@@ -469,13 +528,72 @@ public class MessageCall {
         return builder.toString();
     }
 
-    public void setRole(String roleId) {
+    public void saveRoleId(String roleId) {
+        removeRoleIdFromSettings();
         this.roleId = roleId;
-        settingsService.save(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role", roleId);
+        if (this.roleId != null) {
+            settingsService.save(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role", roleId);
+        }
+    }
+
+    public void removeRoleIdFromSettings() {
+        settingsService.deleteByKey(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role");
     }
 
     public void deleteRole() {
         this.roleId = null;
         settingsService.deleteByKey(SettingsKey.SEED_CALL_LEVEL.getKey() + "." + level.getLevel() + ".role");
+    }
+
+    public void setMessagesToTempLevel() {
+        List<Message> messages = messageService.findByLevel(level);
+        for (Message message : messages) {
+            message.setLevel(Levels.TEMP);
+        }
+        messageService.saveAll(messages);
+    }
+
+    public void applyNew(@NotNull MessageCall messageCall) {
+        applyNewMessagePerDay(messageCall.getMessagePerDay());
+        applyNewMessagePerDayCount(messageCall.getMessagePerDayCount());
+        saveRoleId(messageCall.getRoleId());
+        applyNewConditions(messageCall.getConditions());
+        List<Message> messages = messageCall.pullMessages();
+        applyNewMessages(messages);
+    }
+
+    public void applyNewMessagePerDay(int messagePerDay) {
+        this.messagePerDay = messagePerDay;
+        SettingsKey keyMessagePerDay = getSettingsKeyMessagePerDay();
+        settingsService.save(keyMessagePerDay, this.messagePerDay);
+    }
+
+    public void applyNewMessagePerDayCount(int messagePerDayCount) {
+        this.messagePerDayCount = messagePerDayCount;
+        SettingsKey keyMessagePerDayCount = getSettingsKeyMessagePerDayCount();
+        settingsService.save(keyMessagePerDayCount, this.messagePerDayCount);
+    }
+
+
+    public void applyNewConditions(List<Conditions> conditions) {
+        this.conditions.clear();
+        this.conditions.addAll(conditions);
+        saveConditions();
+    }
+
+    public void applyNewMessages(@NotNull List<Message> messages) {
+        for (Message message : messages) {
+            message.setLevel(level);
+        }
+        messageService.saveAll(messages);
+    }
+
+    public void applyNewFromTemp(@NotNull MessageCall messageCall) {
+        applyNewMessagePerDay(messageCall.getMessagePerDay());
+        applyNewMessagePerDayCount(messageCall.getMessagePerDayCount());
+        applyNewConditions(messageCall.getConditions());
+        saveRoleId(messageCall.getRoleId());
+        List<Message> messages = messageService.findByLevel(Levels.TEMP);
+        applyNewMessages(messages);
     }
 }

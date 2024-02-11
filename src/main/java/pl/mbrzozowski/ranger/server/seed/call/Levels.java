@@ -8,7 +8,8 @@ public enum Levels {
     TWO(2),
     THREE(3),
     FOUR(4),
-    END(0);
+    END(0),
+    TEMP(1000);
 
     private final int level;
     private static final Levels[] ENUMS = Levels.values();

@@ -129,6 +129,8 @@ public class SlashCommandListener extends ListenerAdapter {
             seedCallService.deleteRole(event);
         } else if (name.equals(SEED_CALL_CHANNEL.getName())) {
             seedCallService.setChannel(event);
+        } else if (name.equals(SEED_CALL_REPLACEMENT_LEVELS.getName())) {
+            seedCallService.replacementLevels(event);
         }
     }
 

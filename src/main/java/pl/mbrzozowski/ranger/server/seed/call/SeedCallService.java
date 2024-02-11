@@ -48,7 +48,7 @@ public class SeedCallService implements SlashCommand {
         this.settingsService = settingsService;
         createLevels();
         pullOnOff();
-        pullLevels();
+        pullLastLevel();
         pullLast();
         pullChannelId();
     }
@@ -112,10 +112,9 @@ public class SeedCallService implements SlashCommand {
     }
 
     private void createLevels() {
-        LevelFactory levelFactory = new LevelFactory();
         Levels[] levels = Levels.values();
         for (int i = 0; i < messageCalls.length; i++) {
-            messageCalls[i] = levelFactory.getLevelOfMessageCall(messageService, levels[i], settingsService);
+            messageCalls[i] = new MessageCall(settingsService, messageService, levels[i]);
         }
     }
 
@@ -127,7 +126,7 @@ public class SeedCallService implements SlashCommand {
         });
     }
 
-    private void pullLevels() {
+    private void pullLastLevel() {
         Optional<String> optional = settingsService.find(SettingsKey.SEED_CALL_LEVEL);
         if (optional.isEmpty()) {
             log.info("No settings property");
@@ -217,6 +216,15 @@ public class SeedCallService implements SlashCommand {
         commandData.add(
                 Commands.slash(SEED_CALL_MESSAGE_INFO.getName(), SEED_CALL_MESSAGE_INFO.getDescription())
                         .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Dla którego levelu chcesz wyświetlić ustawione wiadomości.")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .setDefaultPermissions(defaultMemberPermissions));
+        commandData.add(
+                Commands.slash(SEED_CALL_REPLACEMENT_LEVELS.getName(), SEED_CALL_REPLACEMENT_LEVELS.getDescription())
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL.getName(), "Który level zamienić?")
+                                .addChoices(getChoicesForLevels())
+                                .setRequired(true))
+                        .addOptions(new OptionData(OptionType.STRING, LEVEL_SECOND.getName(), "Z którym levelem chcesz dokonać zmiany?")
                                 .addChoices(getChoicesForLevels())
                                 .setRequired(true))
                         .setDefaultPermissions(defaultMemberPermissions));
@@ -345,7 +353,7 @@ public class SeedCallService implements SlashCommand {
     public void conditionsInfo(@NotNull SlashCommandInteractionEvent event) {
         StringBuilder builder = new StringBuilder();
         for (MessageCall messageCall : messageCalls) {
-            builder.append(messageCall.getConditions());
+            builder.append(messageCall.getConditionsAsString());
         }
         event.reply(builder.toString()).setEphemeral(true).queue();
         log.info("Conditions info sent");
@@ -484,7 +492,7 @@ public class SeedCallService implements SlashCommand {
             return;
         }
         int level = Objects.requireNonNull(event.getOption(LEVEL.getName())).getAsInt();
-        messageCalls[level - 1].setRole(roleId);
+        messageCalls[level - 1].saveRoleId(roleId);
         event.reply("Rola ustawiona dla levelu " + level).setEphemeral(true).queue();
     }
 
@@ -506,6 +514,20 @@ public class SeedCallService implements SlashCommand {
         settingsService.save(SettingsKey.SEED_CALL_CHANNEL_ID, channelId);
         event.reply("Kanał *" + textChannel.getName() + "* ustawiony.").setEphemeral(true).queue();
         log.info("Text channel set: {}", textChannel);
+    }
+
+    public void replacementLevels(@NotNull SlashCommandInteractionEvent event) {
+        int indexLevelTo = Objects.requireNonNull(event.getOption(LEVEL.getName())).getAsInt() - 1;
+        int indexLevelFor = Objects.requireNonNull(event.getOption(LEVEL_SECOND.getName())).getAsInt() - 1;
+        MessageCall messageCallsTemp = messageCalls[indexLevelFor];
+        messageCalls[indexLevelFor].setMessagesToTempLevel();
+        messageCalls[indexLevelFor].removeAllConditionsFromSettings();
+        Levels[] levels = Levels.values();
+        messageCalls[indexLevelFor] = new MessageCall(settingsService, messageService, levels[indexLevelFor]);
+        messageCalls[indexLevelFor].applyNew(messageCalls[indexLevelTo]);
+        messageCalls[indexLevelTo] = new MessageCall(settingsService, messageService, levels[indexLevelTo]);
+        messageCalls[indexLevelTo].applyNewFromTemp(messageCallsTemp);
+        event.reply("Zamieniono level " + (indexLevelTo + 1) + " z levelem " + (indexLevelFor + 1)).setEphemeral(true).queue();
     }
 }
 

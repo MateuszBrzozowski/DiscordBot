@@ -47,8 +47,10 @@ public enum SlashCommands {
     SEED_CALL_ROLE_ADD("seed-call-ustaw-role", "Dodaj role ID dla levelu którą mam oznaczyć"),
     SEED_CALL_ROLE_REMOVE("seed-call-usuń-role", "Usuwa role z levelu"),
     SEED_CALL_CHANNEL("seed-call-kanał", "Ustawia kanał na którym mają być wysyłane wiadomości"),
+    SEED_CALL_REPLACEMENT_LEVELS("seed-call-zmiana-leveli", "Zamienia ze sobą levele"),
     ROLE_ID("role-id", "ID Roli"),
     LEVEL("level", "Level"),
+    LEVEL_SECOND("level-second", "Level"),
     COUNT("count", "Ilość");
 
     private final String name;

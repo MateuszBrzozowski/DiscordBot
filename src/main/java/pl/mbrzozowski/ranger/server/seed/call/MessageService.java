@@ -16,6 +16,10 @@ public class MessageService {
         messageRepository.save(message);
     }
 
+    public void saveAll(List<Message> messages) {
+        messageRepository.saveAll(messages);
+    }
+
     public List<Message> findByLevel(Levels level) {
         return messageRepository.findByLevel(level);
     }
