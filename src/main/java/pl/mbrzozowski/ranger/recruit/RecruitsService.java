@@ -281,18 +281,6 @@ public class RecruitsService implements SlashCommand {
         }
     }
 
-    private void addClanMemberRoleFromUserId(String userId) {
-        Guild guild = RangersGuild.getGuild();
-        if (guild != null) {
-            Member member = guild.getMemberById(userId);
-            Role roleClanMember = guild.getRoleById(RoleID.CLAN_MEMBER_ID);
-            boolean hasUserRole = Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID);
-            if (!hasUserRole && roleClanMember != null && member != null) {
-                guild.addRoleToMember(member, roleClanMember).queue();
-            }
-        }
-    }
-
     public void deleteChannel(@NotNull Recruit recruit) {
         TextChannel textChannel = DiscordBot.getJda().getTextChannelById(recruit.getChannelId());
         if (textChannel != null) {
@@ -375,8 +363,7 @@ public class RecruitsService implements SlashCommand {
                 Guild guild = RangersGuild.getGuild();
                 if (guild != null) {
                     removeSmallRInTag(recruit.getUserId(), guild);
-                    removeRecruitRoleFromUserID(recruit.getUserId());
-                    addClanMemberRoleFromUserId(recruit.getUserId());
+                    modifyRoleRecruitToClanMember(recruit.getUserId());
                     recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
                     recruit.setRecruitmentResult(RecruitmentResult.POSITIVE);
                     recruitRepository.save(recruit);
@@ -387,6 +374,23 @@ public class RecruitsService implements SlashCommand {
             }
         }
         return false;
+    }
+
+    private void modifyRoleRecruitToClanMember(String userId) {
+        Guild guild = RangersGuild.getGuild();
+        if (guild == null) {
+            log.error("Null Guild. Cannot modify roles");
+            return;
+        }
+        Member member = RangersGuild.getMemberByID(userId);
+        if (member == null) {
+            log.warn("Null member. Cannot modify roles");
+            return;
+        }
+        Role clanMemberRole = RangersGuild.getRoleById(RoleID.CLAN_MEMBER_ID);
+        Role recruitRole = RangersGuild.getRoleById(RoleID.RECRUIT_ID);
+        guild.modifyMemberRoles(member, clanMemberRole, recruitRole).queue();
+        log.info("Role changes recruit to member for Server member {}", member);
     }
 
     public void negativeResult(@NotNull ButtonInteractionEvent event) {

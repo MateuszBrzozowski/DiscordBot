@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.guild;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -87,6 +88,15 @@ public class RangersGuild {
             return null;
         }
         return guild.getRoleById(roleId);
+    }
+
+    @Nullable
+    public static Member getMemberByID(String userId) {
+        Guild guild = getGuild();
+        if (guild == null) {
+            return null;
+        }
+        return guild.getMemberById(userId);
     }
 
     public enum CategoryId {
