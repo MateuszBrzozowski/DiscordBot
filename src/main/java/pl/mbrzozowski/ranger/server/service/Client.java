@@ -22,8 +22,9 @@ public class Client {
     private String channelId;
     @Column(length = 1000)
     private String userName;
+    @Column(columnDefinition = "bit(1) default FALSE")
     private Boolean isClose = false;
-    @Column(columnDefinition = "tinyint(1) default 1")
+    @Column(columnDefinition = "bit(1) default TRUE")
     private Boolean autoClose = true;
     @Nullable
     private LocalDateTime closeTimestamp;

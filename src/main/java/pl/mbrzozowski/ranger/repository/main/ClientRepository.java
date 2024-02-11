@@ -17,4 +17,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     void deleteByChannelId(String channelID);
 
     Optional<Client> findByChannelId(String channelID);
+
+    List<Client> findByAutoCloseTrue();
+
+    List<Client> findByIsCloseFalse();
 }

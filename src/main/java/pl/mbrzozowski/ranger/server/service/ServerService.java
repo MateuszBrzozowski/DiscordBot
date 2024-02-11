@@ -200,6 +200,14 @@ public class ServerService implements SlashCommand {
         return clientRepository.findAll();
     }
 
+    public List<Client> findByIsCloseFalse() {
+        return clientRepository.findByIsCloseFalse();
+    }
+
+    public List<Client> findByAutoCloseTrue() {
+        return clientRepository.findByAutoCloseTrue();
+    }
+
     @Override
     public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(SERVER_SERVICE_DELETE_CHANNEL.getName(), SERVER_SERVICE_DELETE_CHANNEL.getDescription())

@@ -22,9 +22,9 @@ public class ServerServiceAutoDelete extends CleanerChannel {
     @Override
     public void run() {
         log.info("Server service channel deleting init");
-        List<Client> clients = serverService.findAll();
+        List<Client> clients = serverService.findByIsCloseFalse();
         clients = clients.stream()
-                .filter(client -> client.getIsClose() && client.getCloseTimestamp() != null)
+                .filter(client -> client.getCloseTimestamp() != null)
                 .filter(client -> client.getCloseTimestamp().isBefore(LocalDateTime.now().minusDays(delay)))
                 .toList();
         for (Client client : clients) {

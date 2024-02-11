@@ -57,7 +57,6 @@ public class EmbedInfo extends EmbedCreator {
         builder.setDescription("Kanał zamknięty przez " + signature + ".");
         channel.sendMessageEmbeds(builder.build())
                 .setComponents(ActionRow.of(getButtons(signature)))
-                .setActionRow()
                 .queue();
     }
 
