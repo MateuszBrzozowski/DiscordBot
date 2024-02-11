@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "event")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,4 +29,6 @@ public class Event {
     private List<Player> players;
     @Enumerated(EnumType.STRING)
     private EventFor eventFor;
+    @Column(name = "groupFor", columnDefinition = "tinyint(1) default 1")
+    private int groupFor;
 }

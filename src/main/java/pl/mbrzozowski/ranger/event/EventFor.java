@@ -8,18 +8,24 @@ import java.util.Collection;
 import java.util.List;
 
 public enum EventFor {
-    CLAN_MEMBER("Clan Member"),
-    RECRUIT("Rekruci"),
-    CLAN_MEMBER_AND_RECRUIT("Clan Member i rekruci"),
-    TACTICAL_GROUP("Grupa taktyczna"),
-    SQ_EVENTS("Squad Events"),
-    CLAN_COUNCIL("Rada klanu");
+    CLAN_MEMBER("Clan Member", 1),
+    RECRUIT("Rekruci", 1),
+    CLAN_MEMBER_AND_RECRUIT("Clan Member i rekruci", 1),
+    TACTICAL_GROUP("Grupa taktyczna", 1),
+    SQ_EVENTS("Squad Events", 2),
+    CLAN_COUNCIL("Rada klanu", 1);
 
     private static final EventFor[] ENUMS = EventFor.values();
     private final String value;
+    private final int group;
 
-    EventFor(String value) {
+    EventFor(String value, int group) {
         this.value = value;
+        this.group = group;
+    }
+
+    public int getGroup() {
+        return group;
     }
 
     public static boolean isByValue(String value) {

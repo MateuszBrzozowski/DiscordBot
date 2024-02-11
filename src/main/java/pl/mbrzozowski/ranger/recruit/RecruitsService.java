@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.Constants;
@@ -34,7 +35,6 @@ import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
-import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.awt.*;
 import java.time.LocalDateTime;
@@ -53,11 +53,10 @@ public class RecruitsService implements SlashCommand {
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
-    private final RecruitRepository recruitRepository;
-    private final RecruitBlackListService recruitBlackListService;
     private final WaitingRecruitRepository waitingRecruitRepository;
-    private final SettingsService settingsService;
-//    private final int MAX_CHANNELS = 50;
+    private final RecruitBlackListService recruitBlackListService;
+    private final RecruitRepository recruitRepository;
+    private final EventService eventService;
 
     /**
      * @param userName Nazwa użytkownika
@@ -428,6 +427,7 @@ public class RecruitsService implements SlashCommand {
                     recruitRepository.save(recruit);
                     setRedCircleInChannelName(channel);
                     EmbedInfo.endNegative(drillId, recruit.getUserId(), channel);
+                    eventService.deletePlayerForEventsBelowSecondGroup(recruit.getUserId());
                     return true;
                 }
             }

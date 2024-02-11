@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.bot.events;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -9,6 +10,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.members.GuildMembersService;
@@ -16,15 +18,12 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GuildMemberListener extends ListenerAdapter {
 
-    private final RecruitsService recruitsService;
     private final GuildMembersService guildMembersService;
-
-    public GuildMemberListener(RecruitsService recruitsService, GuildMembersService guildMembersService) {
-        this.recruitsService = recruitsService;
-        this.guildMembersService = guildMembersService;
-    }
+    private final RecruitsService recruitsService;
+    private final EventService eventService;
 
     @Override
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
@@ -38,6 +37,7 @@ public class GuildMemberListener extends ListenerAdapter {
     public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
         log.info(event.getUser().getName() + " - Guild member leave");
         guildMembersService.save();
+        eventService.deletePlayerFromActiveEvents(event.getUser().getId());
     }
 
     private void addRole(String userID) {

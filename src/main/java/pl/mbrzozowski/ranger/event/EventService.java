@@ -74,8 +74,12 @@ public class EventService implements SlashCommand {
         return eventRepository.findByIsActive(true);
     }
 
-    public boolean isActiveEvents() {
-        return eventRepository.findAll().size() > 0;
+    private void saveAll(List<Event> events) {
+        eventRepository.saveAll(events);
+    }
+
+    private List<Event> findByIsActiveAndFirstGroup() {
+        return eventRepository.findByIsActiveAndFirstGroup();
     }
 
     public Optional<Event> findEventByMsgId(String id) {
@@ -83,9 +87,12 @@ public class EventService implements SlashCommand {
     }
 
     public void deleteByMsgId(String messageId) {
-        timers.cancelByMsgId(messageId);
-        eventRepository.deleteByMsgId(messageId);
-        log.info("Event deleted by messageId(messageId={})", messageId);
+        Optional<Event> eventOptional = findEventByMsgId(messageId);
+        if (eventOptional.isPresent()) {
+            timers.cancelByMsgId(messageId);
+            eventRepository.deleteByMsgId(messageId);
+            log.info("Deleted event by messageId(messageId={})", messageId);
+        }
     }
 
     public void deleteByChannelId(String channelId) {
@@ -202,7 +209,9 @@ public class EventService implements SlashCommand {
                 .channelId(channelId)
                 .isActive(true)
                 .date(eventRequest.getDateTime())
-                .eventFor(eventRequest.getEventFor()).build();
+                .eventFor(eventRequest.getEventFor())
+                .groupFor(eventRequest.getEventFor().getGroup())
+                .build();
         save(event);
         CreateReminder reminder = new CreateReminder(event, this, timers, usersReminderService);
         reminder.create();
@@ -466,12 +475,12 @@ public class EventService implements SlashCommand {
         }
     }
 
-    public boolean isMaxActiveEvents() {
+    boolean isMaxActiveEvents() {
         List<Event> all = findByIsActive();
         return all.size() >= MAX_ACTIVE_EVENTS;
     }
 
-    public boolean isSpaceInCategory() {
+    boolean isSpaceInCategory() {
         return RangersGuild.isSpaceInCategory(RangersGuild.CategoryId.EVENT);
     }
 
@@ -488,5 +497,31 @@ public class EventService implements SlashCommand {
         commandData.add(Commands.slash(FIX_EVENT_EMBED.getName(), FIX_EVENT_EMBED.getDescription())
                 .addOption(OptionType.STRING, "id", "id wiadomości", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+    }
+
+    public void deletePlayerForEventsBelowSecondGroup(String userId) {
+        List<Event> events = findByIsActiveAndFirstGroup();
+        deletePlayerFromEvents(userId, events);
+        saveAll(events);
+    }
+
+    public void deletePlayerFromActiveEvents(String userId) {
+        List<Event> events = findByIsActive();
+        deletePlayerFromEvents(userId, events);
+        saveAll(events);
+    }
+
+    private void deletePlayerFromEvents(String userId, @NotNull List<Event> events) {
+        for (Event event : events) {
+            List<Player> players = event.getPlayers();
+            boolean isRemoved = players.removeIf(player -> player.getUserId().equals(userId));
+            if (isRemoved) {
+                log.info("Player id={} removed from event {}", userId, event.getName());
+                try {
+                    updateEmbed(event);
+                } catch (FullListException ignore) {
+                }
+            }
+        }
     }
 }
