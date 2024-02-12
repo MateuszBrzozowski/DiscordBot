@@ -10,6 +10,7 @@ import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
+import pl.mbrzozowski.ranger.games.RandomTimeout;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
@@ -72,6 +73,7 @@ public class GuildListener extends ListenerAdapter {
         Essa.getInstance().getSlashCommandsList(commandData);
         new Dice().getSlashCommandsList(commandData);
         new Coin().getSlashCommandsList(commandData);
+        new RandomTimeout().getSlashCommandsList(commandData);
     }
 
     private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {

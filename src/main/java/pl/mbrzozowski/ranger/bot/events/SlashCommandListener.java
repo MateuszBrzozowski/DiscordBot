@@ -12,6 +12,7 @@ import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
+import pl.mbrzozowski.ranger.games.RandomTimeout;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
@@ -65,6 +66,8 @@ public class SlashCommandListener extends ListenerAdapter {
             Essa.getInstance().start(event);
         } else if (name.equals(REP.getName())) {
             reputationService.show(event);
+        } else if (name.equals(RANDOM_TIMEOUT.getName())) {
+            new RandomTimeout().start(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
         } else if (name.equals(GIVEAWAY_END.getName())) {
