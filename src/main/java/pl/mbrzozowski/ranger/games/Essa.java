@@ -1,20 +1,40 @@
 package pl.mbrzozowski.ranger.games;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.Math;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 
-public class Essa {
+import static pl.mbrzozowski.ranger.guild.SlashCommands.ESSA;
 
-    private static final HashSet<EssaPlayer> players = new HashSet<>();
+public class Essa implements SlashCommandGame, SlashCommand {
 
-    public static void start(@NotNull SlashCommandInteractionEvent event) {
+    private final HashSet<EssaPlayer> players = new HashSet<>();
+    private static final Essa instance = new Essa();
+
+    private Essa() {
+    }
+
+    public static Essa getInstance() {
+        return instance;
+    }
+
+    @Override
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(ESSA.getName(), ESSA.getDescription()));
+    }
+
+    @Override
+    public void start(@NotNull SlashCommandInteractionEvent event) {
         EssaPlayer essaPlayer = new EssaPlayer(LocalDate.now(), event.getUser().getId(), 0);
         Optional<EssaPlayer> existPlayer = isExist(essaPlayer);
         if (existPlayer.isEmpty()) {
@@ -29,7 +49,7 @@ public class Essa {
     }
 
     @NotNull
-    protected static Optional<EssaPlayer> isExist(EssaPlayer essaPlayer) {
+    protected Optional<EssaPlayer> isExist(EssaPlayer essaPlayer) {
         players.removeIf(player -> player.getDate() != null && !player.getDate().equals(essaPlayer.getDate()));
         return players
                 .stream()
@@ -37,11 +57,11 @@ public class Essa {
                 .findFirst();
     }
 
-    private static void showResult(@NotNull SlashCommandInteractionEvent event, int number) {
+    private void showResult(@NotNull SlashCommandInteractionEvent event, int number) {
         event.reply("<@" + event.getUser().getId() + "> Twój dzisiejszy poziom essy wynosi " + number + "%").queue();
     }
 
-    protected static int roundTo5(int number) {
+    protected int roundTo5(int number) {
         if (number >= 0 && number <= 100) {
             return Math.roundTo5(number);
         } else {
@@ -49,7 +69,7 @@ public class Essa {
         }
     }
 
-    private static int drawNumber() {
+    private int drawNumber() {
         Random random = new Random();
         return random.nextInt(101);
     }

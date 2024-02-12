@@ -2,20 +2,32 @@ package pl.mbrzozowski.ranger.games;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
 
-public class Dice {
+import static pl.mbrzozowski.ranger.guild.SlashCommands.DICE;
 
-    public static void start(@NotNull SlashCommandInteractionEvent event) {
+public class Dice implements SlashCommandGame, SlashCommand {
+
+    @Override
+    public void start(@NotNull SlashCommandInteractionEvent event) {
         int number = drawNumber();
         showResult(event, number);
     }
 
-    private static void showResult(@NotNull SlashCommandInteractionEvent event, int number) {
+    @Override
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.slash(DICE.getName(), DICE.getDescription()));
+    }
+
+    private void showResult(@NotNull SlashCommandInteractionEvent event, int number) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.WHITE);
         builder.setThumbnail(EmbedSettings.THUMBNAIL_DICE);
@@ -23,7 +35,7 @@ public class Dice {
         event.reply(event.getUser().getAsMention()).setEmbeds(builder.build()).queue();
     }
 
-    private static int drawNumber() {
+    private int drawNumber() {
         Random random = new Random();
         return random.nextInt(6) + 1;
     }

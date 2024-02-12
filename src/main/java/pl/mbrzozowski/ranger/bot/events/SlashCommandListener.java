@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
@@ -23,8 +21,6 @@ import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
 import pl.mbrzozowski.ranger.stats.ServerStatsService;
-
-import java.util.ArrayList;
 
 import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
@@ -62,11 +58,11 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(STATS_DATE.getName())) {
             serverStatsService.setDate(event);
         } else if (name.equals(DICE.getName())) {
-            Dice.start(event);
+            new Dice().start(event);
         } else if (name.equals(COIN.getName())) {
-            Coin.start(event);
+            new Coin().start(event);
         } else if (name.equals(ESSA.getName())) {
-            Essa.start(event);
+            Essa.getInstance().start(event);
         } else if (name.equals(REP.getName())) {
             reputationService.show(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
@@ -136,11 +132,5 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(SEED_CALL_REPLACEMENT_LEVELS.getName())) {
             seedCallService.replacementLevels(event);
         }
-    }
-
-    public void getCommandsData(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.slash(DICE.getName(), DICE.getDescription()));
-        commandData.add(Commands.slash(COIN.getName(), COIN.getDescription()));
-        commandData.add(Commands.slash(ESSA.getName(), ESSA.getDescription()));
     }
 }
