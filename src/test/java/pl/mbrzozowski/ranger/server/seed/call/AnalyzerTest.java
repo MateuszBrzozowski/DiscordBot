@@ -23,7 +23,7 @@ class AnalyzerTest {
 
     @Test
     void analyzeConditionsWithPlayerCount_PlayersAboveConditions_ReturnTrue() {
-        List<PlayerCounts> players = new ArrayList<>(List.of(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC).minusMinutes(4), 41 - Analyzer.OFFSET, null, null, null, null)));
+        List<PlayerCounts> players = new ArrayList<>(List.of(new PlayerCounts(1, LocalDateTime.now(ZoneOffset.UTC).minusMinutes(4), 41, null, null, null, null)));
         List<Conditions> conditions = new ArrayList<>(List.of(new Conditions(40, 5)));
         Assertions.assertTrue(new Analyzer().analyzeConditionsWithPlayerCount(players, conditions));
     }
