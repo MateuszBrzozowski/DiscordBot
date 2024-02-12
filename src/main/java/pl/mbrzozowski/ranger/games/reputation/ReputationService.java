@@ -60,7 +60,7 @@ public class ReputationService implements SlashCommand, ContextCommand {
             return;
         }
         if (isAdded == 2) {
-            event.reply("Sam sobie? Oszalałeś chyba!").setEphemeral(true).queue();
+            event.reply("Sam sobie? Oszalałeś chyba!").queue();
         } else if (isAdded == 3) {
             event.reply("Poczekaj chwilę zanim dasz pkt temu samemu użytkownikowi!").setEphemeral(true).queue();
         }
@@ -72,8 +72,7 @@ public class ReputationService implements SlashCommand, ContextCommand {
             return 2;
         }
         ReputationGiving reputationGiving = new ReputationGiving(user.getId(), targetUser.getId(), LocalDateTime.now());
-        reputationGivings.removeIf(rpg -> rpg.equals(reputationGiving) &&
-                rpg.localDateTime().isBefore(LocalDateTime.now().minusMinutes(10)));
+        reputationGivings.removeIf(rpg -> rpg.localDateTime().isBefore(LocalDateTime.now().minusMinutes(10)));
         if (reputationGivings.contains(reputationGiving)) {
             log.info("User gave rep within 10 min");
             return 3;
@@ -106,7 +105,7 @@ public class ReputationService implements SlashCommand, ContextCommand {
     }
 
     private void show(@NotNull SlashCommandInteractionEvent event, int points) {
-        event.reply("### Twoje punkty reputacji: " + points).setEphemeral(true).queue();
+        event.reply("### Twoje punkty reputacji: " + points).queue();
     }
 
     @Override
