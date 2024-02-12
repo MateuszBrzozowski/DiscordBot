@@ -44,7 +44,6 @@ public class GuildListener extends ListenerAdapter {
         if (event.getGuild().equals(RangersGuild.getGuild())) {
             ArrayList<CommandData> commandData = new ArrayList<>();
             getCommandList(commandData);
-            getContextMenu(commandData);
             recruitsService.cleanDB(event);
             implCleaner.autoDeleteChannels();
             implCleaner.autoCloseChannel();
@@ -53,12 +52,12 @@ public class GuildListener extends ListenerAdapter {
         }
     }
 
-    private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.context(Command.Type.USER, ContextCommands.REPUTATION.getName()));
-        commandData.add(Commands.message(ContextCommands.REPUTATION.getName()));
+    private void getCommandList(ArrayList<CommandData> commandData) {
+        getSlashCommands(commandData);
+        getContextMenu(commandData);
     }
 
-    private void getCommandList(ArrayList<CommandData> commandData) {
+    private void getSlashCommands(ArrayList<CommandData> commandData) {
         recruitBlackListService.getCommandsList(commandData);
         slashCommandListener.getCommandsData(commandData);
         serverStatsService.getCommandsList(commandData);
@@ -69,6 +68,11 @@ public class GuildListener extends ListenerAdapter {
         eventService.getCommandsList(commandData);
         roleService.getCommandsList(commandData);
         rankService.getCommandsList(commandData);
+    }
+
+    private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.context(Command.Type.USER, ContextCommands.REPUTATION.getName()));
+        commandData.add(Commands.message(ContextCommands.REPUTATION.getName()));
     }
 
 }
