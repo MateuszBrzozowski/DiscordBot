@@ -523,7 +523,7 @@ public class ServerStatsService implements SlashCommand {
 
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(STEAM_PROFILE.getName(), STEAM_PROFILE.getDescription())
                 .addOption(OptionType.STRING, STEAM_PROFILE_64.getName(), STEAM_PROFILE_64.getDescription(), true));
         commandData.add(Commands.slash(STATS.getName(), STATS.getDescription()));

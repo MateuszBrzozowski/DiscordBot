@@ -639,7 +639,7 @@ public class RecruitsService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY.getName(), RECRUIT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));

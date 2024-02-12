@@ -209,7 +209,7 @@ public class ServerService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(SERVER_SERVICE_DELETE_CHANNEL.getName(), SERVER_SERVICE_DELETE_CHANNEL.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));

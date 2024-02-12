@@ -485,7 +485,7 @@ public class EventService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) throws IllegalArgumentException {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) throws IllegalArgumentException {
         commandData.add(Commands.slash(EVENT_DELETE_CHANNEL_DELAY.getName(), EVENT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));

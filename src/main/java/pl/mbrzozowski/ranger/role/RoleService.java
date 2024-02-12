@@ -55,7 +55,7 @@ public class RoleService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         addRoleCommand(commandData);
         addAddingRoleToBot(commandData);
         addRemoveRoleFromBot(commandData);

@@ -57,7 +57,7 @@ public class RecruitBlackListService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RECRUIT_BLACK_LIST_ADD.getName(), RECRUIT_BLACK_LIST_ADD.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
                 .addOption(OptionType.STRING, "id", "User ID", true)

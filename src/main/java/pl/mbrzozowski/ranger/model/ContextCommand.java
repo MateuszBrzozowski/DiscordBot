@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.util.ArrayList;
 
-public interface SlashCommand {
+public interface ContextCommand {
 
-    void getSlashCommandsList(ArrayList<CommandData> commandData);
+    void getContextCommandsList(ArrayList<CommandData> commandData);
 }

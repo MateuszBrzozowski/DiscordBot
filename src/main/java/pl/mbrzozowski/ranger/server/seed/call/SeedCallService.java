@@ -169,7 +169,7 @@ public class SeedCallService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         Set<Command.Choice> choiceList = getChoices();
         DefaultMemberPermissions defaultMemberPermissions = DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL);
         commandData.add(Commands.slash(SEED_CALL_AMOUNT.getName(), SEED_CALL_AMOUNT.getDescription())

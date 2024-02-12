@@ -637,7 +637,7 @@ public class GiveawayService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_CREATE.getName(), GIVEAWAY_CREATE.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
         commandData.add(net.dv8tion.jda.api.interactions.commands.build.Commands.slash(GIVEAWAY_END.getName(), GIVEAWAY_END.getDescription())

@@ -293,7 +293,7 @@ public class RankService implements SlashCommand {
     }
 
     @Override
-    public void getCommandsList(@NotNull ArrayList<CommandData> commandData) {
+    public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(RANK_ROLE_ADD.getName(), RANK_ROLE_ADD.getDescription())
                 .addOption(OptionType.STRING, "nazwa", "Nazwa stopnia", true)
                 .addOption(OptionType.STRING, "discord-id", "Discord ID stopnia", true)

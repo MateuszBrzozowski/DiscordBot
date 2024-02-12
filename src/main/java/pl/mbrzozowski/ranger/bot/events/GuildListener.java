@@ -3,14 +3,12 @@ package pl.mbrzozowski.ranger.bot.events;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
-import pl.mbrzozowski.ranger.guild.ContextCommands;
+import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
@@ -30,6 +28,7 @@ public class GuildListener extends ListenerAdapter {
     private final RecruitBlackListService recruitBlackListService;
     private final SlashCommandListener slashCommandListener;
     private final ServerStatsService serverStatsService;
+    private final ReputationService reputationService;
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
@@ -58,21 +57,21 @@ public class GuildListener extends ListenerAdapter {
     }
 
     private void getSlashCommands(ArrayList<CommandData> commandData) {
-        recruitBlackListService.getCommandsList(commandData);
+        recruitBlackListService.getSlashCommandsList(commandData);
+        serverStatsService.getSlashCommandsList(commandData);
+        reputationService.getSlashCommandsList(commandData);
         slashCommandListener.getCommandsData(commandData);
-        serverStatsService.getCommandsList(commandData);
-        recruitsService.getCommandsList(commandData);
-        giveawayService.getCommandsList(commandData);
-        seedCallService.getCommandsList(commandData);
-        serverService.getCommandsList(commandData);
-        eventService.getCommandsList(commandData);
-        roleService.getCommandsList(commandData);
-        rankService.getCommandsList(commandData);
+        recruitsService.getSlashCommandsList(commandData);
+        giveawayService.getSlashCommandsList(commandData);
+        seedCallService.getSlashCommandsList(commandData);
+        serverService.getSlashCommandsList(commandData);
+        eventService.getSlashCommandsList(commandData);
+        roleService.getSlashCommandsList(commandData);
+        rankService.getSlashCommandsList(commandData);
     }
 
     private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {
-        commandData.add(Commands.context(Command.Type.USER, ContextCommands.REPUTATION.getName()));
-        commandData.add(Commands.message(ContextCommands.REPUTATION.getName()));
+        reputationService.getContextCommandsList(commandData);
     }
 
 }

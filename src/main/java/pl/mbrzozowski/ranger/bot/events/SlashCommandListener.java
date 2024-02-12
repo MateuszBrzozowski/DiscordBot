@@ -15,6 +15,7 @@ import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
+import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
@@ -36,6 +37,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
     private final ServerStatsService serverStatsService;
+    private final ReputationService reputationService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
     private final EventService eventService;
@@ -65,6 +67,8 @@ public class SlashCommandListener extends ListenerAdapter {
             Coin.start(event);
         } else if (name.equals(ESSA.getName())) {
             Essa.start(event);
+        } else if (name.equals(REP.getName())) {
+            reputationService.show(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
         } else if (name.equals(GIVEAWAY_END.getName())) {

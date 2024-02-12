@@ -9,6 +9,7 @@ public enum SlashCommands {
     DICE("kostka", "Rzut kością do gry"),
     COIN("moneta", "Rzut monetą"),
     ESSA("essa", "Sprawdza twój dzisiejszy poziom essy"),
+    REP("rep", "Twoje punkty reputacji"),
 
     DISCORD_ROLE_OPTION_NAME_ID("id", "Discord ID dodawanej roli"),
     DISCORD_ROLE_OPTION_NAME_NAME("nazwa", "Nazwa wyświetlana na liście"),
