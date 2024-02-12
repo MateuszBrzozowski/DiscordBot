@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 public enum GiveawayGeneratorStage {
     TIME_MODE,

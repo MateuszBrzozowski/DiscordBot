@@ -30,8 +30,8 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.SERVER_SERVICE_CLOSE_CHANNEL;
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.SERVER_SERVICE_DELETE_CHANNEL;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.SERVER_SERVICE_CLOSE_CHANNEL;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.SERVER_SERVICE_DELETE_CHANNEL;
 
 @Slf4j
 @Service

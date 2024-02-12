@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
 @Slf4j
 @Service

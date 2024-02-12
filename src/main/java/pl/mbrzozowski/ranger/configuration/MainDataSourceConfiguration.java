@@ -16,9 +16,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
-import pl.mbrzozowski.ranger.giveaway.Giveaway;
-import pl.mbrzozowski.ranger.giveaway.GiveawayUser;
-import pl.mbrzozowski.ranger.giveaway.Prize;
+import pl.mbrzozowski.ranger.games.giveaway.Giveaway;
+import pl.mbrzozowski.ranger.games.giveaway.GiveawayUser;
+import pl.mbrzozowski.ranger.games.giveaway.Prize;
+import pl.mbrzozowski.ranger.games.reputation.Reputation;
 import pl.mbrzozowski.ranger.members.InOutGuildMembers;
 import pl.mbrzozowski.ranger.members.clan.ClanMember;
 import pl.mbrzozowski.ranger.members.clan.rank.Rank;
@@ -78,7 +79,8 @@ public class MainDataSourceConfiguration {
                         WaitingRecruit.class,
                         ClanMember.class,
                         Rank.class,
-                        Message.class)
+                        Message.class,
+                        Reputation.class)
                 .properties(properties)
                 .build();
     }

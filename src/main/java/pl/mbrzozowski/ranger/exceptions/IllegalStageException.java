@@ -3,7 +3,7 @@ package pl.mbrzozowski.ranger.exceptions;
 import net.dv8tion.jda.api.entities.User;
 import pl.mbrzozowski.ranger.event.EventGeneratorStatus;
 import pl.mbrzozowski.ranger.event.EventSettingsStatus;
-import pl.mbrzozowski.ranger.giveaway.GiveawayGeneratorStage;
+import pl.mbrzozowski.ranger.games.giveaway.GiveawayGeneratorStage;
 
 public class IllegalStageException extends RuntimeException {
 

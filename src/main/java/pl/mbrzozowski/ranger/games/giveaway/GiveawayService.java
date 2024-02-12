@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.guild.SlashCommands;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.GiveawayRepository;
@@ -37,7 +38,7 @@ import java.util.*;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.helpers.Constants.ZONE_ID_EUROPE_PARIS;
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
 @Slf4j
 @Service

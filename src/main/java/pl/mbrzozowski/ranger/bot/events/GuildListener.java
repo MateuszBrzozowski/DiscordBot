@@ -3,11 +3,14 @@ package pl.mbrzozowski.ranger.bot.events;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
-import pl.mbrzozowski.ranger.giveaway.GiveawayService;
+import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
+import pl.mbrzozowski.ranger.guild.ContextCommands;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
@@ -41,12 +44,18 @@ public class GuildListener extends ListenerAdapter {
         if (event.getGuild().equals(RangersGuild.getGuild())) {
             ArrayList<CommandData> commandData = new ArrayList<>();
             getCommandList(commandData);
+            getContextMenu(commandData);
             recruitsService.cleanDB(event);
             implCleaner.autoDeleteChannels();
             implCleaner.autoCloseChannel();
             seedCallService.run();
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
+    }
+
+    private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {
+        commandData.add(Commands.context(Command.Type.USER, ContextCommands.REPUTATION.getName()));
+        commandData.add(Commands.message(ContextCommands.REPUTATION.getName()));
     }
 
     private void getCommandList(ArrayList<CommandData> commandData) {

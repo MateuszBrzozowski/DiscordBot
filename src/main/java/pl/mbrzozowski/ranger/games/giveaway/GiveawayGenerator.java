@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -30,7 +30,6 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-import static pl.mbrzozowski.ranger.giveaway.GiveawayGeneratorStage.*;
 import static pl.mbrzozowski.ranger.guild.ComponentId.*;
 
 @Slf4j
@@ -45,7 +44,7 @@ public class GiveawayGenerator {
     private final User user;
     private List<SelectOption> selectMenuOptionList = new ArrayList<>();
     private boolean isPathSelectTimeDuration = false;
-    private GiveawayGeneratorStage stage = TIME_MODE;
+    private GiveawayGeneratorStage stage = GiveawayGeneratorStage.TIME_MODE;
     private String selectMenuValue;
     private Message message;
 
@@ -341,8 +340,8 @@ public class GiveawayGenerator {
                         openModalToAddPrize(event);
                     } else {
                         event.deferEdit().queue();
-                        setMessageEmbed(MAX_NUMBER_OF_PRIZE_STAGE, 1);
-                        stage = PRIZE;
+                        setMessageEmbed(GiveawayGeneratorStage.MAX_NUMBER_OF_PRIZE_STAGE, 1);
+                        stage = GiveawayGeneratorStage.PRIZE;
                     }
                 }
                 default -> throw new IllegalStageException(stage);
@@ -358,7 +357,7 @@ public class GiveawayGenerator {
                         setMessageEmbed(stage, 1);
                         return;
                     }
-                    setMessageEmbed(PRIZE_REMOVE, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.PRIZE_REMOVE, 1);
                 }
                 default -> throw new IllegalStageException(stage);
             }
@@ -410,7 +409,7 @@ public class GiveawayGenerator {
     }
 
     public void cancel() {
-        setMessageEmbed(CANCEL, 0);
+        setMessageEmbed(GiveawayGeneratorStage.CANCEL, 0);
         log.info("{} - Cancel giveaway generator", user);
     }
 
@@ -437,42 +436,42 @@ public class GiveawayGenerator {
         Prize remove = prizes.remove(Integer.parseInt(selectMenuValue));
         log.info("removed " + remove);
         if (prizes.isEmpty()) {
-            stage = PRIZE;
+            stage = GiveawayGeneratorStage.PRIZE;
         }
         setMessageEmbed(stage, 1);
     }
 
     private void buttonRemoveAllPrizes() {
         prizes.clear();
-        setMessageEmbed(PRIZE, 1);
+        setMessageEmbed(GiveawayGeneratorStage.PRIZE, 1);
         log.info("Removed all prizes");
     }
 
     private void buttonBack() {
         switch (stage) {
-            case TIME_MODE -> setMessageEmbed(TIME_MODE, 1);
+            case TIME_MODE -> setMessageEmbed(GiveawayGeneratorStage.TIME_MODE, 1);
             case TIME_DURATION, TIME_DURATION_NOT_SELECTED, DATE_SELECT, DATE_NOT_SELECTED -> {
-                stage = TIME_MODE;
+                stage = GiveawayGeneratorStage.TIME_MODE;
                 buttonBack();
             }
-            case TIME_SELECT, TIME_NOT_SELECTED -> setMessageEmbed(DATE_SELECT, 1);
+            case TIME_SELECT, TIME_NOT_SELECTED -> setMessageEmbed(GiveawayGeneratorStage.DATE_SELECT, 1);
             case CLAN_MEMBER_EXCLUDE -> {
                 if (isPathSelectTimeDuration) {
-                    setMessageEmbed(TIME_DURATION, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_DURATION, 1);
                 } else {
-                    setMessageEmbed(TIME_SELECT, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_SELECT, 1);
                 }
             }
-            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
+            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(GiveawayGeneratorStage.CLAN_MEMBER_EXCLUDE, 1);
             case PING -> {
                 giveawayRequest.setMentionEveryone(false);
-                setMessageEmbed(RULES, 1);
+                setMessageEmbed(GiveawayGeneratorStage.RULES, 1);
             }
             case PRIZE, CANNOT_END -> {
                 giveawayRequest.setMentionEveryone(false);
-                setMessageEmbed(PING, 1);
+                setMessageEmbed(GiveawayGeneratorStage.PING, 1);
             }
-            case PRIZE_REMOVE -> setMessageEmbed(PRIZE, 1);
+            case PRIZE_REMOVE -> setMessageEmbed(GiveawayGeneratorStage.PRIZE, 1);
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
         }
         selectMenuValue = null;
@@ -482,63 +481,63 @@ public class GiveawayGenerator {
         switch (stage) {
             case TIME_MODE, TIME_MODE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    setMessageEmbed(TIME_MODE_NOT_SELECTED, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_MODE_NOT_SELECTED, 1);
                 } else {
                     if (selectMenuValue.equals(selectMenuOptionList.get(0).getValue())) {
                         isPathSelectTimeDuration = false;
-                        setMessageEmbed(DATE_SELECT, 1);
+                        setMessageEmbed(GiveawayGeneratorStage.DATE_SELECT, 1);
                     } else if (selectMenuValue.equals(selectMenuOptionList.get(1).getValue())) {
                         isPathSelectTimeDuration = true;
-                        setMessageEmbed(TIME_DURATION, 1);
+                        setMessageEmbed(GiveawayGeneratorStage.TIME_DURATION, 1);
                     }
                 }
             }
             case DATE_SELECT, DATE_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    setMessageEmbed(DATE_NOT_SELECTED, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.DATE_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOptionTime date = SelectMenuOptionTime.getByValue(selectMenuValue);
                     giveawayRequest.setExactDate(date);
-                    setMessageEmbed(TIME_SELECT, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_SELECT, 1);
                 }
             }
             case TIME_SELECT, TIME_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    setMessageEmbed(TIME_NOT_SELECTED, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOptionTime time = SelectMenuOptionTime.getByValue(selectMenuValue);
                     giveawayRequest.setExactTime(time);
                     if (giveawayRequest.isEndTimeAfterNow()) {
-                        setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
+                        setMessageEmbed(GiveawayGeneratorStage.CLAN_MEMBER_EXCLUDE, 1);
                     } else {
-                        setMessageEmbed(TIME_NOT_SELECTED, 1);
+                        setMessageEmbed(GiveawayGeneratorStage.TIME_NOT_SELECTED, 1);
                     }
                 }
             }
             case TIME_DURATION, TIME_DURATION_NOT_SELECTED -> {
                 if (selectMenuValue == null) {
-                    setMessageEmbed(TIME_DURATION_NOT_SELECTED, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.TIME_DURATION_NOT_SELECTED, 1);
                 } else {
                     SelectMenuOptionTime timeDuration = SelectMenuOptionTime.getByValue(selectMenuValue);
                     giveawayRequest.setTimeDuration(timeDuration);
-                    setMessageEmbed(CLAN_MEMBER_EXCLUDE, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.CLAN_MEMBER_EXCLUDE, 1);
                 }
             }
             case CLAN_MEMBER_EXCLUDE -> {
                 giveawayRequest.setClanMemberExclude(selectMenuOptionList, selectMenuValue);
-                setMessageEmbed(RULES, 1);
+                setMessageEmbed(GiveawayGeneratorStage.RULES, 1);
             }
-            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(PING, 1);
-            case PING -> setMessageEmbed(PRIZE, 1);
+            case RULES, RULES_NOT_CORRECT -> setMessageEmbed(GiveawayGeneratorStage.PING, 1);
+            case PING -> setMessageEmbed(GiveawayGeneratorStage.PRIZE, 1);
             case PRIZE, CANNOT_END -> {
                 giveawayRequest.setStartTime();
                 if (giveawayRequest.isEndTimeAfterNow()) {
-                    setMessageEmbed(END, 0);
+                    setMessageEmbed(GiveawayGeneratorStage.END, 0);
                     log.info("{}", giveawayRequest);
                     giveawayService.removeGenerator();
                     giveawayService.publishOnChannel(giveawayRequest.getChannelToPublish(), giveawayRequest, prizes);
                 } else {
-                    setMessageEmbed(CANNOT_END, 1);
+                    setMessageEmbed(GiveawayGeneratorStage.CANNOT_END, 1);
                 }
             }
             default -> throw new StageNoSupportedException("Stage - " + stage.name());
@@ -561,12 +560,12 @@ public class GiveawayGenerator {
         if (giveawayRequest.getRulesLink().startsWith("http://") ||
                 giveawayRequest.getRulesLink().startsWith("https://") ||
                 giveawayRequest.getRulesLink().length() == 0) {
-            stage = RULES;
+            stage = GiveawayGeneratorStage.RULES;
             message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
         } else {
             giveawayRequest.setRulesLink("");
-            stage = RULES_NOT_CORRECT;
+            stage = GiveawayGeneratorStage.RULES_NOT_CORRECT;
             message.editMessageEmbeds(getEmbed())
                     .setComponents(ActionRow.of(getSelectMenu()), ActionRow.of(getButtons())).queue();
         }
@@ -583,8 +582,8 @@ public class GiveawayGenerator {
             isCorrect = true;
         } catch (NumberFormatException e) {
             log.info("Cannot create number from input string");
-            setMessageEmbed(PRIZE_QTY_NOT_CORRECT, 1);
-            stage = PRIZE;
+            setMessageEmbed(GiveawayGeneratorStage.PRIZE_QTY_NOT_CORRECT, 1);
+            stage = GiveawayGeneratorStage.PRIZE;
         }
         if (isCorrect) {
             Prize prize = createPrize(name, qtyInt);

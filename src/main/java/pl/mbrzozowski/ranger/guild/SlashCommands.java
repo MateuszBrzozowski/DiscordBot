@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.helpers;
+package pl.mbrzozowski.ranger.guild;
 
 public enum SlashCommands {
     ROLE("role", "Add/Remove a role by selecting it."),

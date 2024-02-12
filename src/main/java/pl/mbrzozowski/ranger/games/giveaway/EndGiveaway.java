@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;

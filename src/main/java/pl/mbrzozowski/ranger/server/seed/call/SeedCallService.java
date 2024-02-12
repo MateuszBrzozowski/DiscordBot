@@ -25,7 +25,7 @@ import pl.mbrzozowski.ranger.stats.service.PlayerCountsService;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL;
 import static pl.mbrzozowski.ranger.settings.SettingsKey.SEED_CALL_LEVEL;
 

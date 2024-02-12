@@ -26,6 +26,7 @@ public class DiscordBot {
     private final SlashCommandListener slashCommandListener;
     private final ModalListener modalListener;
     private final GuildListener guildListener;
+    private final ContextMenuListener contextMenuListener;
     private static JDA jda;
     private final String token;
 
@@ -39,6 +40,7 @@ public class DiscordBot {
                       SlashCommandListener slashCommandListener,
                       ModalListener modalListener,
                       GuildListener guildListener,
+                      ContextMenuListener contextMenuListener,
                       @Value("${discord.token}") String token) throws LoginException {
         this.writeListener = writeListener;
         this.buttonClickListener = buttonClickListener;
@@ -49,6 +51,7 @@ public class DiscordBot {
         this.slashCommandListener = slashCommandListener;
         this.modalListener = modalListener;
         this.guildListener = guildListener;
+        this.contextMenuListener = contextMenuListener;
         this.token = token;
         DiscordBotRun();
     }
@@ -70,6 +73,7 @@ public class DiscordBot {
                 .addEventListeners(this.selectMenuListener)
                 .addEventListeners(this.slashCommandListener)
                 .addEventListeners(this.guildListener)
+                .addEventListeners(this.contextMenuListener)
                 .build();
         jda.getPresence().setActivity(Activity.listening("Spotify"));
         jda.getPresence().setStatus(OnlineStatus.ONLINE);

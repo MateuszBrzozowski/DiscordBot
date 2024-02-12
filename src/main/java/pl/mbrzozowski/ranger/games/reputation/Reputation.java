@@ -1,27 +1,25 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.reputation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity(name = "giveaway_user")
-public class GiveawayUser {
+@Entity(name = "reputation")
+public class Reputation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    @Column(nullable = false, unique = true)
     private String userId;
     private String userName;
-    private LocalDateTime timestamp;
-    @ManyToOne
-    private Giveaway giveaway;
-    @ManyToOne
-    private Prize prize;
+    private int points;
 }

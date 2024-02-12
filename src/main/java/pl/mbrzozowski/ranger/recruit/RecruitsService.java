@@ -44,7 +44,7 @@ import java.util.*;
 
 import static net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import static pl.mbrzozowski.ranger.guild.ComponentId.*;
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.RECRUIT_DELETE_CHANNEL_DELAY;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.RECRUIT_DELETE_CHANNEL_DELAY;
 
 @Service
 @Slf4j

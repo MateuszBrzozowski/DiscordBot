@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.giveaway;
+package pl.mbrzozowski.ranger.games.giveaway;
 
 import lombok.Data;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;

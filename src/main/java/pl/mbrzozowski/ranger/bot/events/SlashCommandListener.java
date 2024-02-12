@@ -14,7 +14,7 @@ import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.Coin;
 import pl.mbrzozowski.ranger.games.Dice;
 import pl.mbrzozowski.ranger.games.Essa;
-import pl.mbrzozowski.ranger.giveaway.GiveawayService;
+import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
@@ -25,7 +25,7 @@ import pl.mbrzozowski.ranger.stats.ServerStatsService;
 
 import java.util.ArrayList;
 
-import static pl.mbrzozowski.ranger.helpers.SlashCommands.*;
+import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
 @Slf4j
 @Service

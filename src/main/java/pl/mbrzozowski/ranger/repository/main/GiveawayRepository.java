@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.repository.main;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.mbrzozowski.ranger.giveaway.Giveaway;
+import pl.mbrzozowski.ranger.games.giveaway.Giveaway;
 
 import java.util.List;
 import java.util.Optional;
