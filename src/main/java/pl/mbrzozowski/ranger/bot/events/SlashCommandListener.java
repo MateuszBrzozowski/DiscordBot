@@ -66,6 +66,8 @@ public class SlashCommandListener extends ListenerAdapter {
             Essa.getInstance().start(event);
         } else if (name.equals(REP.getName())) {
             reputationService.show(event);
+        } else if (name.equals(TOP_REP.getName())) {
+            reputationService.showTopTen(event);
         } else if (name.equals(RANDOM_TIMEOUT.getName())) {
             new RandomTimeout().start(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {

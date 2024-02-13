@@ -1,8 +1,10 @@
 package pl.mbrzozowski.ranger.guild;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
@@ -97,6 +99,15 @@ public class RangersGuild {
             return null;
         }
         return guild.getMemberById(userId);
+    }
+
+    @Nullable
+    public static User getUser(String userId) {
+        JDA jda = DiscordBot.getJda();
+        if (jda == null) {
+            return null;
+        }
+        return jda.getUserById(userId);
     }
 
     public enum CategoryId {

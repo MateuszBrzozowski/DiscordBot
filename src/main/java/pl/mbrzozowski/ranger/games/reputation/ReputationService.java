@@ -2,6 +2,7 @@ package pl.mbrzozowski.ranger.games.reputation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -13,16 +14,16 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.guild.ContextCommands;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.SlashCommands;
 import pl.mbrzozowski.ranger.model.ContextCommand;
 import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.repository.main.ReputationRepository;
 
+import java.awt.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,6 +35,10 @@ public class ReputationService implements SlashCommand, ContextCommand {
 
     private Optional<Reputation> findByUserId(String userId) {
         return reputationRepository.findByUserId(userId);
+    }
+
+    private List<Reputation> findAllOrderByPointsDesc() {
+        return reputationRepository.findAllOrderByPointsDesc();
     }
 
     private void save(Reputation reputation) {
@@ -108,9 +113,48 @@ public class ReputationService implements SlashCommand, ContextCommand {
         event.reply("### Twoje punkty reputacji: " + points).queue();
     }
 
+    public void showTopTen(@NotNull SlashCommandInteractionEvent event) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(Color.DARK_GRAY);
+        builder.setDescription("# Top 10 reputacje:\n" + getUsersAsString());
+        event.replyEmbeds(builder.build()).queue();
+    }
+
+    @NotNull
+    private String getUsersAsString() {
+        List<Reputation> reputations = findAllOrderByPointsDesc();
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for (Reputation reputation : reputations) {
+            User user = RangersGuild.getUser(reputation.getUserId());
+            if (user != null) {
+                if (user.isBot()) {
+                    continue;
+                }
+                if (i < 1) {
+                    builder.append("## ");
+                } else if (i < 3) {
+                    builder.append("### ");
+                }
+                i++;
+                builder.append(i)
+                        .append(". ")
+                        .append(user.getAsMention())
+                        .append(" - ***")
+                        .append(reputation.getPoints())
+                        .append("*** pkt\n");
+            }
+            if (i == 10) {
+                break;
+            }
+        }
+        return builder.toString();
+    }
+
     @Override
     public void getSlashCommandsList(@NotNull ArrayList<CommandData> commandData) {
         commandData.add(Commands.slash(SlashCommands.REP.getName(), SlashCommands.REP.getDescription()));
+        commandData.add(Commands.slash(SlashCommands.TOP_REP.getName(), SlashCommands.TOP_REP.getDescription()));
     }
 
     @Override

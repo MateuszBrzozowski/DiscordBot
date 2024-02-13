@@ -10,6 +10,7 @@ public enum SlashCommands {
     COIN("moneta", "Rzut monetą"),
     ESSA("essa", "Sprawdza twój dzisiejszy poziom essy"),
     REP("rep", "Twoje punkty reputacji"),
+    TOP_REP("rep-top", "Top 10 użytkowników pod względem pkt reputacji"),
     RANDOM_TIMEOUT("ruleta", "Kto nie gra ten nie wygrywa darmowego TIMEOUT'a"),
 
     DISCORD_ROLE_OPTION_NAME_ID("id", "Discord ID dodawanej roli"),
