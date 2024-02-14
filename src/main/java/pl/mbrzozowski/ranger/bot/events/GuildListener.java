@@ -7,10 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
-import pl.mbrzozowski.ranger.games.Coin;
-import pl.mbrzozowski.ranger.games.Dice;
-import pl.mbrzozowski.ranger.games.Essa;
-import pl.mbrzozowski.ranger.games.RandomTimeout;
+import pl.mbrzozowski.ranger.games.*;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
@@ -21,6 +18,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.ServerStatsService;
 
 import java.util.ArrayList;
@@ -35,6 +33,7 @@ public class GuildListener extends ListenerAdapter {
     private final RecruitsService recruitsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
+    private final SettingsService settingsService;
     private final ServerService serverService;
     private final EventService eventService;
     private final RoleService roleService;
@@ -74,6 +73,7 @@ public class GuildListener extends ListenerAdapter {
         new Dice().getSlashCommandsList(commandData);
         new Coin().getSlashCommandsList(commandData);
         new RandomTimeout().getSlashCommandsList(commandData);
+        new RangerOfTheDay(settingsService).getSlashCommandsList(commandData);
     }
 
     private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {

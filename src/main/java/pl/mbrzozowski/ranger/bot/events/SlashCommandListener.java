@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
-import pl.mbrzozowski.ranger.games.Coin;
-import pl.mbrzozowski.ranger.games.Dice;
-import pl.mbrzozowski.ranger.games.Essa;
-import pl.mbrzozowski.ranger.games.RandomTimeout;
+import pl.mbrzozowski.ranger.games.*;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
@@ -21,6 +18,7 @@ import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
 import pl.mbrzozowski.ranger.settings.SettingsKey;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 import pl.mbrzozowski.ranger.stats.ServerStatsService;
 
 import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
@@ -35,6 +33,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final EventsSettingsService eventsSettingsService;
     private final ServerStatsService serverStatsService;
     private final ReputationService reputationService;
+    private final SettingsService settingsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
     private final EventService eventService;
@@ -70,6 +69,8 @@ public class SlashCommandListener extends ListenerAdapter {
             reputationService.showTopTen(event);
         } else if (name.equals(RANDOM_TIMEOUT.getName())) {
             new RandomTimeout().start(event);
+        } else if (name.equals(RANGER_OF_THE_DAY.getName())) {
+            new RangerOfTheDay(settingsService).start(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
         } else if (name.equals(GIVEAWAY_END.getName())) {

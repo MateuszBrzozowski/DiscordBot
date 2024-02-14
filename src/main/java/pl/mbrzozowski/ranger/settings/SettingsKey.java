@@ -27,7 +27,10 @@ public enum SettingsKey {
     SEED_CALL_LAST("seed.call.last"),
     SEED_CALL_LEVEL("seed.call.level"),
     SEED_CALL_CHANNEL_ID("seed.call.channel"),
-    STATS_DATE_FROM("stats-date");
+    STATS_DATE_FROM("stats-date"),
+    RANGER_OF_THE_DAY("ranger.of.the.day"),
+    RANGER_OF_THE_DAY_CHANNEL("ranger.of.the.day.channel"),
+    RANGER_OF_THE_DAY_MESSAGE("ranger.of.the.day.message");
 
     private final String key;
 

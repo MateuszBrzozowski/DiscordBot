@@ -12,6 +12,7 @@ public enum SlashCommands {
     REP("rep", "Twoje punkty reputacji"),
     TOP_REP("rep-top", "Top 10 użytkowników pod względem pkt reputacji"),
     RANDOM_TIMEOUT("ruleta", "Kto nie gra ten nie wygrywa darmowego TIMEOUT'a"),
+    RANGER_OF_THE_DAY("ranger-of-the-day", "Wybiera Clan membera dnia"),
 
     DISCORD_ROLE_OPTION_NAME_ID("id", "Discord ID dodawanej roli"),
     DISCORD_ROLE_OPTION_NAME_NAME("nazwa", "Nazwa wyświetlana na liście"),

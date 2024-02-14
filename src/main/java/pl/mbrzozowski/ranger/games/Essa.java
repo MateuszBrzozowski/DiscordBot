@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.helpers.Math;
-import pl.mbrzozowski.ranger.model.SlashCommand;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ import java.util.Random;
 
 import static pl.mbrzozowski.ranger.guild.SlashCommands.ESSA;
 
-public class Essa implements SlashCommandGame, SlashCommand {
+public class Essa implements SlashCommandGame {
 
     private final HashSet<EssaPlayer> players = new HashSet<>();
     private static final Essa instance = new Essa();

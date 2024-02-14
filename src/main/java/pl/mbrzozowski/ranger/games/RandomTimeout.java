@@ -8,14 +8,13 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.SlashCommands;
-import pl.mbrzozowski.ranger.model.SlashCommand;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class RandomTimeout implements SlashCommand, SlashCommandGame {
+public class RandomTimeout implements SlashCommandGame {
 
 
     @Override

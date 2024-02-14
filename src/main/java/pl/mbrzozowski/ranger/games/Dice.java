@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
-import pl.mbrzozowski.ranger.model.SlashCommand;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 
 import java.awt.*;
@@ -14,7 +13,7 @@ import java.util.Random;
 
 import static pl.mbrzozowski.ranger.guild.SlashCommands.DICE;
 
-public class Dice implements SlashCommandGame, SlashCommand {
+public class Dice implements SlashCommandGame {
 
     @Override
     public void start(@NotNull SlashCommandInteractionEvent event) {

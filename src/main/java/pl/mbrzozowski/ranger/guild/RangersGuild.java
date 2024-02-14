@@ -10,6 +10,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.helpers.RoleID;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RangersGuild {
 
@@ -108,6 +112,19 @@ public class RangersGuild {
             return null;
         }
         return jda.getUserById(userId);
+    }
+
+    @NotNull
+    public static List<Member> getClanMembers() {
+        Guild guild = getGuild();
+        if (guild == null) {
+            return new ArrayList<>();
+        }
+        Role role = getRoleById(RoleID.CLAN_MEMBER_ID);
+        if (role == null) {
+            return new ArrayList<>();
+        }
+        return guild.getMembersWithRoles(role);
     }
 
     public enum CategoryId {
