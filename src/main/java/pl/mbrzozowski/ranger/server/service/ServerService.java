@@ -166,6 +166,7 @@ public class ServerService implements SlashCommand {
                 .channelId(channelId)
                 .userName(userName)
                 .isClose(false)
+                .autoClose(true)
                 .build();
         clientRepository.save(client);
     }
