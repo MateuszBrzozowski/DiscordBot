@@ -201,8 +201,8 @@ public class ServerService implements SlashCommand {
         return clientRepository.findAll();
     }
 
-    public List<Client> findByIsCloseFalse() {
-        return clientRepository.findByIsCloseFalse();
+    public List<Client> findByIsCloseTrue() {
+        return clientRepository.findByIsCloseTrue();
     }
 
     public List<Client> findByAutoCloseTrue() {
@@ -224,6 +224,7 @@ public class ServerService implements SlashCommand {
         Optional<Client> clientOptional = findByChannelId(channelId);
         if (clientOptional.isEmpty()) {
             event.deferEdit().queue();
+            log.warn("Ticket not exists in DB");
             return;
         }
         openChannel(clientOptional.get());

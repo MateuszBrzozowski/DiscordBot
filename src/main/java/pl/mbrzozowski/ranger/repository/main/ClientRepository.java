@@ -20,5 +20,5 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     List<Client> findByAutoCloseTrue();
 
-    List<Client> findByIsCloseFalse();
+    List<Client> findByIsCloseTrue();
 }
