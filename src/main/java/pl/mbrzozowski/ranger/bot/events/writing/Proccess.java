@@ -6,7 +6,7 @@ public abstract class Proccess {
 
     private Proccess nextProccess;
 
-    abstract public void proccessMessage(MessageReceivedEvent message);
+    abstract public void proccessMessage(MessageReceivedEvent event);
 
     public void setNextProccess(Proccess next) {
         this.nextProccess = next;

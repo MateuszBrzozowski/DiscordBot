@@ -19,6 +19,7 @@ import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.BotWriter;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.server.service.ServerService;
+import pl.mbrzozowski.ranger.server.service.transcription.TranscriptionService;
 
 @Slf4j
 @Service
@@ -28,6 +29,7 @@ public class WriteListener extends ListenerAdapter {
     private final EventsGeneratorService eventsGeneratorService;
     private final EventsSettingsService eventsSettingsService;
     private final UsersReminderService usersReminderService;
+    private final TranscriptionService transcriptionService;
     private final GuildMembersService guildMembersService;
     private final RecruitsService recruitsService;
     private final DisboardService disboardService;
@@ -42,6 +44,7 @@ public class WriteListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         log.info(event.getAuthor() + " - send message on channel {}", event.getChannel());
 
+        ServerTicket serverTicket = new ServerTicket(transcriptionService);
         DisboardBot disboardBot = new DisboardBot(disboardService);
         ReminderCmd reminderCmd = new ReminderCmd(usersReminderService);
         LogChannel logChannel = new LogChannel();
@@ -58,6 +61,7 @@ public class WriteListener extends ListenerAdapter {
         DeveloperCmd developerCmd = new DeveloperCmd(eventService, botWriter);
         InvalidCmd invalidCmd = new InvalidCmd();
 
+        serverTicket.setNextProccess(disboardBot);
         disboardBot.setNextProccess(reminderCmd);
         reminderCmd.setNextProccess(logChannel);
         logChannel.setNextProccess(clanMemberCheck);
@@ -73,7 +77,7 @@ public class WriteListener extends ListenerAdapter {
         eventsSettingsCmd.setNextProccess(developerCmd);
         developerCmd.setNextProccess(invalidCmd);
 
-        disboardBot.proccessMessage(event);
+        serverTicket.proccessMessage(event);
     }
 }
 
