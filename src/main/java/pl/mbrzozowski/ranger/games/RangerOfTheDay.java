@@ -74,7 +74,7 @@ public class RangerOfTheDay implements SlashCommandGame {
         Member member = members.get(randomInt);
         log.info("Members size={}, randomInt={}, {}", members.size(), randomInt, member);
         event.reply("Rangerem dnia zostaje " + member.getAsMention()).queue(hook -> {
-                    settingsService.save(SettingsKey.RANGER_OF_THE_DAY_MESSAGE, hook.getInteraction().getId());
+            settingsService.save(SettingsKey.RANGER_OF_THE_DAY_MESSAGE, hook.getInteraction().getId());
             settingsService.save(
                     SettingsKey.RANGER_OF_THE_DAY_CHANNEL,
                     Objects.requireNonNull(hook.getInteraction().getChannelId()));

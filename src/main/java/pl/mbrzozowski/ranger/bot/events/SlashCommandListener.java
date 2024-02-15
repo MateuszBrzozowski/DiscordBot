@@ -10,6 +10,7 @@ import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.*;
+import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
@@ -36,6 +37,7 @@ public class SlashCommandListener extends ListenerAdapter {
     private final SettingsService settingsService;
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
+    private final BirthdayService birthdayService;
     private final EventService eventService;
     private final RoleService roleService;
     private final ImplCleaner implCleaner;
@@ -71,6 +73,10 @@ public class SlashCommandListener extends ListenerAdapter {
             new RandomTimeout().start(event);
         } else if (name.equals(RANGER_OF_THE_DAY.getName())) {
             new RangerOfTheDay(settingsService).start(event);
+        } else if (name.equals(BIRTHDAY.getName())) {
+            birthdayService.start(event);
+        } else if (name.equals(BIRTHDAY_SET.getName())) {
+            birthdayService.setDate(event);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
         } else if (name.equals(GIVEAWAY_END.getName())) {

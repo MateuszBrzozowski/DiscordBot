@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.games.*;
+import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
@@ -34,6 +35,7 @@ public class GuildListener extends ListenerAdapter {
     private final GiveawayService giveawayService;
     private final SeedCallService seedCallService;
     private final SettingsService settingsService;
+    private final BirthdayService birthdayService;
     private final ServerService serverService;
     private final EventService eventService;
     private final RoleService roleService;
@@ -65,6 +67,7 @@ public class GuildListener extends ListenerAdapter {
         recruitsService.getSlashCommandsList(commandData);
         giveawayService.getSlashCommandsList(commandData);
         seedCallService.getSlashCommandsList(commandData);
+        birthdayService.getSlashCommandsList(commandData);
         serverService.getSlashCommandsList(commandData);
         eventService.getSlashCommandsList(commandData);
         roleService.getSlashCommandsList(commandData);

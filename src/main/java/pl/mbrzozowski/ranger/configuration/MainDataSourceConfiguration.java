@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.Player;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminder;
+import pl.mbrzozowski.ranger.games.birthday.Birthday;
 import pl.mbrzozowski.ranger.games.giveaway.Giveaway;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayUser;
 import pl.mbrzozowski.ranger.games.giveaway.Prize;
@@ -80,7 +81,8 @@ public class MainDataSourceConfiguration {
                         ClanMember.class,
                         Rank.class,
                         Message.class,
-                        Reputation.class)
+                        Reputation.class,
+                        Birthday.class)
                 .properties(properties)
                 .build();
     }

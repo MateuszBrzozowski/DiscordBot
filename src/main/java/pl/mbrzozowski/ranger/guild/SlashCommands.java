@@ -13,6 +13,11 @@ public enum SlashCommands {
     TOP_REP("rep-top", "Top 10 użytkowników pod względem pkt reputacji"),
     RANDOM_TIMEOUT("ruleta", "Kto nie gra ten nie wygrywa darmowego TIMEOUT'a"),
     RANGER_OF_THE_DAY("ranger-of-the-day", "Wybiera Clan membera dnia"),
+    BIRTHDAY("birthday", "Wyświetla najbliższe urodziny clan membera"),
+    BIRTHDAY_SET("birthday-set", "Ustawia date urodzenia"),
+    BIRTHDAY_DAY("dzień", "Dzień urodzenia"),
+    BIRTHDAY_MONTH("miesiąc", "Miesiąc urodzenia"),
+    BIRTHDAY_YEAR("rok", "Rok urodzenia"),
 
     DISCORD_ROLE_OPTION_NAME_ID("id", "Discord ID dodawanej roli"),
     DISCORD_ROLE_OPTION_NAME_NAME("nazwa", "Nazwa wyświetlana na liście"),
