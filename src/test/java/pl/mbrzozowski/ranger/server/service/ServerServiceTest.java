@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
+import pl.mbrzozowski.ranger.server.service.transcription.TranscriptionService;
 
 import java.util.ArrayList;
 
@@ -12,11 +13,13 @@ class ServerServiceTest {
 
     private ServerService serverService;
     private ClientRepository clientRepository;
+    private TranscriptionService transcriptionService;
 
     @BeforeEach
     void beforeEach() {
         clientRepository = Mockito.mock(ClientRepository.class);
-        serverService = new ServerService(clientRepository);
+        transcriptionService = Mockito.mock(TranscriptionService.class);
+        serverService = new ServerService(transcriptionService, clientRepository);
     }
 
     @Test

@@ -24,6 +24,7 @@ import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
 import pl.mbrzozowski.ranger.response.ResponseMessage;
+import pl.mbrzozowski.ranger.server.service.transcription.TranscriptionService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,11 +38,18 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.SERVER_SERVICE_DELETE_CH
 @Service
 public class ServerService implements SlashCommand {
 
+    private final TranscriptionService transcriptionService;
     private final ClientRepository clientRepository;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
 
-    public ServerService(ClientRepository clientRepository) {
+    public ServerService(TranscriptionService transcriptionService, ClientRepository clientRepository) {
+        this.transcriptionService = transcriptionService;
         this.clientRepository = clientRepository;
+    }
+
+    public boolean isTicket(@NotNull MessageReceivedEvent event) {
+        Optional<Client> optional = findByChannelId(event.getChannel().getId());
+        return optional.isPresent();
     }
 
     public void buttonClick(@NotNull ButtonInteractionEvent event, @NotNull ButtonClickType buttonType) {
@@ -138,6 +146,7 @@ public class ServerService implements SlashCommand {
                         .queue(channel -> {
                             sendEmbedStartChannel(userID, channel, buttonType);
                             addUser(userID, userName, channel.getId());
+                            transcriptionService.openTicket(channel.getId(), userName);
                         });
             }
         }
@@ -189,8 +198,12 @@ public class ServerService implements SlashCommand {
     }
 
     public void deleteByChannelId(String channelID) {
-        clientRepository.deleteByChannelId(channelID);
-        log.info("Check and deleted channel if exist from DB for Server Service (channelId={})", channelID);
+        Optional<Client> optional = findByChannelId(channelID);
+        if (optional.isPresent()) {
+            clientRepository.deleteByChannelId(channelID);
+            log.info("Deleted channel from DB for Server Service (channelId={})", channelID);
+            transcriptionService.createAndSendTranscript(channelID);
+        }
     }
 
     public Optional<Client> findByChannelId(String channelID) {

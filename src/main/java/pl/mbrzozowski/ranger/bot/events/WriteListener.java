@@ -44,7 +44,7 @@ public class WriteListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         log.info(event.getAuthor() + " - send message on channel {}", event.getChannel());
 
-        ServerTicket serverTicket = new ServerTicket(transcriptionService);
+        ServerTicket serverTicket = new ServerTicket(serverService, transcriptionService);
         DisboardBot disboardBot = new DisboardBot(disboardService);
         ReminderCmd reminderCmd = new ReminderCmd(usersReminderService);
         LogChannel logChannel = new LogChannel();
