@@ -27,7 +27,7 @@ public class RandomTimeout implements SlashCommandGame {
         Random random = new Random();
         boolean isWin = random.nextBoolean();
         if (!isWin) {
-            event.reply("Nie wygrałeś. Graj dalej!").setEphemeral(true).queue();
+            event.reply("Nie wygrałeś. Graj dalej!").queue();
             return;
         }
         Guild guild = RangersGuild.getGuild();
