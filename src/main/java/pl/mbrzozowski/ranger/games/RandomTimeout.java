@@ -36,7 +36,7 @@ public class RandomTimeout implements SlashCommandGame {
         }
         int time = random.nextInt(1430) + 10;
         guild.timeoutFor(event.getUser(), time, TimeUnit.MINUTES).queue();
-        event.reply(event.getUser().getAsMention() + " " + getMessage(time)).setEphemeral(true).queue();
+        event.reply(event.getUser().getAsMention() + " " + getMessage(time)).queue();
     }
 
     @NotNull
