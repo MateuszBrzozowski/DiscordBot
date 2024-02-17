@@ -30,8 +30,11 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ReputationService implements SlashCommand, ContextCommand {
 
+    private static final int TIME_AFTER_CAN_CHECK = 6;
     private final ReputationRepository reputationRepository;
     private final Set<ReputationGiving> reputationGivings = new HashSet<>();
+    private LastCheck topTen;
+    private final Map<User, LastCheck> users = new HashMap<>();
 
     private Optional<Reputation> findByUserId(String userId) {
         return reputationRepository.findByUserId(userId);
@@ -100,24 +103,64 @@ public class ReputationService implements SlashCommand, ContextCommand {
     }
 
     public void show(@NotNull SlashCommandInteractionEvent event) {
-        String userId = event.getUser().getId();
-        Optional<Reputation> optional = findByUserId(userId);
-        if (optional.isPresent()) {
-            show(event, optional.get().getPoints());
+        if (canUserCheck(event.getUser())) {
+            Optional<Reputation> optional = findByUserId(event.getUser().getId());
+            if (optional.isPresent()) {
+                show(event, optional.get().getPoints());
+            } else {
+                show(event, 0);
+            }
         } else {
-            show(event, 0);
+            LastCheck lastCheck = users.get(event.getUser());
+            event.reply("Sprawdzałeś ostatnio swoje punkty reputacji. Wiadomość znajdziesz tutaj: " +
+                    RangersGuild.getLinkToMessage(lastCheck.getChannelId(), lastCheck.getMessageId())).setEphemeral(true).queue();
+        }
+    }
+
+    private boolean canUserCheck(User user) {
+        if (users.containsKey(user)) {
+            LastCheck lastCheck = users.get(user);
+            if (lastCheck.getDateTime().isBefore(LocalDateTime.now().minusHours(TIME_AFTER_CAN_CHECK))) {
+                users.remove(user);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
     }
 
     private void show(@NotNull SlashCommandInteractionEvent event, int points) {
-        event.reply("### Twoje punkty reputacji: " + points).queue();
+        event.reply("### Twoje punkty reputacji: " + points).queue(hook -> {
+            LastCheck userLastCheck = new LastCheck(LocalDateTime.now(), hook.getInteraction().getChannelId(), hook.getInteraction().getId());
+            User user = event.getUser();
+            users.put(user, userLastCheck);
+        });
     }
 
     public void showTopTen(@NotNull SlashCommandInteractionEvent event) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.DARK_GRAY);
-        builder.setDescription("# Top 10 reputacje:\n" + getUsersAsString());
-        event.replyEmbeds(builder.build()).queue();
+        if (canCheckTopTen()) {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.DARK_GRAY);
+            builder.setDescription("# Top 10 reputacje:\n" + getUsersAsString());
+            event.replyEmbeds(builder.build())
+                    .queue(hook -> topTen = new LastCheck(LocalDateTime.now(), hook.getInteraction().getChannelId(), hook.getInteraction().getId()));
+        } else {
+            event.reply("Ktoś tu ostatnio sprawdzał top 10. Sprawdź to " +
+                    RangersGuild.getLinkToMessage(topTen.getChannelId(), topTen.getMessageId())).setEphemeral(true).queue();
+        }
+
+    }
+
+    private boolean canCheckTopTen() {
+        if (topTen == null) {
+            return true;
+        }
+        if (topTen.getDateTime() == null || topTen.getMessageId() == null || topTen.getChannelId() == null) {
+            return true;
+        }
+        return topTen.getDateTime().isBefore(LocalDateTime.now().minusHours(TIME_AFTER_CAN_CHECK));
     }
 
     @NotNull
