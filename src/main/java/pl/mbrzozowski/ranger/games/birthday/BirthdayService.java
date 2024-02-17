@@ -33,6 +33,7 @@ import static java.time.LocalDate.now;
 public class BirthdayService implements SlashCommandGame {
 
     private final BirthdayRepository birthdayRepository;
+    private LocalDate localDate;
 
     private void save(Birthday birthday) {
         birthdayRepository.save(birthday);
@@ -118,6 +119,12 @@ public class BirthdayService implements SlashCommandGame {
 
     @Override
     public void start(SlashCommandInteractionEvent event) {
+        if (localDate != null && localDate.getDayOfYear() == LocalDate.now().getDayOfYear()) {
+            if (event != null) {
+                event.reply("Ktoś już sprawdzał dzisiaj urodzinki.").setEphemeral(true).queue();
+            }
+            return;
+        }
         List<Birthday> all = findAll();
         List<Birthday> today = BirthdayProvider.getListWithToday(all);
         List<Birthday> next = BirthdayProvider.getListWithSortedSinceNow(all);
@@ -140,11 +147,13 @@ public class BirthdayService implements SlashCommandGame {
         }
         if (event != null) {
             event.replyEmbeds(builder.build()).queue();
+            localDate = LocalDate.now();
         } else {
             if (today.size() >= 1) {
                 TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RANGERS_ONLY);
                 if (textChannel != null) {
                     textChannel.sendMessageEmbeds(builder.build()).queue();
+                    localDate = LocalDate.now();
                 }
             }
         }
