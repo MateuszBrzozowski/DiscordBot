@@ -41,23 +41,29 @@ public class Essa implements SlashCommandGame {
             number = roundTo5(number);
             essaPlayer.setEssaValue(number);
             players.add(essaPlayer);
-            showResult(event, number);
+            showResult(event, number, false);
         } else {
-            showResult(event, existPlayer.get().getEssaValue());
+            showResult(event, existPlayer.get().getEssaValue(), true);
         }
     }
 
     @NotNull
     protected Optional<EssaPlayer> isExist(EssaPlayer essaPlayer) {
-        players.removeIf(player -> player.getDate() != null && !player.getDate().equals(essaPlayer.getDate()));
+        players.removeIf(player -> player.getDate() != null && player.getDate().getDayOfYear() != essaPlayer.getDate().getDayOfYear());
         return players
                 .stream()
                 .filter(player -> StringUtils.isNotBlank(player.getUserId()) && player.getUserId().equals(essaPlayer.getUserId()))
                 .findFirst();
     }
 
-    private void showResult(@NotNull SlashCommandInteractionEvent event, int number) {
-        event.reply("<@" + event.getUser().getId() + "> Twój dzisiejszy poziom essy wynosi " + number + "%").queue();
+    private void showResult(@NotNull SlashCommandInteractionEvent event, int number, boolean ephemeral) {
+        String message;
+        if (ephemeral) {
+            message = "Sprawdzałeś już dzisiaj poziom essy. Oto ona: " + number + "%";
+        } else {
+            message = "<@" + event.getUser().getId() + "> Twój dzisiejszy poziom essy wynosi " + number + "%";
+        }
+        event.reply(message).setEphemeral(ephemeral).queue();
     }
 
     protected int roundTo5(int number) {
