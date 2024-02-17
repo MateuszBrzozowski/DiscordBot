@@ -6,7 +6,6 @@ public final class ComponentId {
 
     //ButtonClick
     public static final String NEW_RECRUIT = "newRecrut" + SUFFIX;
-    public static final String NEW_RECRUIT_CONFIRM = "recrutY" + SUFFIX;
     public static final String SERVER_SERVICE_REPORT = "Report" + SUFFIX;
     public static final String SERVER_SERVICE_UNBAN = "Unban" + SUFFIX;
     public static final String SERVER_SERVICE_CONTACT = "Contact" + SUFFIX;
@@ -19,14 +18,12 @@ public final class ComponentId {
     public static final String EVENTS_SIGN_IN = "in_" + SUFFIX;
     public static final String EVENTS_SIGN_IN_RESERVE = "reserve_" + SUFFIX;
     public static final String EVENTS_SIGN_OUT = "out_" + SUFFIX;
-    public static final String OPEN_FORM_RECRUIT_OPINION = "openFormRecruitOpinion" + SUFFIX;
     public static final String OPEN_FORM_ANONYMOUS_COMPLAINTS = "openFormAnonymousComplaints" + SUFFIX;
     public static final String MODAL_COMPLAINT_TEXT = "FormComplaintText" + SUFFIX;
     public static final String MODAL_COMPLAINTS = "FormComplaintModal" + SUFFIX;
     public static final String CLOSE = "close" + SUFFIX;
     public static final String CLOSE_YES = "closeYes" + SUFFIX;
     public static final String CLOSE_NO = "closeNo" + SUFFIX;
-    public static final String RECRUIT_NAME = "RekrutName" + SUFFIX;
     public static final String RECRUIT_OPINION_TEXT = "opinionID" + SUFFIX;
     public static final String MODAL_RECRUIT_OPINION = "rekrutOpinion" + SUFFIX;
     public static final String RECRUIT_ACCEPTED = "recruitIN" + SUFFIX;

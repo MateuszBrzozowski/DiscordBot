@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
 import pl.mbrzozowski.ranger.guild.ContextCommands;
+import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 
 @Slf4j
 @Service
@@ -22,6 +23,8 @@ public class ContextMenuListener extends ListenerAdapter {
         log.info("{} - used user context interaction (name={})", event.getUser(), event.getName());
         if (event.getName().equals(ContextCommands.REPUTATION.getName())) {
             reputationService.plus(event);
+        } else if (event.getName().equals(ContextCommands.RECRUIT_OPINION.getName())) {
+            RecruitOpinions.getInstance().opinion(event);
         }
     }
 
@@ -30,6 +33,8 @@ public class ContextMenuListener extends ListenerAdapter {
         log.info("{} - used message context interaction (name={})", event.getUser(), event.getName());
         if (event.getName().equals(ContextCommands.REPUTATION.getName())) {
             reputationService.plus(event);
+        } else if (event.getName().equals(ContextCommands.RECRUIT_OPINION.getName())) {
+            RecruitOpinions.getInstance().opinion(event);
         }
     }
 }

@@ -6,10 +6,11 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.games.giveaway.Giveaway;
-import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.members.clan.rank.Rank;
+import pl.mbrzozowski.ranger.model.ErrorMessages;
 
 import java.util.List;
 
@@ -116,7 +117,7 @@ public class ResponseMessage {
 
     public static void noPermission(@NotNull ButtonInteractionEvent event) {
         log.info(event.getUser() + " - No permission");
-        event.reply("Brak uprawnień!")
+        event.reply(ErrorMessages.NO_PERMISSIONS.getMessage())
                 .setEphemeral(true)
                 .queue();
     }

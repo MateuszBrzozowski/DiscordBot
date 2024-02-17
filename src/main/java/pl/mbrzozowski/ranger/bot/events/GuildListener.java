@@ -15,6 +15,7 @@ import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
+import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.role.RoleService;
 import pl.mbrzozowski.ranger.server.seed.call.SeedCallService;
@@ -81,6 +82,7 @@ public class GuildListener extends ListenerAdapter {
 
     private void getContextMenu(@NotNull ArrayList<CommandData> commandData) {
         reputationService.getContextCommandsList(commandData);
+        RecruitOpinions.getInstance().getContextCommandsList(commandData);
     }
 
 }

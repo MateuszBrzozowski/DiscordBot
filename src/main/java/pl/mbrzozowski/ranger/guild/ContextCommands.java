@@ -1,7 +1,8 @@
 package pl.mbrzozowski.ranger.guild;
 
 public enum ContextCommands {
-    REPUTATION("+Rep");
+    REPUTATION("+Rep"),
+    RECRUIT_OPINION("Rekrut - opinia");
 
     private final String name;
 

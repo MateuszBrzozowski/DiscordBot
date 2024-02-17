@@ -31,9 +31,9 @@ public class ModalListener extends ListenerAdapter {
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         log.info("{} - Modal{modalId={}} interaction event", event.getUser(), event.getModalId());
         if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_RECRUIT_OPINION)) {
-            RecruitOpinions.submitOpinionAboutRecruit(event);
+            RecruitOpinions.getInstance().submitOpinionAboutRecruit(event);
         } else if (event.getModalId().equalsIgnoreCase(ComponentId.MODAL_COMPLAINTS)) {
-            RecruitOpinions.submitAnonymousComplaints(event);
+            RecruitOpinions.getInstance().submitAnonymousComplaints(event);
         } else if (event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_PRIZE_MODAL_ADD) ||
                 event.getModalId().equals(ComponentId.GIVEAWAY_GENERATOR_MODAL_RULES_LINK)) {
             giveawayService.generatorSaveAnswer(event);
