@@ -15,9 +15,11 @@ public enum SlashCommands {
     RANGER_OF_THE_DAY("ranger-of-the-day", "Wybiera Clan membera dnia"),
     BIRTHDAY("birthday", "Wyświetla najbliższe urodziny clan membera"),
     BIRTHDAY_SET("birthday-set", "Ustawia date urodzenia"),
+    BIRTHDAY_ADMIN_SET("birthday-admin-set", "Ustawia date urodzenia użytkownika"),
     BIRTHDAY_DAY("dzień", "Dzień urodzenia"),
     BIRTHDAY_MONTH("miesiąc", "Miesiąc urodzenia"),
     BIRTHDAY_YEAR("rok", "Rok urodzenia"),
+    USER_ID("user-id", "User ID"),
 
     DISCORD_ROLE_OPTION_NAME_ID("id", "Discord ID dodawanej roli"),
     DISCORD_ROLE_OPTION_NAME_NAME("nazwa", "Nazwa wyświetlana na liście"),

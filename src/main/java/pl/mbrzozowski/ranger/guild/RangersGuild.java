@@ -102,7 +102,10 @@ public class RangersGuild {
         if (guild == null) {
             return null;
         }
-        return guild.getMemberById(userId);
+        if (userId.chars().allMatch(Character::isDigit)) {
+            return guild.getMemberById(userId);
+        }
+        return null;
     }
 
     @Nullable
@@ -111,7 +114,10 @@ public class RangersGuild {
         if (jda == null) {
             return null;
         }
-        return jda.getUserById(userId);
+        if (userId.chars().allMatch(Character::isDigit)) {
+            return jda.getUserById(userId);
+        }
+        return null;
     }
 
     @NotNull

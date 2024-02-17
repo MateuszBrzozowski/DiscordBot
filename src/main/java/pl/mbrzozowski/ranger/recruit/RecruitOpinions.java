@@ -68,10 +68,13 @@ public class RecruitOpinions implements ContextCommand {
         String opinion = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_OPINION_TEXT)).getAsString();
         TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RECRUIT_OPINIONS);
         if (textChannel != null) {
-            sendOpinionToChannel(textChannel, user, recruit, opinion);
+            new Thread(() -> sendOpinionToChannel(textChannel, user, recruit, opinion)).start();
+        } else {
+            event.reply(ErrorMessages.UNKNOWN_EXCEPTIONS.getMessage()).setEphemeral(true).queue();
+            log.error("Text channel for recruit opinions is null.");
+            return;
         }
         event.deferEdit().queue();
-        log.info("{} - send opinion({}) about recruit({})", user, opinion, recruit);
     }
 
     public void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
@@ -114,7 +117,8 @@ public class RecruitOpinions implements ContextCommand {
         builder.setDescription("### Użytkownik: " + user.getAsMention() + " wystawił opinię.\n" +
                 "Na temat rekruta: " + recruit.getAsMention());
         builder.addField("", opinion, false);
-        textChannel.sendMessageEmbeds(builder.build()).queue();
+        textChannel.sendMessageEmbeds(builder.build())
+                .queue(message -> log.info("Opinion sent {}", message), throwable -> log.error("Can not send opinion"));
     }
 
     public void opinion(@NotNull UserContextInteractionEvent event) {

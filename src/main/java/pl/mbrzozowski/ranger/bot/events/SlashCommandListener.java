@@ -76,7 +76,9 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(BIRTHDAY.getName())) {
             birthdayService.start(event);
         } else if (name.equals(BIRTHDAY_SET.getName())) {
-            birthdayService.setDate(event);
+            birthdayService.setDate(event, false);
+        } else if (name.equals(BIRTHDAY_ADMIN_SET.getName())) {
+            birthdayService.setDate(event, true);
         } else if (name.equals(GIVEAWAY_CREATE.getName())) {
             giveawayService.create(event);
         } else if (name.equals(GIVEAWAY_END.getName())) {
