@@ -150,6 +150,7 @@ public class RangersGuild {
     }
 
     public enum ChannelsId {
+        RANGERS_ONLY("1154107337347448872"),
         BOT_LOGGER("860096729457098762"),
         RECRUIT_OPINIONS("973453689316597800"),
         DRILL_INSTRUCTOR_HQ("977884495510388806"),

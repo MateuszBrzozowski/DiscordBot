@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -21,10 +22,10 @@ import pl.mbrzozowski.ranger.repository.main.BirthdayRepository;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+
+import static java.time.LocalDate.now;
 
 @Slf4j
 @Service
@@ -44,6 +45,18 @@ public class BirthdayService implements SlashCommandGame {
 
     private Optional<Birthday> findByUserId(String userId) {
         return birthdayRepository.findByUserId(userId);
+    }
+
+    public void autoCheck() {
+        AutoCheck autoCheck = new AutoCheck(this);
+        Timer timer = new Timer();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(now().getYear(), now().getMonthValue() - 1, now().getDayOfMonth(), 7, 0, 0);
+        if (LocalDateTime.now().isAfter(LocalDateTime.now().withHour(7).withMinute(1).withSecond(0))) {
+            calendar.add(Calendar.DATE, 1);
+        }
+        timer.scheduleAtFixedRate(autoCheck, calendar.getTime(), 24 * 60 * 60 * 1000);
+        log.info("Birthday auto check active");
     }
 
     public void setDate(@NotNull SlashCommandInteractionEvent event, boolean isAdmin) {
@@ -104,13 +117,15 @@ public class BirthdayService implements SlashCommandGame {
     }
 
     @Override
-    public void start(@NotNull SlashCommandInteractionEvent event) {
+    public void start(SlashCommandInteractionEvent event) {
         List<Birthday> all = findAll();
         List<Birthday> today = BirthdayProvider.getListWithToday(all);
         List<Birthday> next = BirthdayProvider.getListWithSortedSinceNow(all);
         log.info("all.size={}, today.size={}, next.size={}", all.size(), today.size(), next.size());
         if (today.isEmpty() && next.isEmpty()) {
-            event.reply("Brak zapisanych użytkowników!").queue();
+            if (event != null) {
+                event.reply("Brak zapisanych użytkowników!").setEphemeral(true).queue();
+            }
             log.info("Empty DB with birthdays all.size={}", all.size());
             return;
         }
@@ -123,7 +138,16 @@ public class BirthdayService implements SlashCommandGame {
         if (next.size() >= 1) {
             builder.addField("Następne urodziny:", BirthdayProvider.getStringNextBirthday(next), false);
         }
-        event.replyEmbeds(builder.build()).queue();
+        if (event != null) {
+            event.replyEmbeds(builder.build()).queue();
+        } else {
+            if (today.size() >= 1) {
+                TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RANGERS_ONLY);
+                if (textChannel != null) {
+                    textChannel.sendMessageEmbeds(builder.build()).queue();
+                }
+            }
+        }
         log.info("Embed with birthdays info sent");
     }
 

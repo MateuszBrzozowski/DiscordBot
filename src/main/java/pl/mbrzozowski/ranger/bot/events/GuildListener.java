@@ -52,6 +52,7 @@ public class GuildListener extends ListenerAdapter {
             implCleaner.autoDeleteChannels();
             implCleaner.autoCloseChannel();
             seedCallService.run();
+            birthdayService.autoCheck();
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }
