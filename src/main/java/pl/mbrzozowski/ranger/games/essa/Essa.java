@@ -1,10 +1,11 @@
-package pl.mbrzozowski.ranger.games;
+package pl.mbrzozowski.ranger.games.essa;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.games.SlashCommandGame;
 import pl.mbrzozowski.ranger.helpers.Math;
 
 import java.time.LocalDate;

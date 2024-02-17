@@ -11,8 +11,10 @@ import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.*;
 import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
+import pl.mbrzozowski.ranger.games.essa.Essa;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
+import pl.mbrzozowski.ranger.games.timeout.RandomTimeout;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
 import pl.mbrzozowski.ranger.recruit.RecruitBlackListService;
@@ -70,7 +72,7 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(TOP_REP.getName())) {
             reputationService.showTopTen(event);
         } else if (name.equals(RANDOM_TIMEOUT.getName())) {
-            new RandomTimeout().start(event);
+            RandomTimeout.getInstance().start(event);
         } else if (name.equals(RANGER_OF_THE_DAY.getName())) {
             new RangerOfTheDay(settingsService).start(event);
         } else if (name.equals(BIRTHDAY.getName())) {

@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.games;
+package pl.mbrzozowski.ranger.games.essa;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

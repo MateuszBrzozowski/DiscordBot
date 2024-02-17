@@ -1,4 +1,4 @@
-package pl.mbrzozowski.ranger.games;
+package pl.mbrzozowski.ranger.games.essa;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;

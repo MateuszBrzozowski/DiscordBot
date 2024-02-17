@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.games.*;
 import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
+import pl.mbrzozowski.ranger.games.essa.Essa;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.games.reputation.ReputationService;
+import pl.mbrzozowski.ranger.games.timeout.RandomTimeout;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.members.clan.rank.RankService;
 import pl.mbrzozowski.ranger.model.ImplCleaner;
@@ -75,9 +77,9 @@ public class GuildListener extends ListenerAdapter {
         roleService.getSlashCommandsList(commandData);
         rankService.getSlashCommandsList(commandData);
         Essa.getInstance().getSlashCommandsList(commandData);
+        RandomTimeout.getInstance().getSlashCommandsList(commandData);
         new Dice().getSlashCommandsList(commandData);
         new Coin().getSlashCommandsList(commandData);
-        new RandomTimeout().getSlashCommandsList(commandData);
         new RangerOfTheDay(settingsService).getSlashCommandsList(commandData);
     }
 
