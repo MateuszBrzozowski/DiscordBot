@@ -74,10 +74,25 @@ public class RandomTimeout implements SlashCommandGame {
         if (guild == null) {
             throw new NullPointerException("Guild null");
         }
-        int time = random.nextInt(1430) + 10;
+        int time = drawTime();
         guild.timeoutFor(event.getUser(), time, TimeUnit.MINUTES).queue();
         event.reply(event.getUser().getAsMention() + " " + getMessage(time))
                 .queue(hook -> addAttempt(event.getUser()));
+        log.info("{} timeout for {}", event.getUser(),time);
+    }
+
+    private int drawTime() {
+        Random random = new Random();
+        double number = random.nextInt(100) + 1;
+        double minute = ((1 / number) * Math.pow(12, 3)) - 7;
+        long minuteAsLong = Math.round(minute);
+        if (minuteAsLong >= 1440) {
+            return 1440;
+        }
+        if (minuteAsLong <= 10) {
+            return 10;
+        }
+        return (int) minuteAsLong;
     }
 
     private void addAttempt(User user) {
