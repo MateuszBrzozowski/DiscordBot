@@ -35,9 +35,25 @@ public class RandomTimeout implements SlashCommandGame {
 
     @Override
     public void start(@NotNull SlashCommandInteractionEvent event) {
+        if (Objects.equals(Objects.requireNonNull(event.getGuild()).getOwner(), event.getMember())) {
+            event.reply("Na Ciebie to nie ma mocnych. Nawet jak bym chciał to Ci nie wlepie timeouta!")
+                    .setEphemeral(true).queue();
+            log.info("Server owner can not play!");
+            return;
+        }
+        int botRolePosition = RangersGuild.getSelfRolePosition();
+        int userRolePosition = RangersGuild.getRolePositionOfMember(Objects.requireNonNull(event.getMember()));
+        if (userRolePosition >= botRolePosition) {
+            event.reply("Nie możesz użyć komendy bo masz wyższa rolę niż ja! " +
+                            "Poproś założyciela serwera by to zmienił i pobaw się z innymi xD")
+                    .setEphemeral(true).queue();
+            log.info("User role position is higher or equal highest role than me!");
+            return;
+        }
         clearMap();
+        final int maxAttempt = 2;
         int amount = amountOfGamesForUser(event.getUser());
-        if (amount >= 2) {
+        if (amount >= maxAttempt) {
             event.reply("Wykorzystałeś swoje szanse. Spróbuj ponownie za jakiś czas").setEphemeral(true).queue();
             log.info("{} can not play", event.getUser());
             return;
@@ -46,7 +62,7 @@ public class RandomTimeout implements SlashCommandGame {
         boolean isWin = random.nextBoolean();
         if (!isWin) {
             String message;
-            if (amount == 1) {
+            if (amount == maxAttempt - 1) {
                 message = "Nie wygrałeś!";
             } else {
                 message = "Nie wygrałeś. Graj dalej!";

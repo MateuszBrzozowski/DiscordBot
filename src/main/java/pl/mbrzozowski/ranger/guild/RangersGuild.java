@@ -133,6 +133,27 @@ public class RangersGuild {
         return guild.getMembersWithRoles(role);
     }
 
+    public static int getSelfRolePosition() {
+        DiscordBot.getJda().getSelfUser().getId();
+        Member bot = getMemberByID(DiscordBot.getJda().getSelfUser().getId());
+        if (bot == null) {
+            return -1;
+        }
+        return getRolePositionOfMember(bot);
+    }
+
+    public static int getRolePositionOfMember(@NotNull Member member) {
+        List<Role> roles = member.getRoles();
+        int rolePosition = -1;
+        for (Role role : roles) {
+            if (role.getPosition() > rolePosition) {
+                rolePosition = role.getPosition();
+            }
+        }
+        return rolePosition;
+    }
+
+
     public enum CategoryId {
         RECRUIT("694916869252972570"),
         SERVER("694911873317077073"),
