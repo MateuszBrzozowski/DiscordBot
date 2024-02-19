@@ -254,7 +254,7 @@ public class ResponseMessage {
     }
 
     public static void awaitingConfirmForm(@NotNull ButtonInteractionEvent event) {
-        event.reply("**Jeżeli wysłałeś formularz oczekuj na zatwierdzenie przez <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">**")
+        event.reply("**Jeżeli wysłałeś [Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform) oczekuj na zatwierdzenie przez <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user waiting to confirm form", event.getUser()));
     }
