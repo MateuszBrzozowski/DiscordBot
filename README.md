@@ -1,7 +1,9 @@
 ## Discord Bot
 
-Bot wspomagający zarządzanie organizacji gamingowej<br><br>
+Bot wspomagający zarządzanie dla organizacji gamingowej<br><br>
+<a href="https://discord.gg/invite/jFNpfSzcBW">
 <img alt="Discord" src="https://img.shields.io/discord/311976984861212672?style=for-the-badge&logo=discord&label=Rangers Polska&labelColor=f8bd00&color=007800&link=rangerspolska.pl">
+</a>
 ---
 
 ## Wykorzystane technologie
