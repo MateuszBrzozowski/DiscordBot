@@ -131,7 +131,7 @@ public class ServerService implements SlashCommand {
 
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
-        String userName = event.getUser().getName();
+        String userName = Users.getNickname(Objects.requireNonNull(event.getMember()));
         Guild guild = RangersGuild.getGuild();
         if (guild != null) {
             Category category = RangersGuild.getCategory(RangersGuild.CategoryId.SERVER);

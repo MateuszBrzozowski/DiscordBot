@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class TranscriptionService {
 
     public void openTicket(String channelId, String userName) {
         FileJSON fileJSON = new FileJSON(channelId);
+        userName = Users.replaceAllIllegalCharsInName(userName);
         fileJSON.openTicket(userName);
     }
 
@@ -35,7 +37,7 @@ public class TranscriptionService {
                 fileAttachments.saveFile();
             }
         }
-        String name = Objects.requireNonNull(event.getMessage().getMember()).getNickname();
+        String name = Users.getNickname(Objects.requireNonNull(event.getMember()));
         LocalDateTime date = event.getMessage().getTimeCreated().toLocalDateTime();
         String message = event.getMessage().getContentRaw();
         if (attachments.size() > 0) {

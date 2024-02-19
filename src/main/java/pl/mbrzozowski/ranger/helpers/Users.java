@@ -95,4 +95,20 @@ public class Users {
         }
         return isAdmin;
     }
+
+    @NotNull
+    public static String getNickname(@NotNull Member member) {
+        String name = member.getNickname();
+        if (name == null) {
+            return member.getUser().getName();
+        }
+        return name;
+    }
+
+    @NotNull
+    public static String replaceAllIllegalCharsInName(@NotNull String name) {
+        return name.replaceAll("<", "").replaceAll(">", "").replaceAll("\\?", "")
+                .replaceAll("\"", "").replaceAll("\\*", "").replaceAll("\\|", "")
+                .replaceAll(":", "").replaceAll("/", "").replaceAll("\\\\", "");
+    }
 }
