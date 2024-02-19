@@ -95,10 +95,9 @@ public class ServerStatsService implements SlashCommand {
     public void autoStatsAfterDay() {
         StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, revivesService, playersService, deathsService, woundsService);
         int playerCount = statsAfterDay.getPlayerCountNow();
-        if (playerCount > 0) {
-            return;
+        if (playerCount == 0) {
+            statsAfterDay.pullData();
         }
-
     }
 
     public void stats(@NotNull SlashCommandInteractionEvent event) {

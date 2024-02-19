@@ -24,6 +24,10 @@ public class PlayerCountsService {
         return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
     }
 
+    public List<PlayerCounts> findLastTwoDays() {
+        return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(2));
+    }
+
     public Optional<PlayerCounts> findLast() {
         return playerCountsRepository.findLast();
     }
