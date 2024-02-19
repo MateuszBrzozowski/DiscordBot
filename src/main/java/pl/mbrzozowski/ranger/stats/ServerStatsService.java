@@ -30,10 +30,8 @@ import java.sql.SQLSyntaxErrorException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
@@ -41,6 +39,7 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 @Slf4j
 public class ServerStatsService implements SlashCommand {
 
+    private final PlayerCountsService playerCountsService;
     private final DiscordUserService discordUserService;
     private final SettingsService settingsService;
     private final PlayersService playersService;
@@ -49,17 +48,19 @@ public class ServerStatsService implements SlashCommand {
     private final WoundsService woundsService;
     private LocalDateTime dateTime;
 
-    public ServerStatsService(DeathsService deathsService,
+    public ServerStatsService(PlayerCountsService playerCountsService,
+                              DeathsService deathsService,
                               DiscordUserService discordUserService,
                               SettingsService settingsService,
                               RevivesService revivesService,
                               PlayersService playersService,
                               WoundsService woundsService) {
-        this.deathsService = deathsService;
+        this.playerCountsService = playerCountsService;
         this.discordUserService = discordUserService;
         this.settingsService = settingsService;
         this.revivesService = revivesService;
         this.playersService = playersService;
+        this.deathsService = deathsService;
         this.woundsService = woundsService;
         pullDateTime();
     }
@@ -74,6 +75,30 @@ public class ServerStatsService implements SlashCommand {
             }
 
         }
+    }
+
+    public void runAutoStatsAfterDay() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonthValue() - 1,
+                LocalDateTime.now().getDayOfMonth(),
+                LocalDateTime.now().getHour(),
+                LocalDateTime.now().getMinute(),
+                0);
+        Timer timer = new Timer();
+        AutoCheckStatsAfterDay autoCheckStatsAfterDay = new AutoCheckStatsAfterDay(this);
+        timer.scheduleAtFixedRate(autoCheckStatsAfterDay, calendar.getTime(), 10 * 60 * 1000);
+        log.info("Auto stats after day active");
+    }
+
+
+    public void autoStatsAfterDay() {
+        StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, revivesService, playersService, deathsService, woundsService);
+        int playerCount = statsAfterDay.getPlayerCountNow();
+        if (playerCount > 0) {
+            return;
+        }
+
     }
 
     public void stats(@NotNull SlashCommandInteractionEvent event) {

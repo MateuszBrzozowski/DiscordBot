@@ -8,6 +8,7 @@ import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,5 +22,9 @@ public class PlayerCountsService {
 
     public List<PlayerCounts> findLastDay() {
         return playerCountsRepository.findByTimeAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(1));
+    }
+
+    public Optional<PlayerCounts> findLast() {
+        return playerCountsRepository.findLast();
     }
 }
