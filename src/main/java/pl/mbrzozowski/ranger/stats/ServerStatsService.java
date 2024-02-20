@@ -99,7 +99,7 @@ public class ServerStatsService implements SlashCommand {
         StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, this, revivesService, playersService, deathsService, woundsService);
         int playerCount = statsAfterDay.getPlayerCountNow();
         boolean send = getShouldSend();
-        if (playerCount == 0 && send) {
+        if (playerCount < 20 && send) {
             statsAfterDay.pullData();
             statsAfterDay.showEmbedOnStatsChannel();
             settingsService.save(SettingsKey.DAILY_STATS, "false");
