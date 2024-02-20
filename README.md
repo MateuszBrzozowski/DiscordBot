@@ -36,6 +36,7 @@ Bot wspomagający zarządzanie dla organizacji gamingowej<br><br>
 * Automatyczne zamykanie i usuwanie ticketow.
 * Automatyczne seed call'e.
 * Statystyki z serwera dla każdego usera po użyciu komendy.
+* Automatyczne dzienne statystyki z serwera.
 * Interaktywne tworzenie i zarządzanie giveaway
 * Automatyczne przypomnienia o podbiciu serwera na disboard.
 * Automatyczna zmiana rang/ról po wysłaniu pliku csv.
