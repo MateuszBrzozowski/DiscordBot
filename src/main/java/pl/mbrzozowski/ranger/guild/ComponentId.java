@@ -30,6 +30,8 @@ public final class ComponentId {
     public static final String RECRUIT_NOT_ACCEPTED = "recruitNotAccepted" + SUFFIX;
     public static final String RECRUIT_POSITIVE = "recruitP" + SUFFIX;
     public static final String RECRUIT_NEGATIVE = "recruitN" + SUFFIX;
+    public static final String FORM_SEND = "CFS_000" + SUFFIX;
+    public static final String FORM_SEND_NO = "CFS_000_N" + SUFFIX;
     public static final String CONFIRM_FORM_SEND = "CFS_001" + SUFFIX;
     public static final String CONFIRM_FORM_RECEIVED = "CFS_002" + SUFFIX;
     public static final String DECLINE_FORM_SEND = "CFS_003" + SUFFIX;
@@ -50,7 +52,7 @@ public final class ComponentId {
     public static final String EVENT_SETTINGS_SELECT_MENU = "ES_005" + SUFFIX;
     public static final String EVENT_SETTINGS_MODAL_TITLE = "ES_006" + SUFFIX;
     public static final String EVENT_SETTINGS_MODAL_DATE_TIME = "ES_007" + SUFFIX;
-    public static final String EVENT_SETTINGS_GO_TO_START= "ES_008" + SUFFIX;
+    public static final String EVENT_SETTINGS_GO_TO_START = "ES_008" + SUFFIX;
 
     //Generator  giveaway
     public static final String GIVEAWAY_GENERATOR_BTN_BACK = "GG_001" + SUFFIX;

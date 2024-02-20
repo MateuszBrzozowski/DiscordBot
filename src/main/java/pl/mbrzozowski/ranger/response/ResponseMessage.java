@@ -29,13 +29,6 @@ public class ResponseMessage {
                 .queue();
     }
 
-    public static void youCantSignReserve(@NotNull ButtonInteractionEvent event) {
-        event.reply("**Nie możesz wypisać się z głównej listy na rezerwową tuż przed rozpoczęciem eventu!**\n " +
-                        "Jeżeli istnieje ryzyko, że się spóźnisz lub z ważnych powodów nie możesz uczestniczyć napisz wiadomość na tym kanale")
-                .setEphemeral(true)
-                .queue();
-    }
-
     public static void youCantSingOut(@NotNull ButtonInteractionEvent event) {
         event.reply("**Nie możesz wypisać się z eventu tuż przed jego rozpoczęciem!**\n " +
                         "Jeżeli istnieje ryzyko, że się spóźnisz lub z ważnych powodów nie możesz uczestniczyć napisz wiadomość na tym kanale")
@@ -89,18 +82,6 @@ public class ResponseMessage {
         event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**")
                 .setEphemeral(true)
                 .queue(m -> log.info("{} - user on black list", event.getUser()));
-    }
-
-    /**
-     * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.
-     *
-     * @param event ButtonInteractionEvent
-     */
-    public static void userIsInClanMember(@NotNull ButtonInteractionEvent event) {
-        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
-                        "Jesteś już w naszym klanie dzbanie!")
-                .setEphemeral(true)
-                .queue(m -> log.info("{} - user is already clan member", event.getUser()));
     }
 
     public static void recruitHasBeenAccepted(@NotNull ButtonInteractionEvent event) {
@@ -256,6 +237,7 @@ public class ResponseMessage {
     public static void awaitingConfirmForm(@NotNull ButtonInteractionEvent event) {
         event.reply("**Jeżeli wysłałeś [Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform) oczekuj na zatwierdzenie przez <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">**")
                 .setEphemeral(true)
+                .setSuppressEmbeds(true)
                 .queue(m -> log.info("{} - user waiting to confirm form", event.getUser()));
     }
 

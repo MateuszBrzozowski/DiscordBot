@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.EventService;
@@ -127,10 +128,10 @@ public class RecruitsService implements SlashCommand {
             ResponseMessage.noReqTimeOnServer(event);
             return;
         }
-        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
-            ResponseMessage.userIsInClanMember(event);
-            return;
-        }
+//        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
+//            ResponseMessage.userIsInClanMember(event);
+//            return;
+//        }
         if (hasRecruitChannel(userId)) {
             ResponseMessage.userHaveRecruitChannel(event);
             return;
@@ -163,23 +164,45 @@ public class RecruitsService implements SlashCommand {
                 "- Uzupełnij formularz rekrutacyjny z linku poniżej.\n" +
                 "- Potwierdź przesłany formularz poniższym przyciskiem.\n" +
                 "- Po zweryfikowaniu Twojego formularza zostanie utworzony kanał rekrutacyjny i skontaktuje się z Tobą jeden z naszych <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">");
-        builder.addField("", "**[Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform)**", false);
         event.replyEmbeds(builder.build()).setComponents(
-                        ActionRow.of(Button.success(CONFIRM_FORM_SEND + event.getUser().getId(), "Potwierdzam wysłanie formularza")))
+                        ActionRow.of(Button.link("https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform", "Wypełnij formularz rekrutacyjny!"),
+                                Button.danger(FORM_SEND, "Wypełniłem formularz! ⮞")))
                 .setEphemeral(true)
                 .queue();
+    }
+
+    public void confirmMessageBack(@NotNull ButtonInteractionEvent event) {
+        event.getMessage().delete().queue();
+        confirmMessage(event);
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setDescription("## Formularz rekrutacyjny");
         builder.setColor(Color.GREEN);
-        builder.addField("Dziękujemy za przesłany formularz", "Oczekuj na utworzenie kanału rekrutacyjnego i kontakt od naszego <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> ", false);
+        builder.addField("Dziękujemy za przesłany formularz", "Jeżeli wypełniłeś " +
+                "[Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform) " +
+                "oczekuj na utworzenie kanału rekrutacyjnego i kontakt od naszego <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> ", false);
         event.getInteraction().deferEdit().queue();
         event.getMessage().editMessageEmbeds(builder.build()).setComponents().queue();
         WaitingRecruit waitingRecruit = new WaitingRecruit(event.getUser().getId());
-        save(waitingRecruit);
-        sendInformationAboutNewForm(event);
+        try {
+            save(waitingRecruit);
+            sendInformationAboutNewForm(event);
+        } catch (DataIntegrityViolationException e) {
+            log.info("Duplicate entry key {}", waitingRecruit.getUserId());
+        }
+    }
+
+    public void confirmYesNo(@NotNull ButtonInteractionEvent event) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setDescription("## Czy na pewno uzupełniłeś formularz?");
+        builder.setColor(Color.RED);
+        event.getInteraction().deferEdit().queue();
+        event.getMessage().editMessageEmbeds(builder.build()).setComponents(
+                ActionRow.of(Button.danger(FORM_SEND_NO, "⮜ Cofnij"),
+                        Button.success(CONFIRM_FORM_SEND + event.getUser().getId(), "Potwierdzam ⮞"))
+        ).queue();
     }
 
     private void sendInformationAboutNewForm(@NotNull ButtonInteractionEvent event) {
@@ -190,12 +213,12 @@ public class RecruitsService implements SlashCommand {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(Color.YELLOW);
-        builder.setDescription("## Nowy formularz\n" +
+        builder.setDescription("## Nowy formularz!\n" +
                 Converter.LocalDateTimeToTimestampDateTimeLongFormat(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))));
         builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
                 "Server nickname: " + Users.getUserNicknameFromID(userId), false);
         builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+        textChannel.sendMessage("<@&" + "RoleID.DRILL_INSTRUCTOR_ID" + ">")
                 .setEmbeds(builder.build())
                 .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
                         Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))

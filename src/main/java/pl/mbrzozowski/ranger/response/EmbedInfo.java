@@ -17,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
-import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 
@@ -42,7 +42,9 @@ public class EmbedInfo extends EmbedCreator {
                 - kultura osobista
                 - duża ilość wolnego czasu
                 - brak VAC bana w ciągu 2 ostatnich lat""", false);
-        event.getChannel().sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.NEW_RECRUIT, "Podanie")).queue();
+        event.getChannel().sendMessageEmbeds(builder.build())
+                .setComponents(ActionRow.of(Button.success(ComponentId.NEW_RECRUIT, "Podanie")))
+                .queue();
     }
 
     /**
@@ -211,19 +213,6 @@ public class EmbedInfo extends EmbedCreator {
         }
     }
 
-    public static void cancelEventEditing(String userID) {
-        User userById = DiscordBot.getJda().getUserById(userID);
-        if (userById != null) {
-            userById.openPrivateChannel().queue(privateChannel -> {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(Color.GREEN);
-                builder.setTitle("Edytor zamknięty");
-                builder.setThumbnail("https://rangerspolska.pl/styles/Hexagon/theme/images/logo.png");
-                privateChannel.sendMessageEmbeds(builder.build()).queue();
-            });
-        }
-    }
-
     public static void seedersRoleJoining(@NotNull TextChannel channel) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("SQUAD SERVER SEEDER");
@@ -320,23 +309,6 @@ public class EmbedInfo extends EmbedCreator {
                 .setEmbeds(builder.build())
                 .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                 .queue(message -> message.pin().queue());
-    }
-
-    public static void connectUnSuccessfully(String userID, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-        builder.setTitle("Steam64ID is not valid");
-        builder.setDescription("""
-                Your Steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/
-
-                e.g.\s
-                *!profile 76561197990543288*""");
-        channel.sendMessage("<@" + userID + ">").setEmbeds(builder.build()).queue();
-    }
-
-    public static void noActiveEvents(@NotNull MessageChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-        builder.setTitle("Brak aktywnych eventów");
-        textChannel.sendMessageEmbeds(builder.build()).queue();
     }
 
     public static void recruitAnonymousComplaintsFormOpening(@NotNull TextChannel textChannel) {

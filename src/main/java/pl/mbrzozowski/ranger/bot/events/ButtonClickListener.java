@@ -50,6 +50,10 @@ public class ButtonClickListener extends ListenerAdapter {
     private void newRecruit(@NotNull ButtonInteractionEvent event, boolean isAdmin) {
         if (event.getComponentId().equalsIgnoreCase(ComponentId.NEW_RECRUIT)) {
             recruitsService.newPodanie(event);
+        } else if (event.getComponentId().equals(ComponentId.FORM_SEND)) {
+            recruitsService.confirmYesNo(event);
+        } else if (event.getComponentId().equals(ComponentId.FORM_SEND_NO)) {
+            recruitsService.confirmMessageBack(event);
         } else if (event.getComponentId().length() > ComponentId.CONFIRM_FORM_SEND.length() &&
                 event.getComponentId().startsWith(ComponentId.CONFIRM_FORM_SEND)) {
             recruitsService.confirm(event);
