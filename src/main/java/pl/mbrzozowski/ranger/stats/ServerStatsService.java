@@ -104,7 +104,7 @@ public class ServerStatsService implements SlashCommand {
             statsAfterDay.showEmbedOnStatsChannel();
             settingsService.save(SettingsKey.DAILY_STATS, "false");
             runAutoStatsAfterDay(120);
-        } else if (playerCount > 70) {
+        } else if (playerCount > 70 && !send) {
             settingsService.save(SettingsKey.DAILY_STATS, "true");
             runAutoStatsAfterDay(10);
         }
