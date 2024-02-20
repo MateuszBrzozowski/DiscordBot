@@ -23,4 +23,8 @@ public class DeathsService {
     public List<Deaths> findByAttackerOrVictimAndTimeAfter(String attacker, LocalDateTime time) {
         return deathsRepository.findByAttackerOrVictimAndTimeAfter(attacker, time);
     }
+
+    public List<Deaths> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
+        return deathsRepository.findByTimeBetween(startTime, endTime);
+    }
 }

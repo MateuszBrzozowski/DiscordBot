@@ -40,6 +40,12 @@ public class Converter {
     }
 
     @NotNull
+    public static String LocalDateTimeToLongDateWWithShortTime(@NotNull LocalDateTime source) {
+        long epochSecond = source.atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toEpochSecond() * 1000;
+        return TimeFormat.DATE_TIME_SHORT.format(epochSecond);
+    }
+
+    @NotNull
     public static String LocalDateTimeToTimestampRelativeFormat(@NotNull LocalDateTime source) {
         long epochSecond = source.atZone(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS)).toEpochSecond() * 1000;
         return TimeFormat.RELATIVE.format(epochSecond);

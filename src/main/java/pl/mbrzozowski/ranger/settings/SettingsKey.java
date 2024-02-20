@@ -30,7 +30,8 @@ public enum SettingsKey {
     STATS_DATE_FROM("stats-date"),
     RANGER_OF_THE_DAY("ranger.of.the.day"),
     RANGER_OF_THE_DAY_CHANNEL("ranger.of.the.day.channel"),
-    RANGER_OF_THE_DAY_MESSAGE("ranger.of.the.day.message");
+    RANGER_OF_THE_DAY_MESSAGE("ranger.of.the.day.message"),
+    DAILY_STATS("daily.stats");
 
     private final String key;
 

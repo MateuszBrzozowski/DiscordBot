@@ -59,6 +59,8 @@ public class SlashCommandListener extends ListenerAdapter {
             serverStatsService.profile(event);
         } else if (name.equals(STATS.getName())) {
             serverStatsService.stats(event);
+        } else if (name.equals(DAILY_STATS_ON.getName())) {
+            serverStatsService.dailyStatsOn(event);
         } else if (name.equals(STATS_DATE.getName())) {
             serverStatsService.setDate(event);
         } else if (name.equals(DICE.getName())) {

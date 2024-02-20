@@ -15,4 +15,6 @@ public interface DeathsRepository extends JpaRepository<Deaths, Integer> {
 
     @Query("SELECT w FROM dblog_deaths w WHERE (attacker = :attacker OR victim = :attacker) AND time > :time")
     List<Deaths> findByAttackerOrVictimAndTimeAfter(String attacker, LocalDateTime time);
+
+    List<Deaths> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
 }

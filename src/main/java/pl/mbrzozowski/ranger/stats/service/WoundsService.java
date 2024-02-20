@@ -21,6 +21,10 @@ public class WoundsService {
     }
 
     public List<Wounds> findByAttackerOrVictimAndTimeAfter(String attacker, LocalDateTime time) {
-        return woundsRepository.findByAttackerOrVictimAndTimeAfter(attacker,time);
+        return woundsRepository.findByAttackerOrVictimAndTimeAfter(attacker, time);
+    }
+
+    public List<Wounds> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
+        return woundsRepository.findByTimeBetween(startTime, endTime);
     }
 }

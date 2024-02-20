@@ -7,7 +7,9 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
-import pl.mbrzozowski.ranger.games.*;
+import pl.mbrzozowski.ranger.games.Coin;
+import pl.mbrzozowski.ranger.games.Dice;
+import pl.mbrzozowski.ranger.games.RangerOfTheDay;
 import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
 import pl.mbrzozowski.ranger.games.essa.Essa;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
@@ -55,7 +57,7 @@ public class GuildListener extends ListenerAdapter {
             implCleaner.autoCloseChannel();
             seedCallService.run();
             birthdayService.autoCheck();
-            serverStatsService.runAutoStatsAfterDay();
+            serverStatsService.runAutoStatsAfterDay(10);
             event.getGuild().updateCommands().addCommands(commandData).queue();
         }
     }

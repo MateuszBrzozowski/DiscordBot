@@ -3,7 +3,6 @@ package pl.mbrzozowski.ranger.stats;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -47,6 +46,7 @@ public class ServerStatsService implements SlashCommand {
     private final DeathsService deathsService;
     private final WoundsService woundsService;
     private LocalDateTime dateTime;
+    private Timer timerDailyStats = new Timer();
 
     public ServerStatsService(PlayerCountsService playerCountsService,
                               DeathsService deathsService,
@@ -77,7 +77,12 @@ public class ServerStatsService implements SlashCommand {
         }
     }
 
-    public void runAutoStatsAfterDay() {
+    /**
+     * @param period in minutes
+     */
+    public void runAutoStatsAfterDay(long period) {
+        timerDailyStats.cancel();
+        timerDailyStats = new Timer();
         Calendar calendar = Calendar.getInstance();
         calendar.set(LocalDateTime.now().getYear(),
                 LocalDateTime.now().getMonthValue() - 1,
@@ -85,26 +90,40 @@ public class ServerStatsService implements SlashCommand {
                 LocalDateTime.now().getHour(),
                 LocalDateTime.now().getMinute(),
                 0);
-        Timer timer = new Timer();
         AutoCheckStatsAfterDay autoCheckStatsAfterDay = new AutoCheckStatsAfterDay(this);
-        timer.scheduleAtFixedRate(autoCheckStatsAfterDay, calendar.getTime(), 10 * 60 * 1000);
+        timerDailyStats.scheduleAtFixedRate(autoCheckStatsAfterDay, calendar.getTime(), period * 60 * 1000);
         log.info("Auto stats after day active");
     }
 
-
     public void autoStatsAfterDay() {
-        StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, revivesService, playersService, deathsService, woundsService);
+        StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, this, revivesService, playersService, deathsService, woundsService);
         int playerCount = statsAfterDay.getPlayerCountNow();
-        if (playerCount == 0) {
+        boolean send = getShouldSend();
+        if (playerCount == 0 && send) {
             statsAfterDay.pullData();
+            statsAfterDay.showEmbedOnStatsChannel();
+            settingsService.save(SettingsKey.DAILY_STATS, "false");
+            runAutoStatsAfterDay(120);
+        } else if (playerCount > 70) {
+            settingsService.save(SettingsKey.DAILY_STATS, "true");
+            runAutoStatsAfterDay(10);
         }
+    }
+
+    private boolean getShouldSend() {
+        Optional<String> optional = settingsService.find(SettingsKey.DAILY_STATS);
+        if (optional.isPresent()) {
+            return Boolean.parseBoolean(optional.get());
+        }
+        settingsService.save(SettingsKey.DAILY_STATS, "false");
+        return false;
     }
 
     public void stats(@NotNull SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         try {
             if (isUserConnected(event.getUser().getId())) {
-                viewStatsForUser(event, event.getUser().getId(), event.getChannel().asTextChannel());
+                viewStatsForUser(event, event.getUser().getId());
             } else {
                 ResponseMessage.notConnectedAccount(event);
             }
@@ -135,7 +154,7 @@ public class ServerStatsService implements SlashCommand {
         }
     }
 
-    public void viewStatsForUser(SlashCommandInteractionEvent event, String userId, TextChannel channel) {
+    public void viewStatsForUser(SlashCommandInteractionEvent event, String userId) {
         log.info("UserId: " + userId + " - stats");
         PlayerStats playerStats = pullStatsFromDB(userId);
         if (playerStats != null) {
@@ -409,7 +428,7 @@ public class ServerStatsService implements SlashCommand {
         return false;
     }
 
-    private int getTeamKills(@NotNull List<Wounds> woundsList, String steamID) {
+    int getTeamKills(@NotNull List<Wounds> woundsList, String steamID) {
         return woundsList.stream()
                 .filter(wounds -> wounds.getAttacker() != null)
                 .filter(wounds -> wounds.getAttacker().equalsIgnoreCase(steamID))
@@ -418,28 +437,28 @@ public class ServerStatsService implements SlashCommand {
                 .toList().size();
     }
 
-    private int getRevivesYou(@NotNull List<Revives> revivesList, String steamID) {
+    int getRevivesYou(@NotNull List<Revives> revivesList, String steamID) {
         return revivesList.stream()
                 .filter(revives -> revives.getVictim() != null)
                 .filter(revives -> revives.getVictim().equalsIgnoreCase(steamID))
                 .toList().size();
     }
 
-    private int getRevives(@NotNull List<Revives> revivesList, String steamID) {
+    int getRevives(@NotNull List<Revives> revivesList, String steamID) {
         return revivesList.stream()
                 .filter(revives -> revives.getReviver() != null)
                 .filter(revives -> revives.getReviver().equalsIgnoreCase(steamID))
                 .toList().size();
     }
 
-    private int getWounds(@NotNull List<Wounds> woundsList, String steamID) {
+    int getWounds(@NotNull List<Wounds> woundsList, String steamID) {
         return woundsList.stream()
                 .filter(wounds -> wounds.getAttacker() != null)
                 .filter(wounds -> wounds.getAttacker().equalsIgnoreCase(steamID))
                 .toList().size();
     }
 
-    private int getDeaths(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
+    int getDeaths(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
         return deathsList.stream()
                 .filter(deaths -> deaths.getVictim() != null)
                 .filter(deaths -> deaths.getVictim().equalsIgnoreCase(steamID))
@@ -452,7 +471,7 @@ public class ServerStatsService implements SlashCommand {
                 .toList().size();
     }
 
-    private int getKills(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
+    int getKills(@NotNull List<Deaths> deathsList, @NotNull String steamID) {
         return deathsList.stream()
                 .filter(deaths -> deaths.getAttacker() != null)
                 .filter(deaths -> deaths.getAttacker().equals(steamID))
@@ -556,6 +575,8 @@ public class ServerStatsService implements SlashCommand {
                 .addOption(OptionType.INTEGER, "month", "Miesiąc", true)
                 .addOption(OptionType.INTEGER, "year", "Rok", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
+        commandData.add(Commands.slash(DAILY_STATS_ON.getName(), DAILY_STATS_ON.getDescription())
+                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
     public void setDate(@NotNull SlashCommandInteractionEvent event) {
@@ -576,5 +597,11 @@ public class ServerStatsService implements SlashCommand {
         } catch (Exception e) {
             event.reply("Data nieprawidłowa!").setEphemeral(true).queue();
         }
+    }
+
+    public void dailyStatsOn(@NotNull SlashCommandInteractionEvent event) {
+        event.reply("Zaraz sprawdzę czy serwer jest pusty i wyślę dzienne statystyki").setEphemeral(true).queue();
+        settingsService.save(SettingsKey.DAILY_STATS, "true");
+        runAutoStatsAfterDay(10);
     }
 }

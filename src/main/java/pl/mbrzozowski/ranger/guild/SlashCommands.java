@@ -5,6 +5,7 @@ public enum SlashCommands {
     STEAM_PROFILE("profile", "Link your discord account to your steam profile if you want view stats from our server."),
     STEAM_PROFILE_64("steam64id", "Your steam64ID - you can find it by pasting your link to steam profile here https://steamid.io/"),
     STATS("stats", "To view your stats from our server"),
+    DAILY_STATS_ON("stats-daily-on", "Włącz dzienne statystyki - (Jeżeli bot był wyłączony i nie wychwycił że serwer był pełny."),
     STATS_DATE("stats-date", "Ustaw datę od kiedy mają być pobierane dane"),
     DICE("kostka", "Rzut kością do gry"),
     COIN("moneta", "Rzut monetą"),

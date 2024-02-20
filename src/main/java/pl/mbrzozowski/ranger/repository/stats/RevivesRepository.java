@@ -15,4 +15,6 @@ public interface RevivesRepository extends JpaRepository<Revives, Integer> {
 
     @Query("SELECT w FROM dblog_revives w WHERE (reviver = :reviver OR victim = :reviver) AND time > :time")
     List<Revives> findByReviverOrVictimAndTimeAfter(String reviver, LocalDateTime time);
+
+    List<Revives> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
 }
