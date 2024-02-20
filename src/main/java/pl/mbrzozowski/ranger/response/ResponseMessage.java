@@ -90,6 +90,18 @@ public class ResponseMessage {
                 .queue(m -> log.info("{} - recruit(channelId={}) has been accepted", event.getUser(), event.getChannel().getId()));
     }
 
+    /**
+     * Wysyła do użytkownika o ID userID informację że jest już w klanie nie może złożyć podania na rekrutację.
+     *
+     * @param event ButtonInteractionEvent
+     */
+    public static void userIsInClanMember(@NotNull ButtonInteractionEvent event) {
+        event.reply("**NIE MOŻESZ ZŁOŻYĆ PODANIA DO NASZEGO KLANU!**\n" +
+                        "Jesteś już w naszym klanie dzbanie!")
+                .setEphemeral(true)
+                .queue(m -> log.info("{} - user is already clan member", event.getUser()));
+    }
+
     public static void recruitHasBeenRejected(@NotNull ButtonInteractionEvent event) {
         event.reply("**Rekrut z wynikiem rekrutacji. Operacja niemożliwa do zrealizowania.**")
                 .setEphemeral(true)

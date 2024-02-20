@@ -128,10 +128,10 @@ public class RecruitsService implements SlashCommand {
             ResponseMessage.noReqTimeOnServer(event);
             return;
         }
-//        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
-//            ResponseMessage.userIsInClanMember(event);
-//            return;
-//        }
+        if (Users.hasUserRole(userId, RoleID.CLAN_MEMBER_ID)) {
+            ResponseMessage.userIsInClanMember(event);
+            return;
+        }
         if (hasRecruitChannel(userId)) {
             ResponseMessage.userHaveRecruitChannel(event);
             return;
@@ -218,7 +218,7 @@ public class RecruitsService implements SlashCommand {
         builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
                 "Server nickname: " + Users.getUserNicknameFromID(userId), false);
         builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + "RoleID.DRILL_INSTRUCTOR_ID" + ">")
+        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
                 .setEmbeds(builder.build())
                 .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
                         Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
