@@ -20,6 +20,7 @@ import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
+import pl.mbrzozowski.ranger.model.TemporaryChannelsInteraction;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -36,7 +37,7 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.SERVER_SERVICE_DELETE_CH
 
 @Slf4j
 @Service
-public class ServerService implements SlashCommand {
+public class ServerService implements SlashCommand, TemporaryChannelsInteraction {
 
     private final TranscriptionService transcriptionService;
     private final ClientRepository clientRepository;
@@ -125,10 +126,6 @@ public class ServerService implements SlashCommand {
         log.info("Client=({}) channel closed", client);
     }
 
-    public void removeChannel(@NotNull ButtonInteractionEvent event) {
-        deleteByChannelId(event.getChannel().getId());
-    }
-
     private void createChannel(@NotNull ButtonInteractionEvent event, ButtonClickType buttonType) {
         String userID = event.getUser().getId();
         String userName = Users.getNickname(Objects.requireNonNull(event.getMember()));
@@ -188,24 +185,6 @@ public class ServerService implements SlashCommand {
         return clients.size() != 0;
     }
 
-    public void deleteChannelById(String channelId) {
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
-        if (textChannel != null) {
-            textChannel.delete().reason("Upłynął termin utrzymywania kanału").queue();
-            log.info("Deleted server service channel by id " + channelId);
-        }
-        deleteByChannelId(channelId);
-    }
-
-    public void deleteByChannelId(String channelID) {
-        Optional<Client> optional = findByChannelId(channelID);
-        if (optional.isPresent()) {
-            clientRepository.deleteByChannelId(channelID);
-            log.info("Deleted channel from DB for Server Service (channelId={})", channelID);
-            transcriptionService.createAndSendTranscript(channelID);
-        }
-    }
-
     public Optional<Client> findByChannelId(String channelID) {
         return clientRepository.findByChannelId(channelID);
     }
@@ -243,5 +222,42 @@ public class ServerService implements SlashCommand {
         openChannel(clientOptional.get());
         event.deferEdit().queue();
         event.getMessage().delete().queue();
+    }
+
+    @Override
+    public void deleteChannelById(String channelId) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
+        deleteFromDBByChannelId(channelId);
+        if (textChannel != null) {
+            textChannel.delete().reason("Upłynął termin utrzymywania kanału").queue();
+            log.info("Deleted server service channel by id " + channelId);
+        }
+    }
+
+    @Override
+    public void deleteFromDBByChannelId(String channelID) {
+        Optional<Client> optional = findByChannelId(channelID);
+        if (optional.isPresent()) {
+            clientRepository.deleteByChannelId(channelID);
+            log.info("Deleted channel from DB for Server Service (channelId={})", channelID);
+            transcriptionService.createAndSendTranscript(channelID);
+        }
+    }
+
+    @Override
+    public void removeChannelAfterButtonClick(@NotNull ButtonInteractionEvent event) {
+        EmbedInfo.removedChannel(event);
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Guild guild = event.getGuild();
+            if (guild != null) {
+                deleteChannelById(event.getChannelId());
+            }
+        });
+        thread.start();
     }
 }

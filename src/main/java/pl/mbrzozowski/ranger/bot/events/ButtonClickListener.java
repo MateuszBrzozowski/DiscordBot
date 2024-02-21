@@ -13,7 +13,6 @@ import pl.mbrzozowski.ranger.event.EventsSettingsService;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
-import pl.mbrzozowski.ranger.helpers.ComponentService;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.recruit.RecruitOpinions;
@@ -216,11 +215,9 @@ public class ButtonClickListener extends ListenerAdapter {
         String parentCategoryId = event.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
             if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.RECRUIT) && isAdmin) {
-                recruitsService.deleteChannelByID(event.getChannel().getId());
-                ComponentService.removeChannel(event);
+                recruitsService.removeChannelAfterButtonClick(event);
             } else if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.SERVER)) {
-                serverService.removeChannel(event);
-                ComponentService.removeChannel(event);
+                serverService.removeChannelAfterButtonClick(event);
             } else {
                 ResponseMessage.noPermission(event);
             }

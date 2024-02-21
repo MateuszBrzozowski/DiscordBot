@@ -28,6 +28,7 @@ import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.model.SlashCommand;
+import pl.mbrzozowski.ranger.model.TemporaryChannels;
 import pl.mbrzozowski.ranger.repository.main.EventRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.response.EmbedSettings;
@@ -41,7 +42,7 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.*;
 
 @Slf4j
 @Service
-public class EventService implements SlashCommand {
+public class EventService implements SlashCommand, TemporaryChannels {
 
     private static final int MAX_ACTIVE_EVENTS = 25;
     private final UsersReminderService usersReminderService;
@@ -74,6 +75,10 @@ public class EventService implements SlashCommand {
         return eventRepository.findByIsActive(true);
     }
 
+    private Optional<Event> findByChannelId(String channelId) {
+        return eventRepository.findByChannelId(channelId);
+    }
+
     private void saveAll(List<Event> events) {
         eventRepository.saveAll(events);
     }
@@ -90,15 +95,8 @@ public class EventService implements SlashCommand {
         Optional<Event> eventOptional = findEventByMsgId(messageId);
         if (eventOptional.isPresent()) {
             timers.cancelByMsgId(messageId);
-            eventRepository.deleteByMsgId(messageId);
-            log.info("Deleted event by messageId(messageId={})", messageId);
+            deleteFromDBByChannelId(eventOptional.get());
         }
-    }
-
-    public void deleteByChannelId(String channelId) {
-        timers.cancelByChannelId(channelId);
-        eventRepository.deleteByChannelId(channelId);
-        log.info("Event deleted by channelId(channelId={})", channelId);
     }
 
     void setActiveToFalse(@NotNull Event event) {
@@ -523,5 +521,27 @@ public class EventService implements SlashCommand {
                 }
             }
         }
+    }
+
+    @Override
+    public void deleteChannelById(String channelId) {
+        TextChannel channel = DiscordBot.getJda().getTextChannelById(channelId);
+        deleteFromDBByChannelId(channelId);
+        if (channel != null) {
+            channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
+            log.info("Deleted event channel by id={}", channelId);
+        }
+    }
+
+    @Override
+    public void deleteFromDBByChannelId(String channelId) {
+        timers.cancelByChannelId(channelId);
+        Optional<Event> event = findByChannelId(channelId);
+        event.ifPresent(this::deleteFromDBByChannelId);
+    }
+
+    private void deleteFromDBByChannelId(Event event) {
+        eventRepository.delete(event);
+        log.info("Event deleted by channelId(channelId={} name={})", event.getChannelId(), event.getName());
     }
 }

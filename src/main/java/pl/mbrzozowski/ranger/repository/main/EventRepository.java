@@ -23,4 +23,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM event e WHERE e.isActive=true and e.groupFor<=1")
     List<Event> findByIsActiveAndFirstGroup();
+
+    Optional<Event> findByChannelId(String channelId);
 }

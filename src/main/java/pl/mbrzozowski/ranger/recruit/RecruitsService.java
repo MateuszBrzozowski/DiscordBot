@@ -31,6 +31,7 @@ import pl.mbrzozowski.ranger.helpers.Converter;
 import pl.mbrzozowski.ranger.helpers.RoleID;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.model.SlashCommand;
+import pl.mbrzozowski.ranger.model.TemporaryChannelsInteraction;
 import pl.mbrzozowski.ranger.repository.main.RecruitRepository;
 import pl.mbrzozowski.ranger.repository.main.WaitingRecruitRepository;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -50,7 +51,7 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.RECRUIT_DELETE_CHANNEL_D
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RecruitsService implements SlashCommand {
+public class RecruitsService implements SlashCommand, TemporaryChannelsInteraction {
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
     private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
@@ -268,16 +269,6 @@ public class RecruitsService implements SlashCommand {
         log.info("user(name={}, id={}) added to DB as recruit", userName, userId);
     }
 
-    public void deleteChannelByID(String channelID) {
-        Optional<Recruit> recruitOptional = findByChannelId(channelID);
-        if (recruitOptional.isPresent()) {
-            Recruit recruit = recruitOptional.get();
-            removeRecruitRoleFromUserID(recruit.getUserId());
-            recruitRepository.delete(recruit);
-            log.info("(channelId={}) - has been removed", channelID);
-        }
-    }
-
     private void addRoleRecruit(String userId) {
         Guild guild = RangersGuild.getGuild();
         if (guild != null) {
@@ -300,15 +291,6 @@ public class RecruitsService implements SlashCommand {
             if (hasRoleRecruit && roleRecruit != null && member != null) {
                 guild.removeRoleFromMember(member, roleRecruit).queue();
             }
-        }
-    }
-
-    public void deleteChannel(@NotNull Recruit recruit) {
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(recruit.getChannelId());
-        if (textChannel != null) {
-            textChannel.delete().reason("Rekrutacja zakończona.").queue();
-            recruitRepository.delete(recruit);
-            log.info("{} - channel deleted", recruit);
         }
     }
 
@@ -666,5 +648,43 @@ public class RecruitsService implements SlashCommand {
         commandData.add(Commands.slash(RECRUIT_DELETE_CHANNEL_DELAY.getName(), RECRUIT_DELETE_CHANNEL_DELAY.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .addOption(OptionType.INTEGER, "days", "Po ilu dniach?", true));
+    }
+
+    @Override
+    public void deleteChannelById(String channelId) {
+        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
+        deleteFromDBByChannelId(channelId);
+        if (textChannel != null) {
+            textChannel.delete().reason("Upłynął termin utrzymywania kanału").queue();
+            log.info("Deleted recruit channel by id " + channelId);
+        }
+    }
+
+    @Override
+    public void deleteFromDBByChannelId(String channelId) {
+        Optional<Recruit> recruitOptional = findByChannelId(channelId);
+        if (recruitOptional.isPresent()) {
+            Recruit recruit = recruitOptional.get();
+            removeRecruitRoleFromUserID(recruit.getUserId());
+            recruitRepository.delete(recruit);
+            log.info("Deleted channel from DB for Recruits (channelId={})", channelId);
+        }
+    }
+
+    @Override
+    public void removeChannelAfterButtonClick(@NotNull ButtonInteractionEvent event) {
+        EmbedInfo.removedChannel(event);
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Guild guild = event.getGuild();
+            if (guild != null) {
+                deleteChannelById(event.getChannelId());
+            }
+        });
+        thread.start();
     }
 }

@@ -99,7 +99,7 @@ public class EmbedInfo extends EmbedCreator {
     public static void removedChannel(@NotNull ButtonInteractionEvent event) {
         EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
         builder.setTitle("Kanał wkrótce zostanie usunięty.");
-        event.reply("").setEmbeds(builder.build()).queue();
+        event.getChannel().asTextChannel().sendMessage("Kanał wkrótce zostanie usunięty.").queue();
     }
 
     public static void endNegative(String drillId, String recruitId, @NotNull TextChannel channel) {

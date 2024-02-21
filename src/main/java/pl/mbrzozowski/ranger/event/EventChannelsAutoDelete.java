@@ -1,10 +1,7 @@
 package pl.mbrzozowski.ranger.event;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.model.CleanerChannel;
 
 import java.time.LocalDateTime;
@@ -37,20 +34,12 @@ public class EventChannelsAutoDelete extends CleanerChannel {
             if ((event.getDate().isBefore(LocalDateTime.now().minusDays(delay))) ||
                     (event.getDate().isBefore(LocalDateTime.now().minusDays(delayInDaysForTactical)) && event.getEventFor() == EventFor.TACTICAL_GROUP)) {
                 eventService.delete(event);
-                deleteChannel(event);
+                eventService.deleteChannelById(event.getChannelId());
             } else {
                 eventService.disableButtons(event);
                 eventService.setActiveToFalse(event);
                 eventService.setRedCircleInChannelName(event);
             }
-        }
-    }
-
-    private void deleteChannel(@NotNull Event event) {
-        TextChannel channel = DiscordBot.getJda().getTextChannelById(event.getChannelId());
-        if (channel != null) {
-            channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
-            log.info("Past event - Deleted channel - [" + event.getName() + "]");
         }
     }
 }

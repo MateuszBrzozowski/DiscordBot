@@ -27,7 +27,7 @@ public class RecruitChannelsAutoDelete extends CleanerChannel {
                 .filter(recruit -> recruit.getEndRecruitment().isBefore(LocalDateTime.now().minusDays(delay)))
                 .toList();
         for (Recruit recruit : recruits) {
-            recruitsService.deleteChannel(recruit);
+            recruitsService.deleteChannelById(recruit.getChannelId());
         }
     }
 }
