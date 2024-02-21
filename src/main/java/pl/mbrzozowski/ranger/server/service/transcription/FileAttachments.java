@@ -2,7 +2,6 @@ package pl.mbrzozowski.ranger.server.service.transcription;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.File;
 import java.util.*;
@@ -31,10 +30,10 @@ public class FileAttachments {
         this.channelId = channelId;
     }
 
-    public void saveFile() {
+    public int saveFile() {
         if (isNotSupportedExtension(attachment.getFileExtension())) {
             log.warn("{} - extension not supported", attachment.getFileExtension());
-            return;
+            return -1;
         }
         FileJSON fileJSON = new FileJSON(channelId + "_attachments");
         int amount = fileJSON.readAmountAttachments();
@@ -45,6 +44,7 @@ public class FileAttachments {
             throw new RuntimeException(e);
         }
         fileJSON.writeAmountAttachments(amount);
+        return amount;
     }
 
     private boolean isNotSupportedExtension(String fileExtension) {
@@ -56,13 +56,12 @@ public class FileAttachments {
         return true;
     }
 
-    public Collection<FileUpload> getAttachments() {
+    public List<File> getAttachments() {
         fileJSON = new FileJSON(channelId + "_attachments");
         int attachmentsSize = fileJSON.readAmountAttachments();
         if (attachmentsSize == 0) {
             return new ArrayList<>();
         }
-        ArrayList<FileUpload> fileUploads = new ArrayList<>();
         for (int i = 1; i <= attachmentsSize; i++) {
             File file = null;
             for (String extension : EXTENSIONS) {
@@ -72,11 +71,10 @@ public class FileAttachments {
                 }
             }
             if (file != null && file.exists()) {
-                fileUploads.add(FileUpload.fromData(file));
                 files.add(file);
             }
         }
-        return fileUploads;
+        return files;
     }
 
     public void clear() {
