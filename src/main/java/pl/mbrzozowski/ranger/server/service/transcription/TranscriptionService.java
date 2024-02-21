@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,24 +65,47 @@ public class TranscriptionService {
             log.warn("Null text channel");
             return;
         }
+        List<FileUpload> fileUploads = new ArrayList<>();
         FileAttachments fileAttachments = new FileAttachments(channelID);
         List<File> files = fileAttachments.getAttachments();
-        File zipFile = zipFiles(transcript, files);
+        File onlyTranscript = zipTranscript(transcript);
+        fileUploads.add(FileUpload.fromData(onlyTranscript));
+        List<File> zipAttachments = new ArrayList<>();
+        if (!files.isEmpty()) {
+            zipAttachments = zipAttachments(transcript, files);
+            for (File zipFile : zipAttachments) {
+                fileUploads.add(FileUpload.fromData(zipFile));
+            }
+        }
+        List<File> finalZipAttachments = zipAttachments;
         textChannel.sendMessage(transcript.getName())
-                .addFiles(FileUpload.fromData(zipFile))
+                .addFiles(fileUploads)
                 .queue(message -> {
                     transcript.delete();
                     fileAttachments.clear();
-                    zipFile.delete();
+                    onlyTranscript.delete();
+                    for (File zipFile : finalZipAttachments) {
+                        zipFile.delete();
+                    }
                 });
     }
 
-    private File zipFiles(@NotNull File transcript, @NotNull List<File> files) {
+    private File zipTranscript(@NotNull File transcript) {
+        Path path = Paths.get(transcript.getAbsolutePath()).getParent().toAbsolutePath();
+        try (ZipFile zipFile = new ZipFile(path + "/" + transcript.getName() + "OnlyTranscript.zip")) {
+            zipFile.addFile(transcript);
+            return zipFile.getFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<File> zipAttachments(@NotNull File transcript, @NotNull List<File> files) {
         Path path = Paths.get(transcript.getAbsolutePath()).getParent().toAbsolutePath();
         try (ZipFile zipFile = new ZipFile(path + "/" + transcript.getName() + ".zip")) {
             files.add(transcript);
-            zipFile.addFiles(files);
-            return zipFile.getFile();
+            zipFile.createSplitZipFile(files, new ZipParameters(), true, 1048576); //25690112
+            return zipFile.getSplitZipFiles();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
