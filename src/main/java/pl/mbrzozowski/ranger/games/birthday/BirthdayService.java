@@ -33,7 +33,7 @@ import static java.time.LocalDate.now;
 public class BirthdayService implements SlashCommandGame {
 
     private final BirthdayRepository birthdayRepository;
-    private LocalDate localDate;
+    private LocalDate lastSendDate;
 
     private void save(Birthday birthday) {
         birthdayRepository.save(birthday);
@@ -119,7 +119,7 @@ public class BirthdayService implements SlashCommandGame {
 
     @Override
     public void start(SlashCommandInteractionEvent event) {
-        if (localDate != null && localDate.getDayOfYear() == LocalDate.now().getDayOfYear()) {
+        if (lastSendDate != null && lastSendDate.getDayOfYear() == LocalDate.now().getDayOfYear()) {
             if (event != null) {
                 event.reply("Ktoś już sprawdzał dzisiaj urodzinki.").setEphemeral(true).queue();
             }
@@ -138,7 +138,7 @@ public class BirthdayService implements SlashCommandGame {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(new Color(151, 1, 95));
-        builder.setDescription("# Urodzinki");
+        builder.setDescription("# :tada: Urodzinki :tada:");
         if (today.size() >= 1) {
             builder.addField("Dzisiaj urodziny obchodzi(ą):", BirthdayProvider.getStringTodayBirthday(today), false);
         }
@@ -147,13 +147,13 @@ public class BirthdayService implements SlashCommandGame {
         }
         if (event != null) {
             event.replyEmbeds(builder.build()).queue();
-            localDate = LocalDate.now();
+            lastSendDate = LocalDate.now();
         } else {
             if (today.size() >= 1) {
                 TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RANGERS_ONLY);
                 if (textChannel != null) {
                     textChannel.sendMessageEmbeds(builder.build()).queue();
-                    localDate = LocalDate.now();
+                    lastSendDate = LocalDate.now();
                 }
             }
         }

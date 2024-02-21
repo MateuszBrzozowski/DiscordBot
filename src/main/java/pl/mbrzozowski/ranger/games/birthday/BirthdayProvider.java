@@ -41,7 +41,7 @@ public class BirthdayProvider {
             return new ArrayList<>();
         } else {
             birthdaysNext.sort(Comparator.comparingInt(o -> o.getDate().getMonthValue()));
-            List<Birthday> birthdays = sortAllMonth(birthdaysNext);
+            List<Birthday> birthdays = sortDaysInMonth(birthdaysNext);
             moveAllToEndIfDayOfYearIsBeforeNow(birthdays);
             return birthdays;
         }
@@ -52,28 +52,27 @@ public class BirthdayProvider {
         int monthValue = birthdays.get(i).getDate().getMonthValue();
         while (monthValue < LocalDate.now().getMonthValue() && i < birthdays.size()) {
             birthdays.add(birthdays.remove(0));
-            monthValue = birthdays.get(0).getDate().getMonthValue();
+            monthValue = birthdays.get(i).getDate().getMonthValue();
             i++;
         }
         i = 0;
         int dayOfMonth = birthdays.get(i).getDate().getDayOfMonth();
-        while (dayOfMonth < LocalDate.now().getDayOfMonth() && i < birthdays.size()) {
+        while (monthValue == LocalDate.now().getMonthValue() &&
+                dayOfMonth < LocalDate.now().getDayOfMonth() &&
+                i < birthdays.size()) {
             birthdays.add(birthdays.remove(0));
-            dayOfMonth = birthdays.get(0).getDate().getDayOfMonth();
+            monthValue = birthdays.get(i).getDate().getMonthValue();
+            dayOfMonth = birthdays.get(i).getDate().getDayOfMonth();
             i++;
         }
     }
 
     @NotNull
-    private static List<Birthday> sortAllMonth(List<Birthday> birthdaysNext) {
+    private static List<Birthday> sortDaysInMonth(List<Birthday> birthdaysNext) {
         List<Birthday> result = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
-            List<Birthday> month = new ArrayList<>();
-            for (Birthday birthday : birthdaysNext) {
-                if (birthday.getDate().getMonthValue() == i) {
-                    month.add(birthday);
-                }
-            }
+            int finalI = i;
+            List<Birthday> month = new ArrayList<>(birthdaysNext.stream().filter(b -> b.getDate().getMonthValue() == finalI).toList());
             month.sort(Comparator.comparingInt(o -> o.getDate().getDayOfMonth()));
             result.addAll(month);
         }
