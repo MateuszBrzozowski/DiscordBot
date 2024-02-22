@@ -13,7 +13,7 @@ public class AutoCheckStatsAfterDay extends TimerTask {
 
     @Override
     public void run() {
-        log.info("Auto check stats after day init");
+        log.info("Auto check daily stats init");
         serverStatsService.autoStatsAfterDay();
     }
 }

@@ -73,14 +73,26 @@ public class ServerStatsService implements SlashCommand {
             } catch (Exception e) {
                 settingsService.deleteByKey(SettingsKey.STATS_DATE_FROM);
             }
+        }
+    }
 
+    public void runDailyStats() {
+        Optional<String> optional = settingsService.find(SettingsKey.DAILY_STATS_ON);
+        if (optional.isPresent()) {
+            boolean isOn = Boolean.parseBoolean(optional.orElse("false"));
+            log.info("Daily stats {}", isOn);
+            if (isOn) {
+                runDailyStats(10);
+            }
+        } else {
+            settingsService.save(SettingsKey.DAILY_STATS_ON, "false");
         }
     }
 
     /**
      * @param period in minutes
      */
-    public void runAutoStatsAfterDay(long period) {
+    private void runDailyStats(long period) {
         timerDailyStats.cancel();
         timerDailyStats = new Timer();
         Calendar calendar = Calendar.getInstance();
@@ -92,21 +104,21 @@ public class ServerStatsService implements SlashCommand {
                 0);
         AutoCheckStatsAfterDay autoCheckStatsAfterDay = new AutoCheckStatsAfterDay(this);
         timerDailyStats.scheduleAtFixedRate(autoCheckStatsAfterDay, calendar.getTime(), period * 60 * 1000);
-        log.info("Auto stats after day active");
+        log.info("Daily stats active - period {}", period);
     }
 
     public void autoStatsAfterDay() {
-        StatsAfterDay statsAfterDay = new StatsAfterDay(playerCountsService, this, revivesService, playersService, deathsService, woundsService);
-        int playerCount = statsAfterDay.getPlayerCountNow();
+        DailyStats dailyStats = new DailyStats(playerCountsService, this, revivesService, playersService, deathsService, woundsService);
+        int playerCount = dailyStats.getPlayerCountNow();
         boolean send = getShouldSend();
         if (playerCount < 20 && send) {
-            statsAfterDay.pullData();
-            statsAfterDay.showEmbedOnStatsChannel();
+            dailyStats.pullData();
+            dailyStats.showEmbedOnStatsChannel();
             settingsService.save(SettingsKey.DAILY_STATS, "false");
-            runAutoStatsAfterDay(120);
-        } else if (playerCount > 70 && !send) {
+            runDailyStats(120);
+        } else if (playerCount > 80 && !send) {
             settingsService.save(SettingsKey.DAILY_STATS, "true");
-            runAutoStatsAfterDay(10);
+            runDailyStats(10);
         }
     }
 
@@ -575,7 +587,7 @@ public class ServerStatsService implements SlashCommand {
                 .addOption(OptionType.INTEGER, "month", "Miesiąc", true)
                 .addOption(OptionType.INTEGER, "year", "Rok", true)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
-        commandData.add(Commands.slash(DAILY_STATS_ON.getName(), DAILY_STATS_ON.getDescription())
+        commandData.add(Commands.slash(DAILY_STATS_SWITCH.getName(), DAILY_STATS_SWITCH.getDescription())
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)));
     }
 
@@ -599,9 +611,24 @@ public class ServerStatsService implements SlashCommand {
         }
     }
 
-    public void dailyStatsOn(@NotNull SlashCommandInteractionEvent event) {
-        event.reply("Zaraz sprawdzę czy serwer jest pusty i wyślę dzienne statystyki").setEphemeral(true).queue();
-        settingsService.save(SettingsKey.DAILY_STATS, "true");
-        runAutoStatsAfterDay(10);
+    public void dailyStatsSwitch(SlashCommandInteractionEvent event) {
+        Optional<String> optional = settingsService.find(SettingsKey.DAILY_STATS_ON);
+        if (optional.isPresent()) {
+            boolean isOn = Boolean.parseBoolean(optional.get());
+            if (isOn) {
+                settingsService.save(SettingsKey.DAILY_STATS_ON, "false");
+                settingsService.save(SettingsKey.DAILY_STATS, "false");
+                timerDailyStats.cancel();
+                event.reply("Usługa wyłączona").setEphemeral(true).queue();
+            } else {
+                settingsService.save(SettingsKey.DAILY_STATS_ON, "true");
+                settingsService.save(SettingsKey.DAILY_STATS, "true");
+                runDailyStats(10);
+                event.reply("Usługa włączona").setEphemeral(true).queue();
+            }
+        } else {
+            settingsService.save(SettingsKey.DAILY_STATS_ON, "false");
+            event.reply("Usługa wyłączona").setEphemeral(true).queue();
+        }
     }
 }

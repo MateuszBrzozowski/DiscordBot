@@ -14,7 +14,7 @@ import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
-public class StatsAfterDay {
+public class DailyStats {
 
     private final PlayerCountsService playerCountsService;
     private final ServerStatsService serverStatsService;
@@ -49,7 +49,7 @@ public class StatsAfterDay {
                 Converter.LocalDateTimeToLongDateWWithShortTime(startTime) +
                 " - " + Converter.LocalDateTimeToLongDateWWithShortTime(endTime) + "\n" +
                 "Unique players: `" + uniquePlayers.size() + "`\n" +
-                "Matches: `" + matches.size() + "`").complete();
+                "Rounds: `" + matches.size() + "`").complete();
         textChannel.sendMessage("### \uD83D\uDDE1 Kills:\n```\n" + getMostKillsAsString() + "\n```\n" +
                 "### ⚰ Deaths:\n```\n" + getMostDeathAsString() + "\n```\n" +
                 "### ⚔ K/D:\n```\n" + getMostKDAsString() + "\n```").complete();
