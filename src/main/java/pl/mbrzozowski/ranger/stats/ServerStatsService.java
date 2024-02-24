@@ -45,6 +45,7 @@ public class ServerStatsService implements SlashCommand {
     private final RevivesService revivesService;
     private final DeathsService deathsService;
     private final WoundsService woundsService;
+    private final Map<String, LocalDateTime> dateTimeMap = new HashMap<>();
     private LocalDateTime dateTime;
     private Timer timerDailyStats = new Timer();
 
@@ -72,6 +73,7 @@ public class ServerStatsService implements SlashCommand {
                 dateTime = LocalDateTime.parse(optional.get());
             } catch (Exception e) {
                 settingsService.deleteByKey(SettingsKey.STATS_DATE_FROM);
+                dateTime = null;
             }
         }
     }
@@ -232,14 +234,19 @@ public class ServerStatsService implements SlashCommand {
         builder.addField("Most killed by", playerStats.getMostKilledBy(), true);
         builder.addField("Most revives", playerStats.getMostRevives(), true);
         builder.addField("Most revived by", playerStats.getMostRevivedBy(), true);
-        builder.setFooter("Data from " + getDate());
+        builder.setFooter("Data from " + getDate(userID));
         event.getHook().editOriginal("<@" + userID + ">").setEmbeds(builder.build()).queue();
+        dateTimeMap.remove(userID);
         log.info("Embed with stats sent for user(id=" + userID + ")");
     }
 
     @NotNull
-    private String getDate() {
-        return dateTime.getDayOfMonth() + "." + String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear() + "r.";
+    private String getDate(String userID) {
+        if (dateTime != null) {
+            return dateTime.getDayOfMonth() + "." + String.format("%02d", dateTime.getMonthValue()) + "." + dateTime.getYear() + "r.";
+        }
+        LocalDateTime localDateTime = dateTimeMap.get(userID);
+        return localDateTime.getDayOfMonth() + "." + String.format("%02d", localDateTime.getMonthValue()) + "." + localDateTime.getYear() + "r.";
     }
 
     private @Nullable PlayerStats pullStatsFromDB(String userId) {
@@ -254,7 +261,7 @@ public class ServerStatsService implements SlashCommand {
             List<Revives> revivesList = getRevives(discordUser);
             List<Wounds> woundsList = getWounds(discordUser);
             if (dateTime == null && deathsList.size() > 0) {
-                dateTime = deathsList.get(0).getTime();
+                dateTimeMap.put(userId, deathsList.get(0).getTime());
             }
             return PlayerStats.builder()
                     .profileName(steamUsersOptional.get().getLastName())
@@ -608,6 +615,7 @@ public class ServerStatsService implements SlashCommand {
             settingsService.save(SettingsKey.STATS_DATE_FROM, dateTime.toString());
         } catch (Exception e) {
             event.reply("Data nieprawidłowa!").setEphemeral(true).queue();
+            dateTime = null;
         }
     }
 
