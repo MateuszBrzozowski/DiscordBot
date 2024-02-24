@@ -61,20 +61,19 @@ public class RecruitOpinions implements ContextCommand {
         User user = event.getUser();
         User recruit = activeOpinionsAboutRecruit.get(user);
         if (recruit == null) {
-            log.warn("Recruit user is null");
             event.reply(ErrorMessages.UNKNOWN_EXCEPTIONS.getMessage()).setEphemeral(true).queue();
+            log.warn("Recruit user is null");
             return;
         }
         String opinion = Objects.requireNonNull(event.getValue(ComponentId.RECRUIT_OPINION_TEXT)).getAsString();
         TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.RECRUIT_OPINIONS);
         if (textChannel != null) {
             new Thread(() -> sendOpinionToChannel(textChannel, user, recruit, opinion)).start();
+            event.reply("Opinia wysłana poprawnie. Dziękujemy!").setEphemeral(true).queue();
         } else {
             event.reply(ErrorMessages.UNKNOWN_EXCEPTIONS.getMessage()).setEphemeral(true).queue();
             log.error("Text channel for recruit opinions is null.");
-            return;
         }
-        event.deferEdit().queue();
     }
 
     public void openAnonymousComplaints(@NotNull ButtonInteractionEvent event) {
@@ -93,10 +92,13 @@ public class RecruitOpinions implements ContextCommand {
         String text = Objects.requireNonNull(event.getValue(ComponentId.MODAL_COMPLAINT_TEXT)).getAsString();
         TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ);
         if (textChannel != null) {
-            sendMessage(textChannel, event.getUser(), text);
+            new Thread(() -> sendMessage(textChannel, event.getUser(), text)).start();
+            event.reply("Dziękujemy za zgłoszenie!").setEphemeral(true).queue();
+            log.info("{} - send anonymous complaints", event.getUser());
+            return;
         }
-        event.deferEdit().queue();
-        log.info("{} - send anonymous complaints", event.getUser());
+        event.reply(ErrorMessages.UNKNOWN_EXCEPTIONS.getMessage()).setEphemeral(true).queue();
+        log.error("Text channel is null");
     }
 
     private void sendMessage(@NotNull TextChannel textChannel, User user, String text) {
