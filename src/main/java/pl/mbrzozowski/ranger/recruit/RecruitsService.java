@@ -54,7 +54,6 @@ import static pl.mbrzozowski.ranger.guild.SlashCommands.RECRUIT_DELETE_CHANNEL_D
 public class RecruitsService implements SlashCommand, TemporaryChannelsInteraction {
 
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_MENTION_EVERYONE);
-    private final Collection<Permission> permViewChannel = EnumSet.of(Permission.VIEW_CHANNEL);
     private final WaitingRecruitRepository waitingRecruitRepository;
     private final RecruitBlackListService recruitBlackListService;
     private final RecruitRepository recruitRepository;
@@ -74,7 +73,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
                 .addPermissionOverride(guild.getPublicRole(), null, permissions)
                 .addMemberPermissionOverride(Long.parseLong(userID), permissions, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_COUNCIL), permissions, null)
-                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permViewChannel, null)
+                .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                 .addRolePermissionOverride(Long.parseLong(RoleID.DRILL_INSTRUCTOR_ID), permissions, null)
                 .queue(textChannel -> {
                     log.info("created text channel(name={}, id={})", textChannel.getName(), textChannel.getId());
