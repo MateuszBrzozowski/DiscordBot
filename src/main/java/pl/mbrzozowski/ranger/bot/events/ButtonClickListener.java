@@ -215,9 +215,9 @@ public class ButtonClickListener extends ListenerAdapter {
         String parentCategoryId = event.getChannel().asTextChannel().getParentCategoryId();
         if (parentCategoryId != null) {
             if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.RECRUIT) && isAdmin) {
-                recruitsService.removeChannelAfterButtonClick(event);
+                recruitsService.deleteChannelAfterButtonClick(event);
             } else if (RangersGuild.compareCategoryId(parentCategoryId, RangersGuild.CategoryId.SERVER)) {
-                serverService.removeChannelAfterButtonClick(event);
+                serverService.deleteChannelAfterButtonClick(event);
             } else {
                 ResponseMessage.noPermission(event);
             }

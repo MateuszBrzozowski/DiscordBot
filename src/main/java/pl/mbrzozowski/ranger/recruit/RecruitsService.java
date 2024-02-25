@@ -22,9 +22,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import pl.mbrzozowski.ranger.DiscordBot;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.guild.ComponentId;
+import pl.mbrzozowski.ranger.guild.DeleteChannel;
+import pl.mbrzozowski.ranger.guild.DeleteChannelById;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.Constants;
 import pl.mbrzozowski.ranger.helpers.Converter;
@@ -651,12 +652,8 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
 
     @Override
     public void deleteChannelById(String channelId) {
-        TextChannel textChannel = DiscordBot.getJda().getTextChannelById(channelId);
-        deleteFromDBByChannelId(channelId);
-        if (textChannel != null) {
-            textChannel.delete().reason("Upłynął termin utrzymywania kanału").queue();
-            log.info("Deleted recruit channel by id " + channelId);
-        }
+        DeleteChannelById deleteChannelById = new DeleteChannelById(this);
+        deleteChannelById.accept(channelId);
     }
 
     @Override
@@ -671,19 +668,9 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
     }
 
     @Override
-    public void removeChannelAfterButtonClick(@NotNull ButtonInteractionEvent event) {
+    public void deleteChannelAfterButtonClick(@NotNull ButtonInteractionEvent event) {
         EmbedInfo.removedChannel(event);
-        Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Guild guild = event.getGuild();
-            if (guild != null) {
-                deleteChannelById(event.getChannelId());
-            }
-        });
-        thread.start();
+        DeleteChannel deleteChannel = new DeleteChannel(event.getChannelId(), this);
+        new Timer().schedule(deleteChannel, 5000);
     }
 }

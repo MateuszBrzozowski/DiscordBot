@@ -25,6 +25,7 @@ import pl.mbrzozowski.ranger.event.reminder.CreateReminder;
 import pl.mbrzozowski.ranger.event.reminder.Timers;
 import pl.mbrzozowski.ranger.event.reminder.UsersReminderService;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
+import pl.mbrzozowski.ranger.guild.DeleteChannelById;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.*;
 import pl.mbrzozowski.ranger.model.SlashCommand;
@@ -525,12 +526,8 @@ public class EventService implements SlashCommand, TemporaryChannels {
 
     @Override
     public void deleteChannelById(String channelId) {
-        TextChannel channel = DiscordBot.getJda().getTextChannelById(channelId);
-        deleteFromDBByChannelId(channelId);
-        if (channel != null) {
-            channel.delete().reason("Upłynął czas utrzymywania kanału").queue();
-            log.info("Deleted event channel by id={}", channelId);
-        }
+        DeleteChannelById deleteChannelById = new DeleteChannelById(this);
+        deleteChannelById.accept(channelId);
     }
 
     @Override
