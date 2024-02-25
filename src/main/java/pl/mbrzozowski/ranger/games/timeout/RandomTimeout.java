@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.games.SlashCommandGame;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.guild.SlashCommands;
+import pl.mbrzozowski.ranger.settings.SettingsKey;
+import pl.mbrzozowski.ranger.settings.SettingsService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,6 +22,7 @@ public class RandomTimeout implements SlashCommandGame {
 
     private static final RandomTimeout instance = new RandomTimeout();
     private final Map<User, LastCall> users = new HashMap<>();
+    private SettingsService settingsService;
 
     private RandomTimeout() {
     }
@@ -51,7 +54,7 @@ public class RandomTimeout implements SlashCommandGame {
             return;
         }
         clearMap();
-        final int maxAttempt = 2;
+        final int maxAttempt = getMaxAttempt();
         int amount = amountOfGamesForUser(event.getUser());
         if (amount >= maxAttempt) {
             event.reply("Wykorzystałeś swoje szanse. Spróbuj ponownie za jakiś czas").setEphemeral(true).queue();
@@ -78,7 +81,28 @@ public class RandomTimeout implements SlashCommandGame {
         guild.timeoutFor(event.getUser(), time, TimeUnit.MINUTES).queue();
         event.reply(event.getUser().getAsMention() + " " + getMessage(time))
                 .queue(hook -> addAttempt(event.getUser()));
-        log.info("{} timeout for {}", event.getUser(),time);
+        log.info("{} timeout for {}", event.getUser(), time);
+    }
+
+    private int getMaxAttempt() {
+        if (settingsService == null) {
+            throw new NullPointerException("Null settings service");
+        }
+        Optional<String> optional = settingsService.find(SettingsKey.RANDOM_TIMEOUT_AMOUNT);
+        if (optional.isPresent()) {
+            try {
+                return Integer.parseInt(optional.get());
+            } catch (NumberFormatException e) {
+                return saveMaxAmount();
+            }
+        }
+        return saveMaxAmount();
+    }
+
+    private int saveMaxAmount() {
+        final int max = 2;
+        settingsService.save(SettingsKey.RANDOM_TIMEOUT_AMOUNT, max);
+        return max;
     }
 
     private int drawTime() {
@@ -143,5 +167,9 @@ public class RandomTimeout implements SlashCommandGame {
             hoursAsString = "godzin";
         }
         return "Wygrał timeout na " + hour + " " + hoursAsString + " i " + time % 60 + " minut";
+    }
+
+    public void injectService(SettingsService settingsService) {
+        this.settingsService = settingsService;
     }
 }

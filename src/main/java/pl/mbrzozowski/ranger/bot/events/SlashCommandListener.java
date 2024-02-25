@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
 import pl.mbrzozowski.ranger.event.EventsSettingsService;
-import pl.mbrzozowski.ranger.games.*;
+import pl.mbrzozowski.ranger.games.Coin;
+import pl.mbrzozowski.ranger.games.Dice;
+import pl.mbrzozowski.ranger.games.RangerOfTheDay;
 import pl.mbrzozowski.ranger.games.birthday.BirthdayService;
 import pl.mbrzozowski.ranger.games.essa.Essa;
 import pl.mbrzozowski.ranger.games.giveaway.GiveawayService;
@@ -74,7 +76,9 @@ public class SlashCommandListener extends ListenerAdapter {
         } else if (name.equals(TOP_REP.getName())) {
             reputationService.showTopTen(event);
         } else if (name.equals(RANDOM_TIMEOUT.getName())) {
-            RandomTimeout.getInstance().start(event);
+            RandomTimeout randomTimeout = RandomTimeout.getInstance();
+            randomTimeout.injectService(settingsService);
+            randomTimeout.start(event);
         } else if (name.equals(RANGER_OF_THE_DAY.getName())) {
             new RangerOfTheDay(settingsService).start(event);
         } else if (name.equals(BIRTHDAY.getName())) {
