@@ -1,5 +1,6 @@
 package pl.mbrzozowski.ranger.event;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed.Field;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.google.calendar.EventLink;
 import pl.mbrzozowski.ranger.exceptions.FullListException;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.helpers.Converter;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 public class EventsEmbed {
 
     @NotNull
@@ -34,10 +37,23 @@ public class EventsEmbed {
                 Converter.LocalDateTimeToTimestampDateTimeLongFormat(eventRequest.getDateTime()) + "\n" +
                         EmbedSettings.WHEN_TIME + Converter.LocalDateTimeToTimestampRelativeFormat(eventRequest.getDateTime()),
                 true);
+        builder.addField("", getHyperlink(eventRequest), false);
         builder.addBlankField(false);
         builder.addField(EmbedSettings.NAME_LIST + "(0)", ">>> -", true);
         builder.setFooter("Utworzony przez " + Users.getUserNicknameFromID(eventRequest.getAuthorId()));
         return builder;
+    }
+
+    private static @NotNull String getHyperlink(@NotNull EventRequest eventRequest) {
+        EventLink eventLink = new EventLink(eventRequest.getName());
+        eventLink.setPeriod(150);
+        eventLink.setStartTime(eventRequest.getDateTime());
+        String link = "[Dodaj do kalendarza google](" + eventLink.get() + ")";
+        if (link.length() >= MessageEmbed.VALUE_MAX_LENGTH) {
+            log.warn("Can not input hyperlink to Message Embed field");
+            return "";
+        }
+        return link;
     }
 
     @NotNull
@@ -98,13 +114,13 @@ public class EventsEmbed {
                                                          String mainList) {
         List<Field> fieldsNew = new ArrayList<>();
         for (int i = 0; i < fieldsOld.size(); i++) {
-            if (i == 2) {
+            if (i == 3) {
                 Field fieldNew = new Field(
                         EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")",
                         ">>> " + mainList,
                         true);
                 fieldsNew.add(fieldNew);
-            } else if (i == 0 || i == 1) {
+            } else {
                 fieldsNew.add(fieldsOld.get(i));
             }
         }
