@@ -113,8 +113,9 @@ public class EventsEmbed {
                                                          @NotNull List<Field> fieldsOld,
                                                          String mainList) {
         List<Field> fieldsNew = new ArrayList<>();
+        int indexOfList = indexOfList(fieldsOld);
         for (int i = 0; i < fieldsOld.size(); i++) {
-            if (i == 3) {
+            if (i == indexOfList) {
                 Field fieldNew = new Field(
                         EmbedSettings.NAME_LIST + "(" + getMainListSize(event) + ")",
                         ">>> " + mainList,
@@ -125,6 +126,16 @@ public class EventsEmbed {
             }
         }
         return fieldsNew;
+    }
+
+    private static int indexOfList(@NotNull List<Field> fields) {
+        for (int i = 0; i < fields.size(); i++) {
+            String name = fields.get(i).getName();
+            if (name != null && name.startsWith(EmbedSettings.NAME_LIST)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @NotNull
