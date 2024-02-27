@@ -104,7 +104,7 @@ public class TranscriptionService {
         Path path = Paths.get(transcript.getAbsolutePath()).getParent().toAbsolutePath();
         try (ZipFile zipFile = new ZipFile(path + "/" + transcript.getName() + ".zip")) {
             files.add(transcript);
-            zipFile.createSplitZipFile(files, new ZipParameters(), true, 25690112);
+            zipFile.createSplitZipFile(files, new ZipParameters(), true, 24000000);
             return zipFile.getSplitZipFiles();
         } catch (IOException e) {
             throw new RuntimeException(e);
