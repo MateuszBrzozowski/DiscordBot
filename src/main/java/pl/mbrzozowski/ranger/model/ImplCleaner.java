@@ -46,7 +46,7 @@ public class ImplCleaner implements Cleaner {
     private void server() {
         int delay = getDelay(3, SettingsKey.SERVER_SERVICE_DELETE_CHANNEL);
         CleanerChannel serverServiceAutoDelete = new ServerServiceAutoDelete(serverService, delay);
-        setTimers(SERVER, serverServiceAutoDelete, 1);
+        setTimers(SERVER, serverServiceAutoDelete, 2);
     }
 
     private void event() {
