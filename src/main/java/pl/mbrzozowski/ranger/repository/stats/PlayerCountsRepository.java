@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface PlayerCountsRepository extends JpaRepository<PlayerCounts, Integer> {
     List<PlayerCounts> findByTimeAfter(LocalDateTime date);
 
-    @Query(value = "SELECT * FROM dblog_playercounts p ORDER BY p.id DESC LIMIT 1", nativeQuery = true)
-    Optional<PlayerCounts> findLast();
+    @Query(value = "SELECT * FROM dblog_playercounts p WHERE p.server = :server ORDER BY p.id DESC LIMIT 1", nativeQuery = true)
+    Optional<PlayerCounts> findLastWhereServer(int server);
 }

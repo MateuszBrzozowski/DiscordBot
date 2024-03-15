@@ -31,7 +31,7 @@ public class DailyStats {
     private final List<PlayerStats> playerStatsArtillery = new ArrayList<>();
 
     public int getPlayerCountNow() {
-        Optional<PlayerCounts> last = playerCountsService.findLast();
+        Optional<PlayerCounts> last = playerCountsService.findLastWhereServer(1);
         if (last.isPresent()) {
             log.info("Players on server: {}", last.get().getPlayers());
             return last.get().getPlayers();
