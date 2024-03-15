@@ -53,7 +53,7 @@ public class DailyStats {
         textChannel.sendMessage("## Daily stats - Top 10\n" +
                 Converter.LocalDateTimeToLongDateWWithShortTime(startTime) +
                 " - " + Converter.LocalDateTimeToLongDateWWithShortTime(endTime) + "\n" +
-                "Serwer: `✹↯✭ [PL/ENG] LTW #1 - Lead The Way polski serwer <RangersPL> | DiscordStatTrack`" +
+                "Serwer: `✹↯✭ [PL/ENG] LTW #1 - Lead The Way polski serwer <RangersPL> | DiscordStatTrack`" + "\n" +
                 "Unique players: `" + uniquePlayers.size() + "`\n" +
                 "Rounds: `" + matches.size() + "`").complete();
         textChannel.sendMessage("### \uD83D\uDDE1 Kills:\n```\n" + getMostKillsAsString() + "\n```\n" +
