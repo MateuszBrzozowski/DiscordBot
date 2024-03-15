@@ -5,6 +5,7 @@ import pl.mbrzozowski.ranger.stats.model.PlayerCounts;
 
 import java.util.List;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SeedCallExecute extends TimerTask {
@@ -29,6 +30,7 @@ public class SeedCallExecute extends TimerTask {
             seedCallService.resetLevels();
             return;
         }
+        players = players.stream().filter(playerCounts -> playerCounts.getServer() == 1).collect(Collectors.toList());
         seedCallService.analyze(players);
     }
 }
