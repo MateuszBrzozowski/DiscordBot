@@ -13,8 +13,9 @@ public interface WoundsRepository extends JpaRepository<Wounds, Integer> {
 
     List<Wounds> findByAttackerOrVictim(String attacker, String victim);
 
-    @Query("SELECT w FROM dblog_wounds w WHERE (attacker = :attacker OR victim = :attacker) AND time > :time")
+    @Query(value = "SELECT w FROM dblog_wounds w WHERE (attacker = :attacker OR victim = :attacker) AND time > :time")
     List<Wounds> findByAttackerOrVictimAndTimeAfter(String attacker, LocalDateTime time);
 
-    List<Wounds> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+    @Query(value = "SELECT w FROM dblog_wounds w WHERE w.server = :server AND w.time > :startTime AND w.time < :endTime")
+    List<Wounds> findByTimeBetweenWhereServer(LocalDateTime startTime, LocalDateTime endTime, int server);
 }

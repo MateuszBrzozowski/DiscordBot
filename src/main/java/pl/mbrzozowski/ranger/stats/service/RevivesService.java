@@ -24,7 +24,7 @@ public class RevivesService {
         return revivesRepository.findByReviverOrVictimAndTimeAfter(reviver, time);
     }
 
-    public List<Revives> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
-        return revivesRepository.findByTimeBetween(startTime, endTime);
+    public List<Revives> findByTimeBetweenWhereServer(LocalDateTime startTime, LocalDateTime endTime, int server) {
+        return revivesRepository.findByTimeBetweenWhereServer(startTime, endTime, server);
     }
 }

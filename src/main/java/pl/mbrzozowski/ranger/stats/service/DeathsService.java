@@ -24,7 +24,7 @@ public class DeathsService {
         return deathsRepository.findByAttackerOrVictimAndTimeAfter(attacker, time);
     }
 
-    public List<Deaths> findByTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
-        return deathsRepository.findByTimeBetween(startTime, endTime);
+    public List<Deaths> findByTimeBetweenWhereServer(LocalDateTime startTime, LocalDateTime endTime, int server) {
+        return deathsRepository.findByTimeBetweenWhereServer(startTime, endTime, server);
     }
 }

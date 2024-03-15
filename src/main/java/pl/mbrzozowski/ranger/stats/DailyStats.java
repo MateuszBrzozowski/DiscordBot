@@ -43,11 +43,17 @@ public class DailyStats {
     public void showEmbedOnStatsChannel() {
         TextChannel textChannel = RangersGuild.getTextChannel(RangersGuild.ChannelsId.STATS);
         if (textChannel == null) {
+            log.warn("Null stats channel");
+            return;
+        }
+        if (playerStats.size() == 0) {
+            log.warn("No data to show");
             return;
         }
         textChannel.sendMessage("## Daily stats - Top 10\n" +
                 Converter.LocalDateTimeToLongDateWWithShortTime(startTime) +
                 " - " + Converter.LocalDateTimeToLongDateWWithShortTime(endTime) + "\n" +
+                "Serwer: `✹↯✭ [PL/ENG] LTW #1 - Lead The Way polski serwer <RangersPL> | DiscordStatTrack`" +
                 "Unique players: `" + uniquePlayers.size() + "`\n" +
                 "Rounds: `" + matches.size() + "`").complete();
         textChannel.sendMessage("### \uD83D\uDDE1 Kills:\n```\n" + getMostKillsAsString() + "\n```\n" +
@@ -57,9 +63,11 @@ public class DailyStats {
                 "### ⚕ Revived:\n```\n" + getMostRevivesYouAsString() + "\n```").complete();
         textChannel.sendMessage("### \uD83E\uDE78 Wounds:\n```\n" + getMostWoundsAsString() + "\n```\n" +
                 "### \uD83D\uDEAB TeamKills:\n```\n" + getMostTeamKillsAsString() + "\n```").complete();
-        textChannel.sendMessage("### Damage - Artillery:\n```\n" + getMostArtilleryDamageAsString() + "\n```\n" +
-                "### \uD83E\uDE78 Wounds - Artillery:\n```\n" + getMostArtilleryWoundsAsString() + "\n```\n" +
-                "### \uD83D\uDDE1 Kills - Artillery:\n```\n" + getMostArtilleryKillsAsString() + "\n```").complete();
+        if (playerStatsArtillery.size() != 0) {
+            textChannel.sendMessage("### Damage - Artillery:\n```\n" + getMostArtilleryDamageAsString() + "\n```\n" +
+                    "### \uD83E\uDE78 Wounds - Artillery:\n```\n" + getMostArtilleryWoundsAsString() + "\n```\n" +
+                    "### \uD83D\uDDE1 Kills - Artillery:\n```\n" + getMostArtilleryKillsAsString() + "\n```").complete();
+        }
     }
 
     @NotNull
@@ -187,9 +195,9 @@ public class DailyStats {
         }
         endTime = activePeriod.get(0).getTime();
         startTime = activePeriod.get(activePeriod.size() - 1).getTime();
-        List<Deaths> deaths = deathsService.findByTimeBetween(startTime, endTime);
-        List<Revives> revives = revivesService.findByTimeBetween(startTime, endTime);
-        List<Wounds> wounds = woundsService.findByTimeBetween(startTime, endTime);
+        List<Deaths> deaths = deathsService.findByTimeBetweenWhereServer(startTime, endTime, 1);
+        List<Revives> revives = revivesService.findByTimeBetweenWhereServer(startTime, endTime, 1);
+        List<Wounds> wounds = woundsService.findByTimeBetweenWhereServer(startTime, endTime, 1);
         getUniquePlayersCount(deaths);
         getMatches(deaths);
         getArtilleryList(wounds, deaths);
@@ -271,7 +279,7 @@ public class DailyStats {
 
     @NotNull
     private List<PlayerCounts> getActivePeriod() {
-        List<PlayerCounts> lastTwoDays = playerCountsService.findLastTwoDays();
+        List<PlayerCounts> lastTwoDays = playerCountsService.findLastTwoDaysWhereServer(1);
         lastTwoDays.sort((o1, o2) -> o2.getTime().compareTo(o1.getTime()));
         int firstIndex = 0;
         for (int i = 0; i < lastTwoDays.size(); i++) {

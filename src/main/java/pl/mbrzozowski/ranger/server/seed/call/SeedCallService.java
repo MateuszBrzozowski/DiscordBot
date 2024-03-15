@@ -58,7 +58,7 @@ public class SeedCallService implements SlashCommand {
             log.info("Seed call service disable");
             return;
         }
-        List<PlayerCounts> players = playerCountsService.findLastDay();
+        List<PlayerCounts> players = playerCountsService.findLastDayWhereServer(1);
         checkLevel(Levels.ONE, players);
     }
 

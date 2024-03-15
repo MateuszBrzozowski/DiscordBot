@@ -11,7 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface PlayerCountsRepository extends JpaRepository<PlayerCounts, Integer> {
-    List<PlayerCounts> findByTimeAfter(LocalDateTime date);
+
+    @Query(value = "SELECT p FROM dblog_playercounts p WHERE p.server = :server AND p.time > :date")
+    List<PlayerCounts> findByTimeAfterWhereServer(LocalDateTime date, int server);
 
     @Query(value = "SELECT * FROM dblog_playercounts p WHERE p.server = :server ORDER BY p.id DESC LIMIT 1", nativeQuery = true)
     Optional<PlayerCounts> findLastWhereServer(int server);

@@ -20,7 +20,7 @@ public class SeedCallExecute extends TimerTask {
     @Override
     public void run() {
         log.info("Seed call check");
-        List<PlayerCounts> players = seedCallService.getPlayerCountsService().findLastTwoHours();
+        List<PlayerCounts> players = seedCallService.getPlayerCountsService().findLastTwoHoursWhereServer(1);
         if (players.size() == 0) {
             log.warn("No data to check");
             return;
