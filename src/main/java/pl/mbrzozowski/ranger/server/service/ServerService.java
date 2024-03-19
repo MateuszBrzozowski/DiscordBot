@@ -43,6 +43,7 @@ public class ServerService implements SlashCommand, TemporaryChannelsInteraction
     private final TranscriptionService transcriptionService;
     private final ClientRepository clientRepository;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
+    private final Collection<Permission> permissionsOnlyView = EnumSet.of(Permission.VIEW_CHANNEL);
 
     public ServerService(TranscriptionService transcriptionService, ClientRepository clientRepository) {
         this.transcriptionService = transcriptionService;
@@ -141,6 +142,7 @@ public class ServerService implements SlashCommand, TemporaryChannelsInteraction
                         .addRolePermissionOverride(Long.parseLong(RoleID.MODERATOR), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_COUNCIL), permissions, null)
                         .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_ADMIN), permissions, null)
+                        .addRolePermissionOverride(Long.parseLong(RoleID.SERVER_JUNIOR_ADMIN), permissionsOnlyView, null)
                         .queue(channel -> {
                             sendEmbedStartChannel(userID, channel, buttonType);
                             addUser(userID, userName, channel.getId());
@@ -245,6 +247,6 @@ public class ServerService implements SlashCommand, TemporaryChannelsInteraction
     public void deleteChannelAfterButtonClick(@NotNull ButtonInteractionEvent event) {
         EmbedInfo.removedChannel(event);
         DeleteChannel deleteChannel = new DeleteChannel(event.getChannelId(), this);
-        new Timer().schedule(deleteChannel,5000);
+        new Timer().schedule(deleteChannel, 5000);
     }
 }
