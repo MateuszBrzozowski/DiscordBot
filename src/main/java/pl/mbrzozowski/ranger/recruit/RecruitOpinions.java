@@ -114,13 +114,9 @@ public class RecruitOpinions implements ContextCommand {
     }
 
     private void sendOpinionToChannel(@NotNull TextChannel textChannel, @NotNull User user, @NotNull User recruit, String opinion) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
-        builder.setDescription("### Użytkownik: " + user.getAsMention() + " wystawił opinię.\n" +
-                "Na temat rekruta: " + recruit.getAsMention());
-        builder.addField("", opinion, false);
-        textChannel.sendMessageEmbeds(builder.build())
-                .queue(message -> log.info("Opinion sent {}", message), throwable -> log.error("Can not send opinion"));
+        textChannel.sendMessage("### Użytkownik: " + user.getAsMention() + " wystawił opinię!\n" +
+                "### Na temat rekruta: " + recruit.getAsMention() + "\n" +
+                ">>> " + opinion).queue(message -> log.info("Opinion sent {}", message), throwable -> log.error("Can not send opinion"));
     }
 
     public void opinion(@NotNull UserContextInteractionEvent event) {
