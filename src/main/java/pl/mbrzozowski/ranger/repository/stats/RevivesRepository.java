@@ -13,9 +13,9 @@ public interface RevivesRepository extends JpaRepository<Revives, Integer> {
 
     List<Revives> findByReviverOrVictim(String reviver, String victim);
 
-    @Query(value = "SELECT w FROM dblog_revives w WHERE (reviver = :reviver OR victim = :reviver) AND time > :time")
+    @Query(value = "SELECT w FROM DBLog_Revives w WHERE (reviver = :reviver OR victim = :reviver) AND time > :time")
     List<Revives> findByReviverOrVictimAndTimeAfter(String reviver, LocalDateTime time);
 
-    @Query(value = "SELECT w FROM dblog_revives w WHERE w.server = :server AND w.time > :startTime AND w.time < :endTime")
+    @Query(value = "SELECT w FROM DBLog_Revives w WHERE w.server = :server AND w.time > :startTime AND w.time < :endTime")
     List<Revives> findByTimeBetweenWhereServer(LocalDateTime startTime, LocalDateTime endTime, int server);
 }

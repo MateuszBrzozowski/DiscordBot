@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "dblog_playercounts")
+@Entity(name = "DBLog_PlayerCounts")
 public class PlayerCounts {
     @Id
     @Column(name = "id")

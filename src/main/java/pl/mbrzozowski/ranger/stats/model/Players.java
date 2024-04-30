@@ -11,7 +11,7 @@ import javax.persistence.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "dblog_players")
+@Entity(name = "DBLog_Players")
 public class Players {
     @Id
     @Column(name = "steamID")
