@@ -14,9 +14,9 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
 
     Optional<Recruit> findByChannelId(String channelId);
 
-    @Query("SELECT r FROM Recruit r WHERE r.userId=:userId AND r.channelId=null")
+    @Query("SELECT r FROM recruit r WHERE r.userId=:userId AND r.channelId=null")
     Optional<Recruit> findByUserIdAndNullChannelID(String userId);
 
-    @Query("SELECT r FROM Recruit r WHERE r.channelId!=null")
+    @Query("SELECT r FROM recruit r WHERE r.channelId!=null")
     List<Recruit> findAllWithChannelId();
 }
