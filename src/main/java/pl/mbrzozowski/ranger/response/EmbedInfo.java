@@ -37,11 +37,14 @@ public class EmbedInfo extends EmbedCreator {
                 "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością.");
         builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
         builder.addField("Wymagamy", """
-                - podstawowa znajomość zasad rozgrywki w Squad
+                - znajomość zasad rozgrywki w Squad
                 - gra zespołowa (używamy TeamSpeak 3)
                 - kultura osobista
                 - duża ilość wolnego czasu
-                - brak VAC bana w ciągu 2 ostatnich lat""", false);
+                - brak VAC bana w ciągu 2 ostatnich lat
+                - minimum 300h w grze
+                - znajomość regulaminu LTW
+                - chęć integracji z członkami klanu""", false);
         event.getChannel().sendMessageEmbeds(builder.build())
                 .setComponents(ActionRow.of(Button.success(ComponentId.NEW_RECRUIT, "Podanie")))
                 .queue();
