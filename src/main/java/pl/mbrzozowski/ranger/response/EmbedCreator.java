@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class EmbedCreator {
 
-    private static final String footer = "ranger.RangerBot created by Brzozaaa © 2022";
+    private static final String footer = "RangerBot created by Brzozaaa © 2022";
 
     /**
      * Created and returns a new Embedbuilder

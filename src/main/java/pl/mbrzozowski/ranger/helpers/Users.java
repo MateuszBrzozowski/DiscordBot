@@ -91,7 +91,7 @@ public class Users {
     public static boolean isAdmin(String userId) {
         boolean isAdmin = hasUserRole(userId, RoleID.CLAN_COUNCIL);
         if (!isAdmin) {
-            isAdmin = isDev(userId);
+            isAdmin = hasUserRole(userId, RoleID.DEV_ID);
         }
         return isAdmin;
     }
@@ -110,5 +110,9 @@ public class Users {
         return name.replaceAll("<", "").replaceAll(">", "").replaceAll("\\?", "")
                 .replaceAll("\"", "").replaceAll("\\*", "").replaceAll("\\|", "")
                 .replaceAll(":", "").replaceAll("/", "").replaceAll("\\\\", "");
+    }
+
+    public static User getDevUser() {
+        return RangersGuild.getUser("642402714382237716");
     }
 }

@@ -15,14 +15,19 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
+import pl.mbrzozowski.ranger.configuration.content.Content;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
+import pl.mbrzozowski.ranger.configuration.content.Field;
 import pl.mbrzozowski.ranger.event.Event;
 import pl.mbrzozowski.ranger.event.EventChanges;
+import pl.mbrzozowski.ranger.exceptions.ContentNotFoundException;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
-import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.StringProvider;
 import pl.mbrzozowski.ranger.helpers.Users;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -223,22 +228,44 @@ public class EmbedInfo extends EmbedCreator {
         channel.sendMessageEmbeds(builder.build()).setActionRow(Button.success(ComponentId.SEED_ROLE, "Add/Remove Seed Role ").withEmoji(Emoji.fromUnicode("\uD83C\uDF31"))).queue();
     }
 
-    /**
-     * Formatka z opisem jak stworzyć ticket.
-     *
-     * @param channel Kanał na którym wstawiana jest formatka.
-     */
-    public static void serverService(@NotNull MessageChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
-        builder.setTitle("Rangers Polska Servers - Create Ticket :ticket:");
-        builder.addField("", "Jeśli potrzebujesz pomocy admina naszych serwerów, " +
-                "kliknij w odpowiedni przycisk poniżej.", false);
-        builder.addField("--------------------", "If you need help of Rangers Polska Servers Admins, " +
-                "please react with the correct button below.", false);
-        channel.sendMessageEmbeds(builder.build()).setActionRow(
-                Button.primary(ComponentId.SERVER_SERVICE_REPORT, "Report Player").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
-                Button.primary(ComponentId.SERVER_SERVICE_UNBAN, "Unban appeal").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
-                Button.primary(ComponentId.SERVER_SERVICE_CONTACT, "Contact With Admin").withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
+    public static void serverService(@NotNull MessageReceivedEvent event, @NotNull ContentService contentService) {
+        Content content;
+        String key = "serverSupport";
+        try {
+            content = contentService.getContent(key);
+        } catch (ContentNotFoundException e) {
+            event.getAuthor()
+                    .openPrivateChannel()
+                    .queue(privateChannel
+                            -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                            "\tERROR - Nie można odnaleźć wartości dla klucza: \"" + key + "\" w pliku \"content.json\"```").queue());
+            throw new RuntimeException("Error retrieving content for key: " + key, e);
+        } catch (IOException e) {
+            event.getAuthor()
+                    .openPrivateChannel()
+                    .queue(privateChannel ->
+                            privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                                    "\tERROR - Nie można odczytać pliku \"content.json\"").queue());
+            throw new RuntimeException("Can not read a file \"content.json\"", e);
+        }
+        try {
+            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
+            builder.setTitle(content.getTitle());
+            builder.setDescription(content.getDescription());
+            for (Field field : content.getFields()) {
+                builder.addField(field.getName(), field.getValue(), field.isInline());
+            }
+            event.getChannel().sendMessage(content.getMessage()).setEmbeds(builder.build()).setActionRow(
+                    Button.primary(ComponentId.SERVER_SERVICE_REPORT, content.getButtons().get(0).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
+                    Button.primary(ComponentId.SERVER_SERVICE_UNBAN, content.getButtons().get(1).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
+                    Button.primary(ComponentId.SERVER_SERVICE_CONTACT, content.getButtons().get(2).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            event.getAuthor()
+                    .openPrivateChannel()
+                    .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                            "\tERROR - Błąd tworzenia embed. Więcej szczegółów w \"rangerbot.log\"```").queue());
+            throw new RuntimeException("Can not create embed", e);
+        }
     }
 
     /**
@@ -247,27 +274,11 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedReport(String userID, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.WARNING);
-        builder.setTitle("Report player");
-        builder.addField("", """
-                Zgłoś gracza według poniższego formularza.
-
-                1. Podaj nick.
-                2. Opisz sytuację i podaj powód dlaczego zgłaszasz gracza.
-                3. Podaj nazwę serwera.
-                4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).""", false);
-        builder.addField("--------------------", """
-                Report player according to the form below.
-
-                1. Player nick.
-                2. Describe of bad behaviour.
-                3. Server name.
-                4. Add evidence. Screenshot or video link (e.g. Youtube).""", false);
-        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
-                .setEmbeds(builder.build())
-                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
-                .queue(message -> message.pin().queue());
+    public static void sendEmbedReport(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
+        Content content;
+        String key = "embedReport";
+        content = getContent(contentService, key);
+        embedBuilder(userID, channel, contentService, content, key, Color.RED, ThumbnailType.WARNING);
     }
 
     /**
@@ -276,21 +287,11 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedUnban(String userID, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.BLUE, ThumbnailType.DEFAULT);
-        builder.setTitle("Unban player");
-        builder.addField("", """
-                Napisz tutaj jeżeli chcesz odowłać swój ban.
-                1. Podaj swój nick i/lub steamid.
-                2. Podaj nazwę serwera.""", false);
-        builder.addField("--------------------", """
-                Write here if you want to revoke your ban.
-                1. Provide your ingame nick and/or steamid.
-                2. Server name.""", false);
-        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
-                .setEmbeds(builder.build())
-                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
-                .queue(message -> message.pin().queue());
+    public static void sendEmbedUnban(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
+        Content content;
+        String key = "embedUnban";
+        content = getContent(contentService, key);
+        embedBuilder(userID, channel, contentService, content, key, Color.BLUE, ThumbnailType.DEFAULT);
     }
 
     /**
@@ -299,17 +300,60 @@ public class EmbedInfo extends EmbedCreator {
      * @param userID  pinguje usera z tym ID
      * @param channel Kanał na którym wysyłana jest wiadomość
      */
-    public static void sendEmbedContact(String userID, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(Color.GREEN, ThumbnailType.DEFAULT);
-        builder.setTitle("Contact with Admin");
-        builder.addField("", "Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. " +
-                "Twój nick w grze lub/i steamId64.", false);
-        builder.addField("--------------------", "Please describe your problem with more details, " +
-                "screenshots, servername the issue occured on and related steamId64", false);
-        channel.sendMessage("<@" + userID + ">, " + "<@&" + RoleID.SERVER_ADMIN + ">")
-                .setEmbeds(builder.build())
-                .setActionRow(Button.primary(ComponentId.CLOSE, "Close ticket").withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
-                .queue(message -> message.pin().queue());
+    public static void sendEmbedContact(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
+        Content content;
+        String key = "embedContact";
+        content = getContent(contentService, key);
+        embedBuilder(userID, channel, contentService, content, key, Color.GREEN, ThumbnailType.WARNING);
+    }
+
+    private static void embedBuilder(String userID,
+                                     @NotNull TextChannel channel,
+                                     @NotNull ContentService contentService,
+                                     @NotNull Content content,
+                                     String key,
+                                     Color color,
+                                     ThumbnailType thumbnailType) {
+        try {
+            EmbedBuilder builder = getEmbedBuilder(color, thumbnailType);
+            builder.setTitle(content.getTitle());
+            builder.setDescription(content.getDescription());
+            for (Field field : content.getFields()) {
+                builder.addField(field.getName(), field.getValue(), field.isInline());
+            }
+            channel.sendMessage(contentService.textFormat(content.getMessage(), userID))
+                    .setEmbeds(builder.build())
+                    .setActionRow(Button.primary(ComponentId.CLOSE, content.getButtons().get(0).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
+                    .queue(message -> message.pin().queue());
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            Users.getDevUser()
+                    .openPrivateChannel()
+                    .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                            "\tERROR - Błąd tworzenia embed(" + key + "\"). Więcej szczegółów w \"rangerbot.log\"```").queue());
+            throw new RuntimeException("Can not create embed", e);
+        }
+    }
+
+    private static Content getContent(@NotNull ContentService contentService, String key) {
+        Content content;
+        try {
+            content = contentService.getContent(key);
+        } catch (ContentNotFoundException e) {
+            Users.getDevUser()
+                    .openPrivateChannel()
+                    .queue(privateChannel
+                            -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                            "\tERROR - Nie można odnaleźć wartości dla klucza: \"" + key + "\" w pliku \"content.json\"```").queue());
+            throw new RuntimeException("Error retrieving content for key: " + key, e);
+        } catch (IOException e) {
+            Users.getDevUser()
+                    .openPrivateChannel()
+                    .queue(privateChannel ->
+                            privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                                    "\tERROR - Nie można odczytać pliku \"content.json\"").queue());
+            throw new RuntimeException("Can not read a file \"content.json\"", e);
+        }
+        return content;
     }
 
     public static void recruitAnonymousComplaintsFormOpening(@NotNull TextChannel textChannel) {

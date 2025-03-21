@@ -1,0 +1,96 @@
+{
+  "serverSupport": {
+    "message": "",
+    "title": "Rangers Polska Servers - Create Ticket :ticket:",
+    "description": "",
+    "fields": [
+      {
+        "name": "",
+        "value": "Jeśli potrzebujesz pomocy admina naszych serwerów, \nkliknij w odpowiedni przycisk poniżej.",
+        "inline": false
+      },
+      {
+        "name": "--------------------",
+        "value": "If you need help of Rangers Polska Servers Admins, \nplease react with the correct button below.",
+        "inline": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Report player"
+      },
+      {
+        "label": "Unban appeal"
+      },
+      {
+        "label": "Contact with admin"
+      }
+    ]
+  },
+  "embedReport": {
+    "message": "@user, @serverAdmin",
+    "title": "Report player",
+    "description": "",
+    "fields": [
+      {
+        "name": "",
+        "value": "Zgłoś gracza według poniższego formularza.\n\n1. Podaj nick.\n2. Opisz sytuację i podaj powód dlaczego zgłaszasz gracza.\n3. Podaj nazwę serwera.\n4. Dodaj dowody. Screenshot lub podaj link do wideo (np. Youtube).",
+        "inline": false
+      },
+      {
+        "name": "--------------------",
+        "value": "Report player according to the form below.\n\n1. Player nick.\n2. Describe of bad behaviour.\n3. Server name.\n4. Add evidence. Screenshot or video link (e.g. Youtube).",
+        "inline": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Close ticket"
+      }
+    ]
+  },
+  "embedUnban": {
+    "message": "@user, @serverAdmin",
+    "title": "Unban player",
+    "description": "",
+    "fields": [
+      {
+        "name": "",
+        "value": "Napisz tutaj jeżeli chcesz odowłać swój ban.\n1. Podaj swój nick i/lub steamid.\n2. Podaj nazwę serwera.",
+        "inline": false
+      },
+      {
+        "name": "--------------------",
+        "value": "Write here if you want to revoke your ban.\n1. Provide your ingame nick and/or steamid.\n2. Server name.",
+        "inline": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Close ticket"
+      }
+    ]
+  },
+  "embedContact": {
+    "message": "@user, @serverAdmin",
+    "title": "Contact with Admin",
+    "description": "",
+    "fields": [
+      {
+        "name": "",
+        "value": "Napisz tutaj jeżeli masz jakiś problem z którymś z naszych serwerów, dodaj screenshoty, nazwę serwera. Twój nick w grze lub/i steamId64.",
+        "inline": false
+      },
+      {
+        "name": "--------------------",
+        "value": "Please describe your problem with more details, screenshots, servername the issue occured on and related steamId64",
+        "inline": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Close ticket"
+      }
+    ]
+  }
+}

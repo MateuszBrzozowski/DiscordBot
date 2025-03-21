@@ -7,8 +7,9 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import pl.mbrzozowski.ranger.DiscordBot;
-import pl.mbrzozowski.ranger.guild.RangersGuild;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.guild.Commands;
+import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.Users;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
 import pl.mbrzozowski.ranger.server.service.ServerService;
@@ -17,9 +18,11 @@ import pl.mbrzozowski.ranger.server.service.ServerService;
 public class ServerServiceCmd extends Proccess {
 
     private final ServerService serverService;
+    private final ContentService contentService;
 
-    public ServerServiceCmd(ServerService serverService) {
+    public ServerServiceCmd(ServerService serverService, ContentService contentService) {
         this.serverService = serverService;
+        this.contentService = contentService;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class ServerServiceCmd extends Proccess {
         if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.EMBED_SERVER_SERVICE) && isAdmin) {
             log.info(event.getAuthor() + " - msg({}) - creates embed for server service", event.getMessage().getContentRaw());
             event.getMessage().delete().submit();
-            EmbedInfo.serverService(event.getChannel());
+            EmbedInfo.serverService(event, contentService);
         } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.CLOSE) && isServerCategory(channelID)) {
             log.info("{} - msg({}) - closes channel in server category", event.getAuthor(), event.getMessage().getContentRaw());
             serverService.closeChannel(event);

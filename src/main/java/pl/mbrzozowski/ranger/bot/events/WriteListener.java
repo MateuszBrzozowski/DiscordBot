@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.bot.events.writing.*;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.disboard.DisboardService;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.event.EventsGeneratorService;
@@ -38,6 +39,7 @@ public class WriteListener extends ListenerAdapter {
     private final HoursService hoursService;
     private final RankService rankService;
     private final BotWriter botWriter;
+    private final ContentService contentService;
 
 
     @Override
@@ -50,7 +52,7 @@ public class WriteListener extends ListenerAdapter {
         LogChannel logChannel = new LogChannel();
         ClanMemberCheck clanMemberCheck = new ClanMemberCheck();
         GeneratorCmd generatorCmd = new GeneratorCmd(eventService, eventsGeneratorService);
-        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(serverService);
+        ServerServiceCmd serverServiceCmd = new ServerServiceCmd(serverService, contentService);
         HelpCmd helpCmd = new HelpCmd();
         AdminCheck adminCheck = new AdminCheck();
         EmbedSender embedSender = new EmbedSender();

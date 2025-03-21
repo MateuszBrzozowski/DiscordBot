@@ -159,4 +159,10 @@ public class StringProvider {
         }
         return text;
     }
+
+    public static @NotNull String getDateAndTime() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return now.format(formatter);
+    }
 }

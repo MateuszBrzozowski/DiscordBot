@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.event.ButtonClickType;
 import pl.mbrzozowski.ranger.guild.DeleteChannel;
 import pl.mbrzozowski.ranger.guild.DeleteChannelById;
@@ -44,10 +45,12 @@ public class ServerService implements SlashCommand, TemporaryChannelsInteraction
     private final ClientRepository clientRepository;
     private final Collection<Permission> permissions = EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND);
     private final Collection<Permission> permissionsOnlyView = EnumSet.of(Permission.VIEW_CHANNEL);
+    private final ContentService contentService;
 
-    public ServerService(TranscriptionService transcriptionService, ClientRepository clientRepository) {
+    public ServerService(TranscriptionService transcriptionService, ClientRepository clientRepository, ContentService contentService) {
         this.transcriptionService = transcriptionService;
         this.clientRepository = clientRepository;
+        this.contentService = contentService;
     }
 
     public boolean isTicket(@NotNull MessageReceivedEvent event) {
@@ -154,9 +157,9 @@ public class ServerService implements SlashCommand, TemporaryChannelsInteraction
 
     private void sendEmbedStartChannel(String userID, TextChannel channel, @NotNull ButtonClickType buttonType) {
         switch (buttonType) {
-            case REPORT -> EmbedInfo.sendEmbedReport(userID, channel);
-            case UNBAN -> EmbedInfo.sendEmbedUnban(userID, channel);
-            case CONTACT -> EmbedInfo.sendEmbedContact(userID, channel);
+            case REPORT -> EmbedInfo.sendEmbedReport(userID, channel, contentService);
+            case UNBAN -> EmbedInfo.sendEmbedUnban(userID, channel, contentService);
+            case CONTACT -> EmbedInfo.sendEmbedContact(userID, channel, contentService);
         }
     }
 

@@ -13,7 +13,7 @@
 
     <groupId>pl.mbrzozowski</groupId>
     <artifactId>038_RangersPLBot</artifactId>
-    <version>1.6.4.10</version>
+    <version>1.6.5</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
@@ -110,6 +110,11 @@
             <groupId>net.lingala.zip4j</groupId>
             <artifactId>zip4j</artifactId>
             <version>2.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.0</version>
         </dependency>
         <dependency>
             <groupId>pl.mbrzozowski</groupId>

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.repository.main.ClientRepository;
 import pl.mbrzozowski.ranger.server.service.transcription.TranscriptionService;
 
@@ -14,12 +15,13 @@ class ServerServiceTest {
     private ServerService serverService;
     private ClientRepository clientRepository;
     private TranscriptionService transcriptionService;
+    private ContentService contentService;
 
     @BeforeEach
     void beforeEach() {
         clientRepository = Mockito.mock(ClientRepository.class);
         transcriptionService = Mockito.mock(TranscriptionService.class);
-        serverService = new ServerService(transcriptionService, clientRepository);
+        serverService = new ServerService(transcriptionService, clientRepository, contentService);
     }
 
     @Test
