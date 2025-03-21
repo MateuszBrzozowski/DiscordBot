@@ -12,12 +12,13 @@ public class InvalidCmd extends Proccess {
     @Override
     public void proccessMessage(@NotNull MessageReceivedEvent event) {
         User user = DiscordBot.getJda().getUserById(event.getAuthor().getId());
+        String version = InvalidCmd.class.getPackage().getImplementationVersion();
         if (user != null) {
-            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage("""
-                            Niestety, nie rozumiem Ciebie.\s
-                            **!event** - otwiera generator eventów.
-                            **!eventsEdit** - edytowanie aktywnych eventów.
-                            Jeżeli potrzebujesz więcej pomocy. Wpisz **!help**""")
+            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(
+                            "Niestety, nie rozumiem Ciebie.\n" +
+                                    "**!event** - otwiera generator eventów.\n" +
+                                    "**!eventsEdit** - edytowanie aktywnych eventów.\n" +
+                                    "App version: " + version)
                     .queue(message1 -> log.info("{}, {}, {} - misunderstood message", privateChannel, privateChannel.getUser(), event.getMessage().getContentRaw())));
             return;
         }

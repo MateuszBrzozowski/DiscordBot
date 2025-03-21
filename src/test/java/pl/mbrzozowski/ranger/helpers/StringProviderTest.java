@@ -137,7 +137,7 @@ class StringProviderTest {
     void getMessageForEventList_EventForCompetitive() {
         EventRequest eventRequest = new EventRequest();
         eventRequest.setEventFor(EventFor.COMPETITIVE_SECTION);
-        String excepted = "<@&" + RoleID.COMPETITIVE_SECTION + ">, <@&" + RoleID.ASPIRING_COMPETITIVE_SECTION + "> Zapisy";
+        String excepted = "<@&" + RoleID.COMPETITIVE_SECTION + ">, <@&" + RoleID.ASPIRING_COMPETITIVE_SECTION + "> Zapisy!";
         String message = StringProvider.getMessageForEventList(eventRequest);
         Assertions.assertEquals(excepted, message);
     }
