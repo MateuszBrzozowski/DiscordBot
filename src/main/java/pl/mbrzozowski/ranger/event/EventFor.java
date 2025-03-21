@@ -12,6 +12,7 @@ public enum EventFor {
     RECRUIT("Rekruci", 1),
     CLAN_MEMBER_AND_RECRUIT("Clan Member i rekruci", 1),
     TACTICAL_GROUP("Grupa taktyczna", 1),
+    COMPETITIVE_SECTION("Sekcja competitive",1),
     SQ_EVENTS("Squad Events", 2),
     CLAN_COUNCIL("Rada klanu", 1);
 
@@ -19,6 +20,11 @@ public enum EventFor {
     private final String value;
     private final int group;
 
+    /**
+     * @param value name of target
+     * @param group 1 - Clan members and recruit. If a recruits gets negative results, they are removed from events.
+     *              2 - Another one
+     */
     EventFor(String value, int group) {
         this.value = value;
         this.group = group;

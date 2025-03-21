@@ -161,6 +161,13 @@ public class EventService implements SlashCommand, TemporaryChannels {
                     .addRolePermissionOverride(Long.parseLong(RoleID.RECRUIT_ID), permissions, null)
                     .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_MEMBER_ID), permissions, null)
                     .queue(textChannel -> createList(textChannel, eventRequest));
+        } else if (eventRequest.getEventFor().equals(EventFor.COMPETITIVE_SECTION)) {
+            guild.createTextChannel(channelName, category)
+                    .addPermissionOverride(guild.getPublicRole(), null, permissions)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.COMPETITIVE_SECTION), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.ASPIRING_COMPETITIVE_SECTION), permissions, null)
+                    .addRolePermissionOverride(Long.parseLong(RoleID.CLAN_COUNCIL), permissions, null)
+                    .queue(textChannel -> createList(textChannel, eventRequest));
         } else if (eventRequest.getEventFor().equals(EventFor.SQ_EVENTS)) {
             guild.createTextChannel(channelName, category)
                     .addPermissionOverride(guild.getPublicRole(), null, permissions)

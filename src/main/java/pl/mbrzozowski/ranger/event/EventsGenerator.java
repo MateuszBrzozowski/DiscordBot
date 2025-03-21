@@ -339,6 +339,8 @@ public class EventsGenerator {
             eventRequest.setEventFor(EventFor.CLAN_MEMBER_AND_RECRUIT);
         } else if (selectMenuValue.equalsIgnoreCase(EventFor.TACTICAL_GROUP.getValue())) {
             eventRequest.setEventFor(EventFor.TACTICAL_GROUP);
+        } else if (selectMenuValue.equalsIgnoreCase(EventFor.COMPETITIVE_SECTION.getValue())) {
+            eventRequest.setEventFor(EventFor.COMPETITIVE_SECTION);
         } else if (selectMenuValue.equalsIgnoreCase(EventFor.SQ_EVENTS.getValue())) {
             eventRequest.setEventFor(EventFor.SQ_EVENTS);
         } else if (selectMenuValue.equalsIgnoreCase(EventFor.CLAN_COUNCIL.getValue())) {

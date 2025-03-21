@@ -2,7 +2,7 @@ package pl.mbrzozowski.ranger.helpers;
 
 public final class RoleID {
 
-    public static final String DEV_ID = "642402714382237716";
+    public static final String DEV_ID = "1165355903067885670";
     public static final String CLAN_COUNCIL = "773233884145647666";
     public static final String CLAN_MEMBER_ID = "311978154291888141";
     public static final String TACTICAL_GROUP = "822549829166694421";
@@ -13,4 +13,6 @@ public final class RoleID {
     public static final String MODERATOR = "311978200739741696";
     public static final String SQUAD = "976110879223451688";
     public static final String SQ_EVENTS = "1106551038787461171";
+    public static final String COMPETITIVE_SECTION = "1031905810223210516";
+    public static final String ASPIRING_COMPETITIVE_SECTION = "1347905237406716046";
 }
