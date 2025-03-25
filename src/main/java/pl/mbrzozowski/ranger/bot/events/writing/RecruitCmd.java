@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.guild.Commands;
 import pl.mbrzozowski.ranger.recruit.RecruitsService;
 import pl.mbrzozowski.ranger.response.EmbedInfo;
@@ -12,9 +13,11 @@ import pl.mbrzozowski.ranger.response.EmbedInfo;
 public class RecruitCmd extends Proccess {
 
     private final RecruitsService recruitsService;
+    private final ContentService contentService;
 
-    public RecruitCmd(RecruitsService recruitsService) {
+    public RecruitCmd(RecruitsService recruitsService, ContentService contentService) {
         this.recruitsService = recruitsService;
+        this.contentService = contentService;
     }
 
     @Override
@@ -22,7 +25,7 @@ public class RecruitCmd extends Proccess {
         if (event.isFromType(ChannelType.TEXT)) {
             if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.START_REKRUT)) {
                 event.getMessage().delete().submit();
-                EmbedInfo.recruiter(event);
+                EmbedInfo.recruiter(event, contentService);
                 log.info("{} - msg({}) - creates embed for recruit application", event.getAuthor(), event.getMessage().getContentRaw());
             } else if (event.getMessage().getContentRaw().equalsIgnoreCase(Commands.NEGATIVE)) {
                 event.getMessage().delete().submit();

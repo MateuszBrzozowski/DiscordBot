@@ -92,5 +92,54 @@
         "label": "Close ticket"
       }
     ]
+  },
+  "recruiter": {
+    "message": "",
+    "title": "",
+    "description": "# Podanie\nChcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością.",
+    "fields": [
+      {
+        "name": "Złóż podanie do klanu klikając przycisk PONIŻEJ",
+        "value": "",
+        "inline": false
+      },
+      {
+        "name": "Wymagamy",
+        "value": "- znajomość zasad rozgrywki w Squad\n- gra zespołowa (używamy TeamSpeak 3)\n- kultura osobista\n- duża ilość wolnego czasu\n- brak VAC bana w ciągu 2 ostatnich lat\n- minimum 300h w grze\n- znajomość regulaminu LTW\n- chęć integracji z członkami klanu",
+        "inline": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Podanie"
+      }
+    ]
+  },
+  "recruitWelcome": {
+    "message": "Cześć @user!\nCieszymy się, że złożyłeś podanie do klanu.",
+    "title": "",
+    "description": "## Obowiązkowo:",
+    "fields": [
+      {
+        "name": "",
+        "value": "**1. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**\n> [Manual](https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view)s\n\n**2. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**s\n> [Poradnik](https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717)\n\n**3. TeamSpeak3:**\n```fix\nts.rangerspolska.pl:6969\n```",
+        "inline": false
+      }
+    ]
+  },
+  "recruitAccepted": {
+    "title": "Rozpoczęto rekrutację",
+    "description": "Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem wszystkich członków klanu."
+  },
+  "recruitNotAccepted": {
+    "title": "Podanie odrzucone"
+  },
+  "endNegative": {
+    "title": "WYNIK REKRUTACJI - NEGATYWNY",
+    "description": "Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!"
+  },
+  "endPositive": {
+    "title": "WYNIK REKRUTACJI - POZYTYWNY",
+    "description": "Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem POZYTYWNYM!"
   }
 }

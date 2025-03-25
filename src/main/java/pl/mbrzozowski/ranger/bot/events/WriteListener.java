@@ -56,7 +56,7 @@ public class WriteListener extends ListenerAdapter {
         HelpCmd helpCmd = new HelpCmd();
         AdminCheck adminCheck = new AdminCheck();
         EmbedSender embedSender = new EmbedSender();
-        RecruitCmd recruitCmd = new RecruitCmd(recruitsService);
+        RecruitCmd recruitCmd = new RecruitCmd(recruitsService, contentService);
         CheckIsPrivateChannel checkIsPrivateChannel = new CheckIsPrivateChannel();
         AdminCommands adminCommands = new AdminCommands(guildMembersService, hoursService, rankService);
         EventsSettingsCmd eventsSettingsCmd = new EventsSettingsCmd(eventsSettingsService);

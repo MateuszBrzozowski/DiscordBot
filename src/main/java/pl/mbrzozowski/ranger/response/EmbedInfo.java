@@ -30,29 +30,44 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class EmbedInfo extends EmbedCreator {
 
 
-    public static void recruiter(@NotNull MessageReceivedEvent event) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
-        builder.setDescription("# Podanie\n" +
-                "Chcemy nasze wieloletnie doświadczenie przekazać kolejnym Rangersom. Nasza gra opiera się na wzajemnej komunikacji i skoordynowanym działaniu. " +
-                "Jako grupa, pielęgnujemy dobrą atmosferę i przyjazne, dojrzałe relacje między członkami naszego klanu, a także polską społecznością.");
-        builder.addField("Złóż podanie do klanu klikając przycisk PONIŻEJ", "", false);
-        builder.addField("Wymagamy", """
-                - znajomość zasad rozgrywki w Squad
-                - gra zespołowa (używamy TeamSpeak 3)
-                - kultura osobista
-                - duża ilość wolnego czasu
-                - brak VAC bana w ciągu 2 ostatnich lat
-                - minimum 300h w grze
-                - znajomość regulaminu LTW
-                - chęć integracji z członkami klanu""", false);
-        event.getChannel().sendMessageEmbeds(builder.build())
-                .setComponents(ActionRow.of(Button.success(ComponentId.NEW_RECRUIT, "Podanie")))
-                .queue();
+    public static void recruiter(@NotNull MessageReceivedEvent event, @NotNull ContentService contentService) {
+        Content content;
+        String key = "recruiter";
+        content = getContent(contentService, key, event.getAuthor().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(content, Color.YELLOW, ThumbnailType.DEFAULT);
+            event.getChannel().sendMessage(content.getMessage()).setEmbeds(builder.build())
+                    .setComponents(ActionRow.of(Button.success(ComponentId.NEW_RECRUIT, content.getButtons().get(0).getLabel())))
+                    .queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(event.getAuthor(), key, e);
+        }
+    }
+
+    public static void sendWelcomeMessageForRecruit(String userID, @NotNull TextChannel textChannel, ContentService contentService) {
+        Content content;
+        String key = "recruitWelcome";
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(content, Color.GREEN, ThumbnailType.DEFAULT);
+            textChannel.sendMessage(contentService.textFormat(content.getMessage(), userID))
+                    .setEmbeds(builder.build())
+                    .setActionRow(
+                            Button.primary(ComponentId.RECRUIT_ACCEPTED, "\u200E"),
+                            Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, "\u200E"),
+                            Button.success(ComponentId.RECRUIT_POSITIVE, "\u200E"),
+                            Button.danger(ComponentId.RECRUIT_NEGATIVE, "\u200E"))
+                    .queue();
+            EmbedInfo.recruitAnonymousComplaintsFormOpening(textChannel);
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
     /**
@@ -108,30 +123,35 @@ public class EmbedInfo extends EmbedCreator {
         event.reply("Kanał wkrótce zostanie usunięty.").setEphemeral(true).queue();
     }
 
-    public static void endNegative(String drillId, String recruitId, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-        builder.setTitle(EmbedSettings.RESULT + "NEGATYWNY");
-        builder.setDescription("Rekrutacja zostaje zakończona z wynikiem NEGATYWNYM!");
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
-        channel.sendMessage("<@" + recruitId + ">").setEmbeds(builder.build()).queue();
-
-        JDA jda = DiscordBot.getJda();
-        jda.openPrivateChannelById(recruitId).queue(privateChannel -> {
-            builder.setDescription("Rekrutacja do klanu Rangers Polska zostaje zakończona z wynikiem NEGATYWNYM!");
-            privateChannel.sendMessageEmbeds(builder.build()).queue((s) -> log.info("Private message send"),
-                    new ErrorHandler().handle(ErrorResponse.CANNOT_SEND_TO_USER,
-                            (ex) -> log.info("Cannot send messages to this user in private channel")));
-        });
+    public static void endNegative(String drillId, String recruitId, @NotNull TextChannel channel, ContentService contentService) {
+        Content content;
+        String key = "endNegative";
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(content, Color.RED, ThumbnailType.DEFAULT);
+            builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
+            channel.sendMessage("<@" + recruitId + ">").setEmbeds(builder.build()).queue();
+            JDA jda = DiscordBot.getJda();
+            jda.openPrivateChannelById(recruitId)
+                    .queue(privateChannel -> privateChannel.sendMessageEmbeds(builder.build()).queue((s) -> log.info("Private message send"),
+                            new ErrorHandler().handle(ErrorResponse.CANNOT_SEND_TO_USER,
+                                    (ex) -> log.info("Cannot send messages to this user in private channel"))));
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
-    public static void endPositive(String drillId, String recruitId, @NotNull TextChannel channel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_CONFIRM);
-        builder.setTitle(EmbedSettings.RESULT + "POZYTYWNY");
-        builder.setDescription("Rekrutacja zostaje zakończona z wynikiem POZYTYWNYM!");
-        builder.setThumbnail(EmbedSettings.THUMBNAIL);
-        builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
-        channel.sendMessage("Gratulacje <@" + recruitId + ">").setEmbeds(builder.build()).queue();
+    public static void endPositive(String drillId, String recruitId, @NotNull TextChannel channel, ContentService contentService) {
+        Content content;
+        String key = "endPositive";
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(content, Color.GREEN, ThumbnailType.DEFAULT);
+            builder.setFooter("Podpis: " + Users.getUserNicknameFromID(drillId));
+            channel.sendMessage("Gratulacje <@" + recruitId + ">").setEmbeds(builder.build()).queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
     /**
@@ -231,40 +251,15 @@ public class EmbedInfo extends EmbedCreator {
     public static void serverService(@NotNull MessageReceivedEvent event, @NotNull ContentService contentService) {
         Content content;
         String key = "serverSupport";
+        content = getContent(contentService, key, event.getAuthor().getId());
         try {
-            content = contentService.getContent(key);
-        } catch (ContentNotFoundException e) {
-            event.getAuthor()
-                    .openPrivateChannel()
-                    .queue(privateChannel
-                            -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
-                            "\tERROR - Nie można odnaleźć wartości dla klucza: \"" + key + "\" w pliku \"content.json\"```").queue());
-            throw new RuntimeException("Error retrieving content for key: " + key, e);
-        } catch (IOException e) {
-            event.getAuthor()
-                    .openPrivateChannel()
-                    .queue(privateChannel ->
-                            privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
-                                    "\tERROR - Nie można odczytać pliku \"content.json\"").queue());
-            throw new RuntimeException("Can not read a file \"content.json\"", e);
-        }
-        try {
-            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.DEFAULT);
-            builder.setTitle(content.getTitle());
-            builder.setDescription(content.getDescription());
-            for (Field field : content.getFields()) {
-                builder.addField(field.getName(), field.getValue(), field.isInline());
-            }
+            EmbedBuilder builder = getEmbedBuilder(content, Color.YELLOW, ThumbnailType.DEFAULT);
             event.getChannel().sendMessage(content.getMessage()).setEmbeds(builder.build()).setActionRow(
                     Button.primary(ComponentId.SERVER_SERVICE_REPORT, content.getButtons().get(0).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_RED)),
                     Button.primary(ComponentId.SERVER_SERVICE_UNBAN, content.getButtons().get(1).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_BLUE)),
                     Button.primary(ComponentId.SERVER_SERVICE_CONTACT, content.getButtons().get(2).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.BOOK_GREEN))).queue();
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            event.getAuthor()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
-                            "\tERROR - Błąd tworzenia embed. Więcej szczegółów w \"rangerbot.log\"```").queue());
-            throw new RuntimeException("Can not create embed", e);
+            canNotCreateEmbedError(event.getAuthor(), key, e);
         }
     }
 
@@ -277,8 +272,8 @@ public class EmbedInfo extends EmbedCreator {
     public static void sendEmbedReport(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
         Content content;
         String key = "embedReport";
-        content = getContent(contentService, key);
-        embedBuilder(userID, channel, contentService, content, key, Color.RED, ThumbnailType.WARNING);
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        embedServerServiceInsideBuilder(userID, channel, contentService, content, key, Color.RED, ThumbnailType.WARNING);
     }
 
     /**
@@ -290,8 +285,8 @@ public class EmbedInfo extends EmbedCreator {
     public static void sendEmbedUnban(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
         Content content;
         String key = "embedUnban";
-        content = getContent(contentService, key);
-        embedBuilder(userID, channel, contentService, content, key, Color.BLUE, ThumbnailType.DEFAULT);
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        embedServerServiceInsideBuilder(userID, channel, contentService, content, key, Color.BLUE, ThumbnailType.DEFAULT);
     }
 
     /**
@@ -303,51 +298,70 @@ public class EmbedInfo extends EmbedCreator {
     public static void sendEmbedContact(String userID, @NotNull TextChannel channel, @NotNull ContentService contentService) {
         Content content;
         String key = "embedContact";
-        content = getContent(contentService, key);
-        embedBuilder(userID, channel, contentService, content, key, Color.GREEN, ThumbnailType.WARNING);
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        embedServerServiceInsideBuilder(userID, channel, contentService, content, key, Color.GREEN, ThumbnailType.WARNING);
     }
 
-    private static void embedBuilder(String userID,
-                                     @NotNull TextChannel channel,
-                                     @NotNull ContentService contentService,
-                                     @NotNull Content content,
-                                     String key,
-                                     Color color,
-                                     ThumbnailType thumbnailType) {
+    private static void embedServerServiceInsideBuilder(String userID,
+                                                        @NotNull TextChannel channel,
+                                                        @NotNull ContentService contentService,
+                                                        @NotNull Content content,
+                                                        String key,
+                                                        Color color,
+                                                        ThumbnailType thumbnailType) {
         try {
-            EmbedBuilder builder = getEmbedBuilder(color, thumbnailType);
-            builder.setTitle(content.getTitle());
-            builder.setDescription(content.getDescription());
-            for (Field field : content.getFields()) {
-                builder.addField(field.getName(), field.getValue(), field.isInline());
-            }
+            EmbedBuilder builder = getEmbedBuilder(content, color, thumbnailType);
             channel.sendMessage(contentService.textFormat(content.getMessage(), userID))
                     .setEmbeds(builder.build())
                     .setActionRow(Button.primary(ComponentId.CLOSE, content.getButtons().get(0).getLabel()).withEmoji(Emoji.fromUnicode(EmbedSettings.LOCK)))
                     .queue(message -> message.pin().queue());
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            Users.getDevUser()
-                    .openPrivateChannel()
-                    .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
-                            "\tERROR - Błąd tworzenia embed(" + key + "\"). Więcej szczegółów w \"rangerbot.log\"```").queue());
-            throw new RuntimeException("Can not create embed", e);
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
         }
     }
 
-    private static Content getContent(@NotNull ContentService contentService, String key) {
+    @NotNull
+    private static EmbedBuilder getEmbedBuilder(@NotNull Content content, Color color, ThumbnailType thumbnailType) {
+        EmbedBuilder builder = getEmbedBuilder(color, thumbnailType);
+        getEmbedBuilder(content, builder);
+        return builder;
+    }
+
+    private static void getEmbedBuilder(@NotNull Content content, @NotNull EmbedBuilder builder) {
+        builder.setTitle(Optional.ofNullable(content.getTitle()).filter(s -> !s.isEmpty()).orElse(" "));
+        builder.setDescription(content.getDescription());
+        for (Field field : content.getFields()) {
+            builder.addField(field.getName(), field.getValue(), field.isInline());
+        }
+    }
+
+    /**
+     * Retrieves the content associated with a given key from the ContentService. If the user cannot be found
+     * or if an error occurs during the retrieval process, appropriate error messages are sent to the user's private channel.
+     *
+     * @param contentService The service responsible for providing the content. It is used to fetch the content based on the provided key.
+     * @param key            The key used to retrieve the corresponding content from the ContentService.
+     * @param userId         This ID is used to identify the user and send error messages to their private channel if necessary.
+     * @return The content retrieved from the ContentService corresponding to the provided key.
+     * @throws RuntimeException If the user cannot be found or the content for the given key cannot be found in the ContentService
+     *                          or there is an issue reading the content from the file.
+     */
+    private static Content getContent(@NotNull ContentService contentService, String key, String userId) {
+        User user = RangersGuild.getUser(userId);
+        if (user == null) {
+            throw new RuntimeException("User is null");
+        }
         Content content;
         try {
             content = contentService.getContent(key);
         } catch (ContentNotFoundException e) {
-            Users.getDevUser()
-                    .openPrivateChannel()
+            user.openPrivateChannel()
                     .queue(privateChannel
                             -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
                             "\tERROR - Nie można odnaleźć wartości dla klucza: \"" + key + "\" w pliku \"content.json\"```").queue());
             throw new RuntimeException("Error retrieving content for key: " + key, e);
         } catch (IOException e) {
-            Users.getDevUser()
-                    .openPrivateChannel()
+            user.openPrivateChannel()
                     .queue(privateChannel ->
                             privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
                                     "\tERROR - Nie można odczytać pliku \"content.json\"").queue());
@@ -366,19 +380,32 @@ public class EmbedInfo extends EmbedCreator {
                 .queue();
     }
 
-    public static void recruitAccepted(String userName, @NotNull TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_BLUE);
-        builder.setTitle("Rozpoczęto rekrutację");
-        builder.setDescription("Od tego momentu rozpoczyna się Twój okres rekrutacyjny pod okiem wszystkich członków klanu.");
-        builder.setFooter("Podpis: " + userName);
-        textChannel.sendMessageEmbeds(builder.build()).queue();
+    public static void recruitAccepted(String userName, @NotNull TextChannel textChannel, ContentService contentService) {
+        Content content;
+        String key = "recruitAccepted";
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_BLUE);
+            getEmbedBuilder(content, builder);
+            builder.setFooter("Podpis: " + userName);
+            textChannel.sendMessageEmbeds(builder.build()).queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
-    public static void recruitNotAccepted(String userName, @NotNull TextChannel textChannel) {
-        EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
-        builder.setTitle("Podanie odrzucone");
-        builder.setFooter("Podpis: " + userName);
-        textChannel.sendMessageEmbeds(builder.build()).queue();
+    public static void recruitNotAccepted(String userName, @NotNull TextChannel textChannel, ContentService contentService) {
+        Content content;
+        String key = "recruitNotAccepted";
+        content = getContent(contentService, key, Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = getEmbedBuilder(EmbedStyle.INF_RED);
+            getEmbedBuilder(content, builder);
+            builder.setFooter("Podpis: " + userName);
+            textChannel.sendMessageEmbeds(builder.build()).queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
     public static void warningMaxRecruits() {
@@ -393,5 +420,12 @@ public class EmbedInfo extends EmbedCreator {
         if (textChannel != null) {
             textChannel.sendMessage("**Pozostały 2 lub mniej miejsc dla rekrutów.**").queue();
         }
+    }
+
+    private static void canNotCreateEmbedError(@NotNull User user, String key, RuntimeException e) {
+        user.openPrivateChannel()
+                .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                        "\tERROR - Błąd tworzenia embed(" + key + "). Więcej szczegółów w \"rangerbot.log\"```").queue());
+        throw new RuntimeException("Can not create embed", e);
     }
 }

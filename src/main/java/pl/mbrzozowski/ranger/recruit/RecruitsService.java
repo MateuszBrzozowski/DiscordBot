@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.event.EventService;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.DeleteChannel;
@@ -58,6 +59,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
     private final WaitingRecruitRepository waitingRecruitRepository;
     private final RecruitBlackListService recruitBlackListService;
     private final RecruitRepository recruitRepository;
+    private final ContentService contentService;
     private final EventService eventService;
 
     /**
@@ -78,7 +80,8 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
                 .addRolePermissionOverride(Long.parseLong(RoleID.DRILL_INSTRUCTOR_ID), permissions, null)
                 .queue(textChannel -> {
                     log.info("created text channel(name={}, id={})", textChannel.getName(), textChannel.getId());
-                    sendWelcomeMessage(userID, textChannel);
+                    EmbedInfo.sendWelcomeMessageForRecruit(userID, textChannel, contentService);
+//                    sendWelcomeMessage(userID, textChannel);
                     add(userID, userName, textChannel.getId());
                 });
         checkCountOfRecruitChannels();
@@ -309,7 +312,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
         addRoleRecruit(recruit.getUserId());
         addRecruitTag(event.getGuild(), recruit.getUserId());
         setYellowCircleInChannelName(event.getChannel().asTextChannel());
-        EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
+        EmbedInfo.recruitAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel(), contentService);
         recruit.setStartRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruitRepository.save(recruit);
         log.info("{} - accepted recruit (channelId={}, channelName={})",
@@ -372,7 +375,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
                     recruit.setRecruitmentResult(RecruitmentResult.POSITIVE);
                     recruitRepository.save(recruit);
                     setGreenCircleInChannelName(channel);
-                    EmbedInfo.endPositive(drillId, recruit.getUserId(), channel);
+                    EmbedInfo.endPositive(drillId, recruit.getUserId(), channel, contentService);
                     return true;
                 }
             }
@@ -431,7 +434,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
                     recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
                     recruitRepository.save(recruit);
                     setRedCircleInChannelName(channel);
-                    EmbedInfo.endNegative(drillId, recruit.getUserId(), channel);
+                    EmbedInfo.endNegative(drillId, recruit.getUserId(), channel, contentService);
                     eventService.deletePlayerForEventsBelowSecondGroup(recruit.getUserId());
                     return true;
                 }
@@ -531,7 +534,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
         recruit.setEndRecruitment(LocalDateTime.now().atZone(ZoneId.of("Europe/Paris")).toLocalDateTime());
         recruit.setRecruitmentResult(RecruitmentResult.NEGATIVE);
         recruitRepository.save(recruit);
-        EmbedInfo.recruitNotAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel());
+        EmbedInfo.recruitNotAccepted(Users.getUserNicknameFromID(event.getUser().getId()), event.getChannel().asTextChannel(), contentService);
         log.info("{} - not accepted recruit (channelId={}, channelName={})",
                 event.getUser(),
                 event.getChannel().getId(),
