@@ -14,19 +14,19 @@ import pl.mbrzozowski.ranger.helpers.StringProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.aspectj.util.FileUtil.copyFile;
 
 @Slf4j
 @Service
 public class ContentService {
     private final String externalPath = "config/content.json";
-    private final String internalPath = "src/main/resources/content.json";
+    private final String internalFile = "content.json";
     private Map<String, Content> contentMap = new HashMap<>();
 
     public ContentService() {
@@ -34,7 +34,12 @@ public class ContentService {
         if (!fileExternal.exists()) {
             try {
                 Files.createDirectories(Paths.get("config"));
-                copyFile(new File(internalPath), fileExternal);
+                try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(internalFile)) {
+                    if (inputStream == null) {
+                        throw new IOException("File " + internalFile + "not found.");
+                    }
+                    Files.copy(inputStream, fileExternal.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
                 log.info("File copied successfully from internalPath to externalPath.");
             } catch (IOException e) {
                 log.error("Error during file copy: " + e.getMessage());
@@ -45,7 +50,7 @@ public class ContentService {
     private void loadContent() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         File fileExternal = new File(externalPath);
-        File fileInternal = new File(internalPath);
+        File fileInternal = new File(internalFile);
 
         if (fileExternal.exists()) {
             contentMap = objectMapper.readValue(fileExternal, new TypeReference<>() {
