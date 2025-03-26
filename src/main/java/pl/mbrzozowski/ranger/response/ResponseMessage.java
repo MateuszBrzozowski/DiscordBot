@@ -1,6 +1,7 @@
 package pl.mbrzozowski.ranger.response;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -9,6 +10,7 @@ import pl.mbrzozowski.ranger.games.giveaway.Giveaway;
 import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.StringProvider;
 import pl.mbrzozowski.ranger.members.clan.rank.Rank;
 import pl.mbrzozowski.ranger.model.ErrorMessages;
 
@@ -276,5 +278,12 @@ public class ResponseMessage {
                         "Skrót: **" + rank.getShortcut() + "**\n")
                 .setEphemeral(true)
                 .queue();
+    }
+
+    public static void canNotCreateEmbedError(@NotNull User user, String key, RuntimeException e) {
+        user.openPrivateChannel()
+                .queue(privateChannel -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                        "\tERROR - Błąd tworzenia embed(" + key + "). Więcej szczegółów w \"rangerbot.log\"```").queue());
+        throw new RuntimeException("Can not create embed", e);
     }
 }

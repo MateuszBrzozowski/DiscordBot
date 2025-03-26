@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import pl.mbrzozowski.ranger.exceptions.ContentNotFoundException;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
 import pl.mbrzozowski.ranger.helpers.RoleID;
+import pl.mbrzozowski.ranger.helpers.StringProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,21 +65,75 @@ public class ContentService {
      * @return The @{@link Content}
      * @throws ContentNotFoundException If the key does not exist in the map.
      */
-    public Content getContent(String key) throws ContentNotFoundException, IOException {
+    private Content getContent(String key) throws ContentNotFoundException, IOException {
         loadContent();
         return Optional.ofNullable(contentMap.get(key)).orElseThrow(() -> new ContentNotFoundException(key));
+    }
+
+    /**
+     * Retrieves the content associated with a given key from the ContentService. If the user cannot be found
+     * or if an error occurs during the retrieval process, appropriate error messages are sent to the user's private channel.
+     *
+     * @param key    The key used to retrieve the corresponding content from the ContentService.
+     * @param userId This ID is used to identify the user and send error messages to their private channel if necessary.
+     * @return The content retrieved from the ContentService corresponding to the provided key.
+     * @throws RuntimeException If the user cannot be found or the content for the given key cannot be found in the ContentService
+     *                          or there is an issue reading the content from the file.
+     */
+    public Content getContent(String key, String userId) {
+        User user = RangersGuild.getUser(userId);
+        if (user == null) {
+            throw new RuntimeException("User is null");
+        }
+        try {
+            Content content = getContent(key);
+            replaceTextToRoleMention(content);
+            return content;
+        } catch (ContentNotFoundException e) {
+            user.openPrivateChannel()
+                    .queue(privateChannel
+                            -> privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                            "\tERROR - Nie można odnaleźć wartości dla klucza: \"" + key + "\" w pliku \"content.json\"```").queue());
+            throw new RuntimeException("Error retrieving content for key: " + key, e);
+        } catch (IOException e) {
+            user.openPrivateChannel()
+                    .queue(privateChannel ->
+                            privateChannel.sendMessage("```" + StringProvider.getDateAndTime() +
+                                    "\tERROR - Nie można odczytać pliku \"content.json\"").queue());
+            throw new RuntimeException("Can not read a file \"content.json\"", e);
+        }
     }
 
     public String textFormat(@NotNull String message, String userID) {
         if (message.contains("@user")) {
             message = message.replaceAll("@user", User.fromId(userID).getAsMention());
         }
-        if (message.contains("@serverAdmin")) {
-            Role role = RangersGuild.getRoleById(RoleID.SERVER_ADMIN);
+        return message;
+    }
+
+    private void replaceTextToRoleMention(@NotNull Content content) {
+        content.setMessage(replaceTextToRoleMention(content.getMessage()));
+        content.setDescription(replaceTextToRoleMention(content.getDescription()));
+        content.setTitle(replaceTextToRoleMention(content.getTitle()));
+        for (Field field : content.getFields()) {
+            field.setName(replaceTextToRoleMention(field.getName()));
+            field.setValue(replaceTextToRoleMention(field.getValue()));
+        }
+    }
+
+    private String replaceTextToRoleMention(String text) {
+        text = replaceTextToRoleMention(text, "@serverAdmin", RoleID.SERVER_ADMIN);
+        text = replaceTextToRoleMention(text, "@drill", RoleID.DRILL_INSTRUCTOR_ID);
+        return text;
+    }
+
+    private String replaceTextToRoleMention(@NotNull String text, String regex, String roleId) {
+        if (text.contains(regex)) {
+            Role role = RangersGuild.getRoleById(roleId);
             if (role != null) {
-                message = message.replaceAll("@serverAdmin", role.getAsMention());
+                text = text.replaceAll(regex, role.getAsMention());
             }
         }
-        return message;
+        return text;
     }
 }

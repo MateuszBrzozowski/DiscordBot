@@ -7,10 +7,7 @@ public interface EmbedSettings {
     String THUMBNAIL_DICE = "https://www.iconsdb.com/icons/download/white/dice-48.png";
     String THUMBNAIL_COIN = "https://www.iconsdb.com/icons/download/white/cheap-48.png";
 
-    String RESULT = "WYNIK REKRUTACJI - ";
     String NAME_LIST = ":white_check_mark: Lista ";
-    String NAME_LIST_RESERVE = ":regional_indicator_r: Rezerwa ";
-    String NAME_LIST_TENTATIVE = ":grey_question: Niepewny ";
     String WHEN_DATE = ":date: Kiedy";
     String WHEN_END_DATE = ":date: ";
     String WHEN_TIME = ":clock930: ";
@@ -22,7 +19,6 @@ public interface EmbedSettings {
     String BOOK_RED = "\uD83D\uDCD5";
     String BOOK_BLUE = "\uD83D\uDCD8";
     String BOOK_GREEN = "\uD83D\uDCD7";
-    String BIN = "\uD83D\uDDD1";
     String LOCK = "\uD83D\uDD12";
 }
 

@@ -115,6 +115,28 @@
       }
     ]
   },
+  "confirmMessage": {
+    "description": "## Formularz rekrutacyjny\n- Uzupełnij formularz rekrutacyjny z linku poniżej.\n- Potwierdź przesłany formularz poniższym przyciskiem.\n- Po zweryfikowaniu Twojego formularza zostanie utworzony kanał rekrutacyjny i skontaktuje się z Tobą jeden z naszych @drill",
+    "buttons": [
+      {
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform",
+        "label": "Wypełnij formularz rekrutacyjny!"
+      },
+      {
+        "label": "Wypełniłem formularz! ⮞"
+      }
+    ]
+  },
+  "confirm": {
+    "description": "## Formularz rekrutacyjny",
+    "fields": [
+      {
+        "name": "Dziękujemy za przesłany formularz",
+        "value": "Jeżeli wypełniłeś [Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform) oczekuj na utworzenie kanału rekrutacyjnego i kontakt od naszego @drill",
+        "inline": false
+      }
+    ]
+  },
   "recruitWelcome": {
     "message": "Cześć @user!\nCieszymy się, że złożyłeś podanie do klanu.",
     "title": "",
@@ -122,10 +144,13 @@
     "fields": [
       {
         "name": "",
-        "value": "**1. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**\n> [Manual](https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view)s\n\n**2. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**s\n> [Poradnik](https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717)\n\n**3. TeamSpeak3:**\n```fix\nts.rangerspolska.pl:6969\n```",
+        "value": "**1. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**\n> [Manual](https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view)\n\n**2. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**\n> [Poradnik](https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717)\n\n**3. TeamSpeak3:**\n```fix\nts.rangerspolska.pl:6969\n```",
         "inline": false
       }
     ]
+  },
+  "recruitSheetLink": {
+    "url": "https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing"
   },
   "recruitAccepted": {
     "title": "Rozpoczęto rekrutację",

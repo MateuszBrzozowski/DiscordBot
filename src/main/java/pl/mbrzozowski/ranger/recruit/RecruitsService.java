@@ -22,9 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import pl.mbrzozowski.ranger.configuration.content.Content;
 import pl.mbrzozowski.ranger.configuration.content.ContentService;
 import pl.mbrzozowski.ranger.event.EventService;
-import pl.mbrzozowski.ranger.guild.ComponentId;
 import pl.mbrzozowski.ranger.guild.DeleteChannel;
 import pl.mbrzozowski.ranger.guild.DeleteChannelById;
 import pl.mbrzozowski.ranger.guild.RangersGuild;
@@ -81,7 +81,6 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
                 .queue(textChannel -> {
                     log.info("created text channel(name={}, id={})", textChannel.getName(), textChannel.getId());
                     EmbedInfo.sendWelcomeMessageForRecruit(userID, textChannel, contentService);
-//                    sendWelcomeMessage(userID, textChannel);
                     add(userID, userName, textChannel.getId());
                 });
         checkCountOfRecruitChannels();
@@ -96,33 +95,6 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
             EmbedInfo.warningFewSlots();
             log.info("Low number of recruitment channels. Warning sent.");
         }
-    }
-
-    public void sendWelcomeMessage(String userID, @NotNull TextChannel textChannel) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.GREEN);
-        builder.setDescription("## Obowiązkowo:");
-        builder.addField("", """
-                        **1. Przeczytaj manual - Najważniejsze zasady gry w Rangers Polska**
-                        > [Manual](https://drive.google.com/file/d/18uefRZx5vIZrD-7wYQqgAk-JlYDgfQzq/view)\s
-
-                        **2. Jeżeli zaczynasz przygodę ze Squadem przeczytaj poradnik:**\s
-                        > [Poradnik](https://steamcommunity.com/sharedfiles/filedetails/?id=2878029717)
-
-                        **3. TeamSpeak3:**
-                        ```fix
-                         ts.rangerspolska.pl:6969
-                        ```""",
-                false);
-        textChannel.sendMessage("Cześć <@" + userID + ">!\nCieszymy się, że złożyłeś podanie do klanu.")
-                .setEmbeds(builder.build())
-                .setActionRow(
-                        Button.primary(ComponentId.RECRUIT_ACCEPTED, "\u200E"),
-                        Button.secondary(ComponentId.RECRUIT_NOT_ACCEPTED, "\u200E"),
-                        Button.success(ComponentId.RECRUIT_POSITIVE, "\u200E"),
-                        Button.danger(ComponentId.RECRUIT_NEGATIVE, "\u200E"))
-                .queue();
-        EmbedInfo.recruitAnonymousComplaintsFormOpening(textChannel);
     }
 
     public void newPodanie(@NotNull ButtonInteractionEvent event) {
@@ -162,17 +134,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
     }
 
     private void confirmMessage(@NotNull ButtonInteractionEvent event) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
-        builder.setDescription("## Formularz rekrutacyjny\n" +
-                "- Uzupełnij formularz rekrutacyjny z linku poniżej.\n" +
-                "- Potwierdź przesłany formularz poniższym przyciskiem.\n" +
-                "- Po zweryfikowaniu Twojego formularza zostanie utworzony kanał rekrutacyjny i skontaktuje się z Tobą jeden z naszych <@&" + RoleID.DRILL_INSTRUCTOR_ID + ">");
-        event.replyEmbeds(builder.build()).setComponents(
-                        ActionRow.of(Button.link("https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform", "Wypełnij formularz rekrutacyjny!"),
-                                Button.danger(FORM_SEND, "Wypełniłem formularz! ⮞")))
-                .setEphemeral(true)
-                .queue();
+        EmbedInfo.confirmMessage(event, contentService);
     }
 
     public void confirmMessageBack(@NotNull ButtonInteractionEvent event) {
@@ -181,14 +143,7 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
     }
 
     public void confirm(@NotNull ButtonInteractionEvent event) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setDescription("## Formularz rekrutacyjny");
-        builder.setColor(Color.GREEN);
-        builder.addField("Dziękujemy za przesłany formularz", "Jeżeli wypełniłeś " +
-                "[Formularz](https://docs.google.com/forms/d/e/1FAIpQLSeWVDY4p5-RlWA6Ug_JMeS1asJVLDJHcblqCNRPuXC87kr8lA/viewform) " +
-                "oczekuj na utworzenie kanału rekrutacyjnego i kontakt od naszego <@&" + RoleID.DRILL_INSTRUCTOR_ID + "> ", false);
-        event.getInteraction().deferEdit().queue();
-        event.getMessage().editMessageEmbeds(builder.build()).setComponents().queue();
+        EmbedInfo.confirm(event, contentService);
         WaitingRecruit waitingRecruit = new WaitingRecruit(event.getUser().getId());
         try {
             save(waitingRecruit);
@@ -215,25 +170,30 @@ public class RecruitsService implements SlashCommand, TemporaryChannelsInteracti
         if (textChannel == null) {
             throw new IllegalStateException(RangersGuild.ChannelsId.DRILL_INSTRUCTOR_HQ.toString());
         }
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(Color.YELLOW);
-        builder.setDescription("## Nowy formularz!\n" +
-                Converter.LocalDateTimeToTimestampDateTimeLongFormat(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))));
-        builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
-                "Server nickname: " + Users.getUserNicknameFromID(userId), false);
-        builder.addField("", "[Arkusz](https://docs.google.com/spreadsheets/d/1GF7BK03K_elLYrVqnfB2RFFI3pCCGcN2D6AF6G61Ta4/edit?usp=sharing)", false);
-        textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
-                .setEmbeds(builder.build())
-                .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
-                        Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
-                .queue();
+        String key = "recruitSheetLink";
+        Content content = contentService.getContent("recruitSheetLink", Users.getDevUser().getId());
+        try {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.YELLOW);
+            builder.setDescription("## Nowy formularz!\n" +
+                    Converter.LocalDateTimeToTimestampDateTimeLongFormat(LocalDateTime.now(ZoneId.of(Constants.ZONE_ID_EUROPE_PARIS))));
+            builder.addField("Rekrut:", "User: <@" + userId + ">\n" +
+                    "Server nickname: " + Users.getUserNicknameFromID(userId), false);
+            builder.addField("", "[Arkusz](" + content.getUrl() + ")", false);
+            textChannel.sendMessage("<@&" + RoleID.DRILL_INSTRUCTOR_ID + ">")
+                    .setEmbeds(builder.build())
+                    .addActionRow(Button.success(CONFIRM_FORM_RECEIVED + userId, "Potwierdź"),
+                            Button.danger(DECLINE_FORM_SEND + userId, "Odrzuć"))
+                    .queue();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            ResponseMessage.canNotCreateEmbedError(Users.getDevUser(), key, e);
+        }
     }
 
     private boolean hasRecruitChannel(String userId) {
         Optional<Recruit> recruitOptional = recruitRepository.findByUserId(userId);
         return recruitOptional.isPresent();
     }
-
 
     private Optional<Recruit> findByUserId(String userId) {
         return recruitRepository.findByUserId(userId);

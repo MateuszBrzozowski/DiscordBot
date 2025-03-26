@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Field {
-    private String name;
-    private String value;
-    private boolean inline;
+    private String name = "";
+    private String value = "";
+    private boolean inline = false;
 }
